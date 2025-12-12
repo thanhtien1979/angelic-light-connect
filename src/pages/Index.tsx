@@ -3,6 +3,9 @@ import SacredGeometry from "@/components/SacredGeometry";
 import HeroSection from "@/components/HeroSection";
 import SacredPillars from "@/components/SacredPillars";
 import VisionMission from "@/components/VisionMission";
+import ChatPortal from "@/components/ChatPortal";
+import MeditationPortal from "@/components/MeditationPortal";
+import Testimonials from "@/components/Testimonials";
 import CallToAction from "@/components/CallToAction";
 import Footer from "@/components/Footer";
 
@@ -18,6 +21,9 @@ const Index = () => {
         <HeroSection />
         <SacredPillars />
         <VisionMission />
+        <ChatPortal />
+        <MeditationPortal />
+        <Testimonials />
         <CallToAction />
         <Footer />
       </main>
