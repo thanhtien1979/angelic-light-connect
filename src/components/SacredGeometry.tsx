@@ -1,11 +1,23 @@
+import { motion, useScroll, useTransform } from "framer-motion";
+
 const SacredGeometry = () => {
+  const { scrollY } = useScroll();
+  const rotate = useTransform(scrollY, [0, 2000], [0, 30]);
+  const y = useTransform(scrollY, [0, 2000], [0, -100]);
+
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-30">
+    <motion.div 
+      className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-30"
+      style={{ y }}
+    >
       {/* Rotating sacred geometry pattern */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vmax] h-[150vmax] animate-rotate-slow">
+      <motion.div 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vmax] h-[150vmax]"
+        style={{ rotate }}
+      >
         <svg
           viewBox="0 0 400 400"
-          className="w-full h-full"
+          className="w-full h-full animate-rotate-slow"
           style={{ opacity: 0.15 }}
         >
           {/* Flower of Life Pattern */}
@@ -65,8 +77,8 @@ const SacredGeometry = () => {
             </linearGradient>
           </defs>
         </svg>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
