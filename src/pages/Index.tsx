@@ -7,6 +7,7 @@ import SacredPillars from "@/components/SacredPillars";
 import VisionMission from "@/components/VisionMission";
 import ChatPortal from "@/components/ChatPortal";
 import MeditationPortal from "@/components/MeditationPortal";
+import MiniMeditationPlayer from "@/components/MiniMeditationPlayer";
 import Testimonials from "@/components/Testimonials";
 import CallToAction from "@/components/CallToAction";
 import Footer from "@/components/Footer";
@@ -38,6 +39,9 @@ const Index = () => {
 
       {/* Auth Modal */}
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+
+      {/* Floating Mini Meditation Player */}
+      <MiniMeditationPlayer />
     </div>
   );
 };
