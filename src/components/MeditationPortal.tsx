@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc } from "lucide-react";
+import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward } from "lucide-react";
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 
 const meditationCards = [
@@ -60,6 +60,33 @@ const formatTime = (seconds: number): string => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
+// Keyboard feedback indicator component
+const KeyboardFeedback = ({ 
+  icon: Icon, 
+  label, 
+  isVisible 
+}: { 
+  icon: React.ComponentType<{ className?: string }>; 
+  label: string; 
+  isVisible: boolean;
+}) => (
+  <AnimatePresence>
+    {isVisible && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.8, y: -10 }}
+        className="fixed bottom-32 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+      >
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-md border border-gold/30 shadow-lg shadow-gold/10">
+          <Icon className="w-4 h-4 text-gold" />
+          <span className="text-sm text-foreground/80 font-light">{label}</span>
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
 const MeditationPortal = () => {
   const { 
     isPlaying, 
@@ -84,6 +111,17 @@ const MeditationPortal = () => {
   const [breathPhase, setBreathPhase] = useState<"inhale" | "exhale">("inhale");
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [isJourneyOpen, setIsJourneyOpen] = useState(false);
+  
+  // Keyboard feedback state
+  const [keyFeedback, setKeyFeedback] = useState<{
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+  } | null>(null);
+  
+  const showKeyFeedback = useCallback((icon: React.ComponentType<{ className?: string }>, label: string) => {
+    setKeyFeedback({ icon, label });
+    setTimeout(() => setKeyFeedback(null), 1200);
+  }, []);
 
   // Breathing animation toggle
   useEffect(() => {
@@ -109,12 +147,14 @@ const MeditationPortal = () => {
         case " ": // Spacebar - toggle play/pause
           e.preventDefault();
           toggle();
+          showKeyFeedback(isPlaying ? Pause : Play, isPlaying ? "Tạm dừng" : "Phát");
           break;
         case "arrowleft": // Seek backward 10 seconds
           e.preventDefault();
           if (duration > 0) {
             const newPercent = Math.max(0, ((currentTime - 10) / duration) * 100);
             seekByPercent(newPercent);
+            showKeyFeedback(Rewind, "-10 giây");
           }
           break;
         case "arrowright": // Seek forward 10 seconds
@@ -122,22 +162,25 @@ const MeditationPortal = () => {
           if (duration > 0) {
             const newPercent = Math.min(100, ((currentTime + 10) / duration) * 100);
             seekByPercent(newPercent);
+            showKeyFeedback(FastForward, "+10 giây");
           }
           break;
         case "n": // Next track
           e.preventDefault();
           nextTrack();
+          showKeyFeedback(SkipForward, "Bản tiếp theo");
           break;
         case "p": // Previous track
           e.preventDefault();
           previousTrack();
+          showKeyFeedback(SkipBack, "Bản trước");
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggle, nextTrack, previousTrack, seekByPercent, currentTime, duration]);
+  }, [toggle, nextTrack, previousTrack, seekByPercent, currentTime, duration, isPlaying, showKeyFeedback]);
 
   const handlePlaylistSelect = (playlist: MeditationPlaylist) => {
     selectPlaylist(playlist);
@@ -161,6 +204,14 @@ const MeditationPortal = () => {
   const PlaylistIcon = getPlaylistIcon(currentPlaylist.icon);
 
   return (
+    <>
+      {/* Keyboard shortcut feedback indicator */}
+      <KeyboardFeedback 
+        icon={keyFeedback?.icon || Play} 
+        label={keyFeedback?.label || ""} 
+        isVisible={keyFeedback !== null} 
+      />
+      
     <section id="meditation" className="relative min-h-screen py-24 px-4 overflow-hidden">
       {/* Immersive background with nebula effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-sky-light/20 to-background" />
@@ -586,6 +637,7 @@ const MeditationPortal = () => {
         </motion.div>
       </div>
     </section>
+    </>
   );
 };
 
