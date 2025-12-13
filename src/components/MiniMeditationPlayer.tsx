@@ -15,6 +15,8 @@ const MiniMeditationPlayer = () => {
   const {
     isPlaying,
     isLoaded,
+    isLoading,
+    loadError,
     volume,
     currentTrack,
     currentPlaylist,
@@ -112,29 +114,39 @@ const MiniMeditationPlayer = () => {
                   <p className="text-xs text-muted-foreground truncate flex-1">
                     {currentPlaylist.nameVi}
                   </p>
+                  {/* Loading indicator */}
+                  {isLoading && (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                      className="w-3 h-3 border border-gold/40 border-t-gold rounded-full"
+                    />
+                  )}
                   {/* Playback mode indicators */}
-                  <div className="flex items-center gap-1">
-                    {isLooping && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="p-1 rounded-full bg-gold-light/20"
-                        title="Lặp lại bật"
-                      >
-                        <Repeat className="w-3 h-3 text-gold" />
-                      </motion.div>
-                    )}
-                    {isShuffled && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="p-1 rounded-full bg-gold-light/20"
-                        title="Phát ngẫu nhiên bật"
-                      >
-                        <Shuffle className="w-3 h-3 text-gold" />
-                      </motion.div>
-                    )}
-                  </div>
+                  {!isLoading && (
+                    <div className="flex items-center gap-1">
+                      {isLooping && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="p-1 rounded-full bg-gold-light/20"
+                          title="Lặp lại bật"
+                        >
+                          <Repeat className="w-3 h-3 text-gold" />
+                        </motion.div>
+                      )}
+                      {isShuffled && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="p-1 rounded-full bg-gold-light/20"
+                          title="Phát ngẫu nhiên bật"
+                        >
+                          <Shuffle className="w-3 h-3 text-gold" />
+                        </motion.div>
+                      )}
+                    </div>
+                  )}
                   {isSleepTimerActive && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
@@ -146,9 +158,28 @@ const MiniMeditationPlayer = () => {
                     </motion.div>
                   )}
                 </div>
-                <p className="text-sm font-medium text-foreground truncate">
-                  {currentTrack?.nameVi || "Đang tải..."}
-                </p>
+                {loadError ? (
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-sm text-muted-foreground/80 truncate italic"
+                  >
+                    ✨ {loadError}
+                  </motion.p>
+                ) : isLoading ? (
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="text-sm text-gold/60 truncate"
+                  >
+                    Âm thanh đang được chuẩn bị...
+                  </motion.p>
+                ) : (
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {currentTrack?.nameVi || "Đang tải..."}
+                  </p>
+                )}
               </div>
 
               {/* Controls */}
