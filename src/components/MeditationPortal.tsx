@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon } from "lucide-react";
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const meditationCards = [
   {
@@ -481,44 +482,67 @@ const MeditationPortal = () => {
             {/* Main Player Controls */}
             <div className="p-4">
               <div className="flex items-center gap-4 mb-4">
-                {/* Skip Previous */}
-                <button
-                  onClick={previousTrack}
-                  disabled={isChangingTrack}
-                  className="p-2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-                >
-                  <SkipBack className="w-5 h-5" />
-                </button>
+                <TooltipProvider delayDuration={400}>
+                  {/* Skip Previous */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={previousTrack}
+                        disabled={isChangingTrack}
+                        className="p-2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                      >
+                        <SkipBack className="w-5 h-5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-background/95 backdrop-blur-sm border-gold-light/30 text-foreground">
+                      <p className="text-xs">Bài trước <span className="text-muted-foreground ml-1">P</span></p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                {/* Play/Pause */}
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={toggle}
-                  disabled={!isLoaded || isChangingTrack}
-                  className="w-14 h-14 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_20px_hsla(45,100%,70%,0.4)] disabled:opacity-50"
-                >
-                  {isChangingTrack ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full"
-                    />
-                  ) : isPlaying ? (
-                    <Pause className="w-6 h-6 text-white" />
-                  ) : (
-                    <Play className="w-6 h-6 text-white ml-0.5" />
-                  )}
-                </motion.button>
+                  {/* Play/Pause */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={toggle}
+                        disabled={!isLoaded || isChangingTrack}
+                        className="w-14 h-14 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_20px_hsla(45,100%,70%,0.4)] disabled:opacity-50"
+                      >
+                        {isChangingTrack ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full"
+                          />
+                        ) : isPlaying ? (
+                          <Pause className="w-6 h-6 text-white" />
+                        ) : (
+                          <Play className="w-6 h-6 text-white ml-0.5" />
+                        )}
+                      </motion.button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-background/95 backdrop-blur-sm border-gold-light/30 text-foreground">
+                      <p className="text-xs">{isPlaying ? "Tạm dừng" : "Phát"} <span className="text-muted-foreground ml-1">Space</span></p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                {/* Skip Next */}
-                <button
-                  onClick={nextTrack}
-                  disabled={isChangingTrack}
-                  className="p-2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-                >
-                  <SkipForward className="w-5 h-5" />
-                </button>
+                  {/* Skip Next */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={nextTrack}
+                        disabled={isChangingTrack}
+                        className="p-2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                      >
+                        <SkipForward className="w-5 h-5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-background/95 backdrop-blur-sm border-gold-light/30 text-foreground">
+                      <p className="text-xs">Bài tiếp <span className="text-muted-foreground ml-1">N</span></p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{currentTrack.name}</p>
