@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, ChevronUp, X } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, ChevronUp, X, Moon, Timer } from "lucide-react";
 import { useMeditationAudio } from "@/hooks/useMeditationAudio";
+import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 
 const formatTime = (seconds: number): string => {
   if (!seconds || isNaN(seconds)) return "0:00";
@@ -25,11 +26,20 @@ const MiniMeditationPlayer = () => {
     nextTrack,
     previousTrack,
     seekByPercent,
+    pause,
   } = useMeditationAudio();
+
+  // Sleep timer
+  const handleTimerEnd = useCallback(() => {
+    pause();
+  }, [pause]);
+  
+  const { isActive: isSleepTimerActive, remainingSeconds, startTimer, cancelTimer, formatRemainingTime } = useSleepTimer(handleTimerEnd);
 
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [isSleepTimerOpen, setIsSleepTimerOpen] = useState(false);
 
   // Show mini player when scrolled away from meditation section
   useEffect(() => {
@@ -94,11 +104,23 @@ const MiniMeditationPlayer = () => {
 
             {/* Main controls */}
             <div className="p-3 flex items-center gap-3">
-              {/* Track info */}
+              {/* Track info & Sleep Timer Badge */}
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground truncate">
-                  {currentPlaylist.nameVi}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground truncate flex-1">
+                    {currentPlaylist.nameVi}
+                  </p>
+                  {isSleepTimerActive && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gold-light/20 border border-gold/30"
+                    >
+                      <Moon className="w-3 h-3 text-gold" />
+                      <span className="text-xs text-gold font-medium">{formatRemainingTime()}</span>
+                    </motion.div>
+                  )}
+                </div>
                 <p className="text-sm font-medium text-foreground truncate">
                   {currentTrack?.nameVi || "Đang tải..."}
                 </p>
@@ -210,6 +232,68 @@ const MiniMeditationPlayer = () => {
                         className="absolute inset-0 opacity-0 cursor-pointer w-full"
                         style={{ display: "none" }}
                       />
+                    </div>
+
+                    {/* Sleep Timer Quick Access */}
+                    <div className="mt-3 pt-3 border-t border-gold-light/20">
+                      <button
+                        onClick={() => setIsSleepTimerOpen(!isSleepTimerOpen)}
+                        className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {isSleepTimerActive ? (
+                          <>
+                            <Moon className="w-3 h-3 text-gold" />
+                            <span className="text-gold">Hẹn giờ: {formatRemainingTime()}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Timer className="w-3 h-3" />
+                            <span>Đặt hẹn giờ ngủ</span>
+                          </>
+                        )}
+                      </button>
+
+                      <AnimatePresence>
+                        {isSleepTimerOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="flex flex-wrap gap-1.5 justify-center mt-2">
+                              {SLEEP_TIMER_OPTIONS.map((option) => (
+                                <button
+                                  key={option.minutes}
+                                  onClick={() => {
+                                    startTimer(option.minutes);
+                                    setIsSleepTimerOpen(false);
+                                  }}
+                                  className={`px-3 py-1 rounded-full text-xs transition-all ${
+                                    remainingSeconds !== null && Math.ceil(remainingSeconds / 60) === option.minutes
+                                      ? "bg-gradient-to-br from-gold to-gold-light text-white"
+                                      : "bg-white/60 text-foreground hover:bg-gold-light/20 border border-gold-light/30"
+                                  }`}
+                                >
+                                  {option.labelVi}
+                                </button>
+                              ))}
+                            </div>
+                            {isSleepTimerActive && (
+                              <button
+                                onClick={() => {
+                                  cancelTimer();
+                                  setIsSleepTimerOpen(false);
+                                }}
+                                className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                Hủy hẹn giờ
+                              </button>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     {/* Scroll to meditation section */}
