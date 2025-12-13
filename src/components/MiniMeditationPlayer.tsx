@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, ChevronUp, X, Moon, Timer } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, ChevronUp, X, Moon, Timer, Repeat, Shuffle } from "lucide-react";
 import { useMeditationAudio } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 
@@ -27,6 +27,8 @@ const MiniMeditationPlayer = () => {
     previousTrack,
     seekByPercent,
     pause,
+    isLooping,
+    isShuffled,
   } = useMeditationAudio();
 
   // Sleep timer
@@ -104,12 +106,35 @@ const MiniMeditationPlayer = () => {
 
             {/* Main controls */}
             <div className="p-3 flex items-center gap-3">
-              {/* Track info & Sleep Timer Badge */}
+              {/* Track info & Mode Indicators */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-xs text-muted-foreground truncate flex-1">
                     {currentPlaylist.nameVi}
                   </p>
+                  {/* Playback mode indicators */}
+                  <div className="flex items-center gap-1">
+                    {isLooping && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="p-1 rounded-full bg-gold-light/20"
+                        title="Lặp lại bật"
+                      >
+                        <Repeat className="w-3 h-3 text-gold" />
+                      </motion.div>
+                    )}
+                    {isShuffled && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="p-1 rounded-full bg-gold-light/20"
+                        title="Phát ngẫu nhiên bật"
+                      >
+                        <Shuffle className="w-3 h-3 text-gold" />
+                      </motion.div>
+                    )}
+                  </div>
                   {isSleepTimerActive && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
