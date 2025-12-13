@@ -21,6 +21,7 @@ export type Database = {
           id: string
           role: string
           session_id: string
+          user_id: string | null
         }
         Insert: {
           content: string
@@ -28,6 +29,7 @@ export type Database = {
           id?: string
           role: string
           session_id: string
+          user_id?: string | null
         }
         Update: {
           content?: string
@@ -35,6 +37,7 @@ export type Database = {
           id?: string
           role?: string
           session_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }

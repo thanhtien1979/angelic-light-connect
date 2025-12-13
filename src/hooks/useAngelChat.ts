@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 type Message = {
   id: string;
@@ -10,31 +11,25 @@ type Message = {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/angel-chat`;
 
-// Get or create a persistent session ID
-const getSessionId = (): string => {
-  const key = "angel-chat-session-id";
-  let sessionId = localStorage.getItem(key);
-  if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    localStorage.setItem(key, sessionId);
-  }
-  return sessionId;
-};
-
 export const useAngelChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
-  const sessionId = getSessionId();
+  const { user, isAuthenticated } = useAuth();
 
-  // Restore previous messages on mount
+  // Restore previous messages on mount when authenticated
   useEffect(() => {
     const restoreMessages = async () => {
+      if (!isAuthenticated || !user) {
+        setIsRestoring(false);
+        return;
+      }
+
       try {
         const { data, error } = await supabase
           .from("chat_messages")
           .select("id, role, content")
-          .eq("session_id", sessionId)
+          .eq("user_id", user.id)
           .order("created_at", { ascending: true });
 
         if (error) throw error;
@@ -56,15 +51,25 @@ export const useAngelChat = () => {
     };
 
     restoreMessages();
-  }, [sessionId]);
+  }, [isAuthenticated, user]);
 
-  // Save a message to the database
+  // Clear messages when user logs out
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setMessages([]);
+    }
+  }, [isAuthenticated]);
+
+  // Save a message to the database (only for authenticated users)
   const saveMessage = async (role: "user" | "assistant", content: string): Promise<string | null> => {
+    if (!isAuthenticated || !user) return null;
+
     try {
       const { data, error } = await supabase
         .from("chat_messages")
         .insert({
-          session_id: sessionId,
+          session_id: user.id, // Use user_id as session_id for consistency
+          user_id: user.id,
           role,
           content,
         })
@@ -76,18 +81,6 @@ export const useAngelChat = () => {
     } catch (error) {
       console.error("Failed to save message:", error);
       return null;
-    }
-  };
-
-  // Update assistant message in database
-  const updateMessage = async (id: string, content: string) => {
-    try {
-      await supabase
-        .from("chat_messages")
-        .update({ content })
-        .eq("id", id);
-    } catch (error) {
-      console.error("Failed to update message:", error);
     }
   };
 
@@ -180,7 +173,7 @@ export const useAngelChat = () => {
       }
 
       // Save the complete assistant message to database
-      if (assistantContent) {
+      if (assistantContent && isAuthenticated) {
         assistantMessageId = await saveMessage("assistant", assistantContent);
         if (assistantMessageId) {
           setMessages((prev) =>
@@ -204,17 +197,22 @@ export const useAngelChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, sessionId]);
+  }, [messages, isLoading, isAuthenticated, user]);
 
   const clearMessages = useCallback(async () => {
+    if (!isAuthenticated || !user) {
+      setMessages([]);
+      return;
+    }
+
     try {
-      await supabase.from("chat_messages").delete().eq("session_id", sessionId);
+      await supabase.from("chat_messages").delete().eq("user_id", user.id);
       setMessages([]);
     } catch (error) {
       console.error("Failed to clear messages:", error);
       toast.error("Không thể xóa tin nhắn");
     }
-  }, [sessionId]);
+  }, [isAuthenticated, user]);
 
-  return { messages, isLoading, isRestoring, sendMessage, clearMessages };
+  return { messages, isLoading, isRestoring, sendMessage, clearMessages, isAuthenticated };
 };

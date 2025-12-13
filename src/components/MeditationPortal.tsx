@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX } from "lucide-react";
-import { useMeditationAudio } from "@/hooks/useMeditationAudio";
+import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check } from "lucide-react";
+import { useMeditationAudio, AudioTrack } from "@/hooks/useMeditationAudio";
 
 const meditationCards = [
   {
@@ -34,8 +34,19 @@ const meditationCards = [
 ];
 
 const MeditationPortal = () => {
-  const { isPlaying, isLoaded, volume, toggle, setVolume } = useMeditationAudio();
+  const { 
+    isPlaying, 
+    isLoaded, 
+    volume, 
+    currentTrack, 
+    tracks, 
+    isChangingTrack,
+    toggle, 
+    setVolume, 
+    selectTrack 
+  } = useMeditationAudio();
   const [breathPhase, setBreathPhase] = useState<"inhale" | "exhale">("inhale");
+  const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
 
   // Breathing animation toggle
   useEffect(() => {
@@ -44,6 +55,11 @@ const MeditationPortal = () => {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleTrackSelect = (track: AudioTrack) => {
+    selectTrack(track);
+    setIsPlaylistOpen(false);
+  };
 
   return (
     <section id="meditation" className="relative min-h-screen py-24 px-4 overflow-hidden">
@@ -227,7 +243,7 @@ const MeditationPortal = () => {
           ))}
         </motion.div>
 
-        {/* Ambient Audio Player */}
+        {/* Ambient Audio Player with Playlist */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -235,46 +251,110 @@ const MeditationPortal = () => {
           viewport={{ once: true }}
           className="max-w-md mx-auto"
         >
-          <div className="bg-white/60 backdrop-blur-xl rounded-full border border-gold-light/30 p-3 flex items-center gap-4">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={toggle}
-              disabled={!isLoaded}
-              className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_20px_hsla(45,100%,70%,0.4)] disabled:opacity-50"
-            >
-              {isPlaying ? (
-                <Pause className="w-5 h-5 text-white" />
-              ) : (
-                <Play className="w-5 h-5 text-white ml-0.5" />
-              )}
-            </motion.button>
-            
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">Divine Harmony</p>
-              <p className="text-xs text-muted-foreground">
-                {isPlaying ? "Đang phát..." : isLoaded ? "Nhấn để bắt đầu" : "Đang tải..."}
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2 pr-2">
-              <button onClick={() => setVolume(volume > 0 ? 0 : 0.7)}>
-                {volume > 0 ? (
-                  <Volume2 className="w-4 h-4 text-gold" />
+          <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gold-light/30 overflow-hidden">
+            {/* Main Player */}
+            <div className="p-4 flex items-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={toggle}
+                disabled={!isLoaded || isChangingTrack}
+                className="w-14 h-14 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_20px_hsla(45,100%,70%,0.4)] disabled:opacity-50"
+              >
+                {isChangingTrack ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full"
+                  />
+                ) : isPlaying ? (
+                  <Pause className="w-6 h-6 text-white" />
                 ) : (
-                  <VolumeX className="w-4 h-4 text-muted-foreground" />
+                  <Play className="w-6 h-6 text-white ml-0.5" />
                 )}
-              </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={volume}
-                onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="w-16 h-1 bg-border rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gold"
-              />
+              </motion.button>
+              
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{currentTrack.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{currentTrack.nameVi}</p>
+                <p className="text-xs text-gold mt-0.5">
+                  {isChangingTrack ? "Đang chuyển..." : isPlaying ? "Đang phát..." : isLoaded ? "Sẵn sàng" : "Đang tải..."}
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button onClick={() => setVolume(volume > 0 ? 0 : 0.7)} className="p-1">
+                  {volume > 0 ? (
+                    <Volume2 className="w-4 h-4 text-gold" />
+                  ) : (
+                    <VolumeX className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={volume}
+                  onChange={(e) => setVolume(parseFloat(e.target.value))}
+                  className="w-16 h-1 bg-border rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gold"
+                />
+              </div>
             </div>
+
+            {/* Playlist Toggle */}
+            <button
+              onClick={() => setIsPlaylistOpen(!isPlaylistOpen)}
+              className="w-full px-4 py-2 flex items-center justify-center gap-2 border-t border-gold-light/20 text-sm text-muted-foreground hover:text-foreground hover:bg-gold-light/10 transition-colors"
+            >
+              <Music className="w-4 h-4" />
+              <span>Chọn bài thiền định</span>
+              <motion.div
+                animate={{ rotate: isPlaylistOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className="w-4 h-4" />
+              </motion.div>
+            </button>
+
+            {/* Playlist */}
+            <motion.div
+              initial={false}
+              animate={{ height: isPlaylistOpen ? "auto" : 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="border-t border-gold-light/20 p-2 space-y-1">
+                {tracks.map((track) => (
+                  <motion.button
+                    key={track.id}
+                    onClick={() => handleTrackSelect(track)}
+                    whileHover={{ x: 4 }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors text-left ${
+                      currentTrack.id === track.id
+                        ? "bg-gold-light/20 text-gold"
+                        : "text-foreground hover:bg-gold-light/10"
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      currentTrack.id === track.id
+                        ? "bg-gradient-to-br from-gold to-gold-light"
+                        : "bg-gold-light/20"
+                    }`}>
+                      {currentTrack.id === track.id ? (
+                        <Check className="w-4 h-4 text-white" />
+                      ) : (
+                        <Music className="w-4 h-4 text-gold" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{track.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{track.nameVi}</p>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </motion.div>
       </div>
