@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon } from "lucide-react";
+import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon, X, Keyboard } from "lucide-react";
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -61,6 +61,88 @@ const formatTime = (seconds: number): string => {
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
+
+// Keyboard shortcuts data
+const keyboardShortcuts = [
+  { key: "Space", label: "Phát / Tạm dừng" },
+  { key: "←", label: "Tua lùi 10 giây" },
+  { key: "→", label: "Tua tiến 10 giây" },
+  { key: "↑", label: "Tăng âm lượng" },
+  { key: "↓", label: "Giảm âm lượng" },
+  { key: "M", label: "Tắt / Bật tiếng" },
+  { key: "N", label: "Bài tiếp theo" },
+  { key: "P", label: "Bài trước đó" },
+  { key: "?", label: "Hiện phím tắt" },
+  { key: "Esc", label: "Đóng hộp thoại" },
+];
+
+// Keyboard shortcuts help overlay
+const KeyboardShortcutsOverlay = ({ 
+  isVisible, 
+  onClose 
+}: { 
+  isVisible: boolean; 
+  onClose: () => void;
+}) => (
+  <AnimatePresence>
+    {isVisible && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" />
+        
+        {/* Modal */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.2 }}
+          className="relative bg-background/95 backdrop-blur-xl rounded-2xl border border-gold/20 shadow-2xl shadow-gold/10 p-6 max-w-sm w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Keyboard className="w-5 h-5 text-gold" />
+              <h3 className="font-serif text-lg text-foreground">Phím Tắt</h3>
+            </div>
+            <button 
+              onClick={onClose}
+              className="p-1.5 rounded-full hover:bg-muted/50 transition-colors"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+          
+          {/* Shortcuts list */}
+          <div className="space-y-2">
+            {keyboardShortcuts.map((shortcut) => (
+              <div 
+                key={shortcut.key}
+                className="flex items-center justify-between py-2 border-b border-gold/10 last:border-0"
+              >
+                <span className="text-sm text-muted-foreground">{shortcut.label}</span>
+                <kbd className="px-2 py-1 text-xs font-mono bg-muted/50 text-gold rounded border border-gold/20">
+                  {shortcut.key}
+                </kbd>
+              </div>
+            ))}
+          </div>
+          
+          {/* Footer hint */}
+          <p className="mt-4 text-xs text-muted-foreground/60 text-center">
+            Nhấn <kbd className="px-1 bg-muted/30 rounded text-gold/60">Esc</kbd> hoặc bấm ngoài để đóng
+          </p>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 // Keyboard feedback indicator component
 const KeyboardFeedback = ({ 
@@ -123,6 +205,8 @@ const MeditationPortal = () => {
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [isJourneyOpen, setIsJourneyOpen] = useState(false);
   const [isSleepTimerOpen, setIsSleepTimerOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const prevVolumeRef = useState(0.7); // Store previous volume for mute toggle
   
   // Keyboard feedback state
   const [keyFeedback, setKeyFeedback] = useState<{
@@ -155,13 +239,13 @@ const MeditationPortal = () => {
       
       if (isInputField) return;
 
-      switch (e.key.toLowerCase()) {
+      switch (e.key) {
         case " ": // Spacebar - toggle play/pause
           e.preventDefault();
           toggle();
           showKeyFeedback(isPlaying ? Pause : Play, isPlaying ? "Tạm dừng" : "Phát");
           break;
-        case "arrowleft": // Seek backward 10 seconds
+        case "ArrowLeft": // Seek backward 10 seconds
           e.preventDefault();
           if (duration > 0) {
             const newPercent = Math.max(0, ((currentTime - 10) / duration) * 100);
@@ -169,7 +253,7 @@ const MeditationPortal = () => {
             showKeyFeedback(Rewind, "-10 giây");
           }
           break;
-        case "arrowright": // Seek forward 10 seconds
+        case "ArrowRight": // Seek forward 10 seconds
           e.preventDefault();
           if (duration > 0) {
             const newPercent = Math.min(100, ((currentTime + 10) / duration) * 100);
@@ -177,7 +261,7 @@ const MeditationPortal = () => {
             showKeyFeedback(FastForward, "+10 giây");
           }
           break;
-        case "arrowup": // Volume up
+        case "ArrowUp": // Volume up
           e.preventDefault();
           {
             const newVolume = Math.min(1, volume + 0.1);
@@ -185,7 +269,7 @@ const MeditationPortal = () => {
             showKeyFeedback(Volume2, `${Math.round(newVolume * 100)}%`);
           }
           break;
-        case "arrowdown": // Volume down
+        case "ArrowDown": // Volume down
           e.preventDefault();
           {
             const newVolume = Math.max(0, volume - 0.1);
@@ -193,22 +277,47 @@ const MeditationPortal = () => {
             showKeyFeedback(newVolume > 0 ? Volume2 : VolumeX, `${Math.round(newVolume * 100)}%`);
           }
           break;
-        case "n": // Next track
+        case "m":
+        case "M": // Mute/unmute
+          e.preventDefault();
+          if (volume > 0) {
+            prevVolumeRef[1](volume);
+            setVolume(0);
+            showKeyFeedback(VolumeX, "Tắt tiếng");
+          } else {
+            const restored = prevVolumeRef[0] || 0.7;
+            setVolume(restored);
+            showKeyFeedback(Volume2, "Bật tiếng");
+          }
+          break;
+        case "n":
+        case "N": // Next track
           e.preventDefault();
           nextTrack();
           showKeyFeedback(SkipForward, "Bản tiếp theo");
           break;
-        case "p": // Previous track
+        case "p":
+        case "P": // Previous track
           e.preventDefault();
           previousTrack();
           showKeyFeedback(SkipBack, "Bản trước");
+          break;
+        case "?": // Show shortcuts help
+          e.preventDefault();
+          setIsShortcutsOpen(true);
+          break;
+        case "Escape": // Close shortcuts overlay
+          if (isShortcutsOpen) {
+            e.preventDefault();
+            setIsShortcutsOpen(false);
+          }
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggle, nextTrack, previousTrack, seekByPercent, setVolume, volume, currentTime, duration, isPlaying, showKeyFeedback]);
+  }, [toggle, nextTrack, previousTrack, seekByPercent, setVolume, volume, currentTime, duration, isPlaying, isShortcutsOpen, showKeyFeedback, prevVolumeRef]);
 
   const handlePlaylistSelect = (playlist: MeditationPlaylist) => {
     selectPlaylist(playlist);
@@ -233,6 +342,12 @@ const MeditationPortal = () => {
 
   return (
     <>
+      {/* Keyboard shortcuts help overlay */}
+      <KeyboardShortcutsOverlay 
+        isVisible={isShortcutsOpen} 
+        onClose={() => setIsShortcutsOpen(false)} 
+      />
+      
       {/* Keyboard shortcut feedback indicator */}
       <KeyboardFeedback 
         icon={keyFeedback?.icon || Play} 
