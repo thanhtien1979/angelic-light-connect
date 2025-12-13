@@ -176,7 +176,9 @@ const KeyboardFeedback = ({
 const MeditationPortal = () => {
   const { 
     isPlaying, 
-    isLoaded, 
+    isLoaded,
+    isLoading,
+    loadError,
     volume, 
     currentTrack, 
     currentTrackIndex,
@@ -736,7 +738,20 @@ const MeditationPortal = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm font-medium text-foreground truncate">{currentTrack.name}</p>
-                    {isLooping && (
+                    {isLoading && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex-shrink-0"
+                      >
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                          className="w-3 h-3 border border-gold/40 border-t-gold rounded-full"
+                        />
+                      </motion.div>
+                    )}
+                    {isLooping && !isLoading && (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -745,7 +760,7 @@ const MeditationPortal = () => {
                         <Repeat className="w-3 h-3 text-gold drop-shadow-[0_0_4px_hsla(45,100%,70%,0.5)]" />
                       </motion.div>
                     )}
-                    {isShuffled && (
+                    {isShuffled && !isLoading && (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -755,7 +770,26 @@ const MeditationPortal = () => {
                       </motion.div>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{currentTrack.nameVi}</p>
+                  {loadError ? (
+                    <motion.p 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-xs text-muted-foreground/80 truncate italic"
+                    >
+                      ✨ {loadError}
+                    </motion.p>
+                  ) : isLoading ? (
+                    <motion.p 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="text-xs text-gold/60 truncate"
+                    >
+                      Âm thanh đang được chuẩn bị...
+                    </motion.p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground truncate">{currentTrack.nameVi}</p>
+                  )}
                 </div>
                 
                 <Tooltip>

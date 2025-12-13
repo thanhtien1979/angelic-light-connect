@@ -168,6 +168,8 @@ export const useMeditationAudio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(getSavedVolume);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [currentPlaylist, setCurrentPlaylist] = useState<MeditationPlaylist>(getSavedPlaylist);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isChangingTrack, setIsChangingTrack] = useState(false);
@@ -199,6 +201,9 @@ export const useMeditationAudio = () => {
       audioRef.current.src = "";
     }
 
+    setIsLoading(true);
+    setLoadError(null);
+
     const audio = new Audio(track.url);
     audio.loop = looping;
     audio.volume = 0;
@@ -206,12 +211,16 @@ export const useMeditationAudio = () => {
     
     audio.addEventListener("canplaythrough", () => {
       setIsLoaded(true);
+      setIsLoading(false);
+      setLoadError(null);
       setIsChangingTrack(false);
     });
     
     audio.addEventListener("error", (e) => {
       console.error("Audio load error:", e);
       setIsLoaded(false);
+      setIsLoading(false);
+      setLoadError("Bài thiền này sẽ sớm được hoàn thiện");
       setIsChangingTrack(false);
       pendingAutoPlayRef.current = false;
     });
@@ -529,6 +538,8 @@ export const useMeditationAudio = () => {
   return {
     isPlaying,
     isLoaded,
+    isLoading,
+    loadError,
     volume,
     currentTrack,
     currentTrackIndex,
