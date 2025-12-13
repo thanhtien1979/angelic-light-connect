@@ -571,27 +571,37 @@ const MeditationPortal = () => {
 
               {/* Progress Bar */}
               <div className="space-y-2">
-                <div
-                  onClick={handleProgressClick}
-                  onMouseDown={() => setIsDragging(true)}
-                  onMouseUp={() => setIsDragging(false)}
-                  onMouseLeave={() => setIsDragging(false)}
-                  className="relative h-2 bg-border/50 rounded-full cursor-pointer group"
-                >
-                  {/* Progress fill */}
-                  <motion.div
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-gold to-gold-light rounded-full"
-                    style={{ width: `${progressPercent}%` }}
-                    transition={isDragging ? { duration: 0 } : { duration: 0.1 }}
-                  />
-                  {/* Seek handle */}
-                  <motion.div
-                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-gold rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ left: `calc(${progressPercent}% - 6px)` }}
-                  />
-                  {/* Hover glow effect */}
-                  <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-[0_0_8px_hsla(45,100%,70%,0.3)]" />
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      onClick={handleProgressClick}
+                      onMouseDown={() => setIsDragging(true)}
+                      onMouseUp={() => setIsDragging(false)}
+                      onMouseLeave={() => setIsDragging(false)}
+                      className="relative h-2 bg-border/50 rounded-full cursor-pointer group"
+                    >
+                      {/* Progress fill */}
+                      <motion.div
+                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-gold to-gold-light rounded-full"
+                        style={{ width: `${progressPercent}%` }}
+                        transition={isDragging ? { duration: 0 } : { duration: 0.1 }}
+                      />
+                      {/* Seek handle */}
+                      <motion.div
+                        className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-gold rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ left: `calc(${progressPercent}% - 6px)` }}
+                      />
+                      {/* Hover glow effect */}
+                      <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-[0_0_8px_hsla(45,100%,70%,0.3)]" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent 
+                    side="top" 
+                    className="bg-background/90 backdrop-blur-sm border-gold/20 text-foreground/80 text-xs font-light"
+                  >
+                    <span className="text-gold/80">← / →</span> Tua nhanh
+                  </TooltipContent>
+                </Tooltip>
 
                 {/* Time display */}
                 <div className="flex justify-between text-xs text-muted-foreground font-mono">
