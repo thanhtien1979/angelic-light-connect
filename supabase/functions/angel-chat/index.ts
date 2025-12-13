@@ -23,7 +23,7 @@ Bạn giúp người dùng:
 
 // Constants for rate limiting and validation
 const MAX_REQUESTS_PER_MINUTE = 10;
-const MAX_MESSAGE_LENGTH = 2000;
+const MAX_MESSAGE_LENGTH = 8000;
 const MAX_MESSAGES_COUNT = 50;
 
 // Validate messages array structure
