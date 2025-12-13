@@ -175,6 +175,7 @@ export const useMeditationAudio = () => {
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
+  const pendingAutoPlayRef = useRef<boolean>(false);
 
   const currentTrack = currentPlaylist.tracks[currentTrackIndex];
 
@@ -208,6 +209,7 @@ export const useMeditationAudio = () => {
       console.error("Audio load error:", e);
       setIsLoaded(false);
       setIsChangingTrack(false);
+      pendingAutoPlayRef.current = false;
     });
 
     audio.addEventListener("loadedmetadata", () => {
@@ -223,12 +225,15 @@ export const useMeditationAudio = () => {
     setDuration(0);
   }, []);
 
-  // Handle track ended - play next track
+  // Handle track ended - play next track automatically
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const handleEnded = () => {
+      // Set pending auto-play before changing track
+      pendingAutoPlayRef.current = true;
+      
       if (currentTrackIndex < currentPlaylist.tracks.length - 1) {
         setCurrentTrackIndex(prev => prev + 1);
       } else {
@@ -326,6 +331,17 @@ export const useMeditationAudio = () => {
     }
   }, [isLoaded, volume, fadeIn]);
 
+  // Auto-play when track loads and pending
+  useEffect(() => {
+    if (isLoaded && pendingAutoPlayRef.current && audioRef.current) {
+      pendingAutoPlayRef.current = false;
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+        fadeIn(volume);
+      }).catch(console.error);
+    }
+  }, [isLoaded, volume, fadeIn]);
+
   const pause = useCallback(() => {
     if (!audioRef.current) return;
     fadeOut();
@@ -346,34 +362,28 @@ export const useMeditationAudio = () => {
     }
   }, [isPlaying]);
 
-  const selectTrack = useCallback((trackIndex: number) => {
-    if (trackIndex === currentTrackIndex) return;
+  const selectTrack = useCallback((trackIndex: number, autoPlay: boolean = false) => {
+    if (trackIndex === currentTrackIndex && !autoPlay) return;
     
-    const wasPlaying = isPlaying;
+    const wasPlaying = isPlaying || autoPlay;
     setIsChangingTrack(true);
     setIsLoaded(false);
 
     const switchToNewTrack = () => {
       setCurrentTrackIndex(trackIndex);
-      
-      if (wasPlaying) {
-        // Auto-play after track loads
-        const checkAndPlay = setInterval(() => {
-          if (audioRef.current && !isChangingTrack) {
-            clearInterval(checkAndPlay);
-            play();
-          }
-        }, 100);
-        setTimeout(() => clearInterval(checkAndPlay), 5000);
-      }
     };
 
-    if (isPlaying) {
+    if (isPlaying && !autoPlay) {
       fadeOut(1000, switchToNewTrack);
     } else {
       switchToNewTrack();
     }
-  }, [currentTrackIndex, isPlaying, isChangingTrack, fadeOut, play]);
+
+    // Schedule auto-play if needed
+    if (wasPlaying) {
+      pendingAutoPlayRef.current = true;
+    }
+  }, [currentTrackIndex, isPlaying, fadeOut]);
 
   const selectPlaylist = useCallback((playlist: MeditationPlaylist) => {
     if (playlist.id === currentPlaylist.id) return;
@@ -385,16 +395,6 @@ export const useMeditationAudio = () => {
     const switchToNewPlaylist = () => {
       setCurrentPlaylist(playlist);
       setCurrentTrackIndex(0);
-      
-      if (wasPlaying) {
-        const checkAndPlay = setInterval(() => {
-          if (audioRef.current && !isChangingTrack) {
-            clearInterval(checkAndPlay);
-            play();
-          }
-        }, 100);
-        setTimeout(() => clearInterval(checkAndPlay), 5000);
-      }
     };
 
     if (isPlaying) {
@@ -402,19 +402,32 @@ export const useMeditationAudio = () => {
     } else {
       switchToNewPlaylist();
     }
-  }, [currentPlaylist, isPlaying, isChangingTrack, fadeOut, play]);
+
+    // Schedule auto-play if was playing
+    if (wasPlaying) {
+      pendingAutoPlayRef.current = true;
+    }
+  }, [currentPlaylist, isPlaying, fadeOut]);
 
   const nextTrack = useCallback(() => {
     const nextIndex = (currentTrackIndex + 1) % currentPlaylist.tracks.length;
+    const wasPlaying = isPlaying;
     selectTrack(nextIndex);
-  }, [currentTrackIndex, currentPlaylist.tracks.length, selectTrack]);
+    if (wasPlaying) {
+      pendingAutoPlayRef.current = true;
+    }
+  }, [currentTrackIndex, currentPlaylist.tracks.length, selectTrack, isPlaying]);
 
   const previousTrack = useCallback(() => {
     const prevIndex = currentTrackIndex === 0 
       ? currentPlaylist.tracks.length - 1 
       : currentTrackIndex - 1;
+    const wasPlaying = isPlaying;
     selectTrack(prevIndex);
-  }, [currentTrackIndex, currentPlaylist.tracks.length, selectTrack]);
+    if (wasPlaying) {
+      pendingAutoPlayRef.current = true;
+    }
+  }, [currentTrackIndex, currentPlaylist.tracks.length, selectTrack, isPlaying]);
 
   const seek = useCallback((time: number) => {
     if (audioRef.current && isLoaded) {
