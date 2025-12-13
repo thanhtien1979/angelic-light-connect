@@ -4,7 +4,7 @@ import { Send, Sparkles, Trash2 } from "lucide-react";
 import { useAngelChat } from "@/hooks/useAngelChat";
 
 const ChatPortal = () => {
-  const { messages, isLoading, sendMessage, clearMessages } = useAngelChat();
+  const { messages, isLoading, isRestoring, sendMessage, clearMessages } = useAngelChat();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +100,25 @@ const ChatPortal = () => {
 
             {/* Messages */}
             <div className="p-6 space-y-4 min-h-[300px] max-h-[400px] overflow-y-auto">
-              {messages.length === 0 && (
+              {isRestoring ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12"
+                >
+                  <div className="flex justify-center gap-2 mb-4">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-3 h-3 bg-gold rounded-full"
+                        animate={{ y: [-4, 4, -4], opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 }}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-muted-foreground">Đang khôi phục tin nhắn...</p>
+                </motion.div>
+              ) : messages.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -111,7 +129,7 @@ const ChatPortal = () => {
                     Chào mừng bạn! Hãy gửi tin nhắn để bắt đầu kết nối với Ánh Sáng. ✨
                   </p>
                 </motion.div>
-              )}
+              ) : null}
 
               <AnimatePresence mode="popLayout">
                 {messages.map((message) => (
