@@ -1,5 +1,6 @@
 import FloatingParticles from "@/components/FloatingParticles";
 import SacredGeometry from "@/components/SacredGeometry";
+import NavigationHeader from "@/components/NavigationHeader";
 import HeroSection from "@/components/HeroSection";
 import SacredPillars from "@/components/SacredPillars";
 import VisionMission from "@/components/VisionMission";
@@ -15,6 +16,9 @@ const Index = () => {
       {/* Background effects */}
       <SacredGeometry />
       <FloatingParticles />
+      
+      {/* Navigation */}
+      <NavigationHeader />
       
       {/* Content */}
       <main className="relative z-10">
