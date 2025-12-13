@@ -9,6 +9,8 @@ type Message = {
   content: string;
 };
 
+export type SyncStatus = "idle" | "saving" | "saved" | "offline" | "error";
+
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/angel-chat`;
 const SESSION_ID_KEY = "angel_chat_session_id";
 
@@ -33,7 +35,28 @@ export const useAngelChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { user, isAuthenticated } = useAuth();
+
+  // Track online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setSyncStatus("idle");
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setSyncStatus("offline");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   // Restore previous messages on mount
   useEffect(() => {
@@ -96,6 +119,13 @@ export const useAngelChat = () => {
     content: string,
     retries = 3
   ): Promise<string | null> => {
+    if (!isOnline) {
+      setSyncStatus("offline");
+      return null;
+    }
+
+    setSyncStatus("saving");
+    
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         if (isAuthenticated && user) {
@@ -112,6 +142,9 @@ export const useAngelChat = () => {
             .single();
 
           if (error) throw error;
+          setSyncStatus("saved");
+          // Reset to idle after showing "saved" briefly
+          setTimeout(() => setSyncStatus("idle"), 2000);
           return data?.id || null;
         } else {
           // Anonymous user
@@ -128,12 +161,17 @@ export const useAngelChat = () => {
             .single();
 
           if (error) throw error;
+          setSyncStatus("saved");
+          // Reset to idle after showing "saved" briefly
+          setTimeout(() => setSyncStatus("idle"), 2000);
           return data?.id || null;
         }
       } catch (error) {
         console.error(`Failed to save message (attempt ${attempt}/${retries}):`, error);
         if (attempt === retries) {
-          // On final failure, queue for later save
+          // On final failure, show error
+          setSyncStatus("error");
+          setTimeout(() => setSyncStatus("idle"), 3000);
           console.error("Message save failed after all retries:", { role, content });
           return null;
         }
@@ -310,5 +348,5 @@ export const useAngelChat = () => {
     setMessages([]);
   }, [isAuthenticated]);
 
-  return { messages, isLoading, isRestoring, sendMessage, clearMessages, startNewConversation, isAuthenticated };
+  return { messages, isLoading, isRestoring, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated };
 };

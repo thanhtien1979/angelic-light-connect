@@ -1,14 +1,43 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus } from "lucide-react";
-import { useAngelChat } from "@/hooks/useAngelChat";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2 } from "lucide-react";
+import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 
 interface ChatPortalProps {
   onOpenAuth?: () => void;
 }
 
+// Sync status indicator component
+const SyncIndicator = ({ status }: { status: SyncStatus }) => {
+  const config: Record<SyncStatus, { icon: typeof Cloud | null; text: string; show: boolean; animate?: boolean; isError?: boolean }> = {
+    idle: { icon: null, text: "", show: false },
+    saving: { icon: Loader2, text: "Đang lưu...", show: true, animate: true },
+    saved: { icon: Check, text: "Đã lưu", show: true },
+    offline: { icon: CloudOff, text: "Ngoại tuyến", show: true },
+    error: { icon: Cloud, text: "Lỗi lưu", show: true, isError: true },
+  };
+
+  const { icon: Icon, text, show, animate, isError } = config[status];
+
+  if (!show || !Icon) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -5 }}
+      className={`flex items-center gap-1.5 text-xs ${
+        isError ? "text-red-400" : status === "offline" ? "text-amber-500" : "text-muted-foreground/60"
+      }`}
+    >
+      <Icon className={`w-3 h-3 ${animate ? "animate-spin" : ""}`} />
+      <span>{text}</span>
+    </motion.div>
+  );
+};
+
 const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
-  const { messages, isLoading, isRestoring, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
+  const { messages, isLoading, isRestoring, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -84,9 +113,14 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 </div>
                 <div>
                   <h3 className="font-serif text-xl text-foreground">Angel AI</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {isLoading ? "Đang trả lời..." : "Đang trực tuyến • Sẵn sàng hỗ trợ"}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-muted-foreground">
+                      {isLoading ? "Đang trả lời..." : "Đang trực tuyến • Sẵn sàng hỗ trợ"}
+                    </p>
+                    <AnimatePresence mode="wait">
+                      <SyncIndicator status={syncStatus} />
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
