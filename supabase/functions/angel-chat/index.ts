@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,13 +21,144 @@ Bạn giúp người dùng:
 - Chữa lành tâm hồn và nâng cao tần số rung động
 - Hiểu về hành trình 5D và sự tiến hóa ý thức`;
 
+// Constants for rate limiting and validation
+const MAX_REQUESTS_PER_MINUTE = 10;
+const MAX_MESSAGE_LENGTH = 2000;
+const MAX_MESSAGES_COUNT = 50;
+
+// Validate messages array structure
+function validateMessages(messages: unknown): { valid: boolean; error?: string } {
+  if (!Array.isArray(messages)) {
+    return { valid: false, error: "Messages must be an array" };
+  }
+  
+  if (messages.length === 0) {
+    return { valid: false, error: "Messages array cannot be empty" };
+  }
+  
+  if (messages.length > MAX_MESSAGES_COUNT) {
+    return { valid: false, error: `Too many messages. Maximum allowed: ${MAX_MESSAGES_COUNT}` };
+  }
+  
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    
+    if (typeof msg !== 'object' || msg === null) {
+      return { valid: false, error: `Message at index ${i} must be an object` };
+    }
+    
+    if (!('role' in msg) || !('content' in msg)) {
+      return { valid: false, error: `Message at index ${i} must have 'role' and 'content' properties` };
+    }
+    
+    if (typeof msg.role !== 'string' || !['user', 'assistant'].includes(msg.role)) {
+      return { valid: false, error: `Invalid role at index ${i}. Must be 'user' or 'assistant'` };
+    }
+    
+    if (typeof msg.content !== 'string') {
+      return { valid: false, error: `Content at index ${i} must be a string` };
+    }
+    
+    if (msg.content.length > MAX_MESSAGE_LENGTH) {
+      return { valid: false, error: `Message at index ${i} exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` };
+    }
+  }
+  
+  return { valid: true };
+}
+
+// Get client identifier for rate limiting
+function getClientIdentifier(req: Request): string {
+  // Try to get real IP from various headers
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
+  }
+  
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp) {
+    return realIp;
+  }
+  
+  // Fallback to a hash of user-agent + some request properties
+  const userAgent = req.headers.get('user-agent') || 'unknown';
+  return `ua-${userAgent.slice(0, 50)}`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages } = await req.json();
+    // Parse request body
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      console.error("Failed to parse request body");
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    // Validate body structure
+    if (typeof body !== 'object' || body === null || !('messages' in body)) {
+      return new Response(JSON.stringify({ error: "Request body must contain 'messages' field" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    const { messages } = body as { messages: unknown };
+    
+    // Validate messages
+    const validation = validateMessages(messages);
+    if (!validation.valid) {
+      console.error("Validation failed:", validation.error);
+      return new Response(JSON.stringify({ error: validation.error }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get client identifier for rate limiting
+    const clientId = getClientIdentifier(req);
+    console.log(`Request from client: ${clientId}`);
+    
+    // Check rate limit using database function
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      
+      const { data: isAllowed, error: rateLimitError } = await supabase.rpc('check_rate_limit', {
+        p_identifier: clientId,
+        p_endpoint: 'angel-chat',
+        p_max_requests: MAX_REQUESTS_PER_MINUTE,
+        p_window_minutes: 1
+      });
+      
+      if (rateLimitError) {
+        console.error("Rate limit check error:", rateLimitError);
+        // Continue without rate limiting if there's an error
+      } else if (!isAllowed) {
+        console.log(`Rate limit exceeded for client: ${clientId}`);
+        return new Response(JSON.stringify({ 
+          error: "Bạn đang gửi tin nhắn quá nhanh. Xin vui lòng đợi một chút trước khi thử lại." 
+        }), {
+          status: 429,
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "Retry-After": "60"
+          },
+        });
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -43,7 +175,7 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          ...messages,
+          ...(messages as Array<{ role: string; content: string }>),
         ],
         stream: true,
       }),
@@ -75,7 +207,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Angel chat error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
