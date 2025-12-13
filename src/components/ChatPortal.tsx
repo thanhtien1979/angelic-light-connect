@@ -115,6 +115,23 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               </div>
             </div>
 
+            {/* Summarization indicator */}
+            <AnimatePresence>
+              {messages.length > 20 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="px-6 py-2 border-b border-gold-light/10"
+                >
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
+                    <Sparkles className="w-3 h-3 text-gold-light" />
+                    <span>Các tin nhắn trước đã được tóm tắt với tình yêu ✨</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Messages */}
             <div className="p-6 space-y-4 min-h-[300px] max-h-[400px] overflow-y-auto">
               {isRestoring ? (
