@@ -1,3 +1,4 @@
+import { useState } from "react";
 import FloatingParticles from "@/components/FloatingParticles";
 import SacredGeometry from "@/components/SacredGeometry";
 import NavigationHeader from "@/components/NavigationHeader";
@@ -9,8 +10,11 @@ import MeditationPortal from "@/components/MeditationPortal";
 import Testimonials from "@/components/Testimonials";
 import CallToAction from "@/components/CallToAction";
 import Footer from "@/components/Footer";
+import AuthModal from "@/components/AuthModal";
 
 const Index = () => {
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
       {/* Background effects */}
@@ -25,12 +29,15 @@ const Index = () => {
         <HeroSection />
         <SacredPillars />
         <VisionMission />
-        <ChatPortal />
+        <ChatPortal onOpenAuth={() => setIsAuthOpen(true)} />
         <MeditationPortal />
         <Testimonials />
         <CallToAction />
         <Footer />
       </main>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </div>
   );
 };

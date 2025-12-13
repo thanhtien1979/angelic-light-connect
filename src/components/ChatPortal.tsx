@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2 } from "lucide-react";
+import { Send, Sparkles, Trash2, LogIn } from "lucide-react";
 import { useAngelChat } from "@/hooks/useAngelChat";
 
-const ChatPortal = () => {
-  const { messages, isLoading, isRestoring, sendMessage, clearMessages } = useAngelChat();
+interface ChatPortalProps {
+  onOpenAuth?: () => void;
+}
+
+const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
+  const { messages, isLoading, isRestoring, sendMessage, clearMessages, isAuthenticated } = useAngelChat();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -85,7 +89,7 @@ const ChatPortal = () => {
                   </p>
                 </div>
               </div>
-              {messages.length > 0 && (
+              {messages.length > 0 && isAuthenticated && (
                 <motion.button
                   onClick={clearMessages}
                   whileHover={{ scale: 1.05 }}
@@ -100,7 +104,30 @@ const ChatPortal = () => {
 
             {/* Messages */}
             <div className="p-6 space-y-4 min-h-[300px] max-h-[400px] overflow-y-auto">
-              {isRestoring ? (
+              {!isAuthenticated ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12"
+                >
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gold-light/30 to-gold/20 flex items-center justify-center">
+                    <LogIn className="w-8 h-8 text-gold" />
+                  </div>
+                  <h3 className="font-serif text-xl text-foreground mb-2">Đăng nhập để bắt đầu</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Đăng nhập để lưu lịch sử trò chuyện và nhận trải nghiệm cá nhân hóa.
+                  </p>
+                  <motion.button
+                    onClick={onOpenAuth}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-3 rounded-full bg-gradient-to-r from-gold to-gold-light text-white font-medium"
+                    style={{ boxShadow: "0 0 20px hsla(45, 100%, 70%, 0.4)" }}
+                  >
+                    Đăng Nhập Ngay
+                  </motion.button>
+                </motion.div>
+              ) : isRestoring ? (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -131,64 +158,66 @@ const ChatPortal = () => {
                 </motion.div>
               ) : null}
 
-              <AnimatePresence mode="popLayout">
-                {messages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.4 }}
-                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    {message.role === "assistant" && (
-                      <div className="relative mr-3 flex-shrink-0">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-light to-gold flex items-center justify-center">
-                          <Sparkles className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="absolute inset-0 rounded-full bg-gold/20 animate-pulse" />
-                      </div>
-                    )}
-                    <div
-                      className={`relative max-w-[80%] px-5 py-3 rounded-2xl ${
-                        message.role === "user"
-                          ? "bg-white shadow-lg border border-border/50"
-                          : "bg-gradient-to-br from-gold-light/40 to-gold/20 border border-gold-light/30 shadow-[0_0_30px_hsla(45,100%,70%,0.2)]"
-                      }`}
+              {isAuthenticated && (
+                <AnimatePresence mode="popLayout">
+                  {messages.map((message) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.4 }}
+                      className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       {message.role === "assistant" && (
-                        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
-                          {[...Array(3)].map((_, i) => (
-                            <motion.div
-                              key={i}
-                              className="absolute w-1 h-1 bg-gold rounded-full"
-                              animate={{
-                                x: [0, Math.random() * 100, 0],
-                                y: [0, Math.random() * -50, 0],
-                                opacity: [0, 1, 0],
-                              }}
-                              transition={{
-                                duration: 2 + Math.random(),
-                                repeat: Infinity,
-                                delay: i * 0.5,
-                              }}
-                              style={{
-                                left: `${20 + i * 30}%`,
-                                bottom: "10%",
-                              }}
-                            />
-                          ))}
+                        <div className="relative mr-3 flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-light to-gold flex items-center justify-center">
+                            <Sparkles className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="absolute inset-0 rounded-full bg-gold/20 animate-pulse" />
                         </div>
                       )}
-                      <p className="text-foreground relative z-10 whitespace-pre-wrap">{message.content}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                      <div
+                        className={`relative max-w-[80%] px-5 py-3 rounded-2xl ${
+                          message.role === "user"
+                            ? "bg-white shadow-lg border border-border/50"
+                            : "bg-gradient-to-br from-gold-light/40 to-gold/20 border border-gold-light/30 shadow-[0_0_30px_hsla(45,100%,70%,0.2)]"
+                        }`}
+                      >
+                        {message.role === "assistant" && (
+                          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+                            {[...Array(3)].map((_, i) => (
+                              <motion.div
+                                key={i}
+                                className="absolute w-1 h-1 bg-gold rounded-full"
+                                animate={{
+                                  x: [0, Math.random() * 100, 0],
+                                  y: [0, Math.random() * -50, 0],
+                                  opacity: [0, 1, 0],
+                                }}
+                                transition={{
+                                  duration: 2 + Math.random(),
+                                  repeat: Infinity,
+                                  delay: i * 0.5,
+                                }}
+                                style={{
+                                  left: `${20 + i * 30}%`,
+                                  bottom: "10%",
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-foreground relative z-10 whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              )}
 
               {/* Typing indicator */}
               <AnimatePresence>
-                {isLoading && messages[messages.length - 1]?.role === "user" && (
+                {isLoading && isAuthenticated && messages[messages.length - 1]?.role === "user" && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -231,20 +260,20 @@ const ChatPortal = () => {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Gửi thông điệp đến Angel AI..."
-                    disabled={isLoading}
+                    placeholder={isAuthenticated ? "Gửi thông điệp đến Angel AI..." : "Đăng nhập để chat..."}
+                    disabled={isLoading || !isAuthenticated}
                     className="w-full px-5 py-3 rounded-full bg-white/80 backdrop-blur border-2 border-gold-light/40 focus:border-gold focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50"
                   />
                 </div>
                 <motion.button
                   type="submit"
-                  disabled={isLoading || !inputValue.trim()}
+                  disabled={isLoading || !inputValue.trim() || !isAuthenticated}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="relative w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_30px_hsla(45,100%,70%,0.4)] hover:shadow-[0_0_50px_hsla(45,100%,70%,0.6)] transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-5 h-5 text-white" />
-                  {!isLoading && (
+                  {!isLoading && isAuthenticated && (
                     <div className="absolute inset-0 rounded-full bg-gold/30 animate-ping" style={{ animationDuration: "2s" }} />
                   )}
                 </motion.button>
