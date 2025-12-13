@@ -90,63 +90,92 @@ export const useAngelChat = () => {
     restoreMessages();
   }, [isAuthenticated, user]);
 
-  // Save a message to the database
-  const saveMessage = async (role: "user" | "assistant", content: string): Promise<string | null> => {
-    try {
-      if (isAuthenticated && user) {
-        // Authenticated user
-        const { data, error } = await supabase
-          .from("chat_messages")
-          .insert({
-            session_id: user.id,
-            user_id: user.id,
-            role,
-            content,
-          })
-          .select("id")
-          .single();
+  // Save a message to the database with retry logic
+  const saveMessage = async (
+    role: "user" | "assistant", 
+    content: string,
+    retries = 3
+  ): Promise<string | null> => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        if (isAuthenticated && user) {
+          // Authenticated user
+          const { data, error } = await supabase
+            .from("chat_messages")
+            .insert({
+              session_id: user.id,
+              user_id: user.id,
+              role,
+              content,
+            })
+            .select("id")
+            .single();
 
-        if (error) throw error;
-        return data?.id || null;
-      } else {
-        // Anonymous user
-        const sessionId = getSessionId();
-        const { data, error } = await supabase
-          .from("chat_messages")
-          .insert({
-            session_id: sessionId,
-            user_id: null,
-            role,
-            content,
-          })
-          .select("id")
-          .single();
+          if (error) throw error;
+          return data?.id || null;
+        } else {
+          // Anonymous user
+          const sessionId = getSessionId();
+          const { data, error } = await supabase
+            .from("chat_messages")
+            .insert({
+              session_id: sessionId,
+              user_id: null,
+              role,
+              content,
+            })
+            .select("id")
+            .single();
 
-        if (error) throw error;
-        return data?.id || null;
+          if (error) throw error;
+          return data?.id || null;
+        }
+      } catch (error) {
+        console.error(`Failed to save message (attempt ${attempt}/${retries}):`, error);
+        if (attempt === retries) {
+          // On final failure, queue for later save
+          console.error("Message save failed after all retries:", { role, content });
+          return null;
+        }
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
       }
-    } catch (error) {
-      console.error("Failed to save message:", error);
-      return null;
     }
+    return null;
   };
 
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || isLoading) return;
 
-    const userMessageId = await saveMessage("user", content.trim());
+    const trimmedContent = content.trim();
     
+    // Create optimistic user message for immediate UI update
+    const tempUserMessageId = `temp-${Date.now()}`;
     const userMessage: Message = {
-      id: userMessageId || Date.now().toString(),
+      id: tempUserMessageId,
       role: "user",
-      content: content.trim(),
+      content: trimmedContent,
     };
 
+    // Update UI immediately
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
+    // Save user message to database immediately (don't wait for response)
+    const saveUserMessagePromise = saveMessage("user", trimmedContent);
+    
+    // Update the message ID once saved
+    saveUserMessagePromise.then((savedId) => {
+      if (savedId) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempUserMessageId ? { ...m, id: savedId } : m))
+        );
+      }
+    });
+
     let assistantContent = "";
     let assistantMessageId: string | null = null;
+    const tempAssistantId = `assistant-${Date.now()}`;
 
     const updateAssistant = (chunk: string) => {
       assistantContent += chunk;
@@ -159,7 +188,7 @@ export const useAngelChat = () => {
         }
         return [
           ...prev,
-          { id: assistantMessageId || `assistant-${Date.now()}`, role: "assistant", content: assistantContent },
+          { id: tempAssistantId, role: "assistant", content: assistantContent },
         ];
       });
     };
@@ -219,13 +248,13 @@ export const useAngelChat = () => {
         }
       }
 
-      // Save the complete assistant message to database
+      // Save the complete assistant message to database immediately
       if (assistantContent) {
         assistantMessageId = await saveMessage("assistant", assistantContent);
         if (assistantMessageId) {
           setMessages((prev) =>
-            prev.map((m, i) =>
-              i === prev.length - 1 && m.role === "assistant"
+            prev.map((m) =>
+              m.id === tempAssistantId && m.role === "assistant"
                 ? { ...m, id: assistantMessageId! }
                 : m
             )
@@ -235,7 +264,12 @@ export const useAngelChat = () => {
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(error instanceof Error ? error.message : "Không thể kết nối với Angel AI");
-      setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
+      
+      // Wait for user message save to complete before potentially deleting
+      const userMessageId = await saveUserMessagePromise;
+      
+      // Remove the optimistic user message from UI
+      setMessages((prev) => prev.filter((m) => m.id !== tempUserMessageId && m.id !== userMessageId));
       
       // Delete the user message from DB if chat failed
       if (userMessageId) {
