@@ -93,6 +93,52 @@ const MeditationPortal = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Keyboard shortcuts for meditation player
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip if user is typing in an input field
+      const target = e.target as HTMLElement;
+      const isInputField = 
+        target.tagName === "INPUT" || 
+        target.tagName === "TEXTAREA" || 
+        target.isContentEditable;
+      
+      if (isInputField) return;
+
+      switch (e.key.toLowerCase()) {
+        case " ": // Spacebar - toggle play/pause
+          e.preventDefault();
+          toggle();
+          break;
+        case "arrowleft": // Seek backward 10 seconds
+          e.preventDefault();
+          if (duration > 0) {
+            const newPercent = Math.max(0, ((currentTime - 10) / duration) * 100);
+            seekByPercent(newPercent);
+          }
+          break;
+        case "arrowright": // Seek forward 10 seconds
+          e.preventDefault();
+          if (duration > 0) {
+            const newPercent = Math.min(100, ((currentTime + 10) / duration) * 100);
+            seekByPercent(newPercent);
+          }
+          break;
+        case "n": // Next track
+          e.preventDefault();
+          nextTrack();
+          break;
+        case "p": // Previous track
+          e.preventDefault();
+          previousTrack();
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toggle, nextTrack, previousTrack, seekByPercent, currentTime, duration]);
+
   const handlePlaylistSelect = (playlist: MeditationPlaylist) => {
     selectPlaylist(playlist);
     setIsJourneyOpen(false);
