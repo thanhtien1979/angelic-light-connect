@@ -7,7 +7,7 @@ const HeroSection = () => {
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0.3]);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-20">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-light via-background to-background" />
       

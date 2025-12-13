@@ -48,7 +48,7 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <section className="relative py-24 px-4 overflow-hidden">
+    <section id="testimonials" className="relative py-24 px-4 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-gold-light/5 to-background" />
       

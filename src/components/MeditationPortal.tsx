@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Heart, Sun, Sparkles, Play, Pause, Volume2 } from "lucide-react";
+import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { useMeditationAudio } from "@/hooks/useMeditationAudio";
 
 const meditationCards = [
   {
@@ -33,19 +34,19 @@ const meditationCards = [
 ];
 
 const MeditationPortal = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { isPlaying, isLoaded, volume, toggle, setVolume } = useMeditationAudio();
   const [breathPhase, setBreathPhase] = useState<"inhale" | "exhale">("inhale");
 
   // Breathing animation toggle
-  useState(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setBreathPhase((prev) => (prev === "inhale" ? "exhale" : "inhale"));
     }, 4000);
     return () => clearInterval(interval);
-  });
+  }, []);
 
   return (
-    <section className="relative min-h-screen py-24 px-4 overflow-hidden">
+    <section id="meditation" className="relative min-h-screen py-24 px-4 overflow-hidden">
       {/* Immersive background with nebula effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-sky-light/20 to-background" />
       
@@ -238,8 +239,9 @@ const MeditationPortal = () => {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_20px_hsla(45,100%,70%,0.4)]"
+              onClick={toggle}
+              disabled={!isLoaded}
+              className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_20px_hsla(45,100%,70%,0.4)] disabled:opacity-50"
             >
               {isPlaying ? (
                 <Pause className="w-5 h-5 text-white" />
@@ -250,18 +252,28 @@ const MeditationPortal = () => {
             
             <div className="flex-1">
               <p className="text-sm font-medium text-foreground">Divine Harmony</p>
-              <p className="text-xs text-muted-foreground">Ambient meditation music</p>
+              <p className="text-xs text-muted-foreground">
+                {isPlaying ? "Đang phát..." : isLoaded ? "Nhấn để bắt đầu" : "Đang tải..."}
+              </p>
             </div>
             
             <div className="flex items-center gap-2 pr-2">
-              <Volume2 className="w-4 h-4 text-gold" />
-              <div className="w-20 h-1 bg-border rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-gold to-gold-light"
-                  initial={{ width: "70%" }}
-                  style={{ boxShadow: "0 0 10px hsla(45, 100%, 70%, 0.5)" }}
-                />
-              </div>
+              <button onClick={() => setVolume(volume > 0 ? 0 : 0.7)}>
+                {volume > 0 ? (
+                  <Volume2 className="w-4 h-4 text-gold" />
+                ) : (
+                  <VolumeX className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="w-16 h-1 bg-border rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gold"
+              />
             </div>
           </div>
         </motion.div>
