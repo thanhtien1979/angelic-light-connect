@@ -174,6 +174,9 @@ export const useMeditationAudio = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLooping, setIsLooping] = useState(false);
+  const [isShuffled, setIsShuffled] = useState(false);
+  const [shuffledIndices, setShuffledIndices] = useState<number[]>([]);
+  const [shufflePosition, setShufflePosition] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
   const pendingAutoPlayRef = useRef<boolean>(false);
@@ -235,17 +238,25 @@ export const useMeditationAudio = () => {
       // Set pending auto-play before changing track
       pendingAutoPlayRef.current = true;
       
-      if (currentTrackIndex < currentPlaylist.tracks.length - 1) {
-        setCurrentTrackIndex(prev => prev + 1);
+      if (isShuffled && shuffledIndices.length > 0) {
+        // In shuffle mode, move to next position in shuffled order
+        const nextShufflePos = (shufflePosition + 1) % shuffledIndices.length;
+        setShufflePosition(nextShufflePos);
+        setCurrentTrackIndex(shuffledIndices[nextShufflePos]);
       } else {
-        // Loop back to first track
-        setCurrentTrackIndex(0);
+        // Normal sequential playback
+        if (currentTrackIndex < currentPlaylist.tracks.length - 1) {
+          setCurrentTrackIndex(prev => prev + 1);
+        } else {
+          // Loop back to first track
+          setCurrentTrackIndex(0);
+        }
       }
     };
 
     audio.addEventListener("ended", handleEnded);
     return () => audio.removeEventListener("ended", handleEnded);
-  }, [currentTrackIndex, currentPlaylist.tracks.length]);
+  }, [currentTrackIndex, currentPlaylist.tracks.length, isShuffled, shuffledIndices, shufflePosition]);
 
   // Load track when index changes
   useEffect(() => {
@@ -267,6 +278,47 @@ export const useMeditationAudio = () => {
   const toggleLoop = useCallback(() => {
     setIsLooping(prev => !prev);
   }, []);
+
+  // Generate shuffled indices for the current playlist
+  const generateShuffledIndices = useCallback((trackCount: number, currentIndex: number) => {
+    const indices = Array.from({ length: trackCount }, (_, i) => i);
+    // Fisher-Yates shuffle
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    // Move current track to the front so we don't immediately skip
+    const currentPos = indices.indexOf(currentIndex);
+    if (currentPos > 0) {
+      [indices[0], indices[currentPos]] = [indices[currentPos], indices[0]];
+    }
+    return indices;
+  }, []);
+
+  const toggleShuffle = useCallback(() => {
+    setIsShuffled(prev => {
+      if (!prev) {
+        // Turning shuffle ON - generate new shuffled order
+        const newIndices = generateShuffledIndices(currentPlaylist.tracks.length, currentTrackIndex);
+        setShuffledIndices(newIndices);
+        setShufflePosition(0);
+      } else {
+        // Turning shuffle OFF - reset
+        setShuffledIndices([]);
+        setShufflePosition(0);
+      }
+      return !prev;
+    });
+  }, [currentPlaylist.tracks.length, currentTrackIndex, generateShuffledIndices]);
+
+  // Reset shuffle when playlist changes
+  useEffect(() => {
+    if (isShuffled) {
+      const newIndices = generateShuffledIndices(currentPlaylist.tracks.length, currentTrackIndex);
+      setShuffledIndices(newIndices);
+      setShufflePosition(0);
+    }
+  }, [currentPlaylist.id]);
 
   // Initial load
   useEffect(() => {
@@ -422,24 +474,42 @@ export const useMeditationAudio = () => {
   }, [currentPlaylist, isPlaying, fadeOut]);
 
   const nextTrack = useCallback(() => {
-    const nextIndex = (currentTrackIndex + 1) % currentPlaylist.tracks.length;
     const wasPlaying = isPlaying;
-    selectTrack(nextIndex);
+    
+    if (isShuffled && shuffledIndices.length > 0) {
+      const nextShufflePos = (shufflePosition + 1) % shuffledIndices.length;
+      setShufflePosition(nextShufflePos);
+      selectTrack(shuffledIndices[nextShufflePos]);
+    } else {
+      const nextIndex = (currentTrackIndex + 1) % currentPlaylist.tracks.length;
+      selectTrack(nextIndex);
+    }
+    
     if (wasPlaying) {
       pendingAutoPlayRef.current = true;
     }
-  }, [currentTrackIndex, currentPlaylist.tracks.length, selectTrack, isPlaying]);
+  }, [currentTrackIndex, currentPlaylist.tracks.length, selectTrack, isPlaying, isShuffled, shuffledIndices, shufflePosition]);
 
   const previousTrack = useCallback(() => {
-    const prevIndex = currentTrackIndex === 0 
-      ? currentPlaylist.tracks.length - 1 
-      : currentTrackIndex - 1;
     const wasPlaying = isPlaying;
-    selectTrack(prevIndex);
+    
+    if (isShuffled && shuffledIndices.length > 0) {
+      const prevShufflePos = shufflePosition === 0 
+        ? shuffledIndices.length - 1 
+        : shufflePosition - 1;
+      setShufflePosition(prevShufflePos);
+      selectTrack(shuffledIndices[prevShufflePos]);
+    } else {
+      const prevIndex = currentTrackIndex === 0 
+        ? currentPlaylist.tracks.length - 1 
+        : currentTrackIndex - 1;
+      selectTrack(prevIndex);
+    }
+    
     if (wasPlaying) {
       pendingAutoPlayRef.current = true;
     }
-  }, [currentTrackIndex, currentPlaylist.tracks.length, selectTrack, isPlaying]);
+  }, [currentTrackIndex, currentPlaylist.tracks.length, selectTrack, isPlaying, isShuffled, shuffledIndices, shufflePosition]);
 
   const seek = useCallback((time: number) => {
     if (audioRef.current && isLoaded) {
@@ -468,10 +538,12 @@ export const useMeditationAudio = () => {
     currentTime,
     duration,
     isLooping,
+    isShuffled,
     play,
     pause,
     toggle,
     toggleLoop,
+    toggleShuffle,
     setVolume: setAudioVolume,
     selectTrack,
     selectPlaylist,

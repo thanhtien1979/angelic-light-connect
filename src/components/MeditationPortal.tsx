@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon, X, Keyboard, HelpCircle, Repeat } from "lucide-react";
+import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon, X, Keyboard, HelpCircle, Repeat, Shuffle } from "lucide-react";
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -71,6 +71,7 @@ const keyboardShortcuts = [
   { key: "↓", label: "Giảm âm lượng" },
   { key: "M", label: "Tắt / Bật tiếng" },
   { key: "L", label: "Lặp lại bài hát" },
+  { key: "S", label: "Phát ngẫu nhiên" },
   { key: "N", label: "Bài tiếp theo" },
   { key: "P", label: "Bài trước đó" },
   { key: "?", label: "Hiện phím tắt" },
@@ -185,8 +186,10 @@ const MeditationPortal = () => {
     currentTime,
     duration,
     isLooping,
+    isShuffled,
     toggle, 
     toggleLoop,
+    toggleShuffle,
     setVolume, 
     selectTrack,
     selectPlaylist,
@@ -311,6 +314,12 @@ const MeditationPortal = () => {
           toggleLoop();
           showKeyFeedback(Repeat, isLooping ? "Tắt lặp lại" : "Bật lặp lại");
           break;
+        case "s":
+        case "S": // Toggle shuffle
+          e.preventDefault();
+          toggleShuffle();
+          showKeyFeedback(Shuffle, isShuffled ? "Tắt ngẫu nhiên" : "Bật ngẫu nhiên");
+          break;
         case "?": // Show shortcuts help
           e.preventDefault();
           setIsShortcutsOpen(true);
@@ -326,7 +335,7 @@ const MeditationPortal = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggle, nextTrack, previousTrack, toggleLoop, seekByPercent, setVolume, volume, currentTime, duration, isPlaying, isLooping, isShortcutsOpen, showKeyFeedback, prevVolumeRef]);
+  }, [toggle, nextTrack, previousTrack, toggleLoop, toggleShuffle, seekByPercent, setVolume, volume, currentTime, duration, isPlaying, isLooping, isShuffled, isShortcutsOpen, showKeyFeedback, prevVolumeRef]);
 
   const handlePlaylistSelect = (playlist: MeditationPlaylist) => {
     selectPlaylist(playlist);
@@ -702,6 +711,26 @@ const MeditationPortal = () => {
                       <p className="text-xs">{isLooping ? "Tắt lặp lại" : "Lặp lại"} <span className="text-muted-foreground ml-1">L</span></p>
                     </TooltipContent>
                   </Tooltip>
+                  {/* Shuffle Toggle */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <motion.button
+                        onClick={toggleShuffle}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`p-2 transition-colors ${
+                          isShuffled 
+                            ? "text-gold" 
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Shuffle className={`w-5 h-5 ${isShuffled ? "drop-shadow-[0_0_6px_hsla(45,100%,70%,0.6)]" : ""}`} />
+                      </motion.button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-background/95 backdrop-blur-sm border-gold-light/30 text-foreground">
+                      <p className="text-xs">{isShuffled ? "Tắt ngẫu nhiên" : "Ngẫu nhiên"} <span className="text-muted-foreground ml-1">S</span></p>
+                    </TooltipContent>
+                  </Tooltip>
                 </TooltipProvider>
                 
                 <div className="flex-1 min-w-0">
@@ -714,6 +743,15 @@ const MeditationPortal = () => {
                         className="flex-shrink-0"
                       >
                         <Repeat className="w-3 h-3 text-gold drop-shadow-[0_0_4px_hsla(45,100%,70%,0.5)]" />
+                      </motion.div>
+                    )}
+                    {isShuffled && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex-shrink-0"
+                      >
+                        <Shuffle className="w-3 h-3 text-gold drop-shadow-[0_0_4px_hsla(45,100%,70%,0.5)]" />
                       </motion.div>
                     )}
                   </div>
