@@ -53,6 +53,13 @@ const getPlaylistGradient = (iconType: MeditationPlaylist["icon"]) => {
   }
 };
 
+const formatTime = (seconds: number): string => {
+  if (!seconds || isNaN(seconds)) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
+
 const MeditationPortal = () => {
   const { 
     isPlaying, 
@@ -63,13 +70,17 @@ const MeditationPortal = () => {
     currentPlaylist,
     playlists,
     isChangingTrack,
+    currentTime,
+    duration,
     toggle, 
     setVolume, 
     selectTrack,
     selectPlaylist,
     nextTrack,
     previousTrack,
+    seekByPercent,
   } = useMeditationAudio();
+  const [isDragging, setIsDragging] = useState(false);
   const [breathPhase, setBreathPhase] = useState<"inhale" | "exhale">("inhale");
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [isJourneyOpen, setIsJourneyOpen] = useState(false);
@@ -91,6 +102,15 @@ const MeditationPortal = () => {
     selectTrack(index);
     setIsPlaylistOpen(false);
   };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const percent = ((e.clientX - rect.left) / rect.width) * 100;
+    seekByPercent(Math.max(0, Math.min(100, percent)));
+  };
+
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const remainingTime = duration - currentTime;
 
   const PlaylistIcon = getPlaylistIcon(currentPlaylist.icon);
 
@@ -414,6 +434,37 @@ const MeditationPortal = () => {
                     onChange={(e) => setVolume(parseFloat(e.target.value))}
                     className="w-16 h-1 bg-border rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gold"
                   />
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-2">
+                <div
+                  onClick={handleProgressClick}
+                  onMouseDown={() => setIsDragging(true)}
+                  onMouseUp={() => setIsDragging(false)}
+                  onMouseLeave={() => setIsDragging(false)}
+                  className="relative h-2 bg-border/50 rounded-full cursor-pointer group"
+                >
+                  {/* Progress fill */}
+                  <motion.div
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-gold to-gold-light rounded-full"
+                    style={{ width: `${progressPercent}%` }}
+                    transition={isDragging ? { duration: 0 } : { duration: 0.1 }}
+                  />
+                  {/* Seek handle */}
+                  <motion.div
+                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-gold rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ left: `calc(${progressPercent}% - 6px)` }}
+                  />
+                  {/* Hover glow effect */}
+                  <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-[0_0_8px_hsla(45,100%,70%,0.3)]" />
+                </div>
+
+                {/* Time display */}
+                <div className="flex justify-between text-xs text-muted-foreground font-mono">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>-{formatTime(remainingTime)}</span>
                 </div>
               </div>
             </div>

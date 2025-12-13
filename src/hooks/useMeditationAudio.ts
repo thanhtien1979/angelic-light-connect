@@ -1,5 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
+const STORAGE_KEYS = {
+  PLAYLIST_ID: "meditation_playlist_id",
+  VOLUME: "meditation_volume",
+};
+
 export interface AudioTrack {
   id: string;
   name: string;
@@ -141,17 +146,47 @@ export const MEDITATION_PLAYLISTS: MeditationPlaylist[] = [
   },
 ];
 
+const getSavedPlaylist = (): MeditationPlaylist => {
+  const savedId = localStorage.getItem(STORAGE_KEYS.PLAYLIST_ID);
+  if (savedId) {
+    const found = MEDITATION_PLAYLISTS.find(p => p.id === savedId);
+    if (found) return found;
+  }
+  return MEDITATION_PLAYLISTS[0];
+};
+
+const getSavedVolume = (): number => {
+  const savedVolume = localStorage.getItem(STORAGE_KEYS.VOLUME);
+  if (savedVolume) {
+    const parsed = parseFloat(savedVolume);
+    if (!isNaN(parsed) && parsed >= 0 && parsed <= 1) return parsed;
+  }
+  return 0.7;
+};
+
 export const useMeditationAudio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.7);
+  const [volume, setVolume] = useState(getSavedVolume);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [currentPlaylist, setCurrentPlaylist] = useState<MeditationPlaylist>(MEDITATION_PLAYLISTS[0]);
+  const [currentPlaylist, setCurrentPlaylist] = useState<MeditationPlaylist>(getSavedPlaylist);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isChangingTrack, setIsChangingTrack] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
 
   const currentTrack = currentPlaylist.tracks[currentTrackIndex];
+
+  // Save playlist preference to localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.PLAYLIST_ID, currentPlaylist.id);
+  }, [currentPlaylist.id]);
+
+  // Save volume preference to localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.VOLUME, volume.toString());
+  }, [volume]);
 
   const loadTrack = useCallback((track: AudioTrack) => {
     if (audioRef.current) {
@@ -175,7 +210,17 @@ export const useMeditationAudio = () => {
       setIsChangingTrack(false);
     });
 
+    audio.addEventListener("loadedmetadata", () => {
+      setDuration(audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      setCurrentTime(audio.currentTime);
+    });
+
     audioRef.current = audio;
+    setCurrentTime(0);
+    setDuration(0);
   }, []);
 
   // Handle track ended - play next track
@@ -371,6 +416,21 @@ export const useMeditationAudio = () => {
     selectTrack(prevIndex);
   }, [currentTrackIndex, currentPlaylist.tracks.length, selectTrack]);
 
+  const seek = useCallback((time: number) => {
+    if (audioRef.current && isLoaded) {
+      const clampedTime = Math.max(0, Math.min(time, audioRef.current.duration || 0));
+      audioRef.current.currentTime = clampedTime;
+      setCurrentTime(clampedTime);
+    }
+  }, [isLoaded]);
+
+  const seekByPercent = useCallback((percent: number) => {
+    if (audioRef.current && isLoaded && duration > 0) {
+      const time = (percent / 100) * duration;
+      seek(time);
+    }
+  }, [isLoaded, duration, seek]);
+
   return {
     isPlaying,
     isLoaded,
@@ -380,6 +440,8 @@ export const useMeditationAudio = () => {
     currentPlaylist,
     playlists: MEDITATION_PLAYLISTS,
     isChangingTrack,
+    currentTime,
+    duration,
     play,
     pause,
     toggle,
@@ -388,5 +450,7 @@ export const useMeditationAudio = () => {
     selectPlaylist,
     nextTrack,
     previousTrack,
+    seek,
+    seekByPercent,
   };
 };
