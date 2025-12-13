@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, MessageSquare, Sparkles } from "lucide-react";
+import { User, LogOut, MessageSquare, Sparkles, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 
 interface UserMenuProps {
   onOpenAuth: () => void;
@@ -68,6 +69,15 @@ const UserMenu = ({ onOpenAuth }: UserMenuProps) => {
               </div>
 
               <div className="p-2">
+                <Link
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gold-light/10 transition-colors"
+                >
+                  <Settings className="w-5 h-5 text-gold" />
+                  <span className="text-foreground">Hồ sơ của tôi</span>
+                </Link>
+
                 <button
                   onClick={() => {
                     document.getElementById("chat")?.scrollIntoView({ behavior: "smooth" });
