@@ -173,6 +173,7 @@ export const useMeditationAudio = () => {
   const [isChangingTrack, setIsChangingTrack] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isLooping, setIsLooping] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
   const pendingAutoPlayRef = useRef<boolean>(false);
@@ -189,14 +190,14 @@ export const useMeditationAudio = () => {
     localStorage.setItem(STORAGE_KEYS.VOLUME, volume.toString());
   }, [volume]);
 
-  const loadTrack = useCallback((track: AudioTrack) => {
+  const loadTrack = useCallback((track: AudioTrack, looping: boolean = false) => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = "";
     }
 
     const audio = new Audio(track.url);
-    audio.loop = false;
+    audio.loop = looping;
     audio.volume = 0;
     audio.preload = "auto";
     
@@ -252,9 +253,20 @@ export const useMeditationAudio = () => {
     if (track) {
       setIsChangingTrack(true);
       setIsLoaded(false);
-      loadTrack(track);
+      loadTrack(track, isLooping);
     }
-  }, [currentTrackIndex, currentPlaylist, loadTrack]);
+  }, [currentTrackIndex, currentPlaylist, loadTrack, isLooping]);
+
+  // Update loop state on audio element when isLooping changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.loop = isLooping;
+    }
+  }, [isLooping]);
+
+  const toggleLoop = useCallback(() => {
+    setIsLooping(prev => !prev);
+  }, []);
 
   // Initial load
   useEffect(() => {
@@ -455,9 +467,11 @@ export const useMeditationAudio = () => {
     isChangingTrack,
     currentTime,
     duration,
+    isLooping,
     play,
     pause,
     toggle,
+    toggleLoop,
     setVolume: setAudioVolume,
     selectTrack,
     selectPlaylist,
