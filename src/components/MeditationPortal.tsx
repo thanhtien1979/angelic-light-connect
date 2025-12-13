@@ -177,6 +177,22 @@ const MeditationPortal = () => {
             showKeyFeedback(FastForward, "+10 giây");
           }
           break;
+        case "arrowup": // Volume up
+          e.preventDefault();
+          {
+            const newVolume = Math.min(1, volume + 0.1);
+            setVolume(newVolume);
+            showKeyFeedback(Volume2, `${Math.round(newVolume * 100)}%`);
+          }
+          break;
+        case "arrowdown": // Volume down
+          e.preventDefault();
+          {
+            const newVolume = Math.max(0, volume - 0.1);
+            setVolume(newVolume);
+            showKeyFeedback(newVolume > 0 ? Volume2 : VolumeX, `${Math.round(newVolume * 100)}%`);
+          }
+          break;
         case "n": // Next track
           e.preventDefault();
           nextTrack();
@@ -192,7 +208,7 @@ const MeditationPortal = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggle, nextTrack, previousTrack, seekByPercent, currentTime, duration, isPlaying, showKeyFeedback]);
+  }, [toggle, nextTrack, previousTrack, seekByPercent, setVolume, volume, currentTime, duration, isPlaying, showKeyFeedback]);
 
   const handlePlaylistSelect = (playlist: MeditationPlaylist) => {
     selectPlaylist(playlist);
@@ -549,24 +565,34 @@ const MeditationPortal = () => {
                   <p className="text-xs text-muted-foreground truncate">{currentTrack.nameVi}</p>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setVolume(volume > 0 ? 0 : 0.7)} className="p-1">
-                    {volume > 0 ? (
-                      <Volume2 className="w-4 h-4 text-gold" />
-                    ) : (
-                      <VolumeX className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </button>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={volume}
-                    onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    className="w-16 h-1 bg-border rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gold"
-                  />
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setVolume(volume > 0 ? 0 : 0.7)} className="p-1">
+                        {volume > 0 ? (
+                          <Volume2 className="w-4 h-4 text-gold" />
+                        ) : (
+                          <VolumeX className="w-4 h-4 text-muted-foreground" />
+                        )}
+                      </button>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={volume}
+                        onChange={(e) => setVolume(parseFloat(e.target.value))}
+                        className="w-16 h-1 bg-border rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gold"
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent 
+                    side="top" 
+                    className="bg-background/90 backdrop-blur-sm border-gold/20 text-foreground/80 text-xs font-light"
+                  >
+                    <span className="text-gold/80">↑ / ↓</span> Âm lượng
+                  </TooltipContent>
+                </Tooltip>
               </div>
 
               {/* Progress Bar */}
