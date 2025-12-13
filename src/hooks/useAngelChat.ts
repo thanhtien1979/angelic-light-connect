@@ -265,5 +265,16 @@ export const useAngelChat = () => {
     }
   }, [isAuthenticated, user]);
 
-  return { messages, isLoading, isRestoring, sendMessage, clearMessages, isAuthenticated };
+  // Start a new conversation without deleting old messages
+  const startNewConversation = useCallback(() => {
+    // Generate a new session ID for anonymous users
+    if (!isAuthenticated) {
+      const newSessionId = generateSecureId();
+      localStorage.setItem(SESSION_ID_KEY, newSessionId);
+    }
+    // Clear the current messages state (but keep them in the database)
+    setMessages([]);
+  }, [isAuthenticated]);
+
+  return { messages, isLoading, isRestoring, sendMessage, clearMessages, startNewConversation, isAuthenticated };
 };
