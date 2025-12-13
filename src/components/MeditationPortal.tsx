@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward } from "lucide-react";
+import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon } from "lucide-react";
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
+import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 
 const meditationCards = [
   {
@@ -106,11 +107,21 @@ const MeditationPortal = () => {
     nextTrack,
     previousTrack,
     seekByPercent,
+    pause,
   } = useMeditationAudio();
+
+  // Sleep timer
+  const handleTimerEnd = useCallback(() => {
+    pause();
+  }, [pause]);
+  
+  const { isActive: isSleepTimerActive, remainingSeconds, startTimer, cancelTimer, formatRemainingTime } = useSleepTimer(handleTimerEnd);
+  
   const [isDragging, setIsDragging] = useState(false);
   const [breathPhase, setBreathPhase] = useState<"inhale" | "exhale">("inhale");
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [isJourneyOpen, setIsJourneyOpen] = useState(false);
+  const [isSleepTimerOpen, setIsSleepTimerOpen] = useState(false);
   
   // Keyboard feedback state
   const [keyFeedback, setKeyFeedback] = useState<{
@@ -566,20 +577,96 @@ const MeditationPortal = () => {
               </div>
             </div>
 
-            {/* Track List Toggle */}
-            <button
-              onClick={() => setIsPlaylistOpen(!isPlaylistOpen)}
-              className="w-full px-4 py-2 flex items-center justify-center gap-2 border-t border-gold-light/20 text-sm text-muted-foreground hover:text-foreground hover:bg-gold-light/10 transition-colors"
-            >
-              <Music className="w-4 h-4" />
-              <span>Danh sách bài ({currentPlaylist.tracks.length} bài)</span>
-              <motion.div
-                animate={{ rotate: isPlaylistOpen ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
+            {/* Sleep Timer & Track List Row */}
+            <div className="flex border-t border-gold-light/20">
+              {/* Sleep Timer Button */}
+              <button
+                onClick={() => setIsSleepTimerOpen(!isSleepTimerOpen)}
+                className="flex-1 px-4 py-2 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:bg-gold-light/10 transition-colors border-r border-gold-light/20"
               >
-                <ChevronDown className="w-4 h-4" />
-              </motion.div>
-            </button>
+                {isSleepTimerActive ? (
+                  <>
+                    <Moon className="w-4 h-4 text-gold" />
+                    <span className="text-gold font-medium">{formatRemainingTime()}</span>
+                  </>
+                ) : (
+                  <>
+                    <Timer className="w-4 h-4" />
+                    <span>Hẹn giờ ngủ</span>
+                  </>
+                )}
+                <motion.div
+                  animate={{ rotate: isSleepTimerOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </motion.div>
+              </button>
+
+              {/* Track List Toggle */}
+              <button
+                onClick={() => setIsPlaylistOpen(!isPlaylistOpen)}
+                className="flex-1 px-4 py-2 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:bg-gold-light/10 transition-colors"
+              >
+                <Music className="w-4 h-4" />
+                <span>{currentPlaylist.tracks.length} bài</span>
+                <motion.div
+                  animate={{ rotate: isPlaylistOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </motion.div>
+              </button>
+            </div>
+
+            {/* Sleep Timer Dropdown */}
+            <AnimatePresence>
+              {isSleepTimerOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-3 border-t border-gold-light/20 bg-gold-light/5">
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {SLEEP_TIMER_OPTIONS.map((option) => (
+                        <motion.button
+                          key={option.minutes}
+                          onClick={() => {
+                            startTimer(option.minutes);
+                            setIsSleepTimerOpen(false);
+                          }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`px-4 py-2 rounded-full text-sm transition-all ${
+                            remainingSeconds !== null && Math.ceil(remainingSeconds / 60) === option.minutes
+                              ? "bg-gradient-to-br from-gold to-gold-light text-white shadow-[0_0_12px_hsla(45,100%,70%,0.4)]"
+                              : "bg-white/60 text-foreground hover:bg-gold-light/20 border border-gold-light/30"
+                          }`}
+                        >
+                          {option.labelVi}
+                        </motion.button>
+                      ))}
+                    </div>
+                    {isSleepTimerActive && (
+                      <motion.button
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        onClick={() => {
+                          cancelTimer();
+                          setIsSleepTimerOpen(false);
+                        }}
+                        className="mt-3 w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Hủy hẹn giờ
+                      </motion.button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Track List */}
             <AnimatePresence>
