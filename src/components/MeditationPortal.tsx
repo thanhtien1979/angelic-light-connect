@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon, X, Keyboard } from "lucide-react";
+import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon, X, Keyboard, HelpCircle } from "lucide-react";
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -781,7 +781,7 @@ const MeditationPortal = () => {
               {/* Track List Toggle */}
               <button
                 onClick={() => setIsPlaylistOpen(!isPlaylistOpen)}
-                className="flex-1 px-4 py-2 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:bg-gold-light/10 transition-colors"
+                className="flex-1 px-4 py-2 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:bg-gold-light/10 transition-colors border-r border-gold-light/20"
               >
                 <Music className="w-4 h-4" />
                 <span>{currentPlaylist.tracks.length} bài</span>
@@ -792,6 +792,28 @@ const MeditationPortal = () => {
                   <ChevronDown className="w-4 h-4" />
                 </motion.div>
               </button>
+
+              {/* Help Button */}
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.button
+                      onClick={() => setIsShortcutsOpen(true)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-4 py-2 flex items-center justify-center text-muted-foreground hover:text-gold hover:bg-gold-light/10 transition-colors"
+                    >
+                      <HelpCircle className="w-4 h-4" />
+                    </motion.button>
+                  </TooltipTrigger>
+                  <TooltipContent 
+                    side="top" 
+                    className="bg-background/90 backdrop-blur-sm border-gold/20 text-foreground/80 text-xs font-light"
+                  >
+                    Phím tắt <span className="text-gold/80 ml-1">?</span>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
             {/* Sleep Timer Dropdown */}
