@@ -8,8 +8,8 @@ interface UserMenuProps {
 }
 
 const UserMenu = ({ onOpenAuth }: UserMenuProps) => {
-  const { user, isAuthenticated, signOut, isLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isAuthenticated, signOut, isLoading } = useAuth();
 
   if (isLoading) {
     return (
