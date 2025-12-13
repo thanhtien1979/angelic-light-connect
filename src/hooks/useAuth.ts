@@ -80,6 +80,27 @@ export const useAuth = () => {
     }
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) {
+        toast.error("Không thể đăng nhập với Google. Vui lòng thử lại.");
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi. Vui lòng thử lại.");
+      return { error };
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -102,6 +123,7 @@ export const useAuth = () => {
     isAuthenticated: !!user,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
   };
 };
