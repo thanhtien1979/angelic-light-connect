@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      anonymous_sessions: {
+        Row: {
+          created_at: string
+          session_id: string
+          session_secret: string
+        }
+        Insert: {
+          created_at?: string
+          session_id: string
+          session_secret: string
+        }
+        Update: {
+          created_at?: string
+          session_id?: string
+          session_secret?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -46,7 +64,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_validated_session_id: { Args: never; Returns: string }
+      set_session_context: {
+        Args: { p_session_id: string; p_session_secret: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

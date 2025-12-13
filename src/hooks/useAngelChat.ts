@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,38 +10,154 @@ type Message = {
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/angel-chat`;
+const SESSION_ID_KEY = "angel_chat_session_id";
+const SESSION_SECRET_KEY = "angel_chat_session_secret";
+
+// Generate a cryptographically secure random string
+const generateSecureId = () => {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
+};
 
 export const useAngelChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
   const { user, isAuthenticated } = useAuth();
+  const sessionValidated = useRef(false);
 
-  // Restore previous messages on mount when authenticated
-  useEffect(() => {
-    const restoreMessages = async () => {
-      if (!isAuthenticated || !user) {
-        setIsRestoring(false);
-        return;
+  // Get or create anonymous session credentials
+  const getSessionCredentials = useCallback(() => {
+    let sessionId = localStorage.getItem(SESSION_ID_KEY);
+    let sessionSecret = localStorage.getItem(SESSION_SECRET_KEY);
+
+    if (!sessionId || !sessionSecret) {
+      sessionId = generateSecureId();
+      sessionSecret = generateSecureId();
+      localStorage.setItem(SESSION_ID_KEY, sessionId);
+      localStorage.setItem(SESSION_SECRET_KEY, sessionSecret);
+    }
+
+    return { sessionId, sessionSecret };
+  }, []);
+
+  // Initialize and validate anonymous session
+  const initializeAnonymousSession = useCallback(async () => {
+    if (isAuthenticated) return true;
+
+    const { sessionId, sessionSecret } = getSessionCredentials();
+
+    try {
+      // Check if session exists
+      const { data: existingSession } = await supabase
+        .from("anonymous_sessions")
+        .select("session_id")
+        .eq("session_id", sessionId)
+        .eq("session_secret", sessionSecret)
+        .maybeSingle();
+
+      if (!existingSession) {
+        // Create new session
+        const { error: insertError } = await supabase
+          .from("anonymous_sessions")
+          .insert({ session_id: sessionId, session_secret: sessionSecret });
+
+        if (insertError) {
+          // Session might already exist with different secret, regenerate
+          const newSessionId = generateSecureId();
+          const newSessionSecret = generateSecureId();
+          localStorage.setItem(SESSION_ID_KEY, newSessionId);
+          localStorage.setItem(SESSION_SECRET_KEY, newSessionSecret);
+
+          await supabase
+            .from("anonymous_sessions")
+            .insert({ session_id: newSessionId, session_secret: newSessionSecret });
+        }
       }
 
+      // Validate session context for RLS
+      const { sessionId: currentId, sessionSecret: currentSecret } = getSessionCredentials();
+      const { data: isValid } = await supabase.rpc("set_session_context", {
+        p_session_id: currentId,
+        p_session_secret: currentSecret,
+      });
+
+      sessionValidated.current = !!isValid;
+      return !!isValid;
+    } catch (error) {
+      console.error("Failed to initialize anonymous session:", error);
+      return false;
+    }
+  }, [isAuthenticated, getSessionCredentials]);
+
+  // Validate session before each DB operation (for anonymous users)
+  const ensureSessionContext = useCallback(async () => {
+    if (isAuthenticated) return true;
+    if (!sessionValidated.current) {
+      return await initializeAnonymousSession();
+    }
+
+    const { sessionId, sessionSecret } = getSessionCredentials();
+    const { data: isValid } = await supabase.rpc("set_session_context", {
+      p_session_id: sessionId,
+      p_session_secret: sessionSecret,
+    });
+
+    sessionValidated.current = !!isValid;
+    return !!isValid;
+  }, [isAuthenticated, initializeAnonymousSession, getSessionCredentials]);
+
+  // Restore previous messages on mount
+  useEffect(() => {
+    const restoreMessages = async () => {
       try {
-        const { data, error } = await supabase
-          .from("chat_messages")
-          .select("id, role, content")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: true });
+        if (isAuthenticated && user) {
+          // Authenticated user: query by user_id
+          const { data, error } = await supabase
+            .from("chat_messages")
+            .select("id, role, content")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: true });
 
-        if (error) throw error;
+          if (error) throw error;
 
-        if (data && data.length > 0) {
-          setMessages(
-            data.map((m) => ({
-              id: m.id,
-              role: m.role as "user" | "assistant",
-              content: m.content,
-            }))
-          );
+          if (data && data.length > 0) {
+            setMessages(
+              data.map((m) => ({
+                id: m.id,
+                role: m.role as "user" | "assistant",
+                content: m.content,
+              }))
+            );
+          }
+        } else {
+          // Anonymous user: validate session first, then query
+          const isValid = await initializeAnonymousSession();
+          if (!isValid) {
+            setIsRestoring(false);
+            return;
+          }
+
+          const { sessionId } = getSessionCredentials();
+          const { data, error } = await supabase
+            .from("chat_messages")
+            .select("id, role, content")
+            .eq("session_id", sessionId)
+            .is("user_id", null)
+            .order("created_at", { ascending: true });
+
+          if (error) throw error;
+
+          if (data && data.length > 0) {
+            setMessages(
+              data.map((m) => ({
+                id: m.id,
+                role: m.role as "user" | "assistant",
+                content: m.content,
+              }))
+            );
+          }
         }
       } catch (error) {
         console.error("Failed to restore messages:", error);
@@ -51,33 +167,54 @@ export const useAngelChat = () => {
     };
 
     restoreMessages();
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, initializeAnonymousSession, getSessionCredentials]);
 
   // Clear messages when user logs out
   useEffect(() => {
     if (!isAuthenticated) {
-      setMessages([]);
+      // Reset session validation when auth state changes
+      sessionValidated.current = false;
     }
   }, [isAuthenticated]);
 
-  // Save a message to the database (only for authenticated users)
+  // Save a message to the database
   const saveMessage = async (role: "user" | "assistant", content: string): Promise<string | null> => {
-    if (!isAuthenticated || !user) return null;
-
     try {
-      const { data, error } = await supabase
-        .from("chat_messages")
-        .insert({
-          session_id: user.id, // Use user_id as session_id for consistency
-          user_id: user.id,
-          role,
-          content,
-        })
-        .select("id")
-        .single();
+      if (isAuthenticated && user) {
+        // Authenticated user
+        const { data, error } = await supabase
+          .from("chat_messages")
+          .insert({
+            session_id: user.id,
+            user_id: user.id,
+            role,
+            content,
+          })
+          .select("id")
+          .single();
 
-      if (error) throw error;
-      return data?.id || null;
+        if (error) throw error;
+        return data?.id || null;
+      } else {
+        // Anonymous user: ensure session context is set
+        const isValid = await ensureSessionContext();
+        if (!isValid) return null;
+
+        const { sessionId } = getSessionCredentials();
+        const { data, error } = await supabase
+          .from("chat_messages")
+          .insert({
+            session_id: sessionId,
+            user_id: null,
+            role,
+            content,
+          })
+          .select("id")
+          .single();
+
+        if (error) throw error;
+        return data?.id || null;
+      }
     } catch (error) {
       console.error("Failed to save message:", error);
       return null;
@@ -101,7 +238,7 @@ export const useAngelChat = () => {
     let assistantContent = "";
     let assistantMessageId: string | null = null;
 
-    const updateAssistant = async (chunk: string) => {
+    const updateAssistant = (chunk: string) => {
       assistantContent += chunk;
       setMessages((prev) => {
         const last = prev[prev.length - 1];
@@ -173,7 +310,7 @@ export const useAngelChat = () => {
       }
 
       // Save the complete assistant message to database
-      if (assistantContent && isAuthenticated) {
+      if (assistantContent) {
         assistantMessageId = await saveMessage("assistant", assistantContent);
         if (assistantMessageId) {
           setMessages((prev) =>
@@ -192,27 +329,35 @@ export const useAngelChat = () => {
       
       // Delete the user message from DB if chat failed
       if (userMessageId) {
+        await ensureSessionContext();
         await supabase.from("chat_messages").delete().eq("id", userMessageId);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, isAuthenticated, user]);
+  }, [messages, isLoading, isAuthenticated, user, ensureSessionContext, getSessionCredentials]);
 
   const clearMessages = useCallback(async () => {
-    if (!isAuthenticated || !user) {
-      setMessages([]);
-      return;
-    }
-
     try {
-      await supabase.from("chat_messages").delete().eq("user_id", user.id);
+      if (isAuthenticated && user) {
+        await supabase.from("chat_messages").delete().eq("user_id", user.id);
+      } else {
+        const isValid = await ensureSessionContext();
+        if (isValid) {
+          const { sessionId } = getSessionCredentials();
+          await supabase
+            .from("chat_messages")
+            .delete()
+            .eq("session_id", sessionId)
+            .is("user_id", null);
+        }
+      }
       setMessages([]);
     } catch (error) {
       console.error("Failed to clear messages:", error);
       toast.error("Không thể xóa tin nhắn");
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, ensureSessionContext, getSessionCredentials]);
 
   return { messages, isLoading, isRestoring, sendMessage, clearMessages, isAuthenticated };
 };
