@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon, X, Keyboard, HelpCircle } from "lucide-react";
+import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon, X, Keyboard, HelpCircle, Repeat } from "lucide-react";
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -70,6 +70,7 @@ const keyboardShortcuts = [
   { key: "↑", label: "Tăng âm lượng" },
   { key: "↓", label: "Giảm âm lượng" },
   { key: "M", label: "Tắt / Bật tiếng" },
+  { key: "L", label: "Lặp lại bài hát" },
   { key: "N", label: "Bài tiếp theo" },
   { key: "P", label: "Bài trước đó" },
   { key: "?", label: "Hiện phím tắt" },
@@ -183,7 +184,9 @@ const MeditationPortal = () => {
     isChangingTrack,
     currentTime,
     duration,
+    isLooping,
     toggle, 
+    toggleLoop,
     setVolume, 
     selectTrack,
     selectPlaylist,
@@ -302,6 +305,12 @@ const MeditationPortal = () => {
           previousTrack();
           showKeyFeedback(SkipBack, "Bản trước");
           break;
+        case "l":
+        case "L": // Toggle loop
+          e.preventDefault();
+          toggleLoop();
+          showKeyFeedback(Repeat, isLooping ? "Tắt lặp lại" : "Bật lặp lại");
+          break;
         case "?": // Show shortcuts help
           e.preventDefault();
           setIsShortcutsOpen(true);
@@ -317,7 +326,7 @@ const MeditationPortal = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggle, nextTrack, previousTrack, seekByPercent, setVolume, volume, currentTime, duration, isPlaying, isShortcutsOpen, showKeyFeedback, prevVolumeRef]);
+  }, [toggle, nextTrack, previousTrack, toggleLoop, seekByPercent, setVolume, volume, currentTime, duration, isPlaying, isLooping, isShortcutsOpen, showKeyFeedback, prevVolumeRef]);
 
   const handlePlaylistSelect = (playlist: MeditationPlaylist) => {
     selectPlaylist(playlist);
@@ -673,10 +682,41 @@ const MeditationPortal = () => {
                       <p className="text-xs">Bài tiếp <span className="text-muted-foreground ml-1">N</span></p>
                     </TooltipContent>
                   </Tooltip>
+                  {/* Loop Toggle */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <motion.button
+                        onClick={toggleLoop}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`p-2 transition-colors ${
+                          isLooping 
+                            ? "text-gold" 
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Repeat className={`w-5 h-5 ${isLooping ? "drop-shadow-[0_0_6px_hsla(45,100%,70%,0.6)]" : ""}`} />
+                      </motion.button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-background/95 backdrop-blur-sm border-gold-light/30 text-foreground">
+                      <p className="text-xs">{isLooping ? "Tắt lặp lại" : "Lặp lại"} <span className="text-muted-foreground ml-1">L</span></p>
+                    </TooltipContent>
+                  </Tooltip>
                 </TooltipProvider>
                 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{currentTrack.name}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium text-foreground truncate">{currentTrack.name}</p>
+                    {isLooping && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex-shrink-0"
+                      >
+                        <Repeat className="w-3 h-3 text-gold drop-shadow-[0_0_4px_hsla(45,100%,70%,0.5)]" />
+                      </motion.div>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground truncate">{currentTrack.nameVi}</p>
                 </div>
                 
