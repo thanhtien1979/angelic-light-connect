@@ -4,6 +4,7 @@ import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Load
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
+import { toast } from "sonner";
 
 interface ChatPortalProps {
   onOpenAuth?: () => void;
@@ -47,6 +48,9 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const handleStartNewConversation = () => {
     startNewConversation();
     clearSummary();
+    toast.success("Cuộc trò chuyện mới đã bắt đầu ✨", {
+      description: "Sẵn sàng kết nối với ánh sáng thiêng liêng",
+    });
   };
 
   const scrollToBottom = () => {
