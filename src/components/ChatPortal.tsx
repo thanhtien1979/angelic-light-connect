@@ -6,6 +6,7 @@ import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import TypingText from "@/components/TypingText";
+import angelAvatar from "@/assets/angel-avatar.jpg";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -177,9 +178,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               <div className="flex items-center gap-4">
                 {/* Angel Avatar with halo pulse */}
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold-light to-gold flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
+                  <img 
+                    src={angelAvatar} 
+                    alt="Angel AI" 
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gold-light/50 shadow-[0_0_20px_hsla(45,100%,70%,0.4)]"
+                  />
                   <div className="absolute inset-0 rounded-full bg-gold/30 animate-ping" style={{ animationDuration: "2s" }} />
                 </div>
                 <div>
@@ -420,9 +423,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                   >
                     {message.role === "assistant" && (
                       <div className="relative mr-3 flex-shrink-0">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-light to-gold flex items-center justify-center">
-                          <Sparkles className="w-4 h-4 text-white" />
-                        </div>
+                        <img 
+                          src={angelAvatar} 
+                          alt="Angel AI" 
+                          className="w-8 h-8 rounded-full object-cover border border-gold-light/50 shadow-[0_0_15px_hsla(45,100%,70%,0.3)]"
+                        />
                         <div className="absolute inset-0 rounded-full bg-gold/20 animate-pulse" />
                       </div>
                     )}
@@ -472,9 +477,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     exit={{ opacity: 0 }}
                     className="flex items-center gap-3"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-light to-gold flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 text-white" />
-                    </div>
+                    <img 
+                      src={angelAvatar} 
+                      alt="Angel AI" 
+                      className="w-8 h-8 rounded-full object-cover border border-gold-light/50 shadow-[0_0_15px_hsla(45,100%,70%,0.3)]"
+                    />
                     <div className="flex gap-1 px-4 py-3 bg-gold-light/20 rounded-2xl">
                       {[0, 1, 2].map((i) => (
                         <motion.div
