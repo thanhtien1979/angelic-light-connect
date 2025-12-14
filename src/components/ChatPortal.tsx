@@ -7,7 +7,7 @@ import { useFeedback } from "@/hooks/useFeedback";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import TypingText from "@/components/TypingText";
 import angelAvatar from "@/assets/angel-avatar.jpg";
-import chatPortalBg from "@/assets/chat-portal-bg.webp";
+import chatPortalVideo from "@/assets/chat-portal-video.mp4";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -149,13 +149,16 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         viewport={{ once: true, margin: "-100px" }}
         className="relative z-10 max-w-4xl mx-auto"
       >
-        {/* Section Header with background image */}
+        {/* Section Header with background video */}
         <div className="relative text-center mb-12 py-32 md:py-40 lg:py-48 px-4 -mx-4 rounded-3xl overflow-hidden">
-          {/* Background image */}
+          {/* Background video */}
           <div className="absolute inset-0">
-            <img 
-              src={chatPortalBg} 
-              alt="" 
+            <video 
+              src={chatPortalVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
               className="w-full h-full object-contain object-center"
             />
             {/* Overlay gradient for text readability */}
