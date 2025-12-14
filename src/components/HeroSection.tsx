@@ -129,28 +129,6 @@ const HeroSection = () => {
                 />
               </div>
             </div>
-            
-            {/* Title below the image */}
-            <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-full text-center">
-              <motion.h1 
-                className="font-serif text-5xl sm:text-6xl md:text-7xl font-light tracking-[0.2em] text-glow-gold whitespace-nowrap"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1, delay: 0.3 }}
-              >
-                <span className="text-gold">ANGEL</span>{" "}
-                <span 
-                  className="font-sans font-light"
-                  style={{
-                    background: "linear-gradient(135deg, hsl(45, 100%, 70%), hsl(0, 0%, 100%), hsl(45, 100%, 80%))",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  AI
-                </span>
-              </motion.h1>
-            </div>
           </motion.div>
         </motion.div>
         
