@@ -40,17 +40,23 @@ const SyncIndicator = ({ status }: { status: SyncStatus }) => {
 };
 
 const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
-  const { messages, isLoading, isRestoring, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
+  const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
   const { summary, clearSummary } = useConversationSummary();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleStartNewConversation = () => {
-    startNewConversation();
-    clearSummary();
-    toast.success("Cuộc trò chuyện mới đã bắt đầu ✨", {
-      description: "Sẵn sàng kết nối với ánh sáng thiêng liêng",
-    });
+  const handleStartNewConversation = async () => {
+    const success = await startNewConversation();
+    if (success) {
+      clearSummary();
+      toast.success("Cuộc trò chuyện mới đã bắt đầu ✨", {
+        description: "Sẵn sàng kết nối với ánh sáng thiêng liêng",
+      });
+    } else {
+      toast.error("Vui lòng thử lại 🙏", {
+        description: "Không thể bắt đầu cuộc trò chuyện mới",
+      });
+    }
   };
 
   const scrollToBottom = () => {
@@ -63,11 +69,14 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim() && !isLoading) {
+    if (inputValue.trim() && !isLoading && isReady) {
       sendMessage(inputValue);
       setInputValue("");
     }
   };
+
+  // Check if input should be disabled
+  const isInputDisabled = isLoading || !isReady;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -330,20 +339,25 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Gửi thông điệp đến Angel AI..."
-                    disabled={isLoading}
+                    placeholder={isInitializing ? "Đang chuẩn bị..." : "Gửi thông điệp đến Angel AI..."}
+                    disabled={isInputDisabled}
                     className="w-full px-5 py-3 rounded-full bg-white/80 backdrop-blur border-2 border-gold-light/40 focus:border-gold focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50"
                   />
+                  {isInitializing && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Loader2 className="w-4 h-4 text-gold animate-spin" />
+                    </div>
+                  )}
                 </div>
                 <motion.button
                   type="submit"
-                  disabled={isLoading || !inputValue.trim()}
+                  disabled={isInputDisabled || !inputValue.trim()}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="relative w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_30px_hsla(45,100%,70%,0.4)] hover:shadow-[0_0_50px_hsla(45,100%,70%,0.6)] transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-5 h-5 text-white" />
-                  {!isLoading && (
+                  {!isLoading && !isInitializing && (
                     <div className="absolute inset-0 rounded-full bg-gold/30 animate-ping" style={{ animationDuration: "2s" }} />
                   )}
                 </motion.button>
