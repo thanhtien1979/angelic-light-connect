@@ -8,7 +8,10 @@ import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import TypingText from "@/components/TypingText";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import chatPortalVideo from "@/assets/chat-portal-video.mp4";
-import flyingAngel from "@/assets/flying-angel.png";
+import flyingAngel1 from "@/assets/flying-angel.png";
+import flyingAngel2 from "@/assets/flying-angel-2.png";
+import flyingAngel3 from "@/assets/flying-angel-3.png";
+import flyingAngel4 from "@/assets/flying-angel-4.png";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -154,111 +157,126 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         <div className="relative text-center mb-12 py-16 md:py-20 px-4">
           {/* Circular video container */}
           <div className="relative mx-auto w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] mb-8">
-            {/* Flying angels orbiting */}
+            {/* Flying angels orbiting - Angel 1 */}
             <motion.div
               className="absolute inset-0 pointer-events-none"
               animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
             >
-              {/* Angel 1 with trailing light */}
-              <div 
-                className="absolute left-1/2 -translate-x-1/2"
-                style={{ top: "-40px" }}
-              >
-                {/* Trailing light effect */}
+              <div className="absolute left-1/2 -translate-x-1/2" style={{ top: "-45px" }}>
                 <motion.div
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                  animate={{ 
-                    opacity: [0.8, 0.3, 0.8],
-                    scale: [1, 1.5, 1],
-                  }}
+                  animate={{ opacity: [0.8, 0.3, 0.8], scale: [1, 1.5, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <div className="w-16 h-16 bg-gradient-radial from-gold-light/60 via-gold-light/20 to-transparent rounded-full blur-md" />
+                  <div className="w-14 h-14 bg-gradient-radial from-gold-light/60 via-gold-light/20 to-transparent rounded-full blur-md" />
                 </motion.div>
-                {/* Sparkle trail */}
-                <motion.div
-                  className="absolute -right-8 top-1/2 -translate-y-1/2 flex gap-1"
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
-                >
-                  {[...Array(5)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="w-1.5 h-1.5 bg-gold-light rounded-full"
-                      style={{ 
-                        opacity: 1 - i * 0.2,
-                        filter: "blur(0.5px)",
-                        boxShadow: "0 0 6px hsla(45, 100%, 70%, 0.8)"
-                      }}
+                <motion.div className="absolute -right-6 top-1/2 -translate-y-1/2 flex gap-0.5">
+                  {[...Array(4)].map((_, i) => (
+                    <motion.div key={i} className="w-1 h-1 bg-gold-light rounded-full"
+                      style={{ opacity: 1 - i * 0.25, boxShadow: "0 0 4px hsla(45, 100%, 70%, 0.8)" }}
                       animate={{ scale: [1, 0.5, 1] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                      transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
                     />
                   ))}
                 </motion.div>
-                <motion.img 
-                  src={flyingAngel}
-                  alt="Flying Angel"
-                  className="w-14 h-14 md:w-16 md:h-16 object-contain"
-                  animate={{ y: [-3, 3, -3] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ 
-                    filter: "drop-shadow(0 0 15px hsla(45, 100%, 70%, 0.9)) drop-shadow(0 0 30px hsla(45, 100%, 70%, 0.5))",
-                  }}
+                <motion.img src={flyingAngel1} alt="Angel" className="w-12 h-12 md:w-14 md:h-14 object-contain"
+                  animate={{ y: [-2, 2, -2] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ filter: "drop-shadow(0 0 12px hsla(45, 100%, 70%, 0.9))" }}
                 />
               </div>
             </motion.div>
             
+            {/* Angel 2 */}
             <motion.div
               className="absolute inset-0 pointer-events-none"
               animate={{ rotate: -360 }}
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             >
-              {/* Angel 2 with trailing light */}
-              <div 
-                className="absolute left-1/2 -translate-x-1/2"
-                style={{ bottom: "-40px" }}
-              >
-                {/* Trailing light effect */}
+              <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: "-45px" }}>
                 <motion.div
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                  animate={{ 
-                    opacity: [0.8, 0.3, 0.8],
-                    scale: [1, 1.5, 1],
-                  }}
+                  animate={{ opacity: [0.8, 0.3, 0.8], scale: [1, 1.4, 1] }}
                   transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <div className="w-16 h-16 bg-gradient-radial from-gold-light/60 via-gold-light/20 to-transparent rounded-full blur-md" />
+                  <div className="w-14 h-14 bg-gradient-radial from-pink-300/50 via-pink-200/20 to-transparent rounded-full blur-md" />
                 </motion.div>
-                {/* Sparkle trail */}
-                <motion.div
-                  className="absolute -left-8 top-1/2 -translate-y-1/2 flex gap-1"
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
-                >
-                  {[...Array(5)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="w-1.5 h-1.5 bg-gold-light rounded-full"
-                      style={{ 
-                        opacity: 1 - i * 0.2,
-                        filter: "blur(0.5px)",
-                        boxShadow: "0 0 6px hsla(45, 100%, 70%, 0.8)"
-                      }}
+                <motion.div className="absolute -left-6 top-1/2 -translate-y-1/2 flex gap-0.5">
+                  {[...Array(4)].map((_, i) => (
+                    <motion.div key={i} className="w-1 h-1 bg-pink-300 rounded-full"
+                      style={{ opacity: 1 - i * 0.25, boxShadow: "0 0 4px hsla(330, 80%, 80%, 0.8)" }}
                       animate={{ scale: [1, 0.5, 1] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                      transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
                     />
                   ))}
                 </motion.div>
-                <motion.img 
-                  src={flyingAngel}
-                  alt="Flying Angel"
-                  className="w-14 h-14 md:w-16 md:h-16 object-contain scale-x-[-1]"
-                  animate={{ y: [3, -3, 3] }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ 
-                    filter: "drop-shadow(0 0 15px hsla(45, 100%, 70%, 0.9)) drop-shadow(0 0 30px hsla(45, 100%, 70%, 0.5))",
-                  }}
+                <motion.img src={flyingAngel2} alt="Angel" className="w-12 h-12 md:w-14 md:h-14 object-contain"
+                  animate={{ y: [2, -2, 2] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ filter: "drop-shadow(0 0 12px hsla(330, 80%, 80%, 0.9))" }}
+                />
+              </div>
+            </motion.div>
+            
+            {/* Angel 3 */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            >
+              <div className="absolute top-1/2 -translate-y-1/2" style={{ left: "-50px" }}>
+                <motion.div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  animate={{ opacity: [0.7, 0.3, 0.7], scale: [1, 1.3, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="w-12 h-12 bg-gradient-radial from-amber-300/50 via-amber-200/20 to-transparent rounded-full blur-md" />
+                </motion.div>
+                <motion.div className="absolute -top-5 left-1/2 -translate-x-1/2 flex flex-col gap-0.5">
+                  {[...Array(3)].map((_, i) => (
+                    <motion.div key={i} className="w-1 h-1 bg-amber-300 rounded-full mx-auto"
+                      style={{ opacity: 1 - i * 0.3, boxShadow: "0 0 4px hsla(45, 100%, 60%, 0.8)" }}
+                      animate={{ scale: [1, 0.5, 1] }}
+                      transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
+                    />
+                  ))}
+                </motion.div>
+                <motion.img src={flyingAngel3} alt="Angel" className="w-10 h-10 md:w-12 md:h-12 object-contain"
+                  animate={{ y: [-2, 2, -2], rotate: [-5, 5, -5] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ filter: "drop-shadow(0 0 10px hsla(45, 100%, 60%, 0.9))" }}
+                />
+              </div>
+            </motion.div>
+            
+            {/* Angel 4 */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              animate={{ rotate: -360 }}
+              transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
+            >
+              <div className="absolute top-1/2 -translate-y-1/2" style={{ right: "-55px" }}>
+                <motion.div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  animate={{ opacity: [0.8, 0.4, 0.8], scale: [1, 1.4, 1] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="w-16 h-16 bg-gradient-radial from-violet-300/50 via-cyan-200/20 to-transparent rounded-full blur-md" />
+                </motion.div>
+                <motion.div className="absolute -bottom-5 left-1/2 -translate-x-1/2 flex flex-col gap-0.5">
+                  {[...Array(4)].map((_, i) => (
+                    <motion.div key={i} className="w-1 h-1 rounded-full mx-auto"
+                      style={{ 
+                        opacity: 1 - i * 0.25, 
+                        backgroundColor: `hsl(${280 + i * 30}, 80%, 70%)`,
+                        boxShadow: `0 0 4px hsla(${280 + i * 30}, 80%, 70%, 0.8)` 
+                      }}
+                      animate={{ scale: [1, 0.5, 1] }}
+                      transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
+                    />
+                  ))}
+                </motion.div>
+                <motion.img src={flyingAngel4} alt="Angel" className="w-14 h-14 md:w-16 md:h-16 object-contain"
+                  animate={{ y: [2, -2, 2] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ filter: "drop-shadow(0 0 15px hsla(280, 80%, 70%, 0.9)) drop-shadow(0 0 25px hsla(180, 80%, 70%, 0.5))" }}
                 />
               </div>
             </motion.div>
