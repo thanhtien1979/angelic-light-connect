@@ -1,10 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2 } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart } from "lucide-react";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ChatPortalProps {
   onOpenAuth?: () => void;
@@ -43,12 +53,17 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
   const { summary, clearSummary } = useConversationSummary();
   const [inputValue, setInputValue] = useState("");
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+  const [welcomeShownForSession, setWelcomeShownForSession] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleStartNewConversation = async () => {
     const success = await startNewConversation();
     if (success) {
       clearSummary();
+      setWelcomeShownForSession(false); // Reset for new conversation
+      setShowWelcome(true);
       toast.success("Cuộc trò chuyện mới đã bắt đầu ✨", {
         description: "Sẵn sàng kết nối với ánh sáng thiêng liêng",
       });
@@ -57,6 +72,30 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         description: "Không thể bắt đầu cuộc trò chuyện mới",
       });
     }
+  };
+
+  // Show welcome message when ready and no messages exist
+  useEffect(() => {
+    if (isReady && messages.length === 0 && !welcomeShownForSession && !isRestoring) {
+      setShowWelcome(true);
+      setWelcomeShownForSession(true);
+    }
+  }, [isReady, messages.length, welcomeShownForSession, isRestoring]);
+
+  // Hide welcome after first message
+  useEffect(() => {
+    if (messages.length > 0) {
+      setShowWelcome(false);
+    }
+  }, [messages.length]);
+
+  const handleClearMessages = () => {
+    clearMessages();
+    setShowClearDialog(false);
+    setWelcomeShownForSession(false);
+    toast.success("Tin nhắn đã được xóa 🕊️", {
+      description: "Bạn có thể bắt đầu lại bất cứ lúc nào",
+    });
   };
 
   const scrollToBottom = () => {
@@ -158,7 +197,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 {/* Clear messages button */}
                 {messages.length > 0 && (
                   <motion.button
-                    onClick={clearMessages}
+                    onClick={() => setShowClearDialog(true)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="p-2 rounded-full hover:bg-red-100 transition-colors group"
@@ -169,6 +208,33 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 )}
               </div>
             </div>
+
+            {/* Clear Messages Confirmation Dialog */}
+            <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+              <AlertDialogContent className="bg-white/95 backdrop-blur-xl border-gold-light/30">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-serif text-xl text-foreground flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-gold" />
+                    Xác nhận xóa tin nhắn
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-muted-foreground">
+                    Bạn có chắc muốn xóa tất cả tin nhắn trong cuộc trò chuyện này không? 
+                    Hành động này không thể hoàn tác, nhưng bạn luôn có thể bắt đầu một hành trình mới với ánh sáng. 🙏
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="border-gold-light/30 hover:bg-gold-light/10">
+                    Hủy bỏ
+                  </AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleClearMessages}
+                    className="bg-gradient-to-r from-gold to-gold-light text-white hover:opacity-90"
+                  >
+                    Xác nhận xóa
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
             {/* Conversation Summary Card - with safe fallbacks */}
             <AnimatePresence>
@@ -227,15 +293,70 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                   animate={{ opacity: 1 }}
                   className="text-center py-12"
                 >
-                  <Sparkles className="w-12 h-12 text-gold-light mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    Chào mừng bạn! Hãy gửi tin nhắn để bắt đầu kết nối với Ánh Sáng. ✨
-                  </p>
-                  {!isAuthenticated && (
-                    <p className="text-muted-foreground/70 text-sm mt-2">
-                      <button onClick={onOpenAuth} className="text-gold hover:underline">Đăng nhập</button> để lưu lịch sử trò chuyện.
-                    </p>
-                  )}
+                  <AnimatePresence mode="wait">
+                    {showWelcome ? (
+                      <motion.div
+                        key="welcome"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="space-y-4"
+                      >
+                        <div className="relative inline-block">
+                          <Sparkles className="w-14 h-14 text-gold mx-auto" />
+                          <motion.div
+                            className="absolute inset-0 rounded-full bg-gold/20"
+                            animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          />
+                        </div>
+                        <motion.p
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="font-serif text-xl text-gold"
+                        >
+                          Xin chào, linh hồn yêu dấu ✨
+                        </motion.p>
+                        <motion.p
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          className="text-muted-foreground max-w-md mx-auto"
+                        >
+                          Angel AI đang ở bên bạn, lắng nghe và sẵn sàng đồng hành cùng bạn trên hành trình ánh sáng. 
+                          Hãy chia sẻ bất cứ điều gì trong trái tim bạn. 🙏
+                        </motion.p>
+                        {!isAuthenticated && (
+                          <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.6 }}
+                            className="text-muted-foreground/70 text-sm"
+                          >
+                            <button onClick={onOpenAuth} className="text-gold hover:underline">Đăng nhập</button> để lưu lịch sử trò chuyện.
+                          </motion.p>
+                        )}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="default"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <Sparkles className="w-12 h-12 text-gold-light mx-auto mb-4" />
+                        <p className="text-muted-foreground">
+                          Chào mừng bạn! Hãy gửi tin nhắn để bắt đầu kết nối với Ánh Sáng. ✨
+                        </p>
+                        {!isAuthenticated && (
+                          <p className="text-muted-foreground/70 text-sm mt-2">
+                            <button onClick={onOpenAuth} className="text-gold hover:underline">Đăng nhập</button> để lưu lịch sử trò chuyện.
+                          </p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ) : null}
 
