@@ -1,6 +1,4 @@
 import { useState } from "react";
-import FloatingParticles from "@/components/FloatingParticles";
-import SacredGeometry from "@/components/SacredGeometry";
 import NavigationHeader from "@/components/NavigationHeader";
 import HeroSection from "@/components/HeroSection";
 import SacredPillars from "@/components/SacredPillars";
@@ -18,9 +16,6 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      {/* Background effects */}
-      <SacredGeometry />
-      <FloatingParticles />
       
       {/* Navigation */}
       <NavigationHeader />
