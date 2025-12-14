@@ -1,10 +1,13 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
+import { useChatAttachments, type Attachment } from "@/hooks/useChatAttachments";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
+import ChatAttachmentPreview from "@/components/ChatAttachmentPreview";
+import MessageAttachments from "@/components/MessageAttachments";
 import TypingText from "@/components/TypingText";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import chatPortalVideo from "@/assets/chat-portal-video.mp4";
@@ -67,7 +70,14 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [welcomeShownForSession, setWelcomeShownForSession] = useState(false);
+  const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  const [messageAttachments, setMessageAttachments] = useState<Map<string, ReturnType<typeof attachmentsHook.getAttachmentData>>>(new Map());
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Attachment hook
+  const attachmentsHook = useChatAttachments();
+  const { attachments, addImageAttachment, addLinkAttachment, removeAttachment, clearAttachments, detectLinksInText, getAttachmentData } = attachmentsHook;
 
   const handleStartNewConversation = async () => {
     const success = await startNewConversation();
@@ -120,12 +130,55 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim() && !isLoading && isReady) {
+    if ((inputValue.trim() || attachments.length > 0) && !isLoading && isReady) {
       playSendFeedback();
-      sendMessage(inputValue);
+      
+      // Get current attachments data before clearing
+      const currentAttachments = getAttachmentData();
+      
+      // Build message content with attachment info
+      let messageContent = inputValue.trim();
+      
+      // Create a temporary ID to associate attachments with this message
+      const tempMessageId = `temp-${Date.now()}`;
+      if (currentAttachments.length > 0) {
+        setMessageAttachments(prev => new Map(prev).set(tempMessageId, currentAttachments));
+      }
+      
+      sendMessage(messageContent);
       setInputValue("");
+      clearAttachments();
     }
   };
+
+  // Handle file input change
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      const result = addImageAttachment(file);
+      if (!result.success && result.error) {
+        toast.error(result.error);
+      }
+    });
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setShowAttachmentMenu(false);
+  }, [addImageAttachment]);
+
+  // Detect and add links when pasting
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const pastedText = e.clipboardData.getData("text");
+    const links = detectLinksInText(pastedText);
+    
+    links.forEach((link) => {
+      addLinkAttachment(link);
+    });
+  }, [detectLinksInText, addLinkAttachment]);
 
   // Check if input should be disabled
   const isInputDisabled = isLoading || !isReady;
@@ -507,6 +560,13 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                           ))}
                         </div>
                       )}
+                      {/* Message Attachments */}
+                      {messageAttachments.get(message.id) && (
+                        <MessageAttachments 
+                          attachments={messageAttachments.get(message.id)!} 
+                          isUserMessage={message.role === "user"} 
+                        />
+                      )}
                       <p className="text-foreground relative z-10 whitespace-pre-wrap">{message.content}</p>
                     </div>
                   </motion.div>
@@ -551,15 +611,84 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Attachment Preview */}
+            <AnimatePresence>
+              {attachments.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="border-t border-gold-light/20 bg-white/30"
+                >
+                  <ChatAttachmentPreview 
+                    attachments={attachments} 
+                    onRemove={removeAttachment} 
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Input bar */}
             <form onSubmit={handleSubmit} className="p-4 border-t border-gold-light/20 bg-white/50">
-              <div className="flex gap-3 items-center">
+              {/* Hidden file input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+              />
+              
+              <div className="flex gap-2 items-center">
+                {/* Attachment button */}
+                <div className="relative">
+                  <motion.button
+                    type="button"
+                    onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={isInputDisabled}
+                    className="w-10 h-10 rounded-full bg-gold-light/20 hover:bg-gold-light/30 flex items-center justify-center transition-colors disabled:opacity-50"
+                  >
+                    <Paperclip className="w-5 h-5 text-gold" />
+                  </motion.button>
+                  
+                  {/* Attachment dropdown menu */}
+                  <AnimatePresence>
+                    {showAttachmentMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute bottom-12 left-0 bg-white/95 backdrop-blur-xl rounded-xl border border-gold-light/30 shadow-lg overflow-hidden min-w-[160px]"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gold-light/10 transition-colors text-left"
+                        >
+                          <ImageIcon className="w-4 h-4 text-gold" />
+                          <span className="text-sm text-foreground">Thêm ảnh</span>
+                        </button>
+                        <div className="h-px bg-gold-light/20" />
+                        <div className="px-4 py-2">
+                          <p className="text-xs text-muted-foreground">
+                            Dán URL vào ô chat để thêm liên kết
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
                 <div className="flex-1 relative">
                   <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    onPaste={handlePaste}
                     placeholder={isInitializing ? "Đang chuẩn bị..." : "Gửi thông điệp đến Angel AI..."}
                     disabled={isInputDisabled}
                     className="w-full px-5 py-3 rounded-full bg-white/80 backdrop-blur border-2 border-gold-light/40 focus:border-gold focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50"
@@ -572,18 +701,26 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 </div>
                 <motion.button
                   type="submit"
-                  disabled={isInputDisabled || !inputValue.trim()}
+                  disabled={isInputDisabled || (!inputValue.trim() && attachments.length === 0)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="relative w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_30px_hsla(45,100%,70%,0.4)] hover:shadow-[0_0_50px_hsla(45,100%,70%,0.6)] transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-5 h-5 text-white" />
-                  {!isLoading && !isInitializing && (
+                  {!isLoading && !isInitializing && (inputValue.trim() || attachments.length > 0) && (
                     <div className="absolute inset-0 rounded-full bg-gold/30 animate-ping" style={{ animationDuration: "2s" }} />
                   )}
                 </motion.button>
               </div>
             </form>
+
+            {/* Click outside to close attachment menu */}
+            {showAttachmentMenu && (
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setShowAttachmentMenu(false)} 
+              />
+            )}
           </div>
         </motion.div>
       </motion.div>
