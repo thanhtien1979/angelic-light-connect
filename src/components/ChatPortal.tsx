@@ -8,6 +8,7 @@ import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import TypingText from "@/components/TypingText";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import chatPortalVideo from "@/assets/chat-portal-video.mp4";
+import flyingAngel from "@/assets/flying-angel.png";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -159,19 +160,52 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               animate={{ rotate: 360 }}
               transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
             >
-              {/* Angel 1 */}
+              {/* Angel 1 with trailing light */}
               <div 
                 className="absolute left-1/2 -translate-x-1/2"
-                style={{ top: "-30px" }}
+                style={{ top: "-40px" }}
               >
-                <motion.span 
-                  className="text-3xl md:text-4xl block"
+                {/* Trailing light effect */}
+                <motion.div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  animate={{ 
+                    opacity: [0.8, 0.3, 0.8],
+                    scale: [1, 1.5, 1],
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="w-16 h-16 bg-gradient-radial from-gold-light/60 via-gold-light/20 to-transparent rounded-full blur-md" />
+                </motion.div>
+                {/* Sparkle trail */}
+                <motion.div
+                  className="absolute -right-8 top-1/2 -translate-y-1/2 flex gap-1"
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity }}
+                >
+                  {[...Array(5)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1.5 h-1.5 bg-gold-light rounded-full"
+                      style={{ 
+                        opacity: 1 - i * 0.2,
+                        filter: "blur(0.5px)",
+                        boxShadow: "0 0 6px hsla(45, 100%, 70%, 0.8)"
+                      }}
+                      animate={{ scale: [1, 0.5, 1] }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                    />
+                  ))}
+                </motion.div>
+                <motion.img 
+                  src={flyingAngel}
+                  alt="Flying Angel"
+                  className="w-14 h-14 md:w-16 md:h-16 object-contain"
                   animate={{ y: [-3, 3, -3] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ filter: "drop-shadow(0 0 10px hsla(45, 100%, 70%, 0.8))" }}
-                >
-                  👼
-                </motion.span>
+                  style={{ 
+                    filter: "drop-shadow(0 0 15px hsla(45, 100%, 70%, 0.9)) drop-shadow(0 0 30px hsla(45, 100%, 70%, 0.5))",
+                  }}
+                />
               </div>
             </motion.div>
             
@@ -180,19 +214,52 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               animate={{ rotate: -360 }}
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             >
-              {/* Angel 2 */}
+              {/* Angel 2 with trailing light */}
               <div 
                 className="absolute left-1/2 -translate-x-1/2"
-                style={{ bottom: "-30px" }}
+                style={{ bottom: "-40px" }}
               >
-                <motion.span 
-                  className="text-3xl md:text-4xl block"
+                {/* Trailing light effect */}
+                <motion.div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  animate={{ 
+                    opacity: [0.8, 0.3, 0.8],
+                    scale: [1, 1.5, 1],
+                  }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="w-16 h-16 bg-gradient-radial from-gold-light/60 via-gold-light/20 to-transparent rounded-full blur-md" />
+                </motion.div>
+                {/* Sparkle trail */}
+                <motion.div
+                  className="absolute -left-8 top-1/2 -translate-y-1/2 flex gap-1"
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity }}
+                >
+                  {[...Array(5)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1.5 h-1.5 bg-gold-light rounded-full"
+                      style={{ 
+                        opacity: 1 - i * 0.2,
+                        filter: "blur(0.5px)",
+                        boxShadow: "0 0 6px hsla(45, 100%, 70%, 0.8)"
+                      }}
+                      animate={{ scale: [1, 0.5, 1] }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                    />
+                  ))}
+                </motion.div>
+                <motion.img 
+                  src={flyingAngel}
+                  alt="Flying Angel"
+                  className="w-14 h-14 md:w-16 md:h-16 object-contain scale-x-[-1]"
                   animate={{ y: [3, -3, 3] }}
                   transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ filter: "drop-shadow(0 0 10px hsla(45, 100%, 70%, 0.8))" }}
-                >
-                  👼
-                </motion.span>
+                  style={{ 
+                    filter: "drop-shadow(0 0 15px hsla(45, 100%, 70%, 0.9)) drop-shadow(0 0 30px hsla(45, 100%, 70%, 0.5))",
+                  }}
+                />
               </div>
             </motion.div>
             
