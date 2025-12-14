@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2 } from "lucide-react";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
+import { useConversationSummary } from "@/hooks/useConversationSummary";
+import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 
 interface ChatPortalProps {
   onOpenAuth?: () => void;
@@ -38,8 +40,14 @@ const SyncIndicator = ({ status }: { status: SyncStatus }) => {
 
 const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { messages, isLoading, isRestoring, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
+  const { summary, clearSummary } = useConversationSummary();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleStartNewConversation = () => {
+    startNewConversation();
+    clearSummary();
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -126,7 +134,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               <div className="flex items-center gap-2">
                 {/* Start New Conversation button */}
                 <motion.button
-                  onClick={startNewConversation}
+                  onClick={handleStartNewConversation}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="p-2 rounded-full hover:bg-gold-light/20 transition-colors group"
@@ -149,9 +157,23 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               </div>
             </div>
 
-            {/* Summarization indicator */}
+            {/* Conversation Summary Card */}
             <AnimatePresence>
-              {messages.length > 20 && (
+              {summary && messages.length > 0 && (
+                <div className="px-6 pt-4">
+                  <ConversationSummaryCard
+                    summary={summary.summary}
+                    keyThemes={summary.key_themes}
+                    emotionalTone={summary.emotional_tone}
+                    compact
+                  />
+                </div>
+              )}
+            </AnimatePresence>
+
+            {/* Summarization indicator (when summary is being generated) */}
+            <AnimatePresence>
+              {messages.length > 20 && !summary && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}

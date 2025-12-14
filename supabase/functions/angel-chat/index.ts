@@ -32,27 +32,41 @@ const KEEP_RECENT_MESSAGES = 8; // Always keep this many recent messages in full
 const MAX_SUMMARY_TOKENS = 500; // Approximate target for summary length
 
 // Summary prompt for condensing older conversation
-const SUMMARY_SYSTEM_PROMPT = `Bạn là một trợ lý tóm tắt. Hãy tóm tắt cuộc trò chuyện sau đây thành một đoạn ngắn gọn (tối đa 400 từ).
+const SUMMARY_SYSTEM_PROMPT = `Bạn là một trợ lý tóm tắt tâm linh của Angel AI. Hãy tóm tắt cuộc trò chuyện sau đây.
+
+Trả về JSON với cấu trúc sau:
+{
+  "summary": "Tóm tắt ngắn gọn cuộc trò chuyện (tối đa 200 từ)",
+  "key_themes": ["Chủ đề 1", "Chủ đề 2", "Chủ đề 3"],
+  "emotional_tone": "Cảm xúc chủ đạo (ví dụ: Bình an, Đang tìm kiếm, Chữa lành, Biết ơn)"
+}
 
 Bảo toàn:
 - Ý định chính của người dùng
 - Tông cảm xúc và năng lượng tâm linh
 - Các câu hỏi quan trọng đã hỏi
-- Các quyết định hoặc insight đã đạt được
-- Các chủ đề chính được thảo luận
+- Các insight tâm linh đã đạt được
+- Các chủ đề chính về chữa lành, thức tỉnh, tình yêu vũ trụ
 
-Giữ giọng văn bình an, nhẹ nhàng, đầy yêu thương. Viết dưới dạng: "Trong cuộc trò chuyện trước, người dùng đã..."`;
+Giữ giọng văn bình an, nhẹ nhàng, đầy yêu thương và ánh sáng.`;
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
 
+interface SummaryResult {
+  summary: string;
+  key_themes: string[];
+  emotional_tone: string;
+  success: boolean;
+}
+
 // Summarize older messages to reduce context size
 async function summarizeOlderMessages(
   messages: ChatMessage[],
   apiKey: string
-): Promise<{ summary: string; success: boolean }> {
+): Promise<SummaryResult> {
   try {
     const conversationText = messages
       .map((m) => `${m.role === "user" ? "Người dùng" : "Angel AI"}: ${m.content}`)
@@ -65,37 +79,55 @@ async function summarizeOlderMessages(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite", // Use fast, cheap model for summarization
+        model: "google/gemini-2.5-flash-lite",
         messages: [
           { role: "system", content: SUMMARY_SYSTEM_PROMPT },
           { role: "user", content: conversationText },
         ],
         max_tokens: MAX_SUMMARY_TOKENS,
+        response_format: { type: "json_object" },
       }),
     });
 
     if (!response.ok) {
       console.error("Summarization failed:", response.status);
-      return { summary: "", success: false };
+      return { summary: "", key_themes: [], emotional_tone: "", success: false };
     }
 
     const data = await response.json();
-    const summary = data.choices?.[0]?.message?.content || "";
-    return { summary, success: true };
+    const content = data.choices?.[0]?.message?.content || "";
+    
+    try {
+      const parsed = JSON.parse(content);
+      return {
+        summary: parsed.summary || "",
+        key_themes: parsed.key_themes || [],
+        emotional_tone: parsed.emotional_tone || "",
+        success: true,
+      };
+    } catch {
+      // Fallback if JSON parsing fails
+      return { summary: content, key_themes: [], emotional_tone: "", success: true };
+    }
   } catch (error) {
     console.error("Error summarizing messages:", error);
-    return { summary: "", success: false };
+    return { summary: "", key_themes: [], emotional_tone: "", success: false };
   }
+}
+
+interface PrepareResult {
+  messages: ChatMessage[];
+  summaryData?: SummaryResult;
 }
 
 // Prepare messages for AI: summarize if needed
 async function prepareMessagesForAI(
   messages: ChatMessage[],
   apiKey: string
-): Promise<ChatMessage[]> {
+): Promise<PrepareResult> {
   // If messages are under threshold, return as-is
   if (messages.length <= SUMMARIZE_THRESHOLD) {
-    return messages;
+    return { messages };
   }
 
   console.log(`Summarizing conversation: ${messages.length} messages`);
@@ -106,23 +138,26 @@ async function prepareMessagesForAI(
   const recentMessages = messages.slice(splitIndex);
 
   // Attempt to summarize older messages
-  const { summary, success } = await summarizeOlderMessages(olderMessages, apiKey);
+  const summaryResult = await summarizeOlderMessages(olderMessages, apiKey);
 
-  if (success && summary) {
+  if (summaryResult.success && summaryResult.summary) {
     console.log(`Successfully summarized ${olderMessages.length} older messages`);
     // Return summary as a system-level context + recent messages
-    return [
-      {
-        role: "assistant" as const,
-        content: `[Tóm tắt cuộc trò chuyện trước đó]\n${summary}\n\n[Tiếp tục cuộc trò chuyện...]`,
-      },
-      ...recentMessages,
-    ];
+    return {
+      messages: [
+        {
+          role: "assistant" as const,
+          content: `[Tóm tắt cuộc trò chuyện trước đó]\n${summaryResult.summary}\n\n[Tiếp tục cuộc trò chuyện...]`,
+        },
+        ...recentMessages,
+      ],
+      summaryData: summaryResult,
+    };
   }
 
   // Fallback: if summarization fails, just keep recent messages to prevent errors
   console.log("Summarization failed, using recent messages only");
-  return recentMessages;
+  return { messages: recentMessages };
 }
 
 // Validate messages array structure
@@ -266,9 +301,12 @@ serve(async (req) => {
 
     // Prepare messages (summarize if conversation is long)
     const typedMessages = messages as ChatMessage[];
-    const preparedMessages = await prepareMessagesForAI(typedMessages, LOVABLE_API_KEY);
+    const { messages: preparedMessages, summaryData } = await prepareMessagesForAI(typedMessages, LOVABLE_API_KEY);
     
     console.log(`Sending ${preparedMessages.length} messages to AI (original: ${typedMessages.length})`);
+    if (summaryData) {
+      console.log(`Generated summary with themes: ${summaryData.key_themes.join(", ")}`);
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

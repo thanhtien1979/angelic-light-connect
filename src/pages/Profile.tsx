@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -24,6 +24,8 @@ interface ChatSession {
   messageCount: number;
   preview: string;
   messages: Array<{ role: string; content: string; created_at: string }>;
+  summary?: string;
+  keyThemes?: string[];
 }
 
 const Profile = () => {
@@ -189,15 +191,28 @@ const Profile = () => {
                   className="w-full p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50 hover:bg-card/80 hover:border-primary/30 transition-all text-left group"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="p-2 rounded-full bg-primary/10">
                         <Calendar className="w-4 h-4 text-primary" />
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="font-medium text-foreground">{session.date}</p>
                         <p className="text-sm text-muted-foreground truncate">
                           {session.messageCount} tin nhắn • {session.preview || "Cuộc trò chuyện"}
                         </p>
+                        {session.keyThemes && session.keyThemes.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {session.keyThemes.slice(0, 2).map((theme, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gold/15 text-gold-dark border border-gold-light/30"
+                              >
+                                <Sparkles className="w-2.5 h-2.5" />
+                                {theme}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
