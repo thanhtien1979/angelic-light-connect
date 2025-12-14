@@ -35,6 +35,7 @@ export const useAngelChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { user, isAuthenticated } = useAuth();
@@ -338,15 +339,44 @@ export const useAngelChat = () => {
   }, [isAuthenticated, user]);
 
   // Start a new conversation without deleting old messages
-  const startNewConversation = useCallback(() => {
-    // Generate a new session ID for anonymous users
-    if (!isAuthenticated) {
-      const newSessionId = generateSecureId();
-      localStorage.setItem(SESSION_ID_KEY, newSessionId);
+  const startNewConversation = useCallback(async (): Promise<boolean> => {
+    setIsInitializing(true);
+    
+    try {
+      // Generate a new session ID for anonymous users
+      if (!isAuthenticated) {
+        const newSessionId = generateSecureId();
+        localStorage.setItem(SESSION_ID_KEY, newSessionId);
+      }
+      
+      // Clear the current messages state (but keep them in the database)
+      setMessages([]);
+      
+      // Small delay to ensure localStorage is synced and state is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      setIsInitializing(false);
+      return true;
+    } catch (error) {
+      console.error("Failed to initialize new conversation:", error);
+      setIsInitializing(false);
+      return false;
     }
-    // Clear the current messages state (but keep them in the database)
-    setMessages([]);
   }, [isAuthenticated]);
 
-  return { messages, isLoading, isRestoring, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated };
+  // Check if chat is ready for interaction
+  const isReady = !isRestoring && !isInitializing;
+
+  return { 
+    messages, 
+    isLoading, 
+    isRestoring, 
+    isInitializing,
+    isReady,
+    syncStatus, 
+    sendMessage, 
+    clearMessages, 
+    startNewConversation, 
+    isAuthenticated 
+  };
 };
