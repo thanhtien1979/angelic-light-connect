@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import angelHero from "@/assets/angel-hero.png";
+import angelHero from "@/assets/angel-hero.jpg";
 
 const HeroSection = () => {
   const { scrollY } = useScroll();
