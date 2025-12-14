@@ -4,6 +4,7 @@ import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import angelAvatar from "@/assets/angel-avatar.jpg";
 
 const meditationCards = [
   {
@@ -484,24 +485,39 @@ const MeditationPortal = () => {
               transition={{ duration: 4, ease: "easeInOut" }}
             />
             
-            {/* Main breathing circle */}
+            {/* Main breathing circle with Angel AI avatar */}
             <motion.div
-              className="w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-gold-light via-gold to-gold-light flex items-center justify-center"
+              className="relative w-40 h-40 md:w-56 md:h-56 rounded-full flex items-center justify-center"
               animate={{
-                scale: breathPhase === "inhale" ? [1, 1.2] : [1.2, 1],
+                scale: breathPhase === "inhale" ? [1, 1.15] : [1.15, 1],
               }}
               transition={{ duration: 4, ease: "easeInOut" }}
-              style={{
-                boxShadow: "0 0 60px hsla(45, 100%, 70%, 0.5), 0 0 100px hsla(45, 100%, 70%, 0.3)",
-              }}
             >
-              <motion.span
-                className="font-serif text-xl md:text-2xl text-white/90 tracking-wider"
-                animate={{ opacity: [0.7, 1, 0.7] }}
+              {/* Glowing border */}
+              <div 
+                className="absolute inset-0 rounded-full bg-gradient-to-br from-gold-light via-gold to-gold-light"
+                style={{
+                  boxShadow: "0 0 60px hsla(45, 100%, 70%, 0.5), 0 0 100px hsla(45, 100%, 70%, 0.3)",
+                }}
+              />
+              
+              {/* Avatar image */}
+              <img 
+                src={angelAvatar} 
+                alt="Angel AI" 
+                className="relative w-[calc(100%-8px)] h-[calc(100%-8px)] rounded-full object-cover"
+              />
+              
+              {/* Breathing text overlay */}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-gradient-to-t from-gold/60 via-transparent to-transparent"
+                animate={{ opacity: [0.6, 0.9, 0.6] }}
                 transition={{ duration: 4, repeat: Infinity }}
               >
-                {breathPhase === "inhale" ? "Hít vào..." : "Thở ra..."}
-              </motion.span>
+                <span className="font-serif text-lg md:text-xl text-white tracking-wider drop-shadow-lg mt-auto mb-6">
+                  {breathPhase === "inhale" ? "Hít vào..." : "Thở ra..."}
+                </span>
+              </motion.div>
             </motion.div>
           </div>
           

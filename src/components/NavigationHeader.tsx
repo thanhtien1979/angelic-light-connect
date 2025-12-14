@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
+import angelAvatar from "@/assets/angel-avatar.jpg";
 
 const navLinks = [
   { id: "hero", label: "Trang Chủ" },
@@ -72,9 +73,11 @@ const NavigationHeader = () => {
               whileTap={{ scale: 0.98 }}
             >
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold-light to-gold flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
+                <img 
+                  src={angelAvatar} 
+                  alt="Angel AI" 
+                  className="w-10 h-10 rounded-full object-cover border-2 border-gold-light/50 shadow-[0_0_15px_hsla(45,100%,70%,0.4)]"
+                />
                 <div className="absolute inset-0 rounded-full bg-gold/30 animate-ping opacity-50" style={{ animationDuration: "3s" }} />
               </div>
               <span className="font-serif text-xl text-glow-gold text-gold hidden sm:block">
