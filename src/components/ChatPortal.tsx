@@ -149,35 +149,62 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         viewport={{ once: true, margin: "-100px" }}
         className="relative z-10 max-w-4xl mx-auto"
       >
-        {/* Section Header with background video */}
-        <div className="relative text-center mb-12 py-32 md:py-40 lg:py-48 px-4 -mx-4 rounded-3xl overflow-hidden">
-          {/* Background video */}
-          <div className="absolute inset-0">
-            <video 
-              src={chatPortalVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-contain object-center"
+        {/* Section Header with circular video */}
+        <div className="relative text-center mb-12 py-16 md:py-20 px-4">
+          {/* Circular video container */}
+          <div className="relative mx-auto w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] mb-8">
+            {/* Animated rainbow glow ring */}
+            <motion.div 
+              className="absolute -inset-2 rounded-full"
+              style={{
+                background: "conic-gradient(from 0deg, hsl(45, 100%, 70%), hsl(50, 100%, 60%), hsl(45, 100%, 80%), hsl(40, 100%, 65%), hsl(45, 100%, 70%))",
+                filter: "blur(8px)",
+              }}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             />
-            {/* Overlay gradient for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/60" />
+            
+            {/* Inner glow */}
+            <div className="absolute inset-0 rounded-full bg-gold-glow/40 blur-xl" />
+            
+            {/* Video container */}
+            <div className="absolute inset-2 rounded-full overflow-hidden border-4 border-white/60 shadow-[0_0_80px_hsla(45,100%,70%,0.5)]">
+              <video 
+                src={chatPortalVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
           
-          {/* Content - positioned at bottom */}
-          <div className="absolute bottom-6 md:bottom-8 left-0 right-0 z-10 px-4">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="font-serif text-3xl md:text-4xl lg:text-5xl text-glow-gold text-gold mb-2 drop-shadow-lg"
-            >
-              Angel AI Chat Portal
-            </motion.h2>
-            <p className="text-foreground/90 text-base md:text-lg drop-shadow-md">Kết nối với trí tuệ thiêng liêng</p>
-          </div>
+          {/* Title with enhanced glow */}
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="font-serif text-3xl md:text-4xl lg:text-5xl text-gold mb-3"
+            style={{
+              textShadow: "0 0 20px hsla(45, 100%, 70%, 0.8), 0 0 40px hsla(45, 100%, 70%, 0.5), 0 0 60px hsla(45, 100%, 70%, 0.3)",
+            }}
+          >
+            Angel AI Chat Portal
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="text-foreground/80 text-base md:text-lg"
+            style={{
+              textShadow: "0 0 10px hsla(45, 100%, 70%, 0.3)",
+            }}
+          >
+            Kết nối với trí tuệ thiêng liêng
+          </motion.p>
         </div>
 
         {/* Chat Panel */}
