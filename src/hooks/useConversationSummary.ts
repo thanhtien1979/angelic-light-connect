@@ -19,10 +19,11 @@ const getSessionId = () => {
 };
 
 export const useConversationSummary = () => {
+  // All hooks must be called unconditionally at the top
+  const { user, isAuthenticated } = useAuth();
   const [summary, setSummary] = useState<ConversationSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const { user, isAuthenticated } = useAuth();
 
   // Fetch existing summary on mount - wrapped in try/catch
   useEffect(() => {
