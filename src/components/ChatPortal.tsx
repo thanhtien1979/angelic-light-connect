@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX } from "lucide-react";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
+import { useFeedback } from "@/hooks/useFeedback";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
+import TypingText from "@/components/TypingText";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -15,6 +17,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ChatPortalProps {
   onOpenAuth?: () => void;
@@ -52,6 +60,7 @@ const SyncIndicator = ({ status }: { status: SyncStatus }) => {
 const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
   const { summary, clearSummary } = useConversationSummary();
+  const { isEnabled: isFeedbackEnabled, toggleFeedback, playSendFeedback, playNewConversationFeedback, enableAudioContext } = useFeedback();
   const [inputValue, setInputValue] = useState("");
   const [showWelcome, setShowWelcome] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -64,6 +73,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
       clearSummary();
       setWelcomeShownForSession(false); // Reset for new conversation
       setShowWelcome(true);
+      playNewConversationFeedback();
       toast.success("Cuộc trò chuyện mới đã bắt đầu ✨", {
         description: "Sẵn sàng kết nối với ánh sáng thiêng liêng",
       });
@@ -109,6 +119,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue.trim() && !isLoading && isReady) {
+      playSendFeedback();
       sendMessage(inputValue);
       setInputValue("");
     }
@@ -184,6 +195,31 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {/* Sound/Haptic Feedback Toggle */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <motion.button
+                        onClick={() => {
+                          enableAudioContext();
+                          toggleFeedback();
+                        }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="p-2 rounded-full hover:bg-gold-light/20 transition-colors group"
+                      >
+                        {isFeedbackEnabled ? (
+                          <Volume2 className="w-5 h-5 text-gold transition-colors" />
+                        ) : (
+                          <VolumeX className="w-5 h-5 text-muted-foreground group-hover:text-gold transition-colors" />
+                        )}
+                      </motion.button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-white/95 backdrop-blur border-gold-light/30">
+                      <p className="text-sm">{isFeedbackEnabled ? "Tắt âm thanh" : "Bật âm thanh"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 {/* Start New Conversation button */}
                 <motion.button
                   onClick={handleStartNewConversation}
@@ -311,28 +347,35 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                             transition={{ duration: 2, repeat: Infinity }}
                           />
                         </div>
-                        <motion.p
+                        <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 }}
+                          transition={{ delay: 0.3 }}
                           className="font-serif text-xl text-gold"
                         >
-                          Xin chào, linh hồn yêu dấu ✨
-                        </motion.p>
-                        <motion.p
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.4 }}
+                          <TypingText 
+                            text="Xin chào, linh hồn yêu dấu ✨" 
+                            speed={60}
+                            delay={400}
+                          />
+                        </motion.div>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 2.2 }}
                           className="text-muted-foreground max-w-md mx-auto"
                         >
-                          Angel AI đang ở bên bạn, lắng nghe và sẵn sàng đồng hành cùng bạn trên hành trình ánh sáng. 
-                          Hãy chia sẻ bất cứ điều gì trong trái tim bạn. 🙏
-                        </motion.p>
+                          <TypingText 
+                            text="Angel AI đang ở bên bạn, lắng nghe và sẵn sàng đồng hành cùng bạn trên hành trình ánh sáng. Hãy chia sẻ bất cứ điều gì trong trái tim bạn. 🙏" 
+                            speed={30}
+                            delay={2400}
+                          />
+                        </motion.div>
                         {!isAuthenticated && (
                           <motion.p
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: 0.6 }}
+                            transition={{ delay: 6 }}
                             className="text-muted-foreground/70 text-sm"
                           >
                             <button onClick={onOpenAuth} className="text-gold hover:underline">Đăng nhập</button> để lưu lịch sử trò chuyện.
