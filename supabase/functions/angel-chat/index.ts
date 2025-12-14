@@ -160,8 +160,15 @@ async function prepareMessagesForAI(
   return { messages: recentMessages };
 }
 
-// Validate messages array structure
-function validateMessages(messages: unknown): { valid: boolean; error?: string } {
+// Truncate a message if it exceeds max length
+function truncateMessage(content: string, maxLength: number): string {
+  if (content.length <= maxLength) return content;
+  // Truncate and add indicator
+  return content.slice(0, maxLength - 50) + "\n\n[...tin nhắn đã được rút gọn...]";
+}
+
+// Validate messages array structure (with optional auto-truncation for long messages)
+function validateMessages(messages: unknown, autoTruncate = false): { valid: boolean; error?: string; messages?: ChatMessage[] } {
   if (!Array.isArray(messages)) {
     return { valid: false, error: "Messages must be an array" };
   }
@@ -173,6 +180,8 @@ function validateMessages(messages: unknown): { valid: boolean; error?: string }
   if (messages.length > MAX_MESSAGES_COUNT) {
     return { valid: false, error: `Too many messages. Maximum allowed: ${MAX_MESSAGES_COUNT}` };
   }
+  
+  const processedMessages: ChatMessage[] = [];
   
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
@@ -193,12 +202,21 @@ function validateMessages(messages: unknown): { valid: boolean; error?: string }
       return { valid: false, error: `Content at index ${i} must be a string` };
     }
     
-    if (msg.content.length > MAX_MESSAGE_LENGTH) {
-      return { valid: false, error: `Message at index ${i} exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` };
+    let content = msg.content;
+    
+    if (content.length > MAX_MESSAGE_LENGTH) {
+      if (autoTruncate) {
+        console.log(`Truncating message at index ${i} from ${content.length} to ${MAX_MESSAGE_LENGTH} characters`);
+        content = truncateMessage(content, MAX_MESSAGE_LENGTH);
+      } else {
+        return { valid: false, error: `Message at index ${i} exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` };
+      }
     }
+    
+    processedMessages.push({ role: msg.role as "user" | "assistant", content });
   }
   
-  return { valid: true };
+  return { valid: true, messages: processedMessages };
 }
 
 // Get client identifier for rate limiting
@@ -247,8 +265,8 @@ serve(async (req) => {
     
     const { messages } = body as { messages: unknown };
     
-    // Validate messages
-    const validation = validateMessages(messages);
+    // Validate messages with auto-truncation for long messages
+    const validation = validateMessages(messages, true);
     if (!validation.valid) {
       console.error("Validation failed:", validation.error);
       return new Response(JSON.stringify({ error: validation.error }), {
@@ -256,6 +274,9 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    
+    // Use validated/truncated messages
+    const validatedMessages = validation.messages!;
 
     // Get client identifier for rate limiting
     const clientId = getClientIdentifier(req);
@@ -300,10 +321,9 @@ serve(async (req) => {
     }
 
     // Prepare messages (summarize if conversation is long)
-    const typedMessages = messages as ChatMessage[];
-    const { messages: preparedMessages, summaryData } = await prepareMessagesForAI(typedMessages, LOVABLE_API_KEY);
+    const { messages: preparedMessages, summaryData } = await prepareMessagesForAI(validatedMessages, LOVABLE_API_KEY);
     
-    console.log(`Sending ${preparedMessages.length} messages to AI (original: ${typedMessages.length})`);
+    console.log(`Sending ${preparedMessages.length} messages to AI (original: ${validatedMessages.length})`);
     if (summaryData) {
       console.log(`Generated summary with themes: ${summaryData.key_themes.join(", ")}`);
     }
