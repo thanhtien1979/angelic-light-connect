@@ -153,6 +153,49 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         <div className="relative text-center mb-12 py-16 md:py-20 px-4">
           {/* Circular video container */}
           <div className="relative mx-auto w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] mb-8">
+            {/* Flying angels orbiting */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            >
+              {/* Angel 1 */}
+              <div 
+                className="absolute left-1/2 -translate-x-1/2"
+                style={{ top: "-30px" }}
+              >
+                <motion.span 
+                  className="text-3xl md:text-4xl block"
+                  animate={{ y: [-3, 3, -3] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ filter: "drop-shadow(0 0 10px hsla(45, 100%, 70%, 0.8))" }}
+                >
+                  👼
+                </motion.span>
+              </div>
+            </motion.div>
+            
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              animate={{ rotate: -360 }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            >
+              {/* Angel 2 */}
+              <div 
+                className="absolute left-1/2 -translate-x-1/2"
+                style={{ bottom: "-30px" }}
+              >
+                <motion.span 
+                  className="text-3xl md:text-4xl block"
+                  animate={{ y: [3, -3, 3] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ filter: "drop-shadow(0 0 10px hsla(45, 100%, 70%, 0.8))" }}
+                >
+                  👼
+                </motion.span>
+              </div>
+            </motion.div>
+            
             {/* Animated rainbow glow ring */}
             <motion.div 
               className="absolute -inset-2 rounded-full"
