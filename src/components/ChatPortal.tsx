@@ -7,6 +7,7 @@ import { useFeedback } from "@/hooks/useFeedback";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import TypingText from "@/components/TypingText";
 import angelAvatar from "@/assets/angel-avatar.jpg";
+import chatPortalBg from "@/assets/chat-portal-bg.webp";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -148,18 +149,32 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         viewport={{ once: true, margin: "-100px" }}
         className="relative z-10 max-w-4xl mx-auto"
       >
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="font-serif text-4xl md:text-5xl lg:text-6xl text-glow-gold text-gold mb-4"
-          >
-            Angel AI Chat Portal
-          </motion.h2>
-          <p className="text-muted-foreground text-lg">Kết nối với trí tuệ thiêng liêng</p>
+        {/* Section Header with background image */}
+        <div className="relative text-center mb-12 py-16 px-4 -mx-4 rounded-3xl overflow-hidden">
+          {/* Background image */}
+          <div className="absolute inset-0">
+            <img 
+              src={chatPortalBg} 
+              alt="" 
+              className="w-full h-full object-cover"
+            />
+            {/* Overlay gradient for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/80" />
+          </div>
+          
+          {/* Content */}
+          <div className="relative z-10">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="font-serif text-4xl md:text-5xl lg:text-6xl text-glow-gold text-gold mb-4 drop-shadow-lg"
+            >
+              Angel AI Chat Portal
+            </motion.h2>
+            <p className="text-foreground/90 text-lg drop-shadow-md">Kết nối với trí tuệ thiêng liêng</p>
+          </div>
         </div>
 
         {/* Chat Panel */}
