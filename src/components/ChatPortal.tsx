@@ -157,14 +157,14 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               </div>
             </div>
 
-            {/* Conversation Summary Card */}
+            {/* Conversation Summary Card - with safe fallbacks */}
             <AnimatePresence>
-              {summary && messages.length > 0 && (
+              {summary && summary.summary && messages.length > 0 && (
                 <div className="px-6 pt-4">
                   <ConversationSummaryCard
-                    summary={summary.summary}
-                    keyThemes={summary.key_themes}
-                    emotionalTone={summary.emotional_tone}
+                    summary={summary.summary || ""}
+                    keyThemes={Array.isArray(summary.key_themes) ? summary.key_themes : []}
+                    emotionalTone={summary.emotional_tone || null}
                     compact
                   />
                 </div>

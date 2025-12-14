@@ -21,12 +21,14 @@ const getSessionId = () => {
 export const useConversationSummary = () => {
   const [summary, setSummary] = useState<ConversationSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
-  // Fetch existing summary on mount
+  // Fetch existing summary on mount - wrapped in try/catch
   useEffect(() => {
     const fetchSummary = async () => {
       try {
+        setHasError(false);
         let query = supabase
           .from("conversation_summaries")
           .select("*");
@@ -42,17 +44,32 @@ export const useConversationSummary = () => {
           query = query.eq("session_id", sessionId).is("user_id", null);
         }
 
-        const { data, error } = await query.single();
+        const { data, error } = await query.maybeSingle();
 
-        if (error && error.code !== "PGRST116") {
-          console.error("Error fetching summary:", error);
+        if (error) {
+          // Log silently for debugging, don't expose to user
+          console.error("[Summary] Fetch error:", error.message);
+          setHasError(true);
+          // Don't throw - allow chat to continue without summary
         }
 
         if (data) {
-          setSummary(data as ConversationSummary);
+          // Safely handle potentially malformed data
+          setSummary({
+            id: data.id || "",
+            session_id: data.session_id || "",
+            summary: data.summary || "",
+            key_themes: Array.isArray(data.key_themes) ? data.key_themes : [],
+            emotional_tone: data.emotional_tone || null,
+            message_count: typeof data.message_count === "number" ? data.message_count : 0,
+            updated_at: data.updated_at || "",
+          });
         }
       } catch (error) {
-        console.error("Failed to fetch summary:", error);
+        // Silent logging for debugging
+        console.error("[Summary] Unexpected fetch error:", error);
+        setHasError(true);
+        // Don't rethrow - chat experience should continue uninterrupted
       } finally {
         setIsLoading(false);
       }
@@ -61,24 +78,37 @@ export const useConversationSummary = () => {
     fetchSummary();
   }, [isAuthenticated, user]);
 
-  // Update or create summary
+  // Update or create summary - fully wrapped with error handling
   const updateSummary = useCallback(async (
     newSummary: string,
     keyThemes: string[],
     emotionalTone: string,
     messageCount: number
   ) => {
+    // Validate inputs before attempting database operation
+    if (!newSummary || typeof newSummary !== "string") {
+      console.warn("[Summary] Invalid summary data, skipping save");
+      return;
+    }
+
     try {
       const sessionId = isAuthenticated && user ? user.id : getSessionId();
+      
+      // Don't attempt save if no valid session
+      if (!sessionId) {
+        console.warn("[Summary] No session ID available, skipping save");
+        return;
+      }
+
       const userId = isAuthenticated && user ? user.id : null;
 
       const summaryData = {
         session_id: sessionId,
         user_id: userId,
-        summary: newSummary,
-        key_themes: keyThemes,
-        emotional_tone: emotionalTone,
-        message_count: messageCount,
+        summary: newSummary.slice(0, 5000), // Truncate to prevent DB errors
+        key_themes: Array.isArray(keyThemes) ? keyThemes.slice(0, 10) : [],
+        emotional_tone: emotionalTone?.slice(0, 200) || null,
+        message_count: Math.max(0, messageCount),
       };
 
       const { data, error } = await supabase
@@ -87,22 +117,38 @@ export const useConversationSummary = () => {
           onConflict: "session_id,user_id",
         })
         .select()
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        // Log silently for debugging
+        console.error("[Summary] Upsert error:", error.message);
+        // Don't throw - chat should continue without blocking
+        return;
+      }
 
       if (data) {
-        setSummary(data as ConversationSummary);
+        setSummary({
+          id: data.id || "",
+          session_id: data.session_id || "",
+          summary: data.summary || "",
+          key_themes: Array.isArray(data.key_themes) ? data.key_themes : [],
+          emotional_tone: data.emotional_tone || null,
+          message_count: typeof data.message_count === "number" ? data.message_count : 0,
+          updated_at: data.updated_at || "",
+        });
       }
     } catch (error) {
-      console.error("Failed to update summary:", error);
+      // Silent logging - never block chat experience
+      console.error("[Summary] Unexpected save error:", error);
+      // Don't rethrow - allow chat to continue seamlessly
     }
   }, [isAuthenticated, user]);
 
   // Clear summary (when starting new conversation)
   const clearSummary = useCallback(() => {
     setSummary(null);
+    setHasError(false);
   }, []);
 
-  return { summary, isLoading, updateSummary, clearSummary };
+  return { summary, isLoading, hasError, updateSummary, clearSummary };
 };

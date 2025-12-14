@@ -3,8 +3,8 @@ import { Sparkles, Heart, Star, Lightbulb } from "lucide-react";
 
 interface ConversationSummaryCardProps {
   summary: string;
-  keyThemes: string[];
-  emotionalTone: string | null;
+  keyThemes?: string[] | null;
+  emotionalTone?: string | null;
   compact?: boolean;
 }
 
@@ -21,9 +21,17 @@ const ConversationSummaryCard = ({
   emotionalTone,
   compact = false,
 }: ConversationSummaryCardProps) => {
-  if (!summary) return null;
+  // Safe fallbacks for all props
+  const safeSummary = typeof summary === "string" ? summary : "";
+  const safeThemes = Array.isArray(keyThemes) ? keyThemes.filter(t => typeof t === "string") : [];
+  const safeTone = typeof emotionalTone === "string" ? emotionalTone : null;
 
-  const ThemeIcon = themeIcons[keyThemes[0]?.toLowerCase()] || themeIcons.default;
+  // Don't render if no valid summary content
+  if (!safeSummary) {
+    return null;
+  }
+
+  const ThemeIcon = themeIcons[safeThemes[0]?.toLowerCase()] || themeIcons.default;
 
   if (compact) {
     return (
@@ -38,10 +46,10 @@ const ConversationSummaryCard = ({
           </div>
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground/80 mb-1">Tóm tắt cuộc trò chuyện</p>
-            <p className="text-sm text-foreground/90 line-clamp-2">{summary}</p>
-            {keyThemes.length > 0 && (
+            <p className="text-sm text-foreground/90 line-clamp-2">{safeSummary}</p>
+            {safeThemes.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
-                {keyThemes.slice(0, 3).map((theme, i) => (
+                {safeThemes.slice(0, 3).map((theme, i) => (
                   <span
                     key={i}
                     className="px-2 py-0.5 text-xs rounded-full bg-gold/20 text-gold-dark border border-gold-light/30"
@@ -70,16 +78,16 @@ const ConversationSummaryCard = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
             <h4 className="font-serif text-lg text-foreground">Hành Trình Của Bạn</h4>
-            {emotionalTone && (
+            {safeTone && (
               <span className="px-2.5 py-0.5 text-xs rounded-full bg-primary/20 text-primary border border-primary/30">
-                {emotionalTone}
+                {safeTone}
               </span>
             )}
           </div>
-          <p className="text-sm text-foreground/80 leading-relaxed mb-3">{summary}</p>
-          {keyThemes.length > 0 && (
+          <p className="text-sm text-foreground/80 leading-relaxed mb-3">{safeSummary}</p>
+          {safeThemes.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {keyThemes.map((theme, i) => (
+              {safeThemes.map((theme, i) => (
                 <motion.span
                   key={i}
                   initial={{ opacity: 0, scale: 0.8 }}
