@@ -150,16 +150,16 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         className="relative z-10 max-w-4xl mx-auto"
       >
         {/* Section Header with background image */}
-        <div className="relative text-center mb-12 py-16 px-4 -mx-4 rounded-3xl overflow-hidden">
+        <div className="relative text-center mb-12 py-32 md:py-40 lg:py-48 px-4 -mx-4 rounded-3xl overflow-hidden">
           {/* Background image */}
           <div className="absolute inset-0">
             <img 
               src={chatPortalBg} 
               alt="" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain object-center"
             />
             {/* Overlay gradient for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/80" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/60" />
           </div>
           
           {/* Content */}
