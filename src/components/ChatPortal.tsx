@@ -165,18 +165,18 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
             <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/60" />
           </div>
           
-          {/* Content */}
-          <div className="relative z-10">
+          {/* Content - positioned at bottom */}
+          <div className="absolute bottom-6 md:bottom-8 left-0 right-0 z-10 px-4">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
-              className="font-serif text-4xl md:text-5xl lg:text-6xl text-glow-gold text-gold mb-4 drop-shadow-lg"
+              className="font-serif text-3xl md:text-4xl lg:text-5xl text-glow-gold text-gold mb-2 drop-shadow-lg"
             >
               Angel AI Chat Portal
             </motion.h2>
-            <p className="text-foreground/90 text-lg drop-shadow-md">Kết nối với trí tuệ thiêng liêng</p>
+            <p className="text-foreground/90 text-base md:text-lg drop-shadow-md">Kết nối với trí tuệ thiêng liêng</p>
           </div>
         </div>
 
