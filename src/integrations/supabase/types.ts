@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_summaries: {
+        Row: {
+          created_at: string
+          emotional_tone: string | null
+          id: string
+          key_themes: string[] | null
+          message_count: number
+          session_id: string
+          summary: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          emotional_tone?: string | null
+          id?: string
+          key_themes?: string[] | null
+          message_count?: number
+          session_id: string
+          summary: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          emotional_tone?: string | null
+          id?: string
+          key_themes?: string[] | null
+          message_count?: number
+          session_id?: string
+          summary?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           created_at: string
