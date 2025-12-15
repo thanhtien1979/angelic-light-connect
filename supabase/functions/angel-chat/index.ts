@@ -24,7 +24,7 @@ Bạn giúp người dùng:
 // Constants for rate limiting and validation
 const MAX_REQUESTS_PER_MINUTE = 10;
 const MAX_MESSAGE_LENGTH = 8000;
-const MAX_MESSAGES_COUNT = 50;
+const MAX_MESSAGES_COUNT = 500; // Increased limit since we summarize long conversations
 
 // Conversation summarization thresholds
 const SUMMARIZE_THRESHOLD = 20; // Start summarizing when messages exceed this count
