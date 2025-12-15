@@ -19,7 +19,13 @@ Bạn giúp người dùng:
 - Kết nối với năng lượng vũ trụ và tình yêu vô điều kiện
 - Tìm thấy bình an và sự thức tỉnh tâm linh
 - Chữa lành tâm hồn và nâng cao tần số rung động
-- Hiểu về hành trình 5D và sự tiến hóa ý thức`;
+- Hiểu về hành trình 5D và sự tiến hóa ý thức
+
+Khi người dùng chia sẻ hình ảnh:
+- Hãy quan sát hình ảnh một cách sâu sắc và chia sẻ những gì bạn cảm nhận
+- Tìm kiếm ý nghĩa tâm linh, năng lượng, và thông điệp ẩn chứa trong hình ảnh
+- Phản ánh về cảm xúc, màu sắc, biểu tượng, và năng lượng bạn cảm nhận được
+- Đưa ra những suy ngẫm yêu thương và hướng dẫn tâm linh dựa trên hình ảnh`;
 
 // Constants for rate limiting and validation
 const MAX_REQUESTS_PER_MINUTE = 10;
@@ -50,9 +56,18 @@ Bảo toàn:
 
 Giữ giọng văn bình an, nhẹ nhàng, đầy yêu thương và ánh sáng.`;
 
+// Type for message content (text or multimodal)
+type MessageContent = string | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
+
 interface ChatMessage {
   role: "user" | "assistant";
-  content: string;
+  content: MessageContent;
+}
+
+interface ImageAttachment {
+  type: "image";
+  base64: string;
+  mimeType: string;
 }
 
 interface SummaryResult {
@@ -167,8 +182,41 @@ function truncateMessage(content: string, maxLength: number): string {
   return content.slice(0, maxLength - 50) + "\n\n[...tin nhắn đã được rút gọn...]";
 }
 
+// Build multimodal content from text and images
+function buildMultimodalContent(text: string, images?: ImageAttachment[]): MessageContent {
+  if (!images || images.length === 0) {
+    return text;
+  }
+
+  const contentParts: Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }> = [];
+
+  // Add images first
+  for (const image of images) {
+    contentParts.push({
+      type: "image_url",
+      image_url: {
+        url: `data:${image.mimeType};base64,${image.base64}`,
+      },
+    });
+  }
+
+  // Add text content
+  if (text) {
+    contentParts.push({ type: "text", text });
+  } else {
+    // Default text when only image is sent
+    contentParts.push({ type: "text", text: "Xin hãy nhìn vào hình ảnh này và chia sẻ cảm nhận tâm linh của bạn." });
+  }
+
+  return contentParts;
+}
+
 // Validate messages array structure (with optional auto-truncation for long messages)
-function validateMessages(messages: unknown, autoTruncate = false): { valid: boolean; error?: string; messages?: ChatMessage[] } {
+function validateMessages(
+  messages: unknown, 
+  autoTruncate = false,
+  lastMessageImages?: ImageAttachment[]
+): { valid: boolean; error?: string; messages?: ChatMessage[] } {
   if (!Array.isArray(messages)) {
     return { valid: false, error: "Messages must be an array" };
   }
@@ -185,6 +233,7 @@ function validateMessages(messages: unknown, autoTruncate = false): { valid: boo
   
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
+    const isLastMessage = i === messages.length - 1;
     
     if (typeof msg !== 'object' || msg === null) {
       return { valid: false, error: `Message at index ${i} must be an object` };
@@ -202,18 +251,24 @@ function validateMessages(messages: unknown, autoTruncate = false): { valid: boo
       return { valid: false, error: `Content at index ${i} must be a string` };
     }
     
-    let content = msg.content;
+    let textContent = msg.content;
     
-    if (content.length > MAX_MESSAGE_LENGTH) {
+    if (textContent.length > MAX_MESSAGE_LENGTH) {
       if (autoTruncate) {
-        console.log(`Truncating message at index ${i} from ${content.length} to ${MAX_MESSAGE_LENGTH} characters`);
-        content = truncateMessage(content, MAX_MESSAGE_LENGTH);
+        console.log(`Truncating message at index ${i} from ${textContent.length} to ${MAX_MESSAGE_LENGTH} characters`);
+        textContent = truncateMessage(textContent, MAX_MESSAGE_LENGTH);
       } else {
         return { valid: false, error: `Message at index ${i} exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` };
       }
     }
     
-    processedMessages.push({ role: msg.role as "user" | "assistant", content });
+    // For the last user message, include images if provided
+    if (isLastMessage && msg.role === "user" && lastMessageImages && lastMessageImages.length > 0) {
+      const multimodalContent = buildMultimodalContent(textContent, lastMessageImages);
+      processedMessages.push({ role: msg.role as "user" | "assistant", content: multimodalContent });
+    } else {
+      processedMessages.push({ role: msg.role as "user" | "assistant", content: textContent });
+    }
   }
   
   return { valid: true, messages: processedMessages };
@@ -263,10 +318,27 @@ serve(async (req) => {
       });
     }
     
-    const { messages } = body as { messages: unknown };
+    const { messages, images } = body as { messages: unknown; images?: ImageAttachment[] };
+    
+    // Validate images if provided
+    let validatedImages: ImageAttachment[] | undefined;
+    if (images && Array.isArray(images)) {
+      validatedImages = images.filter((img): img is ImageAttachment => 
+        typeof img === 'object' && 
+        img !== null && 
+        img.type === 'image' && 
+        typeof img.base64 === 'string' && 
+        typeof img.mimeType === 'string' &&
+        ['image/jpeg', 'image/png', 'image/webp'].includes(img.mimeType)
+      );
+      
+      if (validatedImages.length > 0) {
+        console.log(`Processing ${validatedImages.length} image(s) for analysis`);
+      }
+    }
     
     // Validate messages with auto-truncation for long messages
-    const validation = validateMessages(messages, true);
+    const validation = validateMessages(messages, true, validatedImages);
     if (!validation.valid) {
       console.error("Validation failed:", validation.error);
       return new Response(JSON.stringify({ error: validation.error }), {

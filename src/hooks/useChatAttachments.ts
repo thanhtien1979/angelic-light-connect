@@ -107,6 +107,37 @@ export const useChatAttachments = () => {
     });
   }, [attachments]);
 
+  // Convert image files to base64 for AI analysis
+  const getImagesAsBase64 = useCallback(async (): Promise<Array<{ type: "image"; base64: string; mimeType: string }>> => {
+    const imageAttachments = attachments.filter((a): a is ImageAttachment => a.type === "image");
+    
+    const base64Images = await Promise.all(
+      imageAttachments.map(async (img) => {
+        return new Promise<{ type: "image"; base64: string; mimeType: string }>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const dataUrl = reader.result as string;
+            // Extract base64 data (remove data:image/xxx;base64, prefix)
+            const base64 = dataUrl.split(",")[1] || "";
+            resolve({
+              type: "image" as const,
+              base64,
+              mimeType: img.file.type,
+            });
+          };
+          reader.onerror = () => {
+            // Return empty on error
+            resolve({ type: "image" as const, base64: "", mimeType: img.file.type });
+          };
+          reader.readAsDataURL(img.file);
+        });
+      })
+    );
+    
+    // Filter out failed conversions
+    return base64Images.filter((img) => img.base64.length > 0);
+  }, [attachments]);
+
   return {
     attachments,
     addImageAttachment,
@@ -115,5 +146,6 @@ export const useChatAttachments = () => {
     clearAttachments,
     detectLinksInText,
     getAttachmentData,
+    getImagesAsBase64,
   };
 };

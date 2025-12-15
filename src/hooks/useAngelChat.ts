@@ -183,17 +183,21 @@ export const useAngelChat = () => {
     return null;
   };
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim() || isLoading) return;
+  const sendMessage = useCallback(async (
+    content: string, 
+    images?: Array<{ type: "image"; base64: string; mimeType: string }>
+  ) => {
+    if ((!content.trim() && (!images || images.length === 0)) || isLoading) return;
 
     const trimmedContent = content.trim();
+    const hasImages = images && images.length > 0;
     
     // Create optimistic user message for immediate UI update
     const tempUserMessageId = `temp-${Date.now()}`;
     const userMessage: Message = {
       id: tempUserMessageId,
       role: "user",
-      content: trimmedContent,
+      content: trimmedContent || (hasImages ? "[Hình ảnh đã gửi]" : ""),
     };
 
     // Update UI immediately
@@ -201,7 +205,7 @@ export const useAngelChat = () => {
     setIsLoading(true);
 
     // Save user message to database immediately (don't wait for response)
-    const saveUserMessagePromise = saveMessage("user", trimmedContent);
+    const saveUserMessagePromise = saveMessage("user", trimmedContent || "[Hình ảnh đã gửi]");
     
     // Update the message ID once saved
     saveUserMessagePromise.then((savedId) => {
@@ -233,18 +237,25 @@ export const useAngelChat = () => {
     };
 
     try {
+      const requestBody: { messages: Array<{ role: string; content: string }>; images?: Array<{ type: "image"; base64: string; mimeType: string }> } = {
+        messages: [...messages, userMessage].map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+      };
+
+      // Include images if present
+      if (hasImages) {
+        requestBody.images = images;
+      }
+
       const response = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({
-          messages: [...messages, userMessage].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
