@@ -77,7 +77,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
 
   // Attachment hook
   const attachmentsHook = useChatAttachments();
-  const { attachments, addImageAttachment, addLinkAttachment, removeAttachment, clearAttachments, detectLinksInText, getAttachmentData } = attachmentsHook;
+  const { attachments, addImageAttachment, addLinkAttachment, removeAttachment, clearAttachments, detectLinksInText, getAttachmentData, getImagesAsBase64 } = attachmentsHook;
 
   const handleStartNewConversation = async () => {
     const success = await startNewConversation();
@@ -128,7 +128,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((inputValue.trim() || attachments.length > 0) && !isLoading && isReady) {
       playSendFeedback();
@@ -136,8 +136,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
       // Get current attachments data before clearing
       const currentAttachments = getAttachmentData();
       
+      // Convert images to base64 for AI analysis
+      const imageBase64Data = await getImagesAsBase64();
+      
       // Build message content with attachment info
-      let messageContent = inputValue.trim();
+      const messageContent = inputValue.trim();
       
       // Create a temporary ID to associate attachments with this message
       const tempMessageId = `temp-${Date.now()}`;
@@ -145,7 +148,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         setMessageAttachments(prev => new Map(prev).set(tempMessageId, currentAttachments));
       }
       
-      sendMessage(messageContent);
+      // Send message with images
+      sendMessage(messageContent, imageBase64Data.length > 0 ? imageBase64Data : undefined);
       setInputValue("");
       clearAttachments();
     }
