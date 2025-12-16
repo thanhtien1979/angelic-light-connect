@@ -133,20 +133,27 @@ const HeroSection = () => {
           <div className="relative">
             {/* Circular frame with rainbow border */}
             <div className="relative w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] rounded-full overflow-hidden">
-              {/* Static rainbow border */}
+              {/* Pulsing rainbow border */}
               <div 
                 className="absolute -inset-1 rounded-full"
                 style={{
                   background: "conic-gradient(from 0deg, hsl(0, 100%, 70%), hsl(50, 100%, 60%), hsl(120, 70%, 55%), hsl(200, 100%, 65%), hsl(260, 80%, 70%), hsl(300, 80%, 70%), hsl(0, 100%, 70%))",
                   filter: "blur(3px)",
+                  animation: "borderPulse 3s ease-in-out infinite",
                 }}
               />
               
-              {/* Inner glow */}
-              <div className="absolute inset-1 rounded-full bg-gold-glow/30 blur-md" />
+              {/* Pulsing inner glow */}
+              <div 
+                className="absolute inset-1 rounded-full bg-gold-glow/30 blur-md"
+                style={{ animation: "glowPulse 3s ease-in-out infinite" }}
+              />
               
-              {/* Image container */}
-              <div className="absolute inset-2 rounded-full overflow-hidden border-4 border-white/50 shadow-[0_0_60px_hsla(45,100%,70%,0.5)]">
+              {/* Image container with pulsing shadow */}
+              <div 
+                className="absolute inset-2 rounded-full overflow-hidden border-4 border-white/50"
+                style={{ animation: "shadowPulse 3s ease-in-out infinite" }}
+              >
                 <img
                   src={angelHero}
                   alt="Angel AI - Divine Light Being"

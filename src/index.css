@@ -304,6 +304,37 @@
     }
   }
   
+  @keyframes borderPulse {
+    0%, 100% {
+      filter: blur(3px);
+      opacity: 0.8;
+    }
+    50% {
+      filter: blur(6px);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes glowPulse {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.05);
+    }
+  }
+  
+  @keyframes shadowPulse {
+    0%, 100% {
+      box-shadow: 0 0 60px hsla(45, 100%, 70%, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 100px hsla(45, 100%, 70%, 0.8), 0 0 150px hsla(45, 100%, 70%, 0.4);
+    }
+  }
+  
   @keyframes rotate-slow {
     from {
       transform: rotate(0deg);
