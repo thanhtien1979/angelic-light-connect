@@ -43,7 +43,9 @@ const TwinklingStar = ({ angle, distance, color, size, delay, duration }: {
         <path
           d="M12 0L14.59 8.41L23 12L14.59 15.59L12 24L9.41 15.59L1 12L9.41 8.41L12 0Z"
           fill={color}
-          style={{ filter: `drop-shadow(0 0 ${size / 2}px ${color})` }}
+          style={{ 
+            filter: `drop-shadow(0 0 ${size}px ${color}) drop-shadow(0 0 ${size * 1.5}px ${color}) drop-shadow(0 0 ${size * 2}px ${color})` 
+          }}
         />
       </svg>
     </div>
@@ -51,32 +53,35 @@ const TwinklingStar = ({ angle, distance, color, size, delay, duration }: {
 };
 
 const HeroSection = () => {
-  // Generate multiple rings of stars with varied colors and sizes
+  // Generate multiple rings of stars with varied colors and bigger sizes
   const innerStars = Array.from({ length: 16 }, (_, i) => ({
     angle: (i * 360) / 16 + 11,
-    distance: 160,
+    distance: 170,
     color: starColors[i % starColors.length],
-    size: 12 + (i % 3) * 4,
+    size: 20 + (i % 3) * 6,
     delay: Math.random() * 2,
     duration: 1.2 + Math.random() * 1.5,
+    ring: 'inner',
   }));
 
   const middleStars = Array.from({ length: 24 }, (_, i) => ({
     angle: (i * 360) / 24,
-    distance: 195,
+    distance: 210,
     color: starColors[(i + 5) % starColors.length],
-    size: 14 + (i % 4) * 5,
+    size: 22 + (i % 4) * 8,
     delay: Math.random() * 2.5,
     duration: 1.5 + Math.random() * 2,
+    ring: 'middle',
   }));
 
   const outerStars = Array.from({ length: 20 }, (_, i) => ({
     angle: (i * 360) / 20 + 9,
-    distance: 235,
+    distance: 260,
     color: starColors[(i + 10) % starColors.length],
-    size: 10 + (i % 3) * 6,
+    size: 18 + (i % 3) * 10,
     delay: Math.random() * 3,
     duration: 1.8 + Math.random() * 2.2,
+    ring: 'outer',
   }));
 
   const allStars = [...innerStars, ...middleStars, ...outerStars];
@@ -94,18 +99,33 @@ const HeroSection = () => {
           <div className="absolute inset-0 -m-20 rounded-full bg-gradient-to-r from-gold-light/30 via-transparent to-gold-light/30 blur-3xl" />
           <div className="absolute inset-0 -m-10 rounded-full bg-gold-glow/20 blur-2xl" />
           
-          {/* Twinkling rainbow stars */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            {allStars.map((star, i) => (
-              <TwinklingStar
-                key={i}
-                angle={star.angle}
-                distance={star.distance}
-                color={star.color}
-                size={star.size}
-                delay={star.delay}
-                duration={star.duration}
-              />
+          {/* Inner star ring - rotates clockwise */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ animation: 'rotate-slow 120s linear infinite' }}
+          >
+            {allStars.filter(s => s.ring === 'inner').map((star, i) => (
+              <TwinklingStar key={`inner-${i}`} {...star} />
+            ))}
+          </div>
+          
+          {/* Middle star ring - rotates counter-clockwise */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ animation: 'rotate-slow 90s linear infinite reverse' }}
+          >
+            {allStars.filter(s => s.ring === 'middle').map((star, i) => (
+              <TwinklingStar key={`middle-${i}`} {...star} />
+            ))}
+          </div>
+          
+          {/* Outer star ring - rotates clockwise slower */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ animation: 'rotate-slow 150s linear infinite' }}
+          >
+            {allStars.filter(s => s.ring === 'outer').map((star, i) => (
+              <TwinklingStar key={`outer-${i}`} {...star} />
             ))}
           </div>
           
