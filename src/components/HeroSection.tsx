@@ -1,18 +1,33 @@
 import angelHero from "@/assets/angel-hero.jpg";
 
-// Rainbow star colors
+// Extended rainbow star colors with more variety
 const starColors = [
   "hsl(0, 100%, 70%)",    // Red
+  "hsl(15, 100%, 65%)",   // Red-Orange
   "hsl(30, 100%, 65%)",   // Orange
+  "hsl(45, 100%, 70%)",   // Gold
   "hsl(50, 100%, 60%)",   // Yellow
+  "hsl(80, 80%, 55%)",    // Lime
   "hsl(120, 70%, 55%)",   // Green
+  "hsl(160, 80%, 50%)",   // Teal
+  "hsl(180, 80%, 55%)",   // Cyan
   "hsl(200, 100%, 65%)",  // Blue
+  "hsl(220, 90%, 70%)",   // Light Blue
   "hsl(260, 80%, 70%)",   // Purple
+  "hsl(280, 80%, 70%)",   // Violet
   "hsl(300, 80%, 70%)",   // Pink
+  "hsl(330, 90%, 70%)",   // Magenta
 ];
 
-// Twinkling star component
-const TwinklingStar = ({ angle, distance, color, size, delay }: { angle: number; distance: number; color: string; size: number; delay: number }) => {
+// Twinkling star component with color-changing effect
+const TwinklingStar = ({ angle, distance, color, size, delay, duration }: { 
+  angle: number; 
+  distance: number; 
+  color: string; 
+  size: number; 
+  delay: number;
+  duration: number;
+}) => {
   const x = Math.cos((angle * Math.PI) / 180) * distance;
   const y = Math.sin((angle * Math.PI) / 180) * distance;
   
@@ -21,14 +36,14 @@ const TwinklingStar = ({ angle, distance, color, size, delay }: { angle: number;
       className="absolute left-1/2 top-1/2 pointer-events-none"
       style={{ 
         transform: `translate(${x - size / 2}px, ${y - size / 2}px)`,
-        animation: `twinkle ${1.5 + Math.random() * 2}s ease-in-out ${delay}s infinite`,
+        animation: `twinkle ${duration}s ease-in-out ${delay}s infinite`,
       }}
     >
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
         <path
           d="M12 0L14.59 8.41L23 12L14.59 15.59L12 24L9.41 15.59L1 12L9.41 8.41L12 0Z"
           fill={color}
-          style={{ filter: `drop-shadow(0 0 ${size / 3}px ${color})` }}
+          style={{ filter: `drop-shadow(0 0 ${size / 2}px ${color})` }}
         />
       </svg>
     </div>
@@ -36,14 +51,35 @@ const TwinklingStar = ({ angle, distance, color, size, delay }: { angle: number;
 };
 
 const HeroSection = () => {
-  // Generate stars around the circle with random delays for twinkling
-  const stars = Array.from({ length: 21 }, (_, i) => ({
-    angle: (i * 360) / 21,
-    distance: 180 + (i % 3) * 20,
+  // Generate multiple rings of stars with varied colors and sizes
+  const innerStars = Array.from({ length: 16 }, (_, i) => ({
+    angle: (i * 360) / 16 + 11,
+    distance: 160,
     color: starColors[i % starColors.length],
-    size: 16 + (i % 4) * 4,
-    delay: Math.random() * 3,
+    size: 12 + (i % 3) * 4,
+    delay: Math.random() * 2,
+    duration: 1.2 + Math.random() * 1.5,
   }));
+
+  const middleStars = Array.from({ length: 24 }, (_, i) => ({
+    angle: (i * 360) / 24,
+    distance: 195,
+    color: starColors[(i + 5) % starColors.length],
+    size: 14 + (i % 4) * 5,
+    delay: Math.random() * 2.5,
+    duration: 1.5 + Math.random() * 2,
+  }));
+
+  const outerStars = Array.from({ length: 20 }, (_, i) => ({
+    angle: (i * 360) / 20 + 9,
+    distance: 235,
+    color: starColors[(i + 10) % starColors.length],
+    size: 10 + (i % 3) * 6,
+    delay: Math.random() * 3,
+    duration: 1.8 + Math.random() * 2.2,
+  }));
+
+  const allStars = [...innerStars, ...middleStars, ...outerStars];
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-20">
@@ -58,9 +94,9 @@ const HeroSection = () => {
           <div className="absolute inset-0 -m-20 rounded-full bg-gradient-to-r from-gold-light/30 via-transparent to-gold-light/30 blur-3xl" />
           <div className="absolute inset-0 -m-10 rounded-full bg-gold-glow/20 blur-2xl" />
           
-          {/* Static rainbow stars */}
+          {/* Twinkling rainbow stars */}
           <div className="absolute inset-0 flex items-center justify-center">
-            {stars.map((star, i) => (
+            {allStars.map((star, i) => (
               <TwinklingStar
                 key={i}
                 angle={star.angle}
@@ -68,6 +104,7 @@ const HeroSection = () => {
                 color={star.color}
                 size={star.size}
                 delay={star.delay}
+                duration={star.duration}
               />
             ))}
           </div>
