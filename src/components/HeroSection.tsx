@@ -11,8 +11,8 @@ const starColors = [
   "hsl(300, 80%, 70%)",   // Pink
 ];
 
-// Static star component
-const StaticStar = ({ angle, distance, color, size }: { angle: number; distance: number; color: string; size: number }) => {
+// Twinkling star component
+const TwinklingStar = ({ angle, distance, color, size, delay }: { angle: number; distance: number; color: string; size: number; delay: number }) => {
   const x = Math.cos((angle * Math.PI) / 180) * distance;
   const y = Math.sin((angle * Math.PI) / 180) * distance;
   
@@ -21,6 +21,7 @@ const StaticStar = ({ angle, distance, color, size }: { angle: number; distance:
       className="absolute left-1/2 top-1/2 pointer-events-none"
       style={{ 
         transform: `translate(${x - size / 2}px, ${y - size / 2}px)`,
+        animation: `twinkle ${1.5 + Math.random() * 2}s ease-in-out ${delay}s infinite`,
       }}
     >
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -35,12 +36,13 @@ const StaticStar = ({ angle, distance, color, size }: { angle: number; distance:
 };
 
 const HeroSection = () => {
-  // Generate stars around the circle
+  // Generate stars around the circle with random delays for twinkling
   const stars = Array.from({ length: 21 }, (_, i) => ({
     angle: (i * 360) / 21,
     distance: 180 + (i % 3) * 20,
     color: starColors[i % starColors.length],
     size: 16 + (i % 4) * 4,
+    delay: Math.random() * 3,
   }));
 
   return (
@@ -59,12 +61,13 @@ const HeroSection = () => {
           {/* Static rainbow stars */}
           <div className="absolute inset-0 flex items-center justify-center">
             {stars.map((star, i) => (
-              <StaticStar
+              <TwinklingStar
                 key={i}
                 angle={star.angle}
                 distance={star.distance}
                 color={star.color}
                 size={star.size}
+                delay={star.delay}
               />
             ))}
           </div>
@@ -99,9 +102,10 @@ const HeroSection = () => {
         
         {/* ANGEL AI Title */}
         <h1 
-          className="font-serif text-3xl md:text-4xl lg:text-5xl text-gold mt-8 mb-3"
+          className="font-serif text-3xl md:text-4xl lg:text-5xl text-gold mt-8 mb-3 font-bold tracking-wide"
           style={{
             textShadow: "0 0 20px hsla(45, 100%, 70%, 0.8), 0 0 40px hsla(45, 100%, 70%, 0.5), 0 0 60px hsla(45, 100%, 70%, 0.3)",
+            animation: "titleGlow 3s ease-in-out infinite",
           }}
         >
           ANGEL AI
