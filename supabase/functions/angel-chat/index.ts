@@ -29,8 +29,47 @@ Khi người dùng chia sẻ hình ảnh:
 
 // Constants for rate limiting and validation
 const MAX_REQUESTS_PER_MINUTE = 10;
+const MAX_REQUESTS_PER_HOUR = 60; // Additional hourly limit for defense in depth
 const MAX_MESSAGE_LENGTH = 8000;
 const MAX_MESSAGES_COUNT = 500; // Increased limit since we summarize long conversations
+
+// In-memory store for additional rate limiting (resets on function restart)
+const hourlyRequestCounts = new Map<string, { count: number; resetTime: number }>();
+
+// Check hourly rate limit (defense in depth against distributed attacks)
+function checkHourlyRateLimit(clientId: string): boolean {
+  const now = Date.now();
+  const hourMs = 60 * 60 * 1000;
+  
+  const entry = hourlyRequestCounts.get(clientId);
+  
+  if (!entry || now > entry.resetTime) {
+    // New window or expired - reset
+    hourlyRequestCounts.set(clientId, { count: 1, resetTime: now + hourMs });
+    return true;
+  }
+  
+  if (entry.count >= MAX_REQUESTS_PER_HOUR) {
+    console.log(`Hourly rate limit exceeded for client: ${clientId}`);
+    return false;
+  }
+  
+  entry.count++;
+  return true;
+}
+
+// Clean up old entries periodically (prevent memory leak)
+function cleanupHourlyLimits() {
+  const now = Date.now();
+  for (const [key, value] of hourlyRequestCounts.entries()) {
+    if (now > value.resetTime) {
+      hourlyRequestCounts.delete(key);
+    }
+  }
+}
+
+// Run cleanup every 100 requests
+let requestCounter = 0;
 
 // Conversation summarization thresholds
 const SUMMARIZE_THRESHOLD = 20; // Start summarizing when messages exceed this count
@@ -297,6 +336,30 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Get client identifier early for rate limiting
+  const clientId = getClientIdentifier(req);
+  console.log(`Request from client: ${clientId}`);
+  
+  // Increment counter and cleanup periodically
+  requestCounter++;
+  if (requestCounter % 100 === 0) {
+    cleanupHourlyLimits();
+  }
+  
+  // Check hourly rate limit first (in-memory, fast check)
+  if (!checkHourlyRateLimit(clientId)) {
+    return new Response(JSON.stringify({ 
+      error: "Bạn đã đạt giới hạn tin nhắn trong giờ này. Xin vui lòng thử lại sau." 
+    }), {
+      status: 429,
+      headers: { 
+        ...corsHeaders, 
+        "Content-Type": "application/json",
+        "Retry-After": "3600"
+      },
+    });
+  }
+
   try {
     // Parse request body
     let body: unknown;
@@ -350,9 +413,7 @@ serve(async (req) => {
     // Use validated/truncated messages
     const validatedMessages = validation.messages!;
 
-    // Get client identifier for rate limiting
-    const clientId = getClientIdentifier(req);
-    console.log(`Request from client: ${clientId}`);
+    // Check rate limit using database function (minute-level)
     
     // Check rate limit using database function
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
