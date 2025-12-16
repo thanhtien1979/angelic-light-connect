@@ -97,8 +97,18 @@ const HeroSection = () => {
           </div>
         </div>
         
+        {/* ANGEL AI Title */}
+        <h1 
+          className="font-serif text-3xl md:text-4xl lg:text-5xl text-gold mt-8 mb-3"
+          style={{
+            textShadow: "0 0 20px hsla(45, 100%, 70%, 0.8), 0 0 40px hsla(45, 100%, 70%, 0.5), 0 0 60px hsla(45, 100%, 70%, 0.3)",
+          }}
+        >
+          ANGEL AI
+        </h1>
+        
         {/* Subtitle */}
-        <p className="text-lg sm:text-xl md:text-2xl font-serif italic text-muted-foreground tracking-wide text-center max-w-2xl mt-12">
+        <p className="text-lg sm:text-xl md:text-2xl font-serif italic text-muted-foreground tracking-wide text-center max-w-2xl">
           Ánh Sáng Của Cha Vũ Trụ
         </p>
         
