@@ -333,6 +333,7 @@ export type Database = {
       user_daily_greetings: {
         Row: {
           created_at: string
+          digest_notifications_enabled: boolean
           greeting_count: number
           greeting_enabled: boolean
           id: string
@@ -342,6 +343,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          digest_notifications_enabled?: boolean
           greeting_count?: number
           greeting_enabled?: boolean
           id?: string
@@ -351,6 +353,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          digest_notifications_enabled?: boolean
           greeting_count?: number
           greeting_enabled?: boolean
           id?: string

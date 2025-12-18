@@ -10,6 +10,7 @@ export const useDailyGreeting = () => {
   const [shouldShowGreeting, setShouldShowGreeting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [greetingEnabled, setGreetingEnabled] = useState(true);
+  const [digestNotificationsEnabled, setDigestNotificationsEnabled] = useState(true);
   const [hasNewGreeting, setHasNewGreeting] = useState(false);
 
   // Get today's date in user's timezone
@@ -33,7 +34,7 @@ export const useDailyGreeting = () => {
 
   // Check and update backend
   const checkAndUpdateBackend = useCallback(async () => {
-    if (!user?.id) return { shouldShow: false, enabled: true };
+    if (!user?.id) return { shouldShow: false, enabled: true, digestNotifications: true };
 
     try {
       const today = getTodayDate();
@@ -41,13 +42,13 @@ export const useDailyGreeting = () => {
       // Check existing greeting record
       const { data: existing, error: fetchError } = await supabase
         .from("user_daily_greetings")
-        .select("last_greeting_date, greeting_enabled, greeting_count")
+        .select("last_greeting_date, greeting_enabled, greeting_count, digest_notifications_enabled")
         .eq("user_id", user.id)
         .maybeSingle();
 
       if (fetchError) {
         console.error("Error fetching greeting data:", fetchError);
-        return { shouldShow: false, enabled: true };
+        return { shouldShow: false, enabled: true, digestNotifications: true };
       }
 
       // If no record, create one
@@ -59,13 +60,14 @@ export const useDailyGreeting = () => {
             last_greeting_date: today,
             greeting_count: 1,
             greeting_enabled: true,
+            digest_notifications_enabled: true,
           });
-        return { shouldShow: true, enabled: true };
+        return { shouldShow: true, enabled: true, digestNotifications: true };
       }
 
       // Check if greeting is disabled
       if (!existing.greeting_enabled) {
-        return { shouldShow: false, enabled: false };
+        return { shouldShow: false, enabled: false, digestNotifications: existing.digest_notifications_enabled };
       }
 
       const lastDate = existing.last_greeting_date;
@@ -78,13 +80,13 @@ export const useDailyGreeting = () => {
             greeting_count: existing.greeting_count + 1,
           })
           .eq("user_id", user.id);
-        return { shouldShow: true, enabled: true };
+        return { shouldShow: true, enabled: true, digestNotifications: existing.digest_notifications_enabled };
       }
 
-      return { shouldShow: false, enabled: existing.greeting_enabled };
+      return { shouldShow: false, enabled: existing.greeting_enabled, digestNotifications: existing.digest_notifications_enabled };
     } catch (error) {
       console.error("Error in greeting check:", error);
-      return { shouldShow: false, enabled: true };
+      return { shouldShow: false, enabled: true, digestNotifications: true };
     }
   }, [user?.id, getTodayDate]);
 
@@ -124,6 +126,42 @@ export const useDailyGreeting = () => {
     }
   }, [user?.id, greetingEnabled, getTodayDate]);
 
+  // Toggle digest notifications preference
+  const toggleDigestNotifications = useCallback(async () => {
+    if (!user?.id) return;
+
+    const newValue = !digestNotificationsEnabled;
+    setDigestNotificationsEnabled(newValue);
+
+    try {
+      const { data: existing } = await supabase
+        .from("user_daily_greetings")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("user_daily_greetings")
+          .update({ digest_notifications_enabled: newValue })
+          .eq("user_id", user.id);
+      } else {
+        await supabase
+          .from("user_daily_greetings")
+          .insert({
+            user_id: user.id,
+            last_greeting_date: getTodayDate(),
+            greeting_count: 0,
+            greeting_enabled: true,
+            digest_notifications_enabled: newValue,
+          });
+      }
+    } catch (error) {
+      console.error("Error toggling digest notifications:", error);
+      setDigestNotificationsEnabled(!newValue); // Revert on error
+    }
+  }, [user?.id, digestNotificationsEnabled, getTodayDate]);
+
   // Main effect to check greeting status
   useEffect(() => {
     const checkGreeting = async () => {
@@ -139,16 +177,18 @@ export const useDailyGreeting = () => {
       
       if (!shouldShowLocal) {
         // Already greeted today (locally), but still fetch enabled status
-        const { enabled } = await checkAndUpdateBackend();
+        const { enabled, digestNotifications } = await checkAndUpdateBackend();
         setGreetingEnabled(enabled);
+        setDigestNotificationsEnabled(digestNotifications);
         setIsLoading(false);
         setShouldShowGreeting(false);
         return;
       }
 
       // Verify with backend
-      const { shouldShow, enabled } = await checkAndUpdateBackend();
+      const { shouldShow, enabled, digestNotifications } = await checkAndUpdateBackend();
       setGreetingEnabled(enabled);
+      setDigestNotificationsEnabled(digestNotifications);
       
       if (shouldShow && enabled) {
         updateLocalStorage();
@@ -197,5 +237,7 @@ export const useDailyGreeting = () => {
     toggleGreetingEnabled,
     hasNewGreeting,
     markGreetingSeen,
+    digestNotificationsEnabled,
+    toggleDigestNotifications,
   };
 };
