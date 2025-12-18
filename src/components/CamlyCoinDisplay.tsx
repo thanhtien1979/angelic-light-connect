@@ -3,7 +3,7 @@ import { Sparkles, TrendingUp, Star } from "lucide-react";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useAuth } from "@/hooks/useAuth";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
+import { LightBurstAnimation } from "@/components/LightBurstAnimation";
 interface CamlyCoinDisplayProps {
   variant?: "compact" | "full";
   showLifetime?: boolean;
@@ -112,57 +112,62 @@ export const CamlyCoinNotification = ({
   onClose: () => void;
 }) => {
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.9 }}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 max-w-sm w-full mx-4"
-        >
+    <>
+      {/* Light burst animation - plays with notification */}
+      <LightBurstAnimation show={show} />
+      
+      <AnimatePresence>
+        {show && (
           <motion.div
-            className="p-4 rounded-2xl bg-gradient-to-r from-gold/30 via-gold-light/20 to-gold/30 backdrop-blur-xl border border-gold/40 shadow-lg shadow-gold/20"
-            animate={{
-              boxShadow: [
-                "0 0 20px hsla(45, 100%, 70%, 0.2)",
-                "0 0 40px hsla(45, 100%, 70%, 0.4)",
-                "0 0 20px hsla(45, 100%, 70%, 0.2)",
-              ],
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 max-w-sm w-full mx-4"
           >
-            <div className="flex items-start gap-3">
-              <motion.div
-                className="p-2 rounded-full bg-gold/30"
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 0.5, repeat: 2 }}
-              >
-                <Sparkles className="w-5 h-5 text-gold" />
-              </motion.div>
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold text-gold">
-                    +{coins.toLocaleString("vi-VN")}
-                  </span>
-                  <span className="text-sm text-gold-dark">Happy Camly Coin</span>
+            <motion.div
+              className="p-4 rounded-2xl bg-gradient-to-r from-gold/30 via-gold-light/20 to-gold/30 backdrop-blur-xl border border-gold/40 shadow-lg shadow-gold/20"
+              animate={{
+                boxShadow: [
+                  "0 0 20px hsla(45, 100%, 70%, 0.2)",
+                  "0 0 40px hsla(45, 100%, 70%, 0.4)",
+                  "0 0 20px hsla(45, 100%, 70%, 0.2)",
+                ],
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <div className="flex items-start gap-3">
+                <motion.div
+                  className="p-2 rounded-full bg-gold/30"
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 0.5, repeat: 2 }}
+                >
+                  <Sparkles className="w-5 h-5 text-gold" />
+                </motion.div>
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg font-bold text-gold">
+                      +{coins.toLocaleString("vi-VN")}
+                    </span>
+                    <span className="text-sm text-gold-dark">Happy Camly Coin</span>
+                  </div>
+                  <p className="text-sm text-foreground/80 leading-relaxed">
+                    {message}
+                  </p>
                 </div>
-                <p className="text-sm text-foreground/80 leading-relaxed">
-                  {message}
-                </p>
-              </div>
 
-              <button
-                onClick={onClose}
-                className="p-1 rounded-full hover:bg-gold/20 transition-colors"
-              >
-                <span className="sr-only">Đóng</span>
-                ×
-              </button>
-            </div>
+                <button
+                  onClick={onClose}
+                  className="p-1 rounded-full hover:bg-gold/20 transition-colors"
+                >
+                  <span className="sr-only">Đóng</span>
+                  ×
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
