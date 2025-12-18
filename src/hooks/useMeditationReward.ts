@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
+import { useLightSound } from "@/hooks/useLightSound";
 
 interface UseMeditationRewardProps {
   currentTime: number;
@@ -48,6 +49,7 @@ export const useMeditationReward = ({
 }: UseMeditationRewardProps) => {
   const { user } = useAuth();
   const { awardMeditationCompletion } = useCamlyCoin();
+  const { playLightChime } = useLightSound();
   const [hasTriggeredReward, setHasTriggeredReward] = useState(false);
   const [lastRewardResult, setLastRewardResult] = useState<RewardResult | null>(null);
   const [showNotification, setShowNotification] = useState(false);
@@ -99,6 +101,9 @@ export const useMeditationReward = ({
             saveRewardedTrack(trackId);
             rewardedTracksRef.current.add(trackId);
             
+            // Play gentle light chime sound
+            playLightChime();
+            
             setShowNotification(true);
             // Auto-hide notification after 6 seconds for calm experience
             setTimeout(() => setShowNotification(false), 6000);
@@ -122,6 +127,7 @@ export const useMeditationReward = ({
     trackId,
     trackName,
     awardMeditationCompletion,
+    playLightChime,
   ]);
 
   const dismissNotification = useCallback(() => {
