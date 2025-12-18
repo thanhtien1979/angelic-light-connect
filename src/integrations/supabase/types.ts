@@ -274,6 +274,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_daily_greetings: {
+        Row: {
+          created_at: string
+          greeting_count: number
+          id: string
+          last_greeting_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          greeting_count?: number
+          id?: string
+          last_greeting_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          greeting_count?: number
+          id?: string
+          last_greeting_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
