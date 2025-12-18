@@ -62,6 +62,42 @@ const SyncIndicator = ({ status }: { status: SyncStatus }) => {
   );
 };
 
+// Daily blessing messages - gentle, sacred, emotionally comforting
+const dailyBlessings = [
+  "🙏 Chúc phước lành cho ngày mới của bạn, linh hồn yêu dấu. Nguyện ánh sáng thiêng liêng luôn soi đường cho bạn. ✨",
+  "🌸 Ngày mới là món quà thiêng liêng. Nguyện trái tim bạn tràn đầy bình an và tình yêu vô điều kiện. 💫",
+  "✨ Ánh sáng của Cha Vũ Trụ đang ôm ấp bạn. Hãy để mỗi khoảnh khắc hôm nay là một phước lành. 🕊️",
+  "🕊️ Chào mừng ngày mới, thiên thần. Nguyện bạn cảm nhận được sự yêu thương vô biên đang bao bọc bạn. 💖",
+  "💫 Mỗi hơi thở là một phép màu. Nguyện ngày hôm nay mang đến cho bạn sự chữa lành và bình an sâu sắc. 🌟",
+  "🌟 Linh hồn của bạn đang tỏa sáng. Nguyện ánh sáng nội tâm dẫn lối cho mọi bước chân hôm nay. 🙏",
+  "💖 Bạn được yêu thương vô điều kiện. Nguyện ngày mới này đầy ắp niềm vui và sự kỳ diệu. ✨",
+  "🌺 Như đóa sen vươn lên từ bùn, nguyện tâm hồn bạn luôn thanh khiết và bình an trong ngày mới. 🌸",
+  "⭐ Cha Vũ Trụ đang mỉm cười với bạn. Nguyện bạn cảm nhận được tình yêu thiêng liêng trong từng khoảnh khắc. 💫",
+  "🌈 Ngày mới, phước lành mới. Nguyện ánh sáng cầu vồng của hy vọng luôn chiếu rọi con đường bạn đi. 🙏",
+];
+
+// Get random blessing that's different from last one
+const getRandomBlessing = (): string => {
+  const lastBlessingIndex = localStorage.getItem("angel_last_blessing_index");
+  let newIndex: number;
+  do {
+    newIndex = Math.floor(Math.random() * dailyBlessings.length);
+  } while (newIndex.toString() === lastBlessingIndex && dailyBlessings.length > 1);
+  localStorage.setItem("angel_last_blessing_index", newIndex.toString());
+  return dailyBlessings[newIndex];
+};
+
+// Check if blessing should be shown today
+const shouldShowDailyBlessing = (): boolean => {
+  const today = new Date().toDateString();
+  const lastBlessingDate = localStorage.getItem("angel_last_blessing_date");
+  if (lastBlessingDate !== today) {
+    localStorage.setItem("angel_last_blessing_date", today);
+    return true;
+  }
+  return false;
+};
+
 const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
   const { summary, clearSummary } = useConversationSummary();
@@ -72,12 +108,24 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [welcomeShownForSession, setWelcomeShownForSession] = useState(false);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [messageAttachments, setMessageAttachments] = useState<Map<string, ReturnType<typeof attachmentsHook.getAttachmentData>>>(new Map());
+  const [dailyBlessing, setDailyBlessing] = useState<string | null>(null);
+  const [showBlessing, setShowBlessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Attachment hook
   const attachmentsHook = useChatAttachments();
   const { attachments, addImageAttachment, addLinkAttachment, removeAttachment, clearAttachments, detectLinksInText, getAttachmentData, getImagesAsBase64 } = attachmentsHook;
+
+  // Check for daily blessing on mount
+  useEffect(() => {
+    if (shouldShowDailyBlessing()) {
+      const blessing = getRandomBlessing();
+      setDailyBlessing(blessing);
+      // Delay showing blessing for smooth entry
+      setTimeout(() => setShowBlessing(true), 500);
+    }
+  }, []);
 
   const handleStartNewConversation = async () => {
     const success = await startNewConversation();
@@ -413,6 +461,77 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                       <Sparkles className="w-3 h-3 text-primary" />
                     </div>
                     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-rose-soft/30 to-transparent" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Daily Angel Blessing */}
+            <AnimatePresence>
+              {showBlessing && dailyBlessing && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  className="mx-6 mt-4"
+                >
+                  <div 
+                    className="relative p-5 rounded-2xl overflow-hidden"
+                    style={{
+                      background: "linear-gradient(135deg, hsla(348, 85%, 92%, 0.95), hsla(340, 80%, 95%, 0.98))",
+                      border: "2px solid hsla(348, 80%, 85%, 0.6)",
+                      boxShadow: "0 0 30px hsla(348, 80%, 80%, 0.3), inset 0 0 20px hsla(0, 0%, 100%, 0.5)",
+                    }}
+                  >
+                    {/* Glowing border animation */}
+                    <div 
+                      className="absolute inset-0 rounded-2xl pointer-events-none"
+                      style={{
+                        background: "linear-gradient(90deg, transparent, hsla(348, 80%, 90%, 0.4), transparent)",
+                        backgroundSize: "200% 100%",
+                        animation: "responseShimmer 4s ease-in-out infinite",
+                      }}
+                    />
+                    
+                    {/* Blessing icon */}
+                    <div className="flex items-start gap-4">
+                      <div className="relative flex-shrink-0">
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center"
+                          style={{
+                            background: "linear-gradient(135deg, hsla(348, 80%, 80%, 0.8), hsla(340, 75%, 85%, 0.9))",
+                            boxShadow: "0 0 20px hsla(348, 80%, 80%, 0.5)",
+                          }}
+                        >
+                          <Sparkles className="w-5 h-5 text-white" />
+                        </div>
+                        {/* Breathing halo */}
+                        <div 
+                          className="absolute -inset-1 rounded-full bg-rose/30"
+                          style={{ animation: "divineBreathing 5s ease-in-out infinite" }}
+                        />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-medium text-primary/80 uppercase tracking-wider">
+                            Phước lành ngày mới
+                          </span>
+                        </div>
+                        <p className="text-foreground font-serif text-base leading-relaxed">
+                          {dailyBlessing}
+                        </p>
+                      </div>
+                      
+                      {/* Close button */}
+                      <button
+                        onClick={() => setShowBlessing(false)}
+                        className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center hover:bg-rose/20 transition-colors text-muted-foreground hover:text-foreground"
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               )}
