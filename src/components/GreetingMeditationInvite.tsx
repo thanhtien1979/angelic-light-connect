@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, X, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Play, Pause, X, Sparkles, Volume2, VolumeX } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useAmbientSound, AMBIENT_SOUNDS, AmbientSoundType } from "@/hooks/useAmbientSound";
 
 interface GreetingMeditationInviteProps {
   greetingTheme?: string;
@@ -18,10 +20,25 @@ const MEDITATION_THEMES = [
 ];
 
 const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditationInviteProps) => {
+  const { user } = useAuth();
   const [isActive, setIsActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [selectedTheme, setSelectedTheme] = useState(MEDITATION_THEMES[0]);
+  const [hasCompleted, setHasCompleted] = useState(false);
+  const [showSoundPicker, setShowSoundPicker] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const totalDurationRef = useRef<number>(0);
+
+  const {
+    isPlaying: isSoundPlaying,
+    selectedSound,
+    setSelectedSound,
+    volume,
+    setVolume,
+    playSound,
+    stopSound,
+  } = useAmbientSound();
 
   // Select meditation theme based on greeting
   useEffect(() => {
@@ -39,12 +56,16 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
     setSelectedTheme(MEDITATION_THEMES[randomIndex]);
   }, [greetingTheme]);
 
+  // Timer effect
   useEffect(() => {
     if (isActive && timeRemaining > 0) {
       intervalRef.current = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
             setIsActive(false);
+            setHasCompleted(true);
+            stopSound();
+            saveMeditationSession();
             return 0;
           }
           return prev - 1;
@@ -59,18 +80,79 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
     };
   }, [isActive, timeRemaining]);
 
+  // Save meditation session to database
+  const saveMeditationSession = async () => {
+    if (!user?.id) return;
+
+    const actualDuration = totalDurationRef.current - timeRemaining;
+    if (actualDuration < 10) return; // Don't save very short sessions
+
+    try {
+      await supabase.from("meditation_history").insert({
+        user_id: user.id,
+        duration_seconds: actualDuration,
+        theme: selectedTheme.theme,
+        ambient_sound: selectedSound,
+      });
+    } catch (error) {
+      console.error("Error saving meditation session:", error);
+    }
+  };
+
   const startMeditation = () => {
-    setTimeRemaining(selectedTheme.duration * 60);
+    const duration = selectedTheme.duration * 60;
+    setTimeRemaining(duration);
+    totalDurationRef.current = duration;
+    startTimeRef.current = Date.now();
     setIsActive(true);
+    setHasCompleted(false);
+    
+    // Play ambient sound if not silence
+    if (selectedSound !== "silence") {
+      playSound(selectedSound);
+    }
   };
 
   const toggleMeditation = () => {
     if (isActive) {
       setIsActive(false);
+      stopSound();
     } else if (timeRemaining > 0) {
       setIsActive(true);
+      if (selectedSound !== "silence") {
+        playSound(selectedSound);
+      }
     } else {
       startMeditation();
+    }
+  };
+
+  const handleClose = () => {
+    stopSound();
+    // Save partial session if meditation was in progress
+    if (startTimeRef.current > 0 && !hasCompleted) {
+      const actualDuration = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      if (actualDuration >= 30 && user?.id) {
+        supabase.from("meditation_history").insert({
+          user_id: user.id,
+          duration_seconds: actualDuration,
+          theme: selectedTheme.theme,
+          ambient_sound: selectedSound,
+        });
+      }
+    }
+    onClose();
+  };
+
+  const handleSoundSelect = (sound: AmbientSoundType) => {
+    setSelectedSound(sound);
+    setShowSoundPicker(false);
+    
+    if (isActive) {
+      stopSound();
+      if (sound !== "silence") {
+        playSound(sound);
+      }
     }
   };
 
@@ -81,8 +163,10 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
   };
 
   const progress = timeRemaining > 0 
-    ? ((selectedTheme.duration * 60 - timeRemaining) / (selectedTheme.duration * 60)) * 100 
-    : 0;
+    ? ((totalDurationRef.current - timeRemaining) / totalDurationRef.current) * 100 
+    : hasCompleted ? 100 : 0;
+
+  const currentSoundOption = AMBIENT_SOUNDS.find(s => s.id === selectedSound);
 
   return (
     <AnimatePresence>
@@ -91,7 +175,7 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
-        onClick={onClose}
+        onClick={handleClose}
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -107,14 +191,14 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
           <div className="relative p-6 rounded-3xl bg-card/95 backdrop-blur-xl border border-gold/30 shadow-2xl shadow-gold/10">
             {/* Close button */}
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/50 transition-colors"
             >
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
 
             {/* Timer circle */}
-            <div className="relative w-40 h-40 mx-auto mb-6">
+            <div className="relative w-40 h-40 mx-auto mb-4">
               {/* Background circle */}
               <svg className="absolute inset-0 w-full h-full -rotate-90">
                 <circle
@@ -182,8 +266,80 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
               )}
             </div>
 
+            {/* Ambient Sound Selector */}
+            <div className="mb-4">
+              <button
+                onClick={() => setShowSoundPicker(!showSoundPicker)}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-sm"
+              >
+                <span>{currentSoundOption?.icon}</span>
+                <span className="text-foreground/80">{currentSoundOption?.nameVi}</span>
+                {selectedSound !== "silence" && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setVolume(volume === 0 ? 0.3 : 0);
+                    }}
+                    className="ml-2 p-1 rounded-full hover:bg-muted/50"
+                  >
+                    {volume === 0 ? (
+                      <VolumeX className="w-3 h-3 text-muted-foreground" />
+                    ) : (
+                      <Volume2 className="w-3 h-3 text-muted-foreground" />
+                    )}
+                  </button>
+                )}
+              </button>
+
+              {/* Sound picker dropdown */}
+              <AnimatePresence>
+                {showSoundPicker && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-2 p-2 rounded-lg bg-muted/20 border border-border/30 grid grid-cols-5 gap-1">
+                      {AMBIENT_SOUNDS.map((sound) => (
+                        <button
+                          key={sound.id}
+                          onClick={() => handleSoundSelect(sound.id)}
+                          className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
+                            selectedSound === sound.id
+                              ? "bg-gold/20 border border-gold/40"
+                              : "hover:bg-muted/30"
+                          }`}
+                        >
+                          <span className="text-lg">{sound.icon}</span>
+                          <span className="text-[10px] text-muted-foreground">{sound.nameVi}</span>
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Volume slider */}
+                    {selectedSound !== "silence" && (
+                      <div className="mt-2 px-2 flex items-center gap-2">
+                        <VolumeX className="w-3 h-3 text-muted-foreground" />
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={volume}
+                          onChange={(e) => setVolume(parseFloat(e.target.value))}
+                          className="flex-1 h-1 appearance-none bg-muted/50 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-gold [&::-webkit-slider-thumb]:rounded-full"
+                        />
+                        <Volume2 className="w-3 h-3 text-muted-foreground" />
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Theme message */}
-            <p className="text-center text-sm text-foreground/80 leading-relaxed mb-6 px-2">
+            <p className="text-center text-sm text-foreground/80 leading-relaxed mb-4 px-2">
               {selectedTheme.message}
             </p>
 
@@ -213,14 +369,14 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
             </motion.button>
 
             {/* Invitation text */}
-            {!isActive && timeRemaining === 0 && (
+            {!isActive && timeRemaining === 0 && !hasCompleted && (
               <p className="text-center text-xs text-muted-foreground/60 mt-4">
                 Đây là lời mời, không phải nhiệm vụ ✨
               </p>
             )}
 
             {/* Completion message */}
-            {!isActive && timeRemaining === 0 && progress > 0 && (
+            {hasCompleted && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -229,6 +385,9 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
                 <Sparkles className="w-5 h-5 text-gold mx-auto mb-1" />
                 <p className="text-sm text-foreground/80">
                   Con đã hoàn thành khoảnh khắc tĩnh lặng
+                </p>
+                <p className="text-xs text-muted-foreground/60 mt-1">
+                  Khoảnh khắc này đã được ghi lại
                 </p>
               </motion.div>
             )}
