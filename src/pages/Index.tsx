@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
 import GlobalAngelicAura from "@/components/GlobalAngelicAura";
 import { GentleMeditationReminder } from "@/components/GentleMeditationReminder";
+import QuickBreathingWidget from "@/components/QuickBreathingWidget";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -44,6 +45,9 @@ const Index = () => {
 
       {/* Floating Mini Meditation Player */}
       <MiniMeditationPlayer />
+
+      {/* Quick Breathing Widget */}
+      <QuickBreathingWidget />
     </div>
   );
 };
