@@ -12,6 +12,7 @@ import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinD
 import { LightJournal } from "@/components/LightJournal";
 import { ReflectionModal } from "@/components/ReflectionModal";
 import SacredGeometryWatermark from "@/components/SacredGeometryWatermark";
+import MeditationYearWheel from "@/components/MeditationYearWheel";
 import { MeditationReminderSettings } from "@/components/MeditationReminderSettings";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
@@ -322,6 +323,11 @@ const Profile = () => {
               <h4 className="font-serif text-foreground">Khoảnh Khắc Tĩnh Lặng</h4>
             </div>
             <MeditationHistoryLog />
+          </div>
+
+          {/* Yearly Meditation Journey */}
+          <div className="mt-6 pt-6 border-t border-border/30">
+            <MeditationYearWheel />
           </div>
         </motion.section>
 
