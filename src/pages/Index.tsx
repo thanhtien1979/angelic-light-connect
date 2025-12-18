@@ -10,12 +10,15 @@ import Testimonials from "@/components/Testimonials";
 import CallToAction from "@/components/CallToAction";
 import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
+import GlobalAngelicAura from "@/components/GlobalAngelicAura";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
+      {/* Global Angelic Aura - Divine presence throughout */}
+      <GlobalAngelicAura />
       
       {/* Navigation */}
       <NavigationHeader />
