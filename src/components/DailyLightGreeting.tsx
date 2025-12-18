@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Sparkles, Sun } from "lucide-react";
+import { useDailyGreeting } from "@/hooks/useDailyGreeting";
 import { useAuth } from "@/hooks/useAuth";
 
 const spiritualGreetings = [
@@ -36,37 +37,32 @@ const spiritualGreetings = [
 
 const DailyLightGreeting = () => {
   const { user } = useAuth();
+  const { shouldShowGreeting, dismissGreeting, isLoading } = useDailyGreeting();
+  const prefersReducedMotion = useReducedMotion();
   const [isVisible, setIsVisible] = useState(false);
   const [greeting, setGreeting] = useState(spiritualGreetings[0]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || isLoading) return;
 
-    const checkAndShowGreeting = () => {
-      const lastShown = localStorage.getItem("dailyLightGreeting_lastShown");
-      const today = new Date().toDateString();
-
-      if (lastShown !== today) {
-        // Select a random greeting
-        const randomIndex = Math.floor(Math.random() * spiritualGreetings.length);
-        setGreeting(spiritualGreetings[randomIndex]);
-        
-        // Show after a small delay for smoother experience
-        setTimeout(() => {
-          setIsVisible(true);
-        }, 1500);
-      }
-    };
-
-    checkAndShowGreeting();
-  }, [user]);
+    if (shouldShowGreeting) {
+      // Select a random greeting
+      const randomIndex = Math.floor(Math.random() * spiritualGreetings.length);
+      setGreeting(spiritualGreetings[randomIndex]);
+      
+      // Show after a small delay for smoother experience
+      setTimeout(() => {
+        setIsVisible(true);
+      }, 1500);
+    }
+  }, [user, shouldShowGreeting, isLoading]);
 
   const handleDismiss = () => {
     setIsVisible(false);
-    localStorage.setItem("dailyLightGreeting_lastShown", new Date().toDateString());
+    dismissGreeting();
   };
 
-  if (!user) return null;
+  if (!user || isLoading) return null;
 
   return (
     <AnimatePresence>
@@ -79,9 +75,9 @@ const DailyLightGreeting = () => {
           onClick={handleDismiss}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-md overflow-hidden"
