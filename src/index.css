@@ -6,80 +6,86 @@
 
 @layer base {
   :root {
-    /* Divine Color Palette */
-    --background: 0 0% 100%;
-    --foreground: 40 10% 20%;
+    /* Divine Rose Aura Color Palette */
+    --background: 340 100% 99%; /* Rose White #FFF7F9 */
+    --foreground: 351 24% 24%; /* Soft deep rose-brown #4A2F35 */
     
-    /* Sacred Gold */
-    --gold: 45 90% 65%;
-    --gold-light: 45 100% 85%;
-    --gold-glow: 45 100% 75%;
+    /* Sacred Rose */
+    --rose: 348 68% 86%; /* Blush Pink #F6C1CC */
+    --rose-light: 340 100% 99%; /* Rose White */
+    --rose-glow: 348 68% 86%; /* Blush Pink */
+    --rose-soft: 349 55% 78%; /* Soft Rose #E9A6B1 */
     
-    /* Celestial Blue */
-    --sky: 200 80% 85%;
-    --sky-light: 200 90% 95%;
+    /* Legacy gold mapped to rose for compatibility */
+    --gold: 348 68% 86%;
+    --gold-light: 340 100% 99%;
+    --gold-glow: 348 68% 86%;
     
-    /* Rainbow Prism */
-    --prism-start: 280 70% 80%;
-    --prism-mid: 200 80% 80%;
-    --prism-end: 45 90% 80%;
+    /* Celestial Rose */
+    --sky: 340 50% 92%;
+    --sky-light: 340 100% 97%;
+    
+    /* Rainbow Prism - Rose tinted */
+    --prism-start: 348 70% 85%;
+    --prism-mid: 340 60% 90%;
+    --prism-end: 349 55% 78%;
     
     /* UI Colors */
-    --card: 0 0% 100%;
-    --card-foreground: 40 10% 20%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 40 10% 20%;
-    --primary: 45 90% 65%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 200 80% 95%;
-    --secondary-foreground: 40 10% 30%;
-    --muted: 45 20% 96%;
-    --muted-foreground: 40 10% 50%;
-    --accent: 45 100% 85%;
-    --accent-foreground: 40 10% 20%;
+    --card: 343 50% 97%; /* Warm Cloud #FAF3F5 */
+    --card-foreground: 351 24% 24%;
+    --popover: 343 50% 97%;
+    --popover-foreground: 351 24% 24%;
+    --primary: 348 68% 86%; /* Blush Pink */
+    --primary-foreground: 351 24% 24%;
+    --secondary: 343 50% 97%; /* Warm Cloud */
+    --secondary-foreground: 350 25% 38%; /* Text secondary #7A4A52 */
+    --muted: 340 40% 96%;
+    --muted-foreground: 350 25% 38%;
+    --accent: 348 68% 86%; /* Blush Pink */
+    --accent-foreground: 351 24% 24%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 45 30% 90%;
-    --input: 45 30% 90%;
-    --ring: 45 90% 65%;
-    --radius: 1rem;
+    --border: 349 55% 88%; /* Soft Rose lighter */
+    --input: 349 55% 92%;
+    --ring: 348 68% 86%;
+    --radius: 1.25rem; /* Larger rounded corners */
     
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 40 10% 26%;
-    --sidebar-primary: 45 90% 65%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 45 20% 96%;
-    --sidebar-accent-foreground: 40 10% 20%;
-    --sidebar-border: 45 30% 90%;
-    --sidebar-ring: 45 90% 65%;
+    --sidebar-background: 340 100% 99%;
+    --sidebar-foreground: 351 24% 24%;
+    --sidebar-primary: 348 68% 86%;
+    --sidebar-primary-foreground: 351 24% 24%;
+    --sidebar-accent: 343 50% 97%;
+    --sidebar-accent-foreground: 351 24% 24%;
+    --sidebar-border: 349 55% 88%;
+    --sidebar-ring: 348 68% 86%;
   }
 
   .dark {
-    --background: 240 10% 5%;
-    --foreground: 45 20% 95%;
-    --card: 240 10% 8%;
-    --card-foreground: 45 20% 95%;
-    --popover: 240 10% 8%;
-    --popover-foreground: 45 20% 95%;
-    --primary: 45 90% 65%;
-    --primary-foreground: 240 10% 5%;
-    --secondary: 240 10% 15%;
-    --secondary-foreground: 45 20% 90%;
-    --muted: 240 10% 15%;
-    --muted-foreground: 45 20% 70%;
-    --accent: 45 90% 65%;
-    --accent-foreground: 240 10% 5%;
-    --border: 240 10% 20%;
-    --input: 240 10% 20%;
-    --ring: 45 90% 65%;
-    --sidebar-background: 240 10% 8%;
-    --sidebar-foreground: 45 20% 95%;
-    --sidebar-primary: 45 90% 65%;
-    --sidebar-primary-foreground: 240 10% 5%;
-    --sidebar-accent: 240 10% 15%;
-    --sidebar-accent-foreground: 45 20% 90%;
-    --sidebar-border: 240 10% 20%;
-    --sidebar-ring: 45 90% 65%;
+    --background: 350 20% 8%;
+    --foreground: 340 40% 95%;
+    --card: 350 20% 12%;
+    --card-foreground: 340 40% 95%;
+    --popover: 350 20% 12%;
+    --popover-foreground: 340 40% 95%;
+    --primary: 348 68% 76%;
+    --primary-foreground: 350 20% 8%;
+    --secondary: 350 20% 15%;
+    --secondary-foreground: 340 40% 90%;
+    --muted: 350 20% 15%;
+    --muted-foreground: 340 30% 70%;
+    --accent: 348 68% 76%;
+    --accent-foreground: 350 20% 8%;
+    --border: 350 20% 20%;
+    --input: 350 20% 20%;
+    --ring: 348 68% 76%;
+    --sidebar-background: 350 20% 10%;
+    --sidebar-foreground: 340 40% 95%;
+    --sidebar-primary: 348 68% 76%;
+    --sidebar-primary-foreground: 350 20% 8%;
+    --sidebar-accent: 350 20% 15%;
+    --sidebar-accent-foreground: 340 40% 90%;
+    --sidebar-border: 350 20% 20%;
+    --sidebar-ring: 348 68% 76%;
   }
 }
 
@@ -99,37 +105,37 @@
 }
 
 @layer components {
-  /* Divine Text Glow */
+  /* Divine Rose Text Glow */
   .text-glow-gold {
     text-shadow: 
-      0 0 20px hsla(45, 100%, 70%, 0.8),
-      0 0 40px hsla(45, 100%, 70%, 0.5),
-      0 0 60px hsla(45, 100%, 70%, 0.3);
+      0 0 20px hsla(348, 68%, 86%, 0.8),
+      0 0 40px hsla(348, 68%, 86%, 0.5),
+      0 0 60px hsla(348, 68%, 86%, 0.3);
   }
   
   .text-glow-white {
     text-shadow: 
       0 0 20px hsla(0, 0%, 100%, 0.9),
-      0 0 40px hsla(45, 100%, 90%, 0.6),
-      0 0 80px hsla(45, 100%, 80%, 0.4);
+      0 0 40px hsla(348, 68%, 90%, 0.6),
+      0 0 80px hsla(348, 68%, 86%, 0.4);
   }
   
   .text-glow-prism {
     background: linear-gradient(90deg, 
-      hsl(280, 70%, 75%), 
-      hsl(200, 80%, 70%), 
-      hsl(45, 90%, 65%),
-      hsl(280, 70%, 75%)
+      hsl(348, 70%, 80%), 
+      hsl(340, 60%, 85%), 
+      hsl(349, 55%, 78%),
+      hsl(348, 70%, 80%)
     );
     background-size: 300% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: prism-shift 8s ease-in-out infinite;
-    filter: drop-shadow(0 0 20px hsla(280, 70%, 70%, 0.5));
+    filter: drop-shadow(0 0 20px hsla(348, 68%, 80%, 0.5));
   }
   
-  /* Halo Effect */
+  /* Halo Effect - Rose */
   .halo {
     position: relative;
   }
@@ -138,23 +144,24 @@
     content: '';
     position: absolute;
     inset: -20px;
-    background: radial-gradient(circle, hsla(45, 100%, 80%, 0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, hsla(348, 68%, 86%, 0.4) 0%, transparent 70%);
     border-radius: 50%;
     animation: pulse-halo 3s ease-in-out infinite;
     z-index: -1;
   }
   
-  /* Sacred Pillar */
+  /* Sacred Pillar - Rose */
   .sacred-pillar {
     background: linear-gradient(180deg, 
-      hsla(45, 100%, 95%, 0.9) 0%,
-      hsla(0, 0%, 100%, 0.95) 50%,
-      hsla(45, 100%, 95%, 0.9) 100%
+      hsla(340, 100%, 99%, 0.95) 0%,
+      hsla(343, 50%, 97%, 0.98) 50%,
+      hsla(340, 100%, 99%, 0.95) 100%
     );
     backdrop-filter: blur(20px);
-    border: 1px solid hsla(45, 100%, 80%, 0.3);
+    border: 1px solid hsla(349, 55%, 78%, 0.3);
+    border-radius: 1.5rem;
     box-shadow: 
-      0 20px 60px hsla(45, 100%, 70%, 0.15),
+      0 20px 60px hsla(348, 68%, 86%, 0.2),
       inset 0 1px 0 hsla(0, 0%, 100%, 0.8);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -162,21 +169,22 @@
   .sacred-pillar:hover {
     transform: translateY(-8px);
     box-shadow: 
-      0 30px 80px hsla(45, 100%, 70%, 0.25),
+      0 30px 80px hsla(348, 68%, 86%, 0.3),
       inset 0 1px 0 hsla(0, 0%, 100%, 0.9),
-      0 0 40px hsla(45, 100%, 80%, 0.3);
+      0 0 40px hsla(348, 68%, 86%, 0.25);
   }
   
-  /* Divine Button */
+  /* Divine Button - Rose */
   .btn-divine {
-    background: linear-gradient(135deg, hsl(45, 90%, 65%), hsl(45, 100%, 75%));
-    color: hsl(40, 10%, 20%);
+    background: linear-gradient(135deg, hsl(348, 68%, 86%), hsl(349, 55%, 82%));
+    color: hsl(351, 24%, 24%);
     font-weight: 500;
     letter-spacing: 0.1em;
+    border-radius: 1.25rem;
     box-shadow: 
-      0 10px 40px hsla(45, 100%, 60%, 0.4),
-      0 0 0 1px hsla(45, 100%, 80%, 0.5),
-      inset 0 1px 0 hsla(0, 0%, 100%, 0.3);
+      0 10px 40px hsla(348, 68%, 86%, 0.4),
+      0 0 0 1px hsla(349, 55%, 78%, 0.5),
+      inset 0 1px 0 hsla(0, 0%, 100%, 0.4);
     transition: all 0.4s ease;
     animation: pulse-glow 3s ease-in-out infinite;
   }
@@ -184,23 +192,25 @@
   .btn-divine:hover {
     transform: translateY(-2px);
     box-shadow: 
-      0 20px 60px hsla(45, 100%, 60%, 0.5),
-      0 0 60px hsla(45, 100%, 70%, 0.4),
-      0 0 0 1px hsla(45, 100%, 80%, 0.7),
-      inset 0 1px 0 hsla(0, 0%, 100%, 0.4);
+      0 20px 60px hsla(348, 68%, 86%, 0.5),
+      0 0 60px hsla(348, 68%, 86%, 0.35),
+      0 0 0 1px hsla(349, 55%, 78%, 0.7),
+      inset 0 1px 0 hsla(0, 0%, 100%, 0.5);
   }
   
-  /* Section Divider */
+  /* Section Divider - Rose */
   .divine-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, hsla(45, 100%, 70%, 0.5), transparent);
+    background: linear-gradient(90deg, transparent, hsla(348, 68%, 86%, 0.6), transparent);
   }
   
-  /* Glass Card */
+  /* Glass Card - Rose */
   .glass-card {
-    background: hsla(0, 0%, 100%, 0.8);
+    background: hsla(343, 50%, 97%, 0.9);
     backdrop-filter: blur(20px);
-    border: 1px solid hsla(45, 100%, 80%, 0.2);
+    border: 1px solid hsla(349, 55%, 78%, 0.25);
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px hsla(348, 68%, 86%, 0.15);
   }
 }
 
@@ -238,14 +248,14 @@
   @keyframes pulse-glow {
     0%, 100% {
       box-shadow: 
-        0 10px 40px hsla(45, 100%, 60%, 0.4),
-        0 0 0 1px hsla(45, 100%, 80%, 0.5);
+        0 10px 40px hsla(348, 68%, 86%, 0.4),
+        0 0 0 1px hsla(349, 55%, 78%, 0.5);
     }
     50% {
       box-shadow: 
-        0 15px 50px hsla(45, 100%, 60%, 0.6),
-        0 0 60px hsla(45, 100%, 70%, 0.4),
-        0 0 0 1px hsla(45, 100%, 80%, 0.7);
+        0 15px 50px hsla(348, 68%, 86%, 0.5),
+        0 0 60px hsla(348, 68%, 86%, 0.35),
+        0 0 0 1px hsla(349, 55%, 78%, 0.7);
     }
   }
   
@@ -291,16 +301,16 @@
   @keyframes titleGlow {
     0%, 100% {
       text-shadow: 
-        0 0 20px hsla(45, 100%, 70%, 0.8), 
-        0 0 40px hsla(45, 100%, 70%, 0.5), 
-        0 0 60px hsla(45, 100%, 70%, 0.3);
+        0 0 20px hsla(348, 68%, 86%, 0.8), 
+        0 0 40px hsla(348, 68%, 86%, 0.5), 
+        0 0 60px hsla(348, 68%, 86%, 0.3);
     }
     50% {
       text-shadow: 
-        0 0 30px hsla(45, 100%, 70%, 1), 
-        0 0 60px hsla(45, 100%, 70%, 0.7), 
-        0 0 90px hsla(45, 100%, 70%, 0.5),
-        0 0 120px hsla(45, 100%, 70%, 0.3);
+        0 0 30px hsla(348, 68%, 86%, 1), 
+        0 0 60px hsla(348, 68%, 86%, 0.7), 
+        0 0 90px hsla(348, 68%, 86%, 0.5),
+        0 0 120px hsla(348, 68%, 86%, 0.3);
     }
   }
   
@@ -328,10 +338,10 @@
   
   @keyframes shadowPulse {
     0%, 100% {
-      box-shadow: 0 0 60px hsla(45, 100%, 70%, 0.5);
+      box-shadow: 0 0 60px hsla(348, 68%, 86%, 0.5);
     }
     50% {
-      box-shadow: 0 0 100px hsla(45, 100%, 70%, 0.8), 0 0 150px hsla(45, 100%, 70%, 0.4);
+      box-shadow: 0 0 100px hsla(348, 68%, 86%, 0.7), 0 0 150px hsla(348, 68%, 86%, 0.4);
     }
   }
   
