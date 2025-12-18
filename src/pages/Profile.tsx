@@ -42,7 +42,7 @@ const Profile = () => {
   const { user, signOut } = useAuth();
   const { balance, formatCoins, isLoading: coinLoading } = useCamlyCoin();
   const { isEnabled: soundEnabled, toggleSound } = useBlessingSound();
-  const { greetingEnabled, toggleGreetingEnabled } = useDailyGreeting();
+  const { greetingEnabled, toggleGreetingEnabled, markGreetingSeen } = useDailyGreeting();
   const prefersReducedMotion = useReducedMotion();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
@@ -54,6 +54,11 @@ const Profile = () => {
     coins: 0,
     message: "",
   });
+
+  // Mark greeting as seen when visiting Profile
+  useEffect(() => {
+    markGreetingSeen();
+  }, [markGreetingSeen]);
 
   useEffect(() => {
     const fetchChatHistory = async () => {
