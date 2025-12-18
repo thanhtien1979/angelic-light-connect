@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2 } from "lucide-react";
 import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
@@ -40,6 +40,7 @@ const Profile = () => {
   const { user, signOut } = useAuth();
   const { balance, formatCoins, isLoading: coinLoading } = useCamlyCoin();
   const { isEnabled: soundEnabled, toggleSound } = useBlessingSound();
+  const prefersReducedMotion = useReducedMotion();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -171,7 +172,12 @@ const Profile = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      <motion.main 
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="max-w-4xl mx-auto px-4 py-8 space-y-8"
+      >
         {/* Profile Card with Camly Coin */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
@@ -404,7 +410,7 @@ const Profile = () => {
             </AlertDialog>
           </div>
         </motion.section>
-      </main>
+      </motion.main>
 
       {/* Chat Session Modal */}
       <AnimatePresence>
