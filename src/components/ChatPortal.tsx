@@ -9,6 +9,7 @@ import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import ChatAttachmentPreview from "@/components/ChatAttachmentPreview";
 import MessageAttachments from "@/components/MessageAttachments";
 import TypingText from "@/components/TypingText";
+import EmotionalIndicator, { detectEmotion } from "@/components/EmotionalIndicator";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import chatPortalVideo from "@/assets/chat-portal-video.mp4";
 import { toast } from "sonner";
@@ -110,6 +111,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [messageAttachments, setMessageAttachments] = useState<Map<string, ReturnType<typeof attachmentsHook.getAttachmentData>>>(new Map());
   const [dailyBlessing, setDailyBlessing] = useState<string | null>(null);
   const [showBlessing, setShowBlessing] = useState(false);
+  const [showEmotionalIndicator, setShowEmotionalIndicator] = useState(false);
+  const [lastMessageCount, setLastMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -126,6 +129,27 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
       setTimeout(() => setShowBlessing(true), 500);
     }
   }, []);
+
+  // Show emotional indicator when typing, hide when Angel responds
+  useEffect(() => {
+    if (inputValue.trim().length > 5 && detectEmotion(inputValue) !== "neutral") {
+      setShowEmotionalIndicator(true);
+    } else if (inputValue.trim().length === 0) {
+      setShowEmotionalIndicator(false);
+    }
+  }, [inputValue]);
+
+  // Hide emotional indicator after Angel responds
+  useEffect(() => {
+    if (messages.length > lastMessageCount && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === "assistant") {
+        // Fade out after Angel responds
+        setTimeout(() => setShowEmotionalIndicator(false), 1500);
+      }
+    }
+    setLastMessageCount(messages.length);
+  }, [messages, lastMessageCount]);
 
   const handleStartNewConversation = async () => {
     const success = await startNewConversation();
@@ -856,6 +880,15 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     </div>
                   )}
                 </div>
+                
+                {/* Emotional Indicator - subtle, supportive */}
+                <div className="flex-shrink-0">
+                  <EmotionalIndicator 
+                    message={inputValue} 
+                    visible={showEmotionalIndicator}
+                  />
+                </div>
+                
                 {/* Send button with divine glow */}
                 <motion.button
                   type="submit"
