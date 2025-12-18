@@ -27,11 +27,11 @@ const navLinks: NavLink[] = [
 ];
 
 const BLESSING_MESSAGES = [
-  "✨ Light received",
-  "✨ Blessed",
-  "✨ Grace flows",
-  "✨ Divine light",
-  "✨ Peace within",
+  ["✨ Light received", "✨ Ánh sáng đã được ghi nhận"],
+  ["✨ Blessed", "✨ Được ban phước"],
+  ["✨ Grace flows", "✨ Ân phúc đang tuôn chảy"],
+  ["✨ Divine light", "✨ Ánh sáng thiêng liêng"],
+  ["✨ Peace within", "✨ Bình an nội tâm"],
 ];
 
 const LightIndicator = () => {
@@ -41,7 +41,8 @@ const LightIndicator = () => {
   
   const blessingMessage = useMemo(() => {
     if (!isShimmering) return "";
-    return BLESSING_MESSAGES[Math.floor(Math.random() * BLESSING_MESSAGES.length)];
+    const messagePair = BLESSING_MESSAGES[Math.floor(Math.random() * BLESSING_MESSAGES.length)];
+    return messagePair[Math.floor(Math.random() * 2)];
   }, [isShimmering]);
 
   if (!user || isLoading) return null;
