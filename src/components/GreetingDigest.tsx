@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Calendar, Loader2, Share2 } from "lucide-react";
+import { Sparkles, Calendar, Loader2, Share2, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import DigestShareCard from "./DigestShareCard";
+import YearlyLightJourney from "./YearlyLightJourney";
 
 interface DigestData {
   digest: string | null;
@@ -135,18 +136,25 @@ const GreetingDigest = () => {
     <>
       <div className="space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-muted/30">
+          <TabsList className="grid w-full grid-cols-3 bg-muted/30">
             <TabsTrigger 
               value="weekly"
-              className="data-[state=active]:bg-gold/20 data-[state=active]:text-foreground"
+              className="data-[state=active]:bg-gold/20 data-[state=active]:text-foreground text-xs sm:text-sm"
             >
               Tuần Qua
             </TabsTrigger>
             <TabsTrigger 
               value="monthly"
-              className="data-[state=active]:bg-gold/20 data-[state=active]:text-foreground"
+              className="data-[state=active]:bg-gold/20 data-[state=active]:text-foreground text-xs sm:text-sm"
             >
               Tháng Qua
+            </TabsTrigger>
+            <TabsTrigger 
+              value="yearly"
+              className="data-[state=active]:bg-gold/20 data-[state=active]:text-foreground text-xs sm:text-sm"
+            >
+              <BookOpen className="w-3 h-3 mr-1 hidden sm:inline" />
+              Hành Trình
             </TabsTrigger>
           </TabsList>
 
@@ -156,6 +164,10 @@ const GreetingDigest = () => {
 
           <TabsContent value="monthly" className="mt-4">
             {renderDigestContent(monthlyDigest, isLoadingMonthly, "tháng qua", "monthly")}
+          </TabsContent>
+
+          <TabsContent value="yearly" className="mt-4">
+            <YearlyLightJourney />
           </TabsContent>
         </Tabs>
       </div>

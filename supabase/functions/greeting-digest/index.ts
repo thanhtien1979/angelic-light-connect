@@ -43,9 +43,15 @@ serve(async (req) => {
     if (period === "weekly") {
       startDate = new Date(now);
       startDate.setDate(now.getDate() - 7);
-    } else {
+    } else if (period === "monthly") {
       startDate = new Date(now);
       startDate.setMonth(now.getMonth() - 1);
+    } else if (period === "yearly") {
+      startDate = new Date(now);
+      startDate.setFullYear(now.getFullYear() - 1);
+    } else {
+      startDate = new Date(now);
+      startDate.setDate(now.getDate() - 7);
     }
 
     // Fetch greetings for the period
@@ -61,10 +67,13 @@ serve(async (req) => {
       throw greetingsError;
     }
 
-    if (!greetings || greetings.length === 0) {
+    const minGreetings = period === "yearly" ? 10 : period === "monthly" ? 3 : 2;
+    
+    if (!greetings || greetings.length < minGreetings) {
       return new Response(JSON.stringify({ 
         digest: null,
-        message: "Chưa đủ lời chào để tạo tổng kết" 
+        greetingCount: greetings?.length || 0,
+        message: `Chưa đủ lời chào để tạo tổng kết (cần ít nhất ${minGreetings} lời chào)` 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -80,8 +89,31 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const periodLabel = period === "weekly" ? "tuần qua" : "tháng qua";
-    const systemPrompt = `Bạn là Angel AI, một người hướng dẫn tâm linh đầy yêu thương và trí tuệ. 
+    const periodLabels: Record<string, string> = {
+      weekly: "tuần qua",
+      monthly: "tháng qua",
+      yearly: "năm qua"
+    };
+    const periodLabel = periodLabels[period] || "tuần qua";
+    
+    // Different prompts for yearly vs weekly/monthly
+    const isYearly = period === "yearly";
+    
+    const systemPrompt = isYearly 
+      ? `Bạn là Angel AI, một người hướng dẫn tâm linh đầy yêu thương và trí tuệ. 
+Nhiệm vụ của bạn là viết một bản tổng kết hành trình tâm linh năm qua cho người dùng.
+
+Hướng dẫn:
+- Viết như một người bạn tâm linh đang chia sẻ suy ngẫm sâu sắc về hành trình của họ
+- Nhận diện các chủ đề tâm linh lặp lại xuyên suốt năm (tình yêu, bình an, ánh sáng, chữa lành, biết ơn)
+- Ghi nhận sự phát triển tâm linh và những khoảnh khắc sáng suốt
+- Cảm nhận cảm xúc và trạng thái tâm hồn tổng thể
+- Sử dụng ngôn ngữ ấm áp, nhẹ nhàng, đầy lòng từ bi
+- Kết thúc bằng một lời ban phước cho năm mới
+- Độ dài: 5-7 câu, súc tích nhưng sâu sắc
+- Không dùng bullet points, số liệu thống kê, hay so sánh
+- Viết như một bức thư yêu thương, không phải báo cáo`
+      : `Bạn là Angel AI, một người hướng dẫn tâm linh đầy yêu thương và trí tuệ. 
 Nhiệm vụ của bạn là phân tích các lời chào ánh sáng và tạo một bản tổng kết tâm linh nhẹ nhàng.
 
 Hướng dẫn:
@@ -93,6 +125,10 @@ Hướng dẫn:
 - Độ dài: 3-4 câu ngắn gọn, súc tích
 - Không dùng bullet points hay danh sách`;
 
+    const userPrompt = isYearly
+      ? `Đây là ${greetings.length} lời chào ánh sáng trong năm qua:\n\n${greetingTexts}\n\nHãy viết một bản tổng kết hành trình tâm linh năm qua, ghi nhận sự phát triển và những chủ đề xuyên suốt hành trình của người dùng.`
+      : `Đây là ${greetings.length} lời chào ánh sáng trong ${periodLabel}:\n\n${greetingTexts}\n\nHãy viết một bản tổng kết tâm linh ngắn gọn, nhẹ nhàng về hành trình của người dùng trong ${periodLabel}.`;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -103,10 +139,7 @@ Hướng dẫn:
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { 
-            role: "user", 
-            content: `Đây là ${greetings.length} lời chào ánh sáng trong ${periodLabel}:\n\n${greetingTexts}\n\nHãy viết một bản tổng kết tâm linh ngắn gọn, nhẹ nhàng về hành trình của người dùng trong ${periodLabel}.`
-          }
+          { role: "user", content: userPrompt }
         ],
       }),
     });
