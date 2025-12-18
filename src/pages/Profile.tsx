@@ -3,13 +3,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2 } from "lucide-react";
 import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import { LightJournal } from "@/components/LightJournal";
 import { ReflectionModal } from "@/components/ReflectionModal";
 import SacredGeometryWatermark from "@/components/SacredGeometryWatermark";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
+import { useBlessingSound } from "@/hooks/useBlessingSound";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import {
@@ -36,6 +39,7 @@ interface ChatSession {
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { balance, formatCoins, isLoading: coinLoading } = useCamlyCoin();
+  const { isEnabled: soundEnabled, toggleSound } = useBlessingSound();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -333,6 +337,31 @@ const Profile = () => {
           className="space-y-4"
         >
           <h3 className="text-lg font-semibold text-foreground">Cài Đặt Tài Khoản</h3>
+
+          {/* Sound Settings */}
+          <div className="p-4 rounded-xl bg-card/50 border border-border/50 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-gold/20">
+                  <Volume2 className="w-4 h-4 text-gold" />
+                </div>
+                <div>
+                  <Label htmlFor="blessing-sound" className="text-sm font-medium text-foreground cursor-pointer">
+                    Âm thanh ánh sáng
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Bật âm thanh nhẹ khi nhận Camly Coin
+                  </p>
+                </div>
+              </div>
+              <Switch
+                id="blessing-sound"
+                checked={soundEnabled}
+                onCheckedChange={toggleSound}
+                className="data-[state=checked]:bg-gold"
+              />
+            </div>
+          </div>
 
           <div className="space-y-2">
             <Button

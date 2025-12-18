@@ -8,6 +8,7 @@ import CoinLightMotes from "./CoinLightMotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBalanceShimmer } from "@/hooks/useBalanceShimmer";
+import { useBlessingSound } from "@/hooks/useBlessingSound";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 
@@ -38,6 +39,14 @@ const LightIndicator = () => {
   const { user } = useAuth();
   const { balance, formatCoins, isLoading } = useCamlyCoin();
   const isShimmering = useBalanceShimmer(balance.total_coins);
+  const { playBlessingChime } = useBlessingSound();
+  
+  // Play blessing sound when shimmer triggers
+  useEffect(() => {
+    if (isShimmering) {
+      playBlessingChime();
+    }
+  }, [isShimmering, playBlessingChime]);
   
   const blessingMessage = useMemo(() => {
     if (!isShimmering) return "";
