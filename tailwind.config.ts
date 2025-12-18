@@ -89,6 +89,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -188,6 +191,16 @@ export default {
             transform: "translateY(-4px)",
           },
         },
+        "ambient-breath": {
+          "0%, 100%": {
+            opacity: "0.03",
+            transform: "scale(1)",
+          },
+          "50%": {
+            opacity: "0.06",
+            transform: "scale(1.02)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -202,6 +215,7 @@ export default {
         "light-mote-2": "light-mote 5s ease-in-out 2s infinite",
         "sacred-glow-ring": "sacred-glow-ring 1.2s ease-out forwards",
         "blessing-text": "blessing-text 1.5s ease-in-out forwards",
+        "ambient-breath": "ambient-breath 10s ease-in-out infinite",
       },
     },
   },
