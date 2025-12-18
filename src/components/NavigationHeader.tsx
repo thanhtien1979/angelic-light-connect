@@ -56,7 +56,7 @@ const LightIndicator = () => {
               transition={{ duration: isShimmering ? 0.5 : 3, repeat: Infinity, ease: "easeInOut" }}
               className="rounded-full p-0.5"
             >
-              <Sun className={`w-3.5 h-3.5 transition-colors ${isShimmering ? "text-yellow-300" : "text-gold"}`} />
+              <Sun className={`w-3.5 h-3.5 transition-colors animate-coin-float ${isShimmering ? "text-yellow-300" : "text-gold"}`} />
             </motion.div>
             <span className={`text-xs font-medium transition-colors ${isShimmering ? "text-yellow-300" : "text-gold"}`}>
               {formatCoins(balance.total_coins)}
