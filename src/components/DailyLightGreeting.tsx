@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { X, Sparkles, Sun } from "lucide-react";
+import { X, Sparkles, Sun, Heart } from "lucide-react";
 import { useDailyGreeting } from "@/hooks/useDailyGreeting";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import GreetingMeditationInvite from "./GreetingMeditationInvite";
 
 const spiritualGreetings = [
   {
@@ -42,6 +43,7 @@ const DailyLightGreeting = () => {
   const prefersReducedMotion = useReducedMotion();
   const [isVisible, setIsVisible] = useState(false);
   const [greeting, setGreeting] = useState(spiritualGreetings[0]);
+  const [showMeditation, setShowMeditation] = useState(false);
 
   useEffect(() => {
     if (!user || isLoading) return;
@@ -78,84 +80,118 @@ const DailyLightGreeting = () => {
     dismissGreeting();
   };
 
+  const handleMeditationInvite = () => {
+    setIsVisible(false);
+    setShowMeditation(true);
+  };
+
+  const handleMeditationClose = () => {
+    setShowMeditation(false);
+    dismissGreeting();
+  };
+
   if (!user || isLoading) return null;
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/60 backdrop-blur-md"
-          onClick={handleDismiss}
-        >
+    <>
+      <AnimatePresence>
+        {isVisible && (
           <motion.div
-            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-md overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/60 backdrop-blur-md"
+            onClick={handleDismiss}
           >
-            {/* Decorative background glow */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-gold/30 via-primary/20 to-gold/30 blur-xl" />
-            
-            <div className="relative p-8 rounded-3xl bg-card/90 backdrop-blur-xl border border-gold/30 shadow-2xl shadow-gold/10">
-              {/* Close button */}
-              <button
-                onClick={handleDismiss}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/50 transition-colors"
-              >
-                <X className="w-5 h-5 text-muted-foreground" />
-              </button>
+            <motion.div
+              initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md overflow-hidden"
+            >
+              {/* Decorative background glow */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-gold/30 via-primary/20 to-gold/30 blur-xl" />
+              
+              <div className="relative p-8 rounded-3xl bg-card/90 backdrop-blur-xl border border-gold/30 shadow-2xl shadow-gold/10">
+                {/* Close button */}
+                <button
+                  onClick={handleDismiss}
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/50 transition-colors"
+                >
+                  <X className="w-5 h-5 text-muted-foreground" />
+                </button>
 
-              {/* Icon */}
-              <motion.div
-                animate={{
-                  boxShadow: [
-                    "0 0 30px hsla(348, 80%, 75%, 0.3)",
-                    "0 0 60px hsla(348, 80%, 75%, 0.5)",
-                    "0 0 30px hsla(348, 80%, 75%, 0.3)",
-                  ],
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center"
-              >
-                <Sun className="w-8 h-8 text-gold" />
-              </motion.div>
+                {/* Icon */}
+                <motion.div
+                  animate={{
+                    boxShadow: [
+                      "0 0 30px hsla(348, 80%, 75%, 0.3)",
+                      "0 0 60px hsla(348, 80%, 75%, 0.5)",
+                      "0 0 30px hsla(348, 80%, 75%, 0.3)",
+                    ],
+                  }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center"
+                >
+                  <Sun className="w-8 h-8 text-gold" />
+                </motion.div>
 
-              {/* Title */}
-              <h2 className="font-serif text-2xl text-center text-foreground mb-4">
-                {greeting.title}
-              </h2>
+                {/* Title */}
+                <h2 className="font-serif text-2xl text-center text-foreground mb-4">
+                  {greeting.title}
+                </h2>
 
-              {/* Message */}
-              <p className="text-center text-foreground/80 leading-relaxed mb-6">
-                {greeting.message}
-              </p>
+                {/* Message */}
+                <p className="text-center text-foreground/80 leading-relaxed mb-6">
+                  {greeting.message}
+                </p>
 
-              {/* Decorative sparkles */}
-              <div className="flex items-center justify-center gap-1 mb-6">
-                <Sparkles className="w-4 h-4 text-gold/50" />
-                <div className="w-12 h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
-                <Sparkles className="w-4 h-4 text-gold/50" />
+                {/* Decorative sparkles */}
+                <div className="flex items-center justify-center gap-1 mb-6">
+                  <Sparkles className="w-4 h-4 text-gold/50" />
+                  <div className="w-12 h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
+                  <Sparkles className="w-4 h-4 text-gold/50" />
+                </div>
+
+                {/* Action buttons */}
+                <div className="space-y-3">
+                  {/* Meditation invitation */}
+                  <motion.button
+                    onClick={handleMeditationInvite}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-gold/30 to-gold/40 hover:from-gold/40 hover:to-gold/50 text-foreground font-medium transition-all border border-gold/40 flex items-center justify-center gap-2"
+                  >
+                    <Heart className="w-4 h-4" />
+                    Dành một khoảnh khắc tĩnh lặng
+                  </motion.button>
+
+                  {/* Dismiss button */}
+                  <motion.button
+                    onClick={handleDismiss}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3 rounded-xl bg-muted/30 hover:bg-muted/50 text-foreground/80 font-medium transition-all border border-muted/30"
+                  >
+                    Cảm ơn, con đã sẵn sàng ✨
+                  </motion.button>
+                </div>
               </div>
-
-              {/* Dismiss button */}
-              <motion.button
-                onClick={handleDismiss}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-gold/20 to-gold/30 hover:from-gold/30 hover:to-gold/40 text-foreground font-medium transition-all border border-gold/30"
-              >
-                Cảm ơn, con đã sẵn sàng ✨
-              </motion.button>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Meditation invitation modal */}
+      {showMeditation && (
+        <GreetingMeditationInvite
+          greetingTheme={greeting.message}
+          onClose={handleMeditationClose}
+        />
       )}
-    </AnimatePresence>
+    </>
   );
 };
 
