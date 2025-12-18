@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell } from "lucide-react";
 import GreetingHistory from "@/components/GreetingHistory";
 import SavedGreetings from "@/components/SavedGreetings";
 import GreetingDigest from "@/components/GreetingDigest";
@@ -44,7 +44,7 @@ const Profile = () => {
   const { user, signOut } = useAuth();
   const { balance, formatCoins, isLoading: coinLoading } = useCamlyCoin();
   const { isEnabled: soundEnabled, toggleSound } = useBlessingSound();
-  const { greetingEnabled, toggleGreetingEnabled, markGreetingSeen } = useDailyGreeting();
+  const { greetingEnabled, toggleGreetingEnabled, markGreetingSeen, digestNotificationsEnabled, toggleDigestNotifications } = useDailyGreeting();
   const prefersReducedMotion = useReducedMotion();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
@@ -438,6 +438,32 @@ const Profile = () => {
                 id="blessing-sound"
                 checked={soundEnabled}
                 onCheckedChange={toggleSound}
+                className="data-[state=checked]:bg-gold"
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-border/50" />
+
+            {/* Digest Notifications Toggle */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-gold/20">
+                  <Bell className="w-4 h-4 text-gold" />
+                </div>
+                <div>
+                  <Label htmlFor="digest-notifications" className="text-sm font-medium text-foreground cursor-pointer">
+                    Thông báo tổng kết
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Nhận thông báo nhẹ nhàng khi có tổng kết tuần/tháng mới
+                  </p>
+                </div>
+              </div>
+              <Switch
+                id="digest-notifications"
+                checked={digestNotificationsEnabled}
+                onCheckedChange={toggleDigestNotifications}
                 className="data-[state=checked]:bg-gold"
               />
             </div>

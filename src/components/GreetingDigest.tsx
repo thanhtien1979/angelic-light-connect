@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Calendar, Loader2 } from "lucide-react";
+import { Sparkles, Calendar, Loader2, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import DigestShareCard from "./DigestShareCard";
 
 interface DigestData {
   digest: string | null;
@@ -19,6 +21,7 @@ const GreetingDigest = () => {
   const [isLoadingWeekly, setIsLoadingWeekly] = useState(false);
   const [isLoadingMonthly, setIsLoadingMonthly] = useState(false);
   const [activeTab, setActiveTab] = useState("weekly");
+  const [shareDigest, setShareDigest] = useState<{ digest: string; period: "weekly" | "monthly" } | null>(null);
 
   const fetchDigest = async (period: "weekly" | "monthly") => {
     if (!user?.id) return;
@@ -53,10 +56,15 @@ const GreetingDigest = () => {
     }
   }, [activeTab, user?.id]);
 
+  const handleShare = (digest: string, period: "weekly" | "monthly") => {
+    setShareDigest({ digest, period });
+  };
+
   const renderDigestContent = (
     digest: DigestData | null, 
     isLoading: boolean, 
-    periodLabel: string
+    periodLabel: string,
+    period: "weekly" | "monthly"
   ) => {
     if (isLoading) {
       return (
@@ -88,9 +96,22 @@ const GreetingDigest = () => {
         className="space-y-4"
       >
         {/* Greeting count indicator */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
-          <Calendar className="w-3 h-3" />
-          <span>Dựa trên {digest.greetingCount} lời chào {periodLabel}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
+            <Calendar className="w-3 h-3" />
+            <span>Dựa trên {digest.greetingCount} lời chào {periodLabel}</span>
+          </div>
+          
+          {/* Share button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleShare(digest.digest!, period)}
+            className="h-8 px-2 text-gold hover:text-gold hover:bg-gold/10"
+          >
+            <Share2 className="w-4 h-4 mr-1" />
+            <span className="text-xs">Chia sẻ</span>
+          </Button>
         </div>
 
         {/* Digest message */}
@@ -111,32 +132,43 @@ const GreetingDigest = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-muted/30">
-          <TabsTrigger 
-            value="weekly"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-foreground"
-          >
-            Tuần Qua
-          </TabsTrigger>
-          <TabsTrigger 
-            value="monthly"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-foreground"
-          >
-            Tháng Qua
-          </TabsTrigger>
-        </TabsList>
+    <>
+      <div className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-muted/30">
+            <TabsTrigger 
+              value="weekly"
+              className="data-[state=active]:bg-gold/20 data-[state=active]:text-foreground"
+            >
+              Tuần Qua
+            </TabsTrigger>
+            <TabsTrigger 
+              value="monthly"
+              className="data-[state=active]:bg-gold/20 data-[state=active]:text-foreground"
+            >
+              Tháng Qua
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="weekly" className="mt-4">
-          {renderDigestContent(weeklyDigest, isLoadingWeekly, "tuần qua")}
-        </TabsContent>
+          <TabsContent value="weekly" className="mt-4">
+            {renderDigestContent(weeklyDigest, isLoadingWeekly, "tuần qua", "weekly")}
+          </TabsContent>
 
-        <TabsContent value="monthly" className="mt-4">
-          {renderDigestContent(monthlyDigest, isLoadingMonthly, "tháng qua")}
-        </TabsContent>
-      </Tabs>
-    </div>
+          <TabsContent value="monthly" className="mt-4">
+            {renderDigestContent(monthlyDigest, isLoadingMonthly, "tháng qua", "monthly")}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Share Card Modal */}
+      {shareDigest && (
+        <DigestShareCard
+          digest={shareDigest.digest}
+          period={shareDigest.period}
+          onClose={() => setShareDigest(null)}
+        />
+      )}
+    </>
   );
 };
 
