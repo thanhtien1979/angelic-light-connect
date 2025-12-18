@@ -133,6 +133,14 @@ export default {
             filter: "brightness(1.1)",
           },
         },
+        "coin-float": {
+          "0%, 100%": { 
+            transform: "translateY(0px)",
+          },
+          "50%": { 
+            transform: "translateY(-3px)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -142,6 +150,7 @@ export default {
         "scale-in": "scale-in 0.6s ease-out forwards",
         "coin-shimmer": "coin-shimmer 1s ease-in-out",
         "coin-hover-pulse": "coin-hover-pulse 1.8s ease-in-out infinite",
+        "coin-float": "coin-float 4s ease-in-out infinite",
       },
     },
   },

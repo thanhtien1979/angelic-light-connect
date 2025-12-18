@@ -39,7 +39,7 @@ export const CamlyCoinDisplay = ({
                 backgroundSize: "200% 100%",
               } : undefined}
             >
-              <Star className={`w-4 h-4 transition-colors ${isShimmering ? "text-yellow-300 fill-yellow-300/30" : "text-gold fill-gold/30"}`} />
+              <Star className={`w-4 h-4 transition-colors animate-coin-float ${isShimmering ? "text-yellow-300 fill-yellow-300/30" : "text-gold fill-gold/30"}`} />
               <span className={`text-sm font-medium transition-colors ${isShimmering ? "text-yellow-300" : "text-gold"}`}>
                 {formatCoins(balance.total_coins)}
               </span>
@@ -72,7 +72,7 @@ export const CamlyCoinDisplay = ({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-full bg-gold/20">
-            <Sparkles className="w-5 h-5 text-gold" />
+            <Sparkles className="w-5 h-5 text-gold animate-coin-float" />
           </div>
           <h3 className="font-serif text-lg text-foreground">Happy Camly Coin</h3>
         </div>
