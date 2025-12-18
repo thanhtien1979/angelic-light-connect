@@ -138,7 +138,20 @@ const Profile = () => {
   const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5 relative">
+      {/* Ambient Sacred Glow */}
+      <div 
+        className="fixed inset-0 pointer-events-none overflow-hidden"
+        aria-hidden="true"
+      >
+        <div 
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-radial from-gold/[0.04] via-rose-200/[0.02] to-transparent animate-ambient-breath blur-3xl"
+        />
+        <div 
+          className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] rounded-full bg-gradient-radial from-amber-100/[0.03] to-transparent animate-ambient-breath blur-3xl"
+          style={{ animationDelay: "-5s" }}
+        />
+      </div>
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
