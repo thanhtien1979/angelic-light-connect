@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wind, X, Play, Square } from 'lucide-react';
+import { Wind, X, Play, Square, Volume2, VolumeX, ChevronDown } from 'lucide-react';
 import { useBreathingCompletionSound } from '@/hooks/useBreathingCompletionSound';
+import { useAmbientSound, AMBIENT_SOUNDS, type AmbientSoundType } from '@/hooks/useAmbientSound';
+import { Slider } from '@/components/ui/slider';
 
 type BreathPhase = 'idle' | 'inhale' | 'exhale' | 'complete';
 
@@ -9,26 +11,48 @@ const INHALE_DURATION = 4; // seconds
 const EXHALE_DURATION = 6; // seconds
 const TOTAL_CYCLES = 6; // 6 cycles = ~60 seconds
 
+// Subset of sounds for quick breathing (calming ambient only)
+const BREATHING_SOUNDS = AMBIENT_SOUNDS.filter(s => 
+  ['silence', 'rain', 'forest', 'ocean'].includes(s.id)
+);
+
 const QuickBreathingWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [phase, setPhase] = useState<BreathPhase>('idle');
   const [cycleCount, setCycleCount] = useState(0);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [showSoundPicker, setShowSoundPicker] = useState(false);
+  
   const { playCompletionSound, enableAudioContext } = useBreathingCompletionSound();
+  const { 
+    isPlaying: isAmbientPlaying, 
+    isLoading: isAmbientLoading,
+    selectedSound, 
+    setSelectedSound, 
+    volume, 
+    setVolume, 
+    playSound, 
+    stopSound 
+  } = useAmbientSound();
 
   const startSession = useCallback(() => {
-    enableAudioContext(); // Enable audio on user interaction
+    enableAudioContext();
     setIsActive(true);
     setPhase('inhale');
     setCycleCount(0);
-  }, [enableAudioContext]);
+    // Start ambient sound if one is selected
+    if (selectedSound !== 'silence') {
+      playSound(selectedSound);
+    }
+  }, [enableAudioContext, selectedSound, playSound]);
 
   const stopSession = useCallback(() => {
     setIsActive(false);
     setPhase('idle');
     setCycleCount(0);
-  }, []);
+    stopSound();
+  }, [stopSound]);
 
   // Breathing cycle logic
   useEffect(() => {
@@ -49,7 +73,8 @@ const QuickBreathingWidget = () => {
         if (newCount >= TOTAL_CYCLES) {
           setPhase('complete');
           setIsActive(false);
-          playCompletionSound(); // Play gentle chime on completion
+          playCompletionSound();
+          stopSound(); // Stop ambient on completion
         } else {
           setPhase('inhale');
         }
@@ -61,8 +86,23 @@ const QuickBreathingWidget = () => {
   // Reset complete state after viewing
   const handleClose = () => {
     setIsOpen(false);
+    setShowSoundPicker(false);
     if (phase === 'complete') {
       setTimeout(() => setPhase('idle'), 300);
+    }
+    if (isActive) {
+      stopSound();
+    }
+  };
+
+  const handleSoundSelect = (soundId: AmbientSoundType) => {
+    setSelectedSound(soundId);
+    setShowSoundPicker(false);
+    // If session is active, switch to new sound
+    if (isActive && soundId !== 'silence') {
+      playSound(soundId);
+    } else if (soundId === 'silence') {
+      stopSound();
     }
   };
 
@@ -238,6 +278,94 @@ const QuickBreathingWidget = () => {
                       <p className="text-center text-xs text-muted-foreground/60 mt-4">
                         {isActive ? `${cycleCount + 1} of ${TOTAL_CYCLES}` : '1 minute • no tracking'}
                       </p>
+
+                      {/* Ambient Sound Section */}
+                      <div className="mt-4 pt-4 border-t border-border/20">
+                        {/* Sound selector */}
+                        <div className="relative">
+                          <button
+                            onClick={() => setShowSoundPicker(!showSoundPicker)}
+                            disabled={isAmbientLoading}
+                            className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-xs"
+                          >
+                            <div className="flex items-center gap-2">
+                              {selectedSound === 'silence' ? (
+                                <VolumeX className="w-3.5 h-3.5 text-muted-foreground" />
+                              ) : (
+                                <Volume2 className="w-3.5 h-3.5 text-primary/70" />
+                              )}
+                              <span className="text-muted-foreground">
+                                {isAmbientLoading ? 'Loading...' : BREATHING_SOUNDS.find(s => s.id === selectedSound)?.name || 'Select sound'}
+                              </span>
+                            </div>
+                            <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${showSoundPicker ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {/* Sound options dropdown */}
+                          <AnimatePresence>
+                            {showSoundPicker && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -5 }}
+                                className="absolute bottom-full left-0 right-0 mb-1 bg-card/95 backdrop-blur-lg rounded-lg border border-border/40 shadow-lg overflow-hidden z-10"
+                              >
+                                {BREATHING_SOUNDS.map((sound) => (
+                                  <button
+                                    key={sound.id}
+                                    onClick={() => handleSoundSelect(sound.id)}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-muted/50 transition-colors ${
+                                      selectedSound === sound.id ? 'bg-primary/10 text-primary' : 'text-foreground/70'
+                                    }`}
+                                  >
+                                    <span>{sound.icon}</span>
+                                    <span>{sound.name}</span>
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+
+                        {/* Volume slider - only show if sound is selected */}
+                        {selectedSound !== 'silence' && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-3 flex items-center gap-3 px-1"
+                          >
+                            <VolumeX className="w-3 h-3 text-muted-foreground/50" />
+                            <Slider
+                              value={[volume]}
+                              onValueChange={([v]) => setVolume(v)}
+                              min={0}
+                              max={0.5}
+                              step={0.01}
+                              className="flex-1"
+                            />
+                            <Volume2 className="w-3 h-3 text-muted-foreground/50" />
+                          </motion.div>
+                        )}
+
+                        {/* Ambient indicator during session */}
+                        {isActive && isAmbientPlaying && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="mt-2 flex items-center justify-center gap-1.5"
+                          >
+                            <motion.div
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                              className="w-1.5 h-1.5 rounded-full bg-primary/50"
+                            />
+                            <span className="text-[10px] text-muted-foreground/50">
+                              {BREATHING_SOUNDS.find(s => s.id === selectedSound)?.name}
+                            </span>
+                          </motion.div>
+                        )}
+                      </div>
                     </>
                   )}
                 </div>
