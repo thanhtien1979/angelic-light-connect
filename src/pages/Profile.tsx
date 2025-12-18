@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart } from "lucide-react";
 import GreetingHistory from "@/components/GreetingHistory";
 import SavedGreetings from "@/components/SavedGreetings";
+import GreetingDigest from "@/components/GreetingDigest";
 import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import { LightJournal } from "@/components/LightJournal";
 import { ReflectionModal } from "@/components/ReflectionModal";
@@ -299,6 +300,15 @@ const Profile = () => {
               <h4 className="font-serif text-foreground">Lời Chào Đã Lưu</h4>
             </div>
             <SavedGreetings />
+          </div>
+
+          {/* Greeting Digest Sub-section */}
+          <div className="mt-6 pt-6 border-t border-border/30">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="w-4 h-4 text-gold" />
+              <h4 className="font-serif text-foreground">Tổng Kết Ánh Sáng</h4>
+            </div>
+            <GreetingDigest />
           </div>
         </motion.section>
 

@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.award-light]
 verify_jwt = false
+
+[functions.greeting-digest]
+verify_jwt = false
