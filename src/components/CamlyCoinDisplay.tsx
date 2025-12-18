@@ -2,8 +2,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, TrendingUp, Star } from "lucide-react";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useAuth } from "@/hooks/useAuth";
+import { useBalanceShimmer } from "@/hooks/useBalanceShimmer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { LightBurstAnimation } from "@/components/LightBurstAnimation";
+
 interface CamlyCoinDisplayProps {
   variant?: "compact" | "full";
   showLifetime?: boolean;
@@ -17,6 +19,7 @@ export const CamlyCoinDisplay = ({
 }: CamlyCoinDisplayProps) => {
   const { user } = useAuth();
   const { balance, formatCoins, isLoading } = useCamlyCoin();
+  const isShimmering = useBalanceShimmer(balance.total_coins);
 
   if (!user || isLoading) return null;
 
@@ -28,10 +31,16 @@ export const CamlyCoinDisplay = ({
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/30 ${className}`}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/30 transition-all ${
+                isShimmering ? "animate-coin-shimmer" : ""
+              } ${className}`}
+              style={isShimmering ? {
+                background: "linear-gradient(90deg, transparent 0%, hsla(45, 100%, 70%, 0.4) 50%, transparent 100%)",
+                backgroundSize: "200% 100%",
+              } : undefined}
             >
-              <Star className="w-4 h-4 text-gold fill-gold/30" />
-              <span className="text-sm font-medium text-gold">
+              <Star className={`w-4 h-4 transition-colors ${isShimmering ? "text-yellow-300 fill-yellow-300/30" : "text-gold fill-gold/30"}`} />
+              <span className={`text-sm font-medium transition-colors ${isShimmering ? "text-yellow-300" : "text-gold"}`}>
                 {formatCoins(balance.total_coins)}
               </span>
             </motion.div>
@@ -76,8 +85,20 @@ export const CamlyCoinDisplay = ({
           <motion.p
             key={balance.total_coins}
             initial={{ scale: 1.1, color: "hsl(45, 100%, 70%)" }}
-            animate={{ scale: 1, color: "hsl(var(--foreground))" }}
-            className="text-3xl font-bold text-glow-gold"
+            animate={{ 
+              scale: 1, 
+              color: isShimmering ? "hsl(45, 100%, 70%)" : "hsl(var(--foreground))",
+              textShadow: isShimmering ? "0 0 20px hsla(45, 100%, 70%, 0.6)" : "none",
+            }}
+            transition={{ duration: 0.3 }}
+            className={`text-3xl font-bold ${isShimmering ? "animate-coin-shimmer" : ""}`}
+            style={isShimmering ? {
+              background: "linear-gradient(90deg, hsl(var(--foreground)) 0%, hsl(45, 100%, 70%) 50%, hsl(var(--foreground)) 100%)",
+              backgroundSize: "200% 100%",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            } : undefined}
           >
             {balance.total_coins.toLocaleString("vi-VN")}
             <span className="text-lg ml-1 text-gold">✨</span>

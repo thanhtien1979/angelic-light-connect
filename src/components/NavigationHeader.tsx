@@ -6,6 +6,7 @@ import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
+import { useBalanceShimmer } from "@/hooks/useBalanceShimmer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 
@@ -27,6 +28,7 @@ const navLinks: NavLink[] = [
 const LightIndicator = () => {
   const { user } = useAuth();
   const { balance, formatCoins, isLoading } = useCamlyCoin();
+  const isShimmering = useBalanceShimmer(balance.total_coins);
 
   if (!user || isLoading) return null;
 
@@ -37,22 +39,26 @@ const LightIndicator = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/25 cursor-default"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/25 cursor-default transition-all ${
+              isShimmering ? "animate-coin-shimmer" : ""
+            }`}
+            style={isShimmering ? {
+              background: "linear-gradient(90deg, transparent 0%, hsla(45, 100%, 70%, 0.4) 50%, transparent 100%)",
+              backgroundSize: "200% 100%",
+            } : undefined}
           >
             <motion.div
               animate={{
-                boxShadow: [
-                  "0 0 8px hsla(348, 80%, 75%, 0.3)",
-                  "0 0 16px hsla(348, 80%, 75%, 0.5)",
-                  "0 0 8px hsla(348, 80%, 75%, 0.3)",
-                ],
+                boxShadow: isShimmering
+                  ? ["0 0 20px hsla(45, 100%, 70%, 0.6)", "0 0 30px hsla(45, 100%, 70%, 0.8)", "0 0 20px hsla(45, 100%, 70%, 0.6)"]
+                  : ["0 0 8px hsla(348, 80%, 75%, 0.3)", "0 0 16px hsla(348, 80%, 75%, 0.5)", "0 0 8px hsla(348, 80%, 75%, 0.3)"],
               }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: isShimmering ? 0.5 : 3, repeat: Infinity, ease: "easeInOut" }}
               className="rounded-full p-0.5"
             >
-              <Sun className="w-3.5 h-3.5 text-gold" />
+              <Sun className={`w-3.5 h-3.5 transition-colors ${isShimmering ? "text-yellow-300" : "text-gold"}`} />
             </motion.div>
-            <span className="text-xs font-medium text-gold">
+            <span className={`text-xs font-medium transition-colors ${isShimmering ? "text-yellow-300" : "text-gold"}`}>
               {formatCoins(balance.total_coins)}
             </span>
             <span className="text-xs text-muted-foreground hidden sm:inline">Light</span>

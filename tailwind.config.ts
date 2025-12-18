@@ -110,6 +110,19 @@ export default {
           "0%": { opacity: "0", transform: "scale(0.95)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
+        "coin-shimmer": {
+          "0%": { 
+            backgroundPosition: "-200% center",
+            filter: "brightness(1)",
+          },
+          "50%": { 
+            filter: "brightness(1.3)",
+          },
+          "100%": { 
+            backgroundPosition: "200% center",
+            filter: "brightness(1)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -117,6 +130,7 @@ export default {
         "fade-in": "fade-in 0.8s ease-out forwards",
         "fade-in-up": "fade-in-up 1s ease-out forwards",
         "scale-in": "scale-in 0.6s ease-out forwards",
+        "coin-shimmer": "coin-shimmer 1s ease-in-out",
       },
     },
   },
