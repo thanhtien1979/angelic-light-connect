@@ -40,7 +40,7 @@ const LightIndicator = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/25 cursor-default transition-all hover:animate-coin-hover-pulse ${
+            className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/25 cursor-default transition-all hover:animate-coin-hover-pulse ${
               isShimmering ? "animate-coin-shimmer" : ""
             }`}
             style={isShimmering ? {
@@ -72,6 +72,15 @@ const LightIndicator = () => {
               {formatCoins(balance.total_coins)}
             </span>
             <span className="text-xs text-muted-foreground hidden sm:inline">Light</span>
+            {isShimmering && (
+              <span 
+                className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-serif text-gold/80 animate-blessing-text pointer-events-none"
+                style={{ textShadow: "0 0 8px hsla(45, 80%, 75%, 0.4)" }}
+                aria-hidden="true"
+              >
+                ✨ Light received
+              </span>
+            )}
           </motion.div>
         </TooltipTrigger>
         <TooltipContent 

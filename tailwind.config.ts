@@ -170,6 +170,24 @@ export default {
             boxShadow: "0 0 20px 8px hsla(45, 80%, 75%, 0)",
           },
         },
+        "blessing-text": {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(4px)",
+          },
+          "20%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+          "80%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+          "100%": {
+            opacity: "0",
+            transform: "translateY(-4px)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -183,6 +201,7 @@ export default {
         "light-mote-1": "light-mote 4s ease-in-out infinite",
         "light-mote-2": "light-mote 5s ease-in-out 2s infinite",
         "sacred-glow-ring": "sacred-glow-ring 1.2s ease-out forwards",
+        "blessing-text": "blessing-text 1.5s ease-in-out forwards",
       },
     },
   },
