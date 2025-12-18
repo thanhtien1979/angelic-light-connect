@@ -3,10 +3,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2 } from "lucide-react";
 import GreetingHistory from "@/components/GreetingHistory";
 import SavedGreetings from "@/components/SavedGreetings";
 import GreetingDigest from "@/components/GreetingDigest";
+import MeditationHistoryLog from "@/components/MeditationHistoryLog";
 import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import { LightJournal } from "@/components/LightJournal";
 import { ReflectionModal } from "@/components/ReflectionModal";
@@ -309,6 +310,15 @@ const Profile = () => {
               <h4 className="font-serif text-foreground">Tổng Kết Ánh Sáng</h4>
             </div>
             <GreetingDigest />
+          </div>
+
+          {/* Meditation History Sub-section */}
+          <div className="mt-6 pt-6 border-t border-border/30">
+            <div className="flex items-center gap-2 mb-4">
+              <Flower2 className="w-4 h-4 text-gold" />
+              <h4 className="font-serif text-foreground">Khoảnh Khắc Tĩnh Lặng</h4>
+            </div>
+            <MeditationHistoryLog />
           </div>
         </motion.section>
 

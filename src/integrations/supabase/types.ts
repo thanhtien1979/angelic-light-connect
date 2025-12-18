@@ -170,6 +170,36 @@ export type Database = {
         }
         Relationships: []
       }
+      meditation_history: {
+        Row: {
+          ambient_sound: string | null
+          completed_at: string
+          created_at: string
+          duration_seconds: number
+          id: string
+          theme: string | null
+          user_id: string
+        }
+        Insert: {
+          ambient_sound?: string | null
+          completed_at?: string
+          created_at?: string
+          duration_seconds: number
+          id?: string
+          theme?: string | null
+          user_id: string
+        }
+        Update: {
+          ambient_sound?: string | null
+          completed_at?: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          theme?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           created_at: string
