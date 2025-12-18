@@ -52,6 +52,20 @@ const GlobalAngelicAura = () => {
 
   return (
     <>
+      {/* Ambient Sacred Breathing Glow - matches Profile page */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        <div 
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-gradient-radial from-gold/[0.03] via-rose-200/[0.02] to-transparent animate-ambient-breath blur-3xl"
+        />
+        <div 
+          className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] rounded-full bg-gradient-radial from-amber-100/[0.025] to-transparent animate-ambient-breath blur-3xl"
+          style={{ animationDelay: "-5s" }}
+        />
+      </div>
+
       {/* Fixed divine gradient overlay across entire app */}
       <div 
         className="fixed inset-0 pointer-events-none z-0"
