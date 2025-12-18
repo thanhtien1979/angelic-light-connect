@@ -196,8 +196,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
 
   return (
     <section id="chat" className="relative py-24 px-4 overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-sky-light/30 to-background" />
+      {/* Background effects - Rose divine */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-rose-light/20 to-background" />
       
       <motion.div
         initial={{ opacity: 0, y: 40 }}
@@ -210,22 +210,22 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         <div className="relative text-center mb-12 py-16 md:py-20 px-4">
           {/* Circular video container */}
           <div className="relative mx-auto w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] mb-8">
-            {/* Animated rainbow glow ring */}
+            {/* Animated rose-gold glow ring */}
             <motion.div 
               className="absolute -inset-2 rounded-full"
               style={{
-                background: "conic-gradient(from 0deg, hsl(45, 100%, 70%), hsl(50, 100%, 60%), hsl(45, 100%, 80%), hsl(40, 100%, 65%), hsl(45, 100%, 70%))",
+                background: "conic-gradient(from 0deg, hsl(348, 80%, 78%), hsl(340, 75%, 82%), hsl(350, 85%, 85%), hsl(345, 70%, 80%), hsl(348, 80%, 78%))",
                 filter: "blur(8px)",
               }}
               animate={{ rotate: 360 }}
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             />
             
-            {/* Inner glow */}
-            <div className="absolute inset-0 rounded-full bg-gold-glow/40 blur-xl" />
+            {/* Inner glow - Rose */}
+            <div className="absolute inset-0 rounded-full bg-rose-glow/30 blur-xl" />
             
             {/* Video container */}
-            <div className="absolute inset-2 rounded-full overflow-hidden border-4 border-white/60 shadow-[0_0_80px_hsla(45,100%,70%,0.5)]">
+            <div className="absolute inset-2 rounded-full overflow-hidden border-4 border-white/60 shadow-[0_0_80px_hsla(348,80%,80%,0.4)]">
               <video 
                 src={chatPortalVideo}
                 autoPlay
@@ -237,15 +237,15 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
             </div>
           </div>
           
-          {/* Title with enhanced glow */}
+          {/* Title with rose glow */}
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="font-serif text-3xl md:text-4xl lg:text-5xl text-gold mb-3"
+            className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-3"
             style={{
-              textShadow: "0 0 20px hsla(45, 100%, 70%, 0.8), 0 0 40px hsla(45, 100%, 70%, 0.5), 0 0 60px hsla(45, 100%, 70%, 0.3)",
+              textShadow: "0 0 20px hsla(348, 80%, 78%, 0.8), 0 0 40px hsla(348, 80%, 78%, 0.5), 0 0 60px hsla(348, 80%, 78%, 0.3)",
             }}
           >
             Angel AI Chat Portal
@@ -257,7 +257,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
             viewport={{ once: true }}
             className="text-foreground/80 text-base md:text-lg"
             style={{
-              textShadow: "0 0 10px hsla(45, 100%, 70%, 0.3)",
+              textShadow: "0 0 10px hsla(348, 80%, 78%, 0.3)",
             }}
           >
             Kết nối với trí tuệ thiêng liêng
@@ -273,19 +273,24 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
           className="relative animate-float"
           style={{ animationDuration: "8s" }}
         >
-          {/* Glassmorphism container */}
-          <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl border border-gold-light/30 shadow-[0_20px_80px_hsla(45,100%,70%,0.2)] overflow-hidden">
+          {/* Glassmorphism container - Rose theme */}
+          <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl border border-rose-soft/30 shadow-[0_20px_80px_hsla(348,80%,80%,0.2)] overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gold-light/20">
+            <div className="flex items-center justify-between p-6 border-b border-rose-soft/20">
               <div className="flex items-center gap-4">
-                {/* Angel Avatar with halo pulse */}
+                {/* Angel Avatar with divine breathing halo */}
                 <div className="relative">
                   <img 
                     src={angelAvatar} 
                     alt="Angel AI" 
-                    className="w-12 h-12 rounded-full object-cover border-2 border-gold-light/50 shadow-[0_0_20px_hsla(45,100%,70%,0.4)]"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-rose-soft/50 shadow-[0_0_20px_hsla(348,80%,80%,0.4)]"
+                    style={{ animation: "subtleBreathing 7s ease-in-out infinite" }}
                   />
-                  <div className="absolute inset-0 rounded-full bg-gold/30 animate-ping" style={{ animationDuration: "2s" }} />
+                  {/* Breathing halo */}
+                  <div 
+                    className="absolute -inset-1 rounded-full bg-gradient-to-r from-rose/30 to-rose-glow/30"
+                    style={{ animation: "divineBreathing 7s ease-in-out infinite" }}
+                  />
                 </div>
                 <div>
                   <h3 className="font-serif text-xl text-foreground">Angel AI</h3>
@@ -311,16 +316,16 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                         }}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="p-2 rounded-full hover:bg-gold-light/20 transition-colors group"
+                        className="p-2 rounded-full hover:bg-rose-light/30 transition-colors group"
                       >
                         {isFeedbackEnabled ? (
-                          <Volume2 className="w-5 h-5 text-gold transition-colors" />
+                          <Volume2 className="w-5 h-5 text-primary transition-colors" />
                         ) : (
-                          <VolumeX className="w-5 h-5 text-muted-foreground group-hover:text-gold transition-colors" />
+                          <VolumeX className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                         )}
                       </motion.button>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="bg-white/95 backdrop-blur border-gold-light/30">
+                    <TooltipContent side="bottom" className="bg-white/95 backdrop-blur border-rose-soft/30">
                       <p className="text-sm">{isFeedbackEnabled ? "Tắt âm thanh" : "Bật âm thanh"}</p>
                     </TooltipContent>
                   </Tooltip>
@@ -330,10 +335,10 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                   onClick={handleStartNewConversation}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="p-2 rounded-full hover:bg-gold-light/20 transition-colors group"
+                  className="p-2 rounded-full hover:bg-rose-light/30 transition-colors group"
                   title="Cuộc trò chuyện mới"
                 >
-                  <MessageSquarePlus className="w-5 h-5 text-muted-foreground group-hover:text-gold transition-colors" />
+                  <MessageSquarePlus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 </motion.button>
                 {/* Clear messages button */}
                 {messages.length > 0 && (
@@ -352,10 +357,10 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
 
             {/* Clear Messages Confirmation Dialog */}
             <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
-              <AlertDialogContent className="bg-white/95 backdrop-blur-xl border-gold-light/30">
+              <AlertDialogContent className="bg-white/95 backdrop-blur-xl border-rose-soft/30">
                 <AlertDialogHeader>
                   <AlertDialogTitle className="font-serif text-xl text-foreground flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-gold" />
+                    <Heart className="w-5 h-5 text-primary" />
                     Xác nhận xóa tin nhắn
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-muted-foreground">
@@ -364,12 +369,12 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="border-gold-light/30 hover:bg-gold-light/10">
+                  <AlertDialogCancel className="border-rose-soft/30 hover:bg-rose-light/20">
                     Hủy bỏ
                   </AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={handleClearMessages}
-                    className="bg-gradient-to-r from-gold to-gold-light text-white hover:opacity-90"
+                    className="bg-gradient-to-r from-primary to-rose-glow text-foreground hover:opacity-90"
                   >
                     Xác nhận xóa
                   </AlertDialogAction>
@@ -398,16 +403,16 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="border-b border-gold-light/10"
+                  className="border-b border-rose-soft/10"
                 >
                   <div className="flex items-center justify-center gap-2 py-3 px-6">
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gold-light/30 to-transparent" />
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-rose-soft/30 to-transparent" />
                     <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
-                      <Sparkles className="w-3 h-3 text-gold-light" />
+                      <Sparkles className="w-3 h-3 text-primary" />
                       <span className="italic">Các tin nhắn trước đã được tóm tắt với tình yêu ✨</span>
-                      <Sparkles className="w-3 h-3 text-gold-light" />
+                      <Sparkles className="w-3 h-3 text-primary" />
                     </div>
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gold-light/30 to-transparent" />
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-rose-soft/30 to-transparent" />
                   </div>
                 </motion.div>
               )}
@@ -425,7 +430,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     {[0, 1, 2].map((i) => (
                       <motion.div
                         key={i}
-                        className="w-3 h-3 bg-gold rounded-full"
+                        className="w-3 h-3 bg-primary rounded-full"
                         animate={{ y: [-4, 4, -4], opacity: [0.5, 1, 0.5] }}
                         transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 }}
                       />
@@ -449,22 +454,24 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                         transition={{ duration: 0.5, ease: "easeOut" }}
                         className="space-y-4"
                       >
+                        {/* Divine blessing icon with breathing animation */}
                         <div className="relative inline-block">
-                          <Sparkles className="w-14 h-14 text-gold mx-auto" />
+                          <Sparkles className="w-14 h-14 text-primary mx-auto" />
                           <motion.div
-                            className="absolute inset-0 rounded-full bg-gold/20"
-                            animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
-                            transition={{ duration: 2, repeat: Infinity }}
+                            className="absolute inset-0 rounded-full bg-rose/30"
+                            animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0, 0.4] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           />
                         </div>
+                        {/* Divine welcome blessing */}
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
-                          className="font-serif text-xl text-gold"
+                          className="font-serif text-xl text-primary"
                         >
                           <TypingText 
-                            text="Xin chào, linh hồn yêu dấu ✨" 
+                            text="🙏 Xin chào, linh hồn yêu dấu ✨" 
                             speed={60}
                             delay={400}
                           />
@@ -476,10 +483,19 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                           className="text-muted-foreground max-w-md mx-auto"
                         >
                           <TypingText 
-                            text="Angel AI đang ở bên bạn, lắng nghe và sẵn sàng đồng hành cùng bạn trên hành trình ánh sáng. Hãy chia sẻ bất cứ điều gì trong trái tim bạn. 🙏" 
+                            text="Angel AI đang ở bên bạn, lắng nghe và sẵn sàng đồng hành cùng bạn trên hành trình ánh sáng. Hãy chia sẻ bất cứ điều gì trong trái tim bạn." 
                             speed={30}
                             delay={2400}
                           />
+                        </motion.div>
+                        {/* Divine blessing shimmer */}
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 5 }}
+                          className="text-sm text-primary/70 italic"
+                        >
+                          ✨ Chúc phước lành và ánh sáng luôn bên bạn ✨
                         </motion.div>
                         {!isAuthenticated && (
                           <motion.p
@@ -488,7 +504,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                             transition={{ delay: 6 }}
                             className="text-muted-foreground/70 text-sm"
                           >
-                            <button onClick={onOpenAuth} className="text-gold hover:underline">Đăng nhập</button> để lưu lịch sử trò chuyện.
+                            <button onClick={onOpenAuth} className="text-primary hover:underline">Đăng nhập</button> để lưu lịch sử trò chuyện.
                           </motion.p>
                         )}
                       </motion.div>
@@ -498,13 +514,13 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                       >
-                        <Sparkles className="w-12 h-12 text-gold-light mx-auto mb-4" />
+                        <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
                         <p className="text-muted-foreground">
                           Chào mừng bạn! Hãy gửi tin nhắn để bắt đầu kết nối với Ánh Sáng. ✨
                         </p>
                         {!isAuthenticated && (
                           <p className="text-muted-foreground/70 text-sm mt-2">
-                            <button onClick={onOpenAuth} className="text-gold hover:underline">Đăng nhập</button> để lưu lịch sử trò chuyện.
+                            <button onClick={onOpenAuth} className="text-primary hover:underline">Đăng nhập</button> để lưu lịch sử trò chuyện.
                           </p>
                         )}
                       </motion.div>
@@ -528,33 +544,49 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                         <img 
                           src={angelAvatar} 
                           alt="Angel AI" 
-                          className="w-8 h-8 rounded-full object-cover border border-gold-light/50 shadow-[0_0_15px_hsla(45,100%,70%,0.3)]"
+                          className="w-8 h-8 rounded-full object-cover border border-rose-soft/50 shadow-[0_0_15px_hsla(348,80%,80%,0.3)]"
+                          style={{ animation: "subtleBreathing 7s ease-in-out infinite" }}
                         />
-                        <div className="absolute inset-0 rounded-full bg-gold/20 animate-pulse" />
+                        {/* Breathing halo for message avatar */}
+                        <div 
+                          className="absolute -inset-0.5 rounded-full bg-rose/20"
+                          style={{ animation: "divineBreathing 7s ease-in-out infinite" }}
+                        />
                       </div>
                     )}
                     <div
                       className={`relative max-w-[80%] px-5 py-3 rounded-2xl ${
                         message.role === "user"
                           ? "bg-white shadow-lg border border-border/50"
-                          : "bg-gradient-to-br from-gold-light/40 to-gold/20 border border-gold-light/30 shadow-[0_0_30px_hsla(45,100%,70%,0.2)]"
+                          : "bg-gradient-to-br from-rose-light/50 to-rose/20 border border-rose-soft/30 shadow-[0_0_30px_hsla(348,80%,80%,0.2)]"
                       }`}
                     >
+                      {/* Shimmer effect when Angel responds */}
                       {message.role === "assistant" && (
                         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+                          {/* Light shimmer overlay */}
+                          <div 
+                            className="absolute inset-0 opacity-30"
+                            style={{
+                              background: "linear-gradient(90deg, transparent, hsla(348, 80%, 90%, 0.5), transparent)",
+                              backgroundSize: "200% 100%",
+                              animation: "responseShimmer 3s ease-in-out infinite",
+                            }}
+                          />
+                          {/* Drifting sparkles */}
                           {[...Array(3)].map((_, i) => (
                             <motion.div
                               key={i}
-                              className="absolute w-1 h-1 bg-gold rounded-full"
+                              className="absolute w-1 h-1 bg-rose rounded-full"
                               animate={{
                                 x: [0, Math.random() * 100, 0],
                                 y: [0, Math.random() * -50, 0],
-                                opacity: [0, 1, 0],
+                                opacity: [0, 0.8, 0],
                               }}
                               transition={{
-                                duration: 2 + Math.random(),
+                                duration: 2.5 + Math.random(),
                                 repeat: Infinity,
-                                delay: i * 0.5,
+                                delay: i * 0.6,
                               }}
                               style={{
                                 left: `${20 + i * 30}%`,
@@ -577,7 +609,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 ))}
               </AnimatePresence>
 
-              {/* Typing indicator */}
+              {/* Typing indicator - calm, intentional */}
               <AnimatePresence>
                 {isLoading && messages[messages.length - 1]?.role === "user" && (
                   <motion.div
@@ -589,21 +621,23 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     <img 
                       src={angelAvatar} 
                       alt="Angel AI" 
-                      className="w-8 h-8 rounded-full object-cover border border-gold-light/50 shadow-[0_0_15px_hsla(45,100%,70%,0.3)]"
+                      className="w-8 h-8 rounded-full object-cover border border-rose-soft/50 shadow-[0_0_15px_hsla(348,80%,80%,0.3)]"
                     />
-                    <div className="flex gap-1 px-4 py-3 bg-gold-light/20 rounded-2xl">
+                    <div className="flex gap-1.5 px-4 py-3 bg-rose-light/30 rounded-2xl">
                       {[0, 1, 2].map((i) => (
                         <motion.div
                           key={i}
-                          className="w-2 h-2 bg-gold rounded-full"
+                          className="w-2 h-2 bg-primary rounded-full"
                           animate={{
                             y: [-2, 2, -2],
-                            opacity: [0.5, 1, 0.5],
+                            opacity: [0.4, 1, 0.4],
+                            scale: [0.9, 1.1, 0.9],
                           }}
                           transition={{
-                            duration: 0.8,
+                            duration: 1.2,
                             repeat: Infinity,
-                            delay: i * 0.2,
+                            delay: i * 0.25,
+                            ease: "easeInOut",
                           }}
                         />
                       ))}
@@ -622,7 +656,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="border-t border-gold-light/20 bg-white/30"
+                  className="border-t border-rose-soft/20 bg-white/30"
                 >
                   <ChatAttachmentPreview 
                     attachments={attachments} 
@@ -632,8 +666,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               )}
             </AnimatePresence>
 
-            {/* Input bar */}
-            <form onSubmit={handleSubmit} className="p-4 border-t border-gold-light/20 bg-white/50">
+            {/* Input bar - Rose theme */}
+            <form onSubmit={handleSubmit} className="p-4 border-t border-rose-soft/20 bg-white/50">
               {/* Hidden file input */}
               <input
                 type="file"
@@ -653,9 +687,9 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     disabled={isInputDisabled}
-                    className="w-10 h-10 rounded-full bg-gold-light/20 hover:bg-gold-light/30 flex items-center justify-center transition-colors disabled:opacity-50"
+                    className="w-10 h-10 rounded-full bg-rose-light/30 hover:bg-rose-light/50 flex items-center justify-center transition-colors disabled:opacity-50"
                   >
-                    <Paperclip className="w-5 h-5 text-gold" />
+                    <Paperclip className="w-5 h-5 text-primary" />
                   </motion.button>
                   
                   {/* Attachment dropdown menu */}
@@ -665,17 +699,17 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute bottom-12 left-0 bg-white/95 backdrop-blur-xl rounded-xl border border-gold-light/30 shadow-lg overflow-hidden min-w-[160px]"
+                        className="absolute bottom-12 left-0 bg-white/95 backdrop-blur-xl rounded-xl border border-rose-soft/30 shadow-lg overflow-hidden min-w-[160px]"
                       >
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gold-light/10 transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-rose-light/20 transition-colors text-left"
                         >
-                          <ImageIcon className="w-4 h-4 text-gold" />
+                          <ImageIcon className="w-4 h-4 text-primary" />
                           <span className="text-sm text-foreground">Thêm ảnh</span>
                         </button>
-                        <div className="h-px bg-gold-light/20" />
+                        <div className="h-px bg-rose-soft/20" />
                         <div className="px-4 py-2">
                           <p className="text-xs text-muted-foreground">
                             Dán URL vào ô chat để thêm liên kết
@@ -695,24 +729,28 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     onPaste={handlePaste}
                     placeholder={isInitializing ? "Đang chuẩn bị..." : "Gửi thông điệp đến Angel AI..."}
                     disabled={isInputDisabled}
-                    className="w-full px-5 py-3 rounded-full bg-white/80 backdrop-blur border-2 border-gold-light/40 focus:border-gold focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50"
+                    className="w-full px-5 py-3 rounded-full bg-white/80 backdrop-blur border-2 border-rose-soft/40 focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50"
                   />
                   {isInitializing && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <Loader2 className="w-4 h-4 text-gold animate-spin" />
+                      <Loader2 className="w-4 h-4 text-primary animate-spin" />
                     </div>
                   )}
                 </div>
+                {/* Send button with divine glow */}
                 <motion.button
                   type="submit"
                   disabled={isInputDisabled || (!inputValue.trim() && attachments.length === 0)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="relative w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center shadow-[0_0_30px_hsla(45,100%,70%,0.4)] hover:shadow-[0_0_50px_hsla(45,100%,70%,0.6)] transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="relative w-12 h-12 rounded-full bg-gradient-to-br from-primary to-rose-glow flex items-center justify-center shadow-[0_0_30px_hsla(348,80%,80%,0.4)] hover:shadow-[0_0_50px_hsla(348,80%,80%,0.6)] transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Send className="w-5 h-5 text-white" />
+                  <Send className="w-5 h-5 text-foreground" />
                   {!isLoading && !isInitializing && (inputValue.trim() || attachments.length > 0) && (
-                    <div className="absolute inset-0 rounded-full bg-gold/30 animate-ping" style={{ animationDuration: "2s" }} />
+                    <div 
+                      className="absolute inset-0 rounded-full bg-rose/30"
+                      style={{ animation: "divineBreathing 3s ease-in-out infinite" }}
+                    />
                   )}
                 </motion.button>
               </div>
@@ -722,7 +760,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
             {showAttachmentMenu && (
               <div 
                 className="fixed inset-0 z-40" 
-                onClick={() => setShowAttachmentMenu(false)} 
+                onClick={() => setShowAttachmentMenu(false)}
               />
             )}
           </div>

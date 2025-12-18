@@ -204,36 +204,69 @@ const HeroSection = () => {
             ))}
           </div>
           
-          {/* Angel image */}
+          {/* Angel image with divine breathing presence */}
           <div className="relative">
+            {/* Sacred halo glow - rose-gold gradient */}
+            <div 
+              className="absolute -inset-6 rounded-full"
+              style={{
+                background: "radial-gradient(circle, hsla(348, 80%, 80%, 0.4) 0%, hsla(340, 70%, 85%, 0.2) 40%, transparent 70%)",
+                animation: "divineBreathing 7s ease-in-out infinite",
+              }}
+            />
+            
+            {/* Light particles drifting outward from avatar */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              {Array.from({ length: 12 }, (_, i) => {
+                const angle = (i * 30) * (Math.PI / 180);
+                return (
+                  <div
+                    key={`drift-${i}`}
+                    className="absolute w-2 h-2 rounded-full"
+                    style={{
+                      background: "radial-gradient(circle, hsla(348, 80%, 85%, 0.8) 0%, transparent 70%)",
+                      left: "50%",
+                      top: "50%",
+                      animation: `particleDrift 8s ease-in-out ${i * 0.6}s infinite`,
+                      transform: `rotate(${i * 30}deg)`,
+                    }}
+                  />
+                );
+              })}
+            </div>
+            
             {/* Circular frame with rose-pink gradient border */}
             <div className="relative w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] rounded-full overflow-hidden">
               {/* Animated rose-pink gradient border */}
               <div 
                 className="absolute -inset-1 rounded-full"
                 style={{
-                  background: "linear-gradient(90deg, hsl(348, 68%, 86%), hsl(349, 55%, 78%), hsl(350, 100%, 91%), hsl(348, 68%, 86%))",
+                  background: "linear-gradient(90deg, hsl(348, 80%, 78%), hsl(349, 65%, 72%), hsl(350, 85%, 85%), hsl(340, 75%, 80%), hsl(348, 80%, 78%))",
                   backgroundSize: "300% 100%",
                   animation: "roseGradientShift 8s ease-in-out infinite, borderPulse 3s ease-in-out infinite",
                   filter: "blur(2px)",
                 }}
               />
               
-              {/* Pulsing inner glow - Rose */}
+              {/* Breathing inner glow - Rose-gold */}
               <div 
-                className="absolute inset-1 rounded-full bg-rose-glow/25 blur-md"
-                style={{ animation: "glowPulse 3s ease-in-out infinite" }}
+                className="absolute inset-1 rounded-full"
+                style={{
+                  background: "radial-gradient(circle, hsla(348, 85%, 80%, 0.35) 0%, hsla(340, 70%, 85%, 0.2) 50%, transparent 70%)",
+                  animation: "divineBreathing 7s ease-in-out infinite",
+                }}
               />
               
-              {/* Image container with pulsing shadow */}
+              {/* Image container with breathing shadow */}
               <div 
-                className="absolute inset-2 rounded-full overflow-hidden border-4 border-white/60"
-                style={{ animation: "shadowPulse 3s ease-in-out infinite" }}
+                className="absolute inset-2 rounded-full overflow-hidden border-4 border-white/70"
+                style={{ animation: "avatarBreathingShadow 7s ease-in-out infinite" }}
               >
                 <img
                   src={angelHero}
                   alt="Angel AI - Divine Light Being"
                   className="w-full h-full object-cover"
+                  style={{ animation: "subtleBreathing 7s ease-in-out infinite" }}
                 />
               </div>
             </div>
