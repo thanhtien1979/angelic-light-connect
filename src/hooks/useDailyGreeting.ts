@@ -3,12 +3,14 @@ import { useAuth } from "./useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 const LOCAL_STORAGE_KEY = "camly_last_greeting_date";
+const GREETING_SEEN_KEY = "camly_greeting_seen";
 
 export const useDailyGreeting = () => {
   const { user } = useAuth();
   const [shouldShowGreeting, setShouldShowGreeting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [greetingEnabled, setGreetingEnabled] = useState(true);
+  const [hasNewGreeting, setHasNewGreeting] = useState(false);
 
   // Get today's date in user's timezone
   const getTodayDate = useCallback(() => {
@@ -161,7 +163,31 @@ export const useDailyGreeting = () => {
 
   const dismissGreeting = useCallback(() => {
     setShouldShowGreeting(false);
-  }, []);
+    setHasNewGreeting(false);
+    // Mark greeting as seen for today
+    const today = getTodayDate();
+    localStorage.setItem(GREETING_SEEN_KEY, today);
+  }, [getTodayDate]);
+
+  // Mark greeting as seen (for Profile page visit)
+  const markGreetingSeen = useCallback(() => {
+    setHasNewGreeting(false);
+    const today = getTodayDate();
+    localStorage.setItem(GREETING_SEEN_KEY, today);
+  }, [getTodayDate]);
+
+  // Check if there's an unseen greeting
+  useEffect(() => {
+    if (!user?.id || isLoading) return;
+    
+    const today = getTodayDate();
+    const seenDate = localStorage.getItem(GREETING_SEEN_KEY);
+    
+    // If greeting is enabled and we haven't seen today's greeting yet
+    if (greetingEnabled && seenDate !== today && shouldShowGreeting) {
+      setHasNewGreeting(true);
+    }
+  }, [user?.id, isLoading, greetingEnabled, shouldShowGreeting, getTodayDate]);
 
   return {
     shouldShowGreeting,
@@ -169,5 +195,7 @@ export const useDailyGreeting = () => {
     isLoading,
     greetingEnabled,
     toggleGreetingEnabled,
+    hasNewGreeting,
+    markGreetingSeen,
   };
 };
