@@ -2,3 +2,9 @@ project_id = "iomnylpisfkvjprbincy"
 
 [functions.angel-chat]
 verify_jwt = false
+
+[functions.validate-reflection]
+verify_jwt = false
+
+[functions.award-light]
+verify_jwt = false

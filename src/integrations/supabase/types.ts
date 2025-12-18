@@ -77,6 +77,72 @@ export type Database = {
         }
         Relationships: []
       }
+      light_acknowledgements: {
+        Row: {
+          acknowledgement_type: string
+          camly_coins: number
+          created_at: string
+          id: string
+          is_public: boolean
+          source_id: string | null
+          spiritual_message: string
+          user_id: string
+        }
+        Insert: {
+          acknowledgement_type: string
+          camly_coins?: number
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          source_id?: string | null
+          spiritual_message: string
+          user_id: string
+        }
+        Update: {
+          acknowledgement_type?: string
+          camly_coins?: number
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          source_id?: string | null
+          spiritual_message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      meditation_completions: {
+        Row: {
+          completed_at: string
+          completed_date: string
+          completion_percent: number
+          id: string
+          rewarded: boolean
+          track_id: string
+          track_name: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          completed_date?: string
+          completion_percent?: number
+          id?: string
+          rewarded?: boolean
+          track_id: string
+          track_name: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          completed_date?: string
+          completion_percent?: number
+          id?: string
+          rewarded?: boolean
+          track_id?: string
+          track_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           created_at: string
@@ -104,11 +170,126 @@ export type Database = {
         }
         Relationships: []
       }
+      reflection_notes: {
+        Row: {
+          approved: boolean
+          content: string
+          created_at: string
+          id: string
+          is_public: boolean
+          rejection_reason: string | null
+          sincerity_score: number | null
+          user_id: string
+          word_count: number
+        }
+        Insert: {
+          approved?: boolean
+          content: string
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          rejection_reason?: string | null
+          sincerity_score?: number | null
+          user_id: string
+          word_count?: number
+        }
+        Update: {
+          approved?: boolean
+          content?: string
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          rejection_reason?: string | null
+          sincerity_score?: number | null
+          user_id?: string
+          word_count?: number
+        }
+        Relationships: []
+      }
+      shared_light_moments: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          light_acknowledgement_id: string | null
+          likes_count: number
+          moment_type: string
+          spiritual_message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          light_acknowledgement_id?: string | null
+          likes_count?: number
+          moment_type: string
+          spiritual_message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          light_acknowledgement_id?: string | null
+          likes_count?: number
+          moment_type?: string
+          spiritual_message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_light_moments_light_acknowledgement_id_fkey"
+            columns: ["light_acknowledgement_id"]
+            isOneToOne: false
+            referencedRelation: "light_acknowledgements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_camly_coins: {
+        Row: {
+          created_at: string
+          id: string
+          lifetime_coins: number
+          total_coins: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lifetime_coins?: number
+          total_coins?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lifetime_coins?: number
+          total_coins?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      award_camly_coins: {
+        Args: {
+          p_coins: number
+          p_is_public?: boolean
+          p_message: string
+          p_source_id?: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       check_rate_limit: {
         Args: {
           p_endpoint: string
