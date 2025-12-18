@@ -11,6 +11,7 @@ import CallToAction from "@/components/CallToAction";
 import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
 import GlobalAngelicAura from "@/components/GlobalAngelicAura";
+import { GentleMeditationReminder } from "@/components/GentleMeditationReminder";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -19,6 +20,9 @@ const Index = () => {
     <div className="relative min-h-screen bg-background overflow-hidden">
       {/* Global Angelic Aura - Divine presence throughout */}
       <GlobalAngelicAura />
+      
+      {/* Gentle Meditation Reminder */}
+      <GentleMeditationReminder />
       
       {/* Navigation */}
       <NavigationHeader />

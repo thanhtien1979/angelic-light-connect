@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2 } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf } from "lucide-react";
 import GreetingHistory from "@/components/GreetingHistory";
 import SavedGreetings from "@/components/SavedGreetings";
 import GreetingDigest from "@/components/GreetingDigest";
@@ -12,6 +12,7 @@ import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinD
 import { LightJournal } from "@/components/LightJournal";
 import { ReflectionModal } from "@/components/ReflectionModal";
 import SacredGeometryWatermark from "@/components/SacredGeometryWatermark";
+import { MeditationReminderSettings } from "@/components/MeditationReminderSettings";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
 import { useDailyGreeting } from "@/hooks/useDailyGreeting";
@@ -477,6 +478,12 @@ const Profile = () => {
                 className="data-[state=checked]:bg-gold"
               />
             </div>
+
+            {/* Divider */}
+            <div className="h-px bg-border/50" />
+
+            {/* Meditation Reminder Settings */}
+            <MeditationReminderSettings />
           </div>
 
           <div className="space-y-2">
