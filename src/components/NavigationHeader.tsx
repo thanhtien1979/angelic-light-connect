@@ -4,6 +4,7 @@ import { Menu, X, Sun } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
+import CoinLightMotes from "./CoinLightMotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBalanceShimmer } from "@/hooks/useBalanceShimmer";
@@ -47,17 +48,20 @@ const LightIndicator = () => {
               backgroundSize: "200% 100%",
             } : undefined}
           >
-            <motion.div
-              animate={{
-                boxShadow: isShimmering
-                  ? ["0 0 20px hsla(45, 100%, 70%, 0.6)", "0 0 30px hsla(45, 100%, 70%, 0.8)", "0 0 20px hsla(45, 100%, 70%, 0.6)"]
-                  : ["0 0 8px hsla(348, 80%, 75%, 0.3)", "0 0 16px hsla(348, 80%, 75%, 0.5)", "0 0 8px hsla(348, 80%, 75%, 0.3)"],
-              }}
-              transition={{ duration: isShimmering ? 0.5 : 3, repeat: Infinity, ease: "easeInOut" }}
-              className="rounded-full p-0.5"
-            >
-              <Sun className={`w-3.5 h-3.5 transition-colors animate-coin-float ${isShimmering ? "text-yellow-300" : "text-gold"}`} />
-            </motion.div>
+            <div className="relative">
+              <motion.div
+                animate={{
+                  boxShadow: isShimmering
+                    ? ["0 0 20px hsla(45, 100%, 70%, 0.6)", "0 0 30px hsla(45, 100%, 70%, 0.8)", "0 0 20px hsla(45, 100%, 70%, 0.6)"]
+                    : ["0 0 8px hsla(348, 80%, 75%, 0.3)", "0 0 16px hsla(348, 80%, 75%, 0.5)", "0 0 8px hsla(348, 80%, 75%, 0.3)"],
+                }}
+                transition={{ duration: isShimmering ? 0.5 : 3, repeat: Infinity, ease: "easeInOut" }}
+                className="rounded-full p-0.5"
+              >
+                <Sun className={`w-3.5 h-3.5 transition-colors animate-coin-float ${isShimmering ? "text-yellow-300" : "text-gold"}`} />
+              </motion.div>
+              <CoinLightMotes />
+            </div>
             <span className={`text-xs font-medium transition-colors ${isShimmering ? "text-yellow-300" : "text-gold"}`}>
               {formatCoins(balance.total_coins)}
             </span>

@@ -141,6 +141,20 @@ export default {
             transform: "translateY(-3px)",
           },
         },
+        "light-mote": {
+          "0%": { 
+            opacity: "0",
+            transform: "scale(0)",
+          },
+          "30%": { 
+            opacity: "0.4",
+            transform: "scale(1)",
+          },
+          "100%": { 
+            opacity: "0",
+            transform: "scale(0.5)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -151,6 +165,8 @@ export default {
         "coin-shimmer": "coin-shimmer 1s ease-in-out",
         "coin-hover-pulse": "coin-hover-pulse 1.8s ease-in-out infinite",
         "coin-float": "coin-float 4s ease-in-out infinite",
+        "light-mote-1": "light-mote 4s ease-in-out infinite",
+        "light-mote-2": "light-mote 5s ease-in-out 2s infinite",
       },
     },
   },
