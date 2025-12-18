@@ -1,6 +1,15 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
-export type AmbientSoundType = "silence" | "singing-bowl" | "wind" | "water" | "forest";
+export type AmbientSoundType = 
+  | "silence" 
+  | "singing-bowl" 
+  | "wind" 
+  | "water" 
+  | "forest"
+  | "rain"
+  | "ocean"
+  | "temple-bells"
+  | "night";
 
 interface AmbientSoundOption {
   id: AmbientSoundType;
@@ -10,9 +19,7 @@ interface AmbientSoundOption {
   audioUrl?: string;
 }
 
-// High-quality ambient audio files hosted on public CDN
-const AUDIO_BASE_URL = "https://cdn.pixabay.com/audio/";
-
+// High-quality ambient audio files from free CDN sources
 export const AMBIENT_SOUNDS: AmbientSoundOption[] = [
   { id: "silence", name: "Silence", nameVi: "Tĩnh lặng", icon: "🤫" },
   { 
@@ -20,28 +27,56 @@ export const AMBIENT_SOUNDS: AmbientSoundOption[] = [
     name: "Singing Bowl", 
     nameVi: "Chuông bát", 
     icon: "🔔",
-    audioUrl: "https://cdn.pixabay.com/audio/2024/11/04/audio_4956b1e816.mp3" // Tibetan bowl ambient
+    audioUrl: "https://cdn.pixabay.com/audio/2024/11/04/audio_4956b1e816.mp3"
   },
   { 
     id: "wind", 
     name: "Wind", 
     nameVi: "Gió", 
     icon: "🌬️",
-    audioUrl: "https://cdn.pixabay.com/audio/2022/05/16/audio_1d51bbfd3d.mp3" // Soft wind ambience
+    audioUrl: "https://cdn.pixabay.com/audio/2022/05/16/audio_1d51bbfd3d.mp3"
   },
   { 
     id: "water", 
     name: "Water", 
-    nameVi: "Nước", 
+    nameVi: "Suối", 
     icon: "💧",
-    audioUrl: "https://cdn.pixabay.com/audio/2024/04/11/audio_149acae47b.mp3" // Gentle water stream
+    audioUrl: "https://cdn.pixabay.com/audio/2024/04/11/audio_149acae47b.mp3"
   },
   { 
     id: "forest", 
     name: "Forest", 
     nameVi: "Rừng", 
     icon: "🌿",
-    audioUrl: "https://cdn.pixabay.com/audio/2022/08/31/audio_419263fc12.mp3" // Forest with birds
+    audioUrl: "https://cdn.pixabay.com/audio/2022/08/31/audio_419263fc12.mp3"
+  },
+  { 
+    id: "rain", 
+    name: "Light Rain", 
+    nameVi: "Mưa nhẹ", 
+    icon: "🌧️",
+    audioUrl: "https://cdn.pixabay.com/audio/2022/05/13/audio_257112220f.mp3"
+  },
+  { 
+    id: "ocean", 
+    name: "Ocean Waves", 
+    nameVi: "Sóng biển", 
+    icon: "🌊",
+    audioUrl: "https://cdn.pixabay.com/audio/2024/06/05/audio_96e7c82c3a.mp3"
+  },
+  { 
+    id: "temple-bells", 
+    name: "Temple Bells", 
+    nameVi: "Chuông chùa", 
+    icon: "🛕",
+    audioUrl: "https://cdn.pixabay.com/audio/2022/10/30/audio_1bf4957317.mp3"
+  },
+  { 
+    id: "night", 
+    name: "Night Nature", 
+    nameVi: "Đêm tĩnh", 
+    icon: "🌙",
+    audioUrl: "https://cdn.pixabay.com/audio/2022/02/07/audio_f8a7c19695.mp3"
   },
 ];
 
@@ -60,7 +95,7 @@ export const useAmbientSound = () => {
   });
   const [volume, setVolume] = useState(() => {
     const stored = localStorage.getItem(VOLUME_KEY);
-    return stored ? parseFloat(stored) : 0.25; // Soft default volume
+    return stored ? parseFloat(stored) : 0.2; // Low, non-intrusive default
   });
 
   // Save preferences
