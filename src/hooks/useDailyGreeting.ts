@@ -8,6 +8,7 @@ export const useDailyGreeting = () => {
   const { user } = useAuth();
   const [shouldShowGreeting, setShouldShowGreeting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [greetingEnabled, setGreetingEnabled] = useState(true);
 
   // Get today's date in user's timezone
   const getTodayDate = useCallback(() => {
@@ -30,7 +31,7 @@ export const useDailyGreeting = () => {
 
   // Check and update backend
   const checkAndUpdateBackend = useCallback(async () => {
-    if (!user?.id) return false;
+    if (!user?.id) return { shouldShow: false, enabled: true };
 
     try {
       const today = getTodayDate();
@@ -38,26 +39,31 @@ export const useDailyGreeting = () => {
       // Check existing greeting record
       const { data: existing, error: fetchError } = await supabase
         .from("user_daily_greetings")
-        .select("last_greeting_date")
+        .select("last_greeting_date, greeting_enabled, greeting_count")
         .eq("user_id", user.id)
         .maybeSingle();
 
       if (fetchError) {
         console.error("Error fetching greeting data:", fetchError);
-        return false;
+        return { shouldShow: false, enabled: true };
       }
 
-      // If no record or different date, show greeting
+      // If no record, create one
       if (!existing) {
-        // Create new record
         await supabase
           .from("user_daily_greetings")
           .insert({
             user_id: user.id,
             last_greeting_date: today,
             greeting_count: 1,
+            greeting_enabled: true,
           });
-        return true;
+        return { shouldShow: true, enabled: true };
+      }
+
+      // Check if greeting is disabled
+      if (!existing.greeting_enabled) {
+        return { shouldShow: false, enabled: false };
       }
 
       const lastDate = existing.last_greeting_date;
@@ -67,18 +73,54 @@ export const useDailyGreeting = () => {
           .from("user_daily_greetings")
           .update({
             last_greeting_date: today,
-            greeting_count: (existing as any).greeting_count + 1,
+            greeting_count: existing.greeting_count + 1,
           })
           .eq("user_id", user.id);
-        return true;
+        return { shouldShow: true, enabled: true };
       }
 
-      return false;
+      return { shouldShow: false, enabled: existing.greeting_enabled };
     } catch (error) {
       console.error("Error in greeting check:", error);
-      return false;
+      return { shouldShow: false, enabled: true };
     }
   }, [user?.id, getTodayDate]);
+
+  // Toggle greeting preference
+  const toggleGreetingEnabled = useCallback(async () => {
+    if (!user?.id) return;
+
+    const newValue = !greetingEnabled;
+    setGreetingEnabled(newValue);
+
+    try {
+      // Check if record exists
+      const { data: existing } = await supabase
+        .from("user_daily_greetings")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("user_daily_greetings")
+          .update({ greeting_enabled: newValue })
+          .eq("user_id", user.id);
+      } else {
+        await supabase
+          .from("user_daily_greetings")
+          .insert({
+            user_id: user.id,
+            last_greeting_date: getTodayDate(),
+            greeting_count: 0,
+            greeting_enabled: newValue,
+          });
+      }
+    } catch (error) {
+      console.error("Error toggling greeting:", error);
+      setGreetingEnabled(!newValue); // Revert on error
+    }
+  }, [user?.id, greetingEnabled, getTodayDate]);
 
   // Main effect to check greeting status
   useEffect(() => {
@@ -94,16 +136,19 @@ export const useDailyGreeting = () => {
       const shouldShowLocal = checkLocalStorage();
       
       if (!shouldShowLocal) {
-        // Already greeted today (locally)
+        // Already greeted today (locally), but still fetch enabled status
+        const { enabled } = await checkAndUpdateBackend();
+        setGreetingEnabled(enabled);
         setIsLoading(false);
         setShouldShowGreeting(false);
         return;
       }
 
       // Verify with backend
-      const shouldShow = await checkAndUpdateBackend();
+      const { shouldShow, enabled } = await checkAndUpdateBackend();
+      setGreetingEnabled(enabled);
       
-      if (shouldShow) {
+      if (shouldShow && enabled) {
         updateLocalStorage();
         setShouldShowGreeting(true);
       }
@@ -122,5 +167,7 @@ export const useDailyGreeting = () => {
     shouldShowGreeting,
     dismissGreeting,
     isLoading,
+    greetingEnabled,
+    toggleGreetingEnabled,
   };
 };
