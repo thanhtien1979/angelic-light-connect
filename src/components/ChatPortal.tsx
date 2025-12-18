@@ -10,6 +10,7 @@ import ChatAttachmentPreview from "@/components/ChatAttachmentPreview";
 import MessageAttachments from "@/components/MessageAttachments";
 import TypingText from "@/components/TypingText";
 import EmotionalIndicator, { detectEmotion } from "@/components/EmotionalIndicator";
+import BreathingExercise from "@/components/BreathingExercise";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import chatPortalVideo from "@/assets/chat-portal-video.mp4";
 import { toast } from "sonner";
@@ -113,6 +114,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [showBlessing, setShowBlessing] = useState(false);
   const [showEmotionalIndicator, setShowEmotionalIndicator] = useState(false);
   const [lastMessageCount, setLastMessageCount] = useState(0);
+  const [showBreathingExercise, setShowBreathingExercise] = useState(false);
+  const [breathingOfferedToday, setBreathingOfferedToday] = useState(() => {
+    const today = new Date().toDateString();
+    return localStorage.getItem("angel_breathing_offered_date") === today;
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -139,17 +145,33 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
     }
   }, [inputValue]);
 
-  // Hide emotional indicator after Angel responds
+  // Hide emotional indicator after Angel responds and check for anxiety to offer breathing
   useEffect(() => {
     if (messages.length > lastMessageCount && messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.role === "assistant") {
         // Fade out after Angel responds
         setTimeout(() => setShowEmotionalIndicator(false), 1500);
+        
+        // Check if the user's previous message had anxiety - offer breathing exercise
+        if (messages.length >= 2 && !breathingOfferedToday) {
+          const userMessage = messages[messages.length - 2];
+          if (userMessage.role === "user") {
+            const emotion = detectEmotion(userMessage.content);
+            if (emotion === "anxiety" || emotion === "sadness") {
+              // Offer breathing exercise after a short delay
+              setTimeout(() => {
+                setShowBreathingExercise(true);
+                setBreathingOfferedToday(true);
+                localStorage.setItem("angel_breathing_offered_date", new Date().toDateString());
+              }, 2000);
+            }
+          }
+        }
       }
     }
     setLastMessageCount(messages.length);
-  }, [messages, lastMessageCount]);
+  }, [messages, lastMessageCount, breathingOfferedToday]);
 
   const handleStartNewConversation = async () => {
     const success = await startNewConversation();
@@ -560,6 +582,13 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Angel-guided Breathing Exercise */}
+            <BreathingExercise
+              visible={showBreathingExercise}
+              onComplete={() => setShowBreathingExercise(false)}
+              onSkip={() => setShowBreathingExercise(false)}
+            />
 
             {/* Messages */}
             <div className="p-6 space-y-4 min-h-[300px] max-h-[400px] overflow-y-auto">
