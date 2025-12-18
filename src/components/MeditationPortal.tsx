@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon, X, Keyboard, HelpCircle, Repeat, Shuffle } from "lucide-react";
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
+import { useMeditationReward } from "@/hooks/useMeditationReward";
+import { CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 
@@ -209,6 +211,15 @@ const MeditationPortal = () => {
   
   const { isActive: isSleepTimerActive, remainingSeconds, startTimer, cancelTimer, formatRemainingTime } = useSleepTimer(handleTimerEnd);
   
+  // Meditation reward tracking (80% completion)
+  const { showNotification, lastRewardResult, dismissNotification } = useMeditationReward({
+    currentTime,
+    duration,
+    trackId: currentTrack?.id || "",
+    trackName: currentTrack?.nameVi || currentTrack?.name || "",
+    isPlaying,
+  });
+  
   const [isDragging, setIsDragging] = useState(false);
   const [breathPhase, setBreathPhase] = useState<"inhale" | "exhale">("inhale");
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
@@ -374,6 +385,14 @@ const MeditationPortal = () => {
         icon={keyFeedback?.icon || Play} 
         label={keyFeedback?.label || ""} 
         isVisible={keyFeedback !== null} 
+      />
+      
+      {/* Camly Coin reward notification */}
+      <CamlyCoinNotification
+        show={showNotification && lastRewardResult?.success === true}
+        coins={lastRewardResult?.coins || 50000}
+        message={lastRewardResult?.message || "Ánh sáng đang lan tỏa qua con!"}
+        onClose={dismissNotification}
       />
       
     <section id="meditation" className="relative min-h-screen py-24 px-4 overflow-hidden">
