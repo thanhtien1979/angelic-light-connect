@@ -1,13 +1,29 @@
 import { useMemo } from "react";
 import angelHero from "@/assets/angel-hero.jpg";
 
-// Rose petal colors for particles
+// Deeper rose petal colors for particles - more vibrant
 const petalColors = [
-  "hsla(348, 68%, 86%, 0.2)",   // #F6C1CC - Blush Pink
-  "hsla(350, 100%, 91%, 0.18)", // #FFD1DC - Light Rose
-  "hsla(343, 50%, 97%, 0.25)",  // #FAF3F5 - Warm Cloud
-  "hsla(349, 55%, 78%, 0.15)",  // #E9A6B1 - Soft Rose
+  "hsla(348, 80%, 75%, 0.35)",   // Vibrant Rose
+  "hsla(350, 85%, 80%, 0.30)",   // Bright Pink
+  "hsla(343, 70%, 85%, 0.40)",   // Warm Rose
+  "hsla(349, 75%, 70%, 0.25)",   // Deep Rose
+  "hsla(340, 80%, 78%, 0.32)",   // Coral Pink
 ];
+
+// Shimmer sparkle component
+const Shimmer = ({ x, y, size, delay }: { x: number; y: number; size: number; delay: number }) => (
+  <div
+    className="absolute rounded-full pointer-events-none"
+    style={{
+      left: `${x}%`,
+      top: `${y}%`,
+      width: `${size}px`,
+      height: `${size}px`,
+      background: "radial-gradient(circle, hsla(0, 0%, 100%, 0.9) 0%, hsla(348, 80%, 90%, 0.5) 40%, transparent 70%)",
+      animation: `shimmer ${2 + Math.random()}s ease-in-out ${delay}s infinite`,
+    }}
+  />
+);
 
 // Rose petal particle component
 const RosePetal = ({ x, y, size, color, delay, duration }: { 
@@ -28,7 +44,7 @@ const RosePetal = ({ x, y, size, color, delay, duration }: {
         height: `${size}px`,
         background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
         animation: `petalFloat ${duration}s ease-in-out ${delay}s infinite`,
-        filter: `blur(${size * 0.15}px)`,
+        filter: `blur(${size * 0.1}px)`,
       }}
     />
   );
@@ -80,15 +96,25 @@ const starColors = [
 ];
 
 const HeroSection = () => {
-  // Generate rose petal particles
+  // Generate rose petal particles - more density
   const petals = useMemo(() => 
-    Array.from({ length: 20 }, (_, i) => ({
+    Array.from({ length: 30 }, (_, i) => ({
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: 4 + Math.random() * 8,
+      size: 6 + Math.random() * 12,
       color: petalColors[i % petalColors.length],
-      delay: Math.random() * 10,
-      duration: 15 + Math.random() * 10,
+      delay: Math.random() * 8,
+      duration: 12 + Math.random() * 8,
+    })), []
+  );
+
+  // Generate shimmer sparkles
+  const shimmers = useMemo(() =>
+    Array.from({ length: 25 }, (_, i) => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: 3 + Math.random() * 5,
+      delay: Math.random() * 3,
     })), []
   );
 
@@ -133,7 +159,10 @@ const HeroSection = () => {
       {/* Rose petal particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {petals.map((petal, i) => (
-          <RosePetal key={i} {...petal} />
+          <RosePetal key={`petal-${i}`} {...petal} />
+        ))}
+        {shimmers.map((shimmer, i) => (
+          <Shimmer key={`shimmer-${i}`} {...shimmer} />
         ))}
       </div>
       

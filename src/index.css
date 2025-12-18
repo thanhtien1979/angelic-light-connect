@@ -6,58 +6,58 @@
 
 @layer base {
   :root {
-    /* Divine Rose Aura Color Palette */
-    --background: 340 100% 99%; /* Rose White #FFF7F9 */
-    --foreground: 351 24% 24%; /* Soft deep rose-brown #4A2F35 */
+    /* Divine Rose Aura Color Palette - Deeper & More Vibrant */
+    --background: 340 70% 94%; /* Deeper Rose Pink */
+    --foreground: 351 30% 20%; /* Deep rose-brown */
     
-    /* Sacred Rose */
-    --rose: 348 68% 86%; /* Blush Pink #F6C1CC */
-    --rose-light: 340 100% 99%; /* Rose White */
-    --rose-glow: 348 68% 86%; /* Blush Pink */
-    --rose-soft: 349 55% 78%; /* Soft Rose #E9A6B1 */
+    /* Sacred Rose - More saturated */
+    --rose: 348 80% 75%; /* Vibrant Rose Pink */
+    --rose-light: 340 80% 90%; /* Light Rose */
+    --rose-glow: 348 85% 80%; /* Glowing Rose */
+    --rose-soft: 349 65% 70%; /* Soft Rose */
     
     /* Legacy gold mapped to rose for compatibility */
-    --gold: 348 68% 86%;
-    --gold-light: 340 100% 99%;
-    --gold-glow: 348 68% 86%;
+    --gold: 348 80% 75%;
+    --gold-light: 340 80% 90%;
+    --gold-glow: 348 85% 80%;
     
-    /* Celestial Rose */
-    --sky: 340 50% 92%;
-    --sky-light: 340 100% 97%;
+    /* Celestial Rose - Deeper */
+    --sky: 340 65% 85%;
+    --sky-light: 340 75% 92%;
     
     /* Rainbow Prism - Rose tinted */
-    --prism-start: 348 70% 85%;
-    --prism-mid: 340 60% 90%;
-    --prism-end: 349 55% 78%;
+    --prism-start: 348 75% 78%;
+    --prism-mid: 340 70% 82%;
+    --prism-end: 349 65% 72%;
     
-    /* UI Colors */
-    --card: 343 50% 97%; /* Warm Cloud #FAF3F5 */
-    --card-foreground: 351 24% 24%;
-    --popover: 343 50% 97%;
-    --popover-foreground: 351 24% 24%;
-    --primary: 348 68% 86%; /* Blush Pink */
-    --primary-foreground: 351 24% 24%;
-    --secondary: 343 50% 97%; /* Warm Cloud */
-    --secondary-foreground: 350 25% 38%; /* Text secondary #7A4A52 */
-    --muted: 340 40% 96%;
-    --muted-foreground: 350 25% 38%;
-    --accent: 348 68% 86%; /* Blush Pink */
-    --accent-foreground: 351 24% 24%;
+    /* UI Colors - Deeper Pink */
+    --card: 343 60% 92%; /* Warm Rose Card */
+    --card-foreground: 351 30% 20%;
+    --popover: 343 60% 92%;
+    --popover-foreground: 351 30% 20%;
+    --primary: 348 80% 72%; /* Vibrant Blush Pink */
+    --primary-foreground: 351 30% 18%;
+    --secondary: 343 55% 88%; /* Deeper Warm Cloud */
+    --secondary-foreground: 350 30% 32%;
+    --muted: 340 50% 90%;
+    --muted-foreground: 350 30% 35%;
+    --accent: 348 80% 75%; /* Vibrant Pink Accent */
+    --accent-foreground: 351 30% 18%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 349 55% 88%; /* Soft Rose lighter */
-    --input: 349 55% 92%;
-    --ring: 348 68% 86%;
+    --border: 349 60% 82%; /* Soft Rose Border */
+    --input: 349 60% 88%;
+    --ring: 348 80% 75%;
     --radius: 1.25rem; /* Larger rounded corners */
     
-    --sidebar-background: 340 100% 99%;
-    --sidebar-foreground: 351 24% 24%;
-    --sidebar-primary: 348 68% 86%;
-    --sidebar-primary-foreground: 351 24% 24%;
-    --sidebar-accent: 343 50% 97%;
-    --sidebar-accent-foreground: 351 24% 24%;
-    --sidebar-border: 349 55% 88%;
-    --sidebar-ring: 348 68% 86%;
+    --sidebar-background: 340 70% 94%;
+    --sidebar-foreground: 351 30% 20%;
+    --sidebar-primary: 348 80% 75%;
+    --sidebar-primary-foreground: 351 30% 18%;
+    --sidebar-accent: 343 60% 90%;
+    --sidebar-accent-foreground: 351 30% 20%;
+    --sidebar-border: 349 60% 82%;
+    --sidebar-ring: 348 80% 75%;
   }
 
   .dark {
@@ -324,6 +324,17 @@
       opacity: 1;
       transform: scale(1.3);
       filter: brightness(1.4);
+    }
+  }
+  
+  @keyframes shimmer {
+    0%, 100% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
     }
   }
   
