@@ -77,6 +77,42 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_breathing_patterns: {
+        Row: {
+          created_at: string
+          exhale_duration: number
+          hold_after_exhale: number | null
+          hold_after_inhale: number | null
+          id: string
+          inhale_duration: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exhale_duration?: number
+          hold_after_exhale?: number | null
+          hold_after_inhale?: number | null
+          id?: string
+          inhale_duration?: number
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exhale_duration?: number
+          hold_after_exhale?: number | null
+          hold_after_inhale?: number | null
+          id?: string
+          inhale_duration?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       greeting_history: {
         Row: {
           created_at: string

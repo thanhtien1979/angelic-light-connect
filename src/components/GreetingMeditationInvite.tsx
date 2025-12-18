@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useAmbientSound, AMBIENT_SOUNDS, AmbientSoundType } from "@/hooks/useAmbientSound";
 import BreathingGuide, { BreathingPatternSelector, BreathingPattern } from "./BreathingGuide";
+import BreathingPatternCreator, { CustomBreathingPattern } from "./BreathingPatternCreator";
 
 interface GreetingMeditationInviteProps {
   greetingTheme?: string;
@@ -28,7 +29,9 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
   const [hasCompleted, setHasCompleted] = useState(false);
   const [showSoundPicker, setShowSoundPicker] = useState(false);
   const [breathingPattern, setBreathingPattern] = useState<BreathingPattern>(null);
+  const [customPattern, setCustomPattern] = useState<CustomBreathingPattern | null>(null);
   const [showBreathingGuide, setShowBreathingGuide] = useState(false);
+  const [showBreathingCreator, setShowBreathingCreator] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const totalDurationRef = useRef<number>(0);
@@ -275,6 +278,7 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
               <BreathingGuide
                 isActive={isActive && showBreathingGuide}
                 pattern={breathingPattern}
+                customPattern={customPattern}
                 onClose={() => setShowBreathingGuide(false)}
               />
 
@@ -326,7 +330,7 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="mt-2 p-2 rounded-lg bg-muted/20 border border-border/30 grid grid-cols-5 gap-1">
+                    <div className="mt-2 p-2 rounded-lg bg-muted/20 border border-border/30 grid grid-cols-3 gap-1.5 max-h-48 overflow-y-auto">
                       {AMBIENT_SOUNDS.map((sound) => (
                         <button
                           key={sound.id}
@@ -338,7 +342,7 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
                           }`}
                         >
                           <span className="text-lg">{sound.icon}</span>
-                          <span className="text-[10px] text-muted-foreground">{sound.nameVi}</span>
+                          <span className="text-[10px] text-muted-foreground text-center leading-tight">{sound.nameVi}</span>
                         </button>
                       ))}
                     </div>
@@ -366,16 +370,47 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
 
             {/* Breathing Guide Selector */}
             <div className="mb-3">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Wind className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Hướng dẫn thở</span>
+              <div className="flex items-center justify-between mb-2 px-1">
+                <div className="flex items-center gap-2">
+                  <Wind className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Hướng dẫn thở</span>
+                </div>
+                <button
+                  onClick={() => setShowBreathingCreator(!showBreathingCreator)}
+                  className="text-[10px] text-rose/70 hover:text-rose transition-colors"
+                >
+                  {showBreathingCreator ? "Ẩn" : "Tùy chỉnh"}
+                </button>
               </div>
-              <div className="flex justify-center">
+              <div className="flex justify-center mb-2">
                 <BreathingPatternSelector
                   selectedPattern={breathingPattern}
-                  onSelectPattern={setBreathingPattern}
+                  onSelectPattern={(p) => {
+                    setBreathingPattern(p);
+                    setCustomPattern(null);
+                  }}
                 />
               </div>
+              
+              {/* Custom pattern creator */}
+              <AnimatePresence>
+                {showBreathingCreator && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <BreathingPatternCreator
+                      selectedPatternId={customPattern?.id}
+                      onSelectPattern={(p) => {
+                        setCustomPattern(p);
+                        setBreathingPattern("custom");
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Theme message */}

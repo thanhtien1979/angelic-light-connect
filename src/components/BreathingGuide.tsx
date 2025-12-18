@@ -1,23 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Wind } from "lucide-react";
+import { CustomBreathingPattern } from "./BreathingPatternCreator";
 
-export type BreathingPattern = "box" | "478" | null;
+export type BreathingPattern = "box" | "478" | "custom" | null;
 
 interface BreathingPhase {
   name: string;
   nameVi: string;
-  duration: number; // in seconds
+  duration: number;
 }
 
 interface PatternConfig {
-  id: BreathingPattern;
+  id: string;
   name: string;
   nameVi: string;
   phases: BreathingPhase[];
 }
 
-const BREATHING_PATTERNS: PatternConfig[] = [
+const PRESET_PATTERNS: PatternConfig[] = [
   {
     id: "box",
     name: "Box Breathing",
@@ -41,23 +42,55 @@ const BREATHING_PATTERNS: PatternConfig[] = [
   },
 ];
 
+// Convert custom pattern to phases
+const customPatternToPhases = (pattern: CustomBreathingPattern): BreathingPhase[] => {
+  const phases: BreathingPhase[] = [
+    { name: "inhale", nameVi: "Hít vào", duration: pattern.inhale_duration },
+  ];
+  
+  if (pattern.hold_after_inhale > 0) {
+    phases.push({ name: "hold", nameVi: "Giữ", duration: pattern.hold_after_inhale });
+  }
+  
+  phases.push({ name: "exhale", nameVi: "Thở ra", duration: pattern.exhale_duration });
+  
+  if (pattern.hold_after_exhale > 0) {
+    phases.push({ name: "hold", nameVi: "Giữ", duration: pattern.hold_after_exhale });
+  }
+  
+  return phases;
+};
+
 interface BreathingGuideProps {
   isActive: boolean;
   pattern: BreathingPattern;
+  customPattern?: CustomBreathingPattern | null;
   onClose: () => void;
 }
 
-const BreathingGuide = ({ isActive, pattern, onClose }: BreathingGuideProps) => {
+const BreathingGuide = ({ isActive, pattern, customPattern, onClose }: BreathingGuideProps) => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const patternConfig = BREATHING_PATTERNS.find(p => p.id === pattern);
+  // Get pattern config
+  const patternConfig: PatternConfig | null = (() => {
+    if (pattern === "custom" && customPattern) {
+      return {
+        id: customPattern.id,
+        name: customPattern.name,
+        nameVi: customPattern.name,
+        phases: customPatternToPhases(customPattern),
+      };
+    }
+    return PRESET_PATTERNS.find(p => p.id === pattern) || null;
+  })();
+
   const currentPhase = patternConfig?.phases[currentPhaseIndex];
 
-  // Auto-hide on interaction, show again after brief pause
+  // Auto-hide on interaction
   const handleInteraction = useCallback(() => {
     setIsVisible(false);
     if (hideTimeoutRef.current) {
@@ -67,6 +100,12 @@ const BreathingGuide = ({ isActive, pattern, onClose }: BreathingGuideProps) => 
       setIsVisible(true);
     }, 3000);
   }, []);
+
+  // Reset phase index when pattern changes
+  useEffect(() => {
+    setCurrentPhaseIndex(0);
+    setProgress(0);
+  }, [pattern, customPattern?.id]);
 
   useEffect(() => {
     if (!isActive || !patternConfig) {
@@ -83,7 +122,6 @@ const BreathingGuide = ({ isActive, pattern, onClose }: BreathingGuideProps) => 
       setProgress((currentStep / totalSteps) * 100);
 
       if (currentStep >= totalSteps) {
-        // Move to next phase
         setCurrentPhaseIndex(prev => (prev + 1) % patternConfig.phases.length);
         currentStep = 0;
         setProgress(0);
@@ -115,11 +153,10 @@ const BreathingGuide = ({ isActive, pattern, onClose }: BreathingGuideProps) => 
     const progressRatio = progress / 100;
 
     if (phaseName === "inhale") {
-      return 1 + progressRatio * 0.3; // Expand from 1 to 1.3
+      return 1 + progressRatio * 0.3;
     } else if (phaseName === "exhale") {
-      return 1.3 - progressRatio * 0.3; // Contract from 1.3 to 1
+      return 1.3 - progressRatio * 0.3;
     } else {
-      // Hold - maintain current size
       const prevPhase = patternConfig.phases[
         (currentPhaseIndex - 1 + patternConfig.phases.length) % patternConfig.phases.length
       ];
@@ -138,7 +175,7 @@ const BreathingGuide = ({ isActive, pattern, onClose }: BreathingGuideProps) => 
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           onClick={handleInteraction}
         >
-          {/* Breathing circle - lotus/circle visualization */}
+          {/* Breathing circle */}
           <div className="relative w-32 h-32">
             {/* Outer glow ring */}
             <motion.div
@@ -154,13 +191,11 @@ const BreathingGuide = ({ isActive, pattern, onClose }: BreathingGuideProps) => 
             {/* Inner breathing circle */}
             <motion.div
               className="absolute inset-4 rounded-full bg-gradient-to-br from-rose/40 via-primary/30 to-gold/40 border border-rose/30"
-              animate={{ 
-                scale: getScale(),
-              }}
+              animate={{ scale: getScale() }}
               transition={{ duration: 0.1, ease: "linear" }}
             />
 
-            {/* Center lotus icon */}
+            {/* Center icon */}
             <motion.div
               className="absolute inset-0 flex items-center justify-center"
               animate={{ scale: getScale() * 0.9 }}
@@ -172,7 +207,7 @@ const BreathingGuide = ({ isActive, pattern, onClose }: BreathingGuideProps) => 
 
           {/* Text cue */}
           <motion.div
-            key={currentPhase.nameVi}
+            key={currentPhase.nameVi + currentPhaseIndex}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -183,7 +218,7 @@ const BreathingGuide = ({ isActive, pattern, onClose }: BreathingGuideProps) => 
             </span>
           </motion.div>
 
-          {/* Close button - pointer-events enabled */}
+          {/* Close button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -199,7 +234,7 @@ const BreathingGuide = ({ isActive, pattern, onClose }: BreathingGuideProps) => 
   );
 };
 
-// Pattern selector component
+// Pattern selector with preset options
 interface BreathingPatternSelectorProps {
   selectedPattern: BreathingPattern;
   onSelectPattern: (pattern: BreathingPattern) => void;
@@ -211,10 +246,12 @@ export const BreathingPatternSelector = ({
 }: BreathingPatternSelectorProps) => {
   return (
     <div className="flex gap-2">
-      {BREATHING_PATTERNS.map((pattern) => (
+      {PRESET_PATTERNS.map((pattern) => (
         <button
           key={pattern.id}
-          onClick={() => onSelectPattern(selectedPattern === pattern.id ? null : pattern.id)}
+          onClick={() => onSelectPattern(
+            selectedPattern === pattern.id ? null : pattern.id as BreathingPattern
+          )}
           className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
             selectedPattern === pattern.id
               ? "bg-rose/20 border border-rose/40 text-foreground"
