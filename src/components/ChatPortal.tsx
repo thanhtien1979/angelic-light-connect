@@ -5,12 +5,14 @@ import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
 import { useChatAttachments, type Attachment } from "@/hooks/useChatAttachments";
+import { useAnonymousRateLimit } from "@/hooks/useAnonymousRateLimit";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import ChatAttachmentPreview from "@/components/ChatAttachmentPreview";
 import MessageAttachments from "@/components/MessageAttachments";
 import TypingText from "@/components/TypingText";
 import EmotionalIndicator, { detectEmotion } from "@/components/EmotionalIndicator";
 import BreathingExercise from "@/components/BreathingExercise";
+import TurnstileVerificationDialog from "@/components/TurnstileVerificationDialog";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import chatPortalVideo from "@/assets/chat-portal-video.mp4";
 import { toast } from "sonner";
@@ -104,6 +106,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
   const { summary, clearSummary } = useConversationSummary();
   const { isEnabled: isFeedbackEnabled, toggleFeedback, playSendFeedback, playNewConversationFeedback, enableAudioContext } = useFeedback();
+  const { needsVerification, incrementCount, setVerified, resetForNewConversation, remainingFreeMessages } = useAnonymousRateLimit();
   const [inputValue, setInputValue] = useState("");
   const [showWelcome, setShowWelcome] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -119,6 +122,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
     const today = new Date().toDateString();
     return localStorage.getItem("angel_breathing_offered_date") === today;
   });
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<{ content: string; images?: Array<{ type: "image"; base64: string; mimeType: string }> } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -180,6 +185,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
       setWelcomeShownForSession(false); // Reset for new conversation
       setShowWelcome(true);
       playNewConversationFeedback();
+      resetForNewConversation(); // Reset rate limit tracking for new conversation
       toast.success("Cuộc trò chuyện mới đã bắt đầu ✨", {
         description: "Sẵn sàng kết nối với ánh sáng thiêng liêng",
       });
@@ -225,6 +231,18 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((inputValue.trim() || attachments.length > 0) && !isLoading && isReady) {
+      // Check if anonymous user needs verification
+      if (needsVerification) {
+        // Store pending message and show verification dialog
+        const imageBase64Data = await getImagesAsBase64();
+        setPendingMessage({
+          content: inputValue.trim(),
+          images: imageBase64Data.length > 0 ? imageBase64Data : undefined,
+        });
+        setShowVerificationDialog(true);
+        return;
+      }
+
       playSendFeedback();
       
       // Get current attachments data before clearing
@@ -246,8 +264,28 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
       sendMessage(messageContent, imageBase64Data.length > 0 ? imageBase64Data : undefined);
       setInputValue("");
       clearAttachments();
+      
+      // Increment anonymous message count (only counts for non-auth users)
+      incrementCount();
     }
   };
+
+  // Handle verification success - send pending message
+  const handleVerificationSuccess = useCallback(() => {
+    setVerified(true);
+    setShowVerificationDialog(false);
+    
+    if (pendingMessage) {
+      playSendFeedback();
+      sendMessage(pendingMessage.content, pendingMessage.images);
+      setInputValue("");
+      clearAttachments();
+      setPendingMessage(null);
+      toast.success("Xác minh thành công! 🌸", {
+        description: "Bạn có thể tiếp tục trò chuyện thoải mái",
+      });
+    }
+  }, [pendingMessage, playSendFeedback, sendMessage, clearAttachments, setVerified]);
 
   // Handle file input change
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -947,6 +985,16 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Turnstile Verification Dialog for anonymous users */}
+      <TurnstileVerificationDialog
+        open={showVerificationDialog}
+        onVerified={handleVerificationSuccess}
+        onClose={() => {
+          setShowVerificationDialog(false);
+          setPendingMessage(null);
+        }}
+      />
     </section>
   );
 };
