@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Heart, Sparkles, BookOpen, MessageCircle, Leaf, Sun } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -120,6 +120,7 @@ const MomentCard = ({ moment, onLike, hasLiked }: {
 
 const Community = () => {
   const { user } = useAuth();
+  const prefersReducedMotion = useReducedMotion();
   const [moments, setMoments] = useState<SharedMoment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [likedMoments, setLikedMoments] = useState<Set<string>>(new Set());
@@ -203,7 +204,12 @@ const Community = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <motion.main 
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="max-w-4xl mx-auto px-4 py-8"
+      >
         {/* Page Title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -266,7 +272,7 @@ const Community = () => {
             </AnimatePresence>
           </div>
         )}
-      </main>
+      </motion.main>
     </div>
   );
 };
