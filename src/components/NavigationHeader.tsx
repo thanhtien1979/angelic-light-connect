@@ -61,6 +61,12 @@ const LightIndicator = () => {
                 <Sun className={`w-3.5 h-3.5 transition-colors animate-coin-float ${isShimmering ? "text-yellow-300" : "text-gold"}`} />
               </motion.div>
               <CoinLightMotes />
+              {isShimmering && (
+                <span 
+                  className="absolute inset-0 rounded-full border border-gold/40 animate-sacred-glow-ring pointer-events-none"
+                  aria-hidden="true"
+                />
+              )}
             </div>
             <span className={`text-xs font-medium transition-colors ${isShimmering ? "text-yellow-300" : "text-gold"}`}>
               {formatCoins(balance.total_coins)}
