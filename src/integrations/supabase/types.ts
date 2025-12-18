@@ -233,6 +233,35 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_greetings: {
+        Row: {
+          created_at: string
+          greeting_history_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          greeting_history_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          greeting_history_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_greetings_greeting_history_id_fkey"
+            columns: ["greeting_history_id"]
+            isOneToOne: false
+            referencedRelation: "greeting_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_light_moments: {
         Row: {
           created_at: string

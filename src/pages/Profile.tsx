@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart } from "lucide-react";
 import GreetingHistory from "@/components/GreetingHistory";
+import SavedGreetings from "@/components/SavedGreetings";
 import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import { LightJournal } from "@/components/LightJournal";
 import { ReflectionModal } from "@/components/ReflectionModal";
@@ -290,7 +291,18 @@ const Profile = () => {
             </div>
           </div>
           <GreetingHistory />
+
+          {/* Saved Greetings Sub-section */}
+          <div className="mt-6 pt-6 border-t border-border/30">
+            <div className="flex items-center gap-2 mb-4">
+              <Heart className="w-4 h-4 text-rose-400" />
+              <h4 className="font-serif text-foreground">Lời Chào Đã Lưu</h4>
+            </div>
+            <SavedGreetings />
+          </div>
         </motion.section>
+
+        {/* Chat History */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
