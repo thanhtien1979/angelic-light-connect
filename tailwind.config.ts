@@ -123,6 +123,16 @@ export default {
             filter: "brightness(1)",
           },
         },
+        "coin-hover-pulse": {
+          "0%, 100%": { 
+            boxShadow: "0 0 8px hsla(45, 100%, 70%, 0.3), 0 0 16px hsla(45, 100%, 75%, 0.15)",
+            filter: "brightness(1)",
+          },
+          "50%": { 
+            boxShadow: "0 0 20px hsla(45, 100%, 70%, 0.5), 0 0 35px hsla(45, 100%, 75%, 0.25)",
+            filter: "brightness(1.1)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -131,6 +141,7 @@ export default {
         "fade-in-up": "fade-in-up 1s ease-out forwards",
         "scale-in": "scale-in 0.6s ease-out forwards",
         "coin-shimmer": "coin-shimmer 1s ease-in-out",
+        "coin-hover-pulse": "coin-hover-pulse 1.8s ease-in-out infinite",
       },
     },
   },
