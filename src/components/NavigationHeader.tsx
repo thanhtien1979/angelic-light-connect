@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sun } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -26,10 +26,23 @@ const navLinks: NavLink[] = [
   { id: "community", label: "Cộng Đồng", isPage: true, path: "/community" },
 ];
 
+const BLESSING_MESSAGES = [
+  "✨ Light received",
+  "✨ Blessed",
+  "✨ Grace flows",
+  "✨ Divine light",
+  "✨ Peace within",
+];
+
 const LightIndicator = () => {
   const { user } = useAuth();
   const { balance, formatCoins, isLoading } = useCamlyCoin();
   const isShimmering = useBalanceShimmer(balance.total_coins);
+  
+  const blessingMessage = useMemo(() => {
+    if (!isShimmering) return "";
+    return BLESSING_MESSAGES[Math.floor(Math.random() * BLESSING_MESSAGES.length)];
+  }, [isShimmering]);
 
   if (!user || isLoading) return null;
 
@@ -78,7 +91,7 @@ const LightIndicator = () => {
                 style={{ textShadow: "0 0 8px hsla(45, 80%, 75%, 0.4)" }}
                 aria-hidden="true"
               >
-                ✨ Light received
+                {blessingMessage}
               </span>
             )}
           </motion.div>
