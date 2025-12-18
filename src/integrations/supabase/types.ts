@@ -278,6 +278,7 @@ export type Database = {
         Row: {
           created_at: string
           greeting_count: number
+          greeting_enabled: boolean
           id: string
           last_greeting_date: string
           updated_at: string
@@ -286,6 +287,7 @@ export type Database = {
         Insert: {
           created_at?: string
           greeting_count?: number
+          greeting_enabled?: boolean
           id?: string
           last_greeting_date?: string
           updated_at?: string
@@ -294,6 +296,7 @@ export type Database = {
         Update: {
           created_at?: string
           greeting_count?: number
+          greeting_enabled?: boolean
           id?: string
           last_greeting_date?: string
           updated_at?: string
