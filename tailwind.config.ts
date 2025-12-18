@@ -155,6 +155,21 @@ export default {
             transform: "scale(0.5)",
           },
         },
+        "sacred-glow-ring": {
+          "0%": {
+            transform: "scale(0.8)",
+            opacity: "0.5",
+            boxShadow: "0 0 0 0 hsla(45, 80%, 75%, 0.4)",
+          },
+          "50%": {
+            opacity: "0.3",
+          },
+          "100%": {
+            transform: "scale(2.5)",
+            opacity: "0",
+            boxShadow: "0 0 20px 8px hsla(45, 80%, 75%, 0)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -167,6 +182,7 @@ export default {
         "coin-float": "coin-float 4s ease-in-out infinite",
         "light-mote-1": "light-mote 4s ease-in-out infinite",
         "light-mote-2": "light-mote 5s ease-in-out 2s infinite",
+        "sacred-glow-ring": "sacred-glow-ring 1.2s ease-out forwards",
       },
     },
   },

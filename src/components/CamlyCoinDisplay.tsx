@@ -43,6 +43,12 @@ export const CamlyCoinDisplay = ({
               <div className="relative">
                 <Star className={`w-4 h-4 transition-colors animate-coin-float ${isShimmering ? "text-yellow-300 fill-yellow-300/30" : "text-gold fill-gold/30"}`} />
                 <CoinLightMotes />
+                {isShimmering && (
+                  <span 
+                    className="absolute inset-0 rounded-full border border-gold/40 animate-sacred-glow-ring pointer-events-none"
+                    aria-hidden="true"
+                  />
+                )}
               </div>
               <span className={`text-sm font-medium transition-colors ${isShimmering ? "text-yellow-300" : "text-gold"}`}>
                 {formatCoins(balance.total_coins)}
@@ -78,6 +84,12 @@ export const CamlyCoinDisplay = ({
           <div className="relative p-2 rounded-full bg-gold/20">
             <Sparkles className="w-5 h-5 text-gold animate-coin-float" />
             <CoinLightMotes />
+            {isShimmering && (
+              <span 
+                className="absolute inset-0 rounded-full border border-gold/40 animate-sacred-glow-ring pointer-events-none"
+                aria-hidden="true"
+              />
+            )}
           </div>
           <h3 className="font-serif text-lg text-foreground">Happy Camly Coin</h3>
         </div>
