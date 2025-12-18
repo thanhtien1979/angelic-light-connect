@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Sparkles, Sun } from "lucide-react";
 import { useDailyGreeting } from "@/hooks/useDailyGreeting";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const spiritualGreetings = [
   {
@@ -48,7 +49,22 @@ const DailyLightGreeting = () => {
     if (shouldShowGreeting) {
       // Select a random greeting
       const randomIndex = Math.floor(Math.random() * spiritualGreetings.length);
-      setGreeting(spiritualGreetings[randomIndex]);
+      const selectedGreeting = spiritualGreetings[randomIndex];
+      setGreeting(selectedGreeting);
+      
+      // Save greeting to history
+      const saveGreetingHistory = async () => {
+        try {
+          await supabase.from("greeting_history").insert({
+            user_id: user.id,
+            greeting_title: selectedGreeting.title,
+            greeting_message: selectedGreeting.message,
+          });
+        } catch (error) {
+          console.error("Error saving greeting history:", error);
+        }
+      };
+      saveGreetingHistory();
       
       // Show after a small delay for smoother experience
       setTimeout(() => {

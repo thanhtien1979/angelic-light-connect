@@ -77,6 +77,33 @@ export type Database = {
         }
         Relationships: []
       }
+      greeting_history: {
+        Row: {
+          created_at: string
+          greeting_message: string
+          greeting_title: string
+          id: string
+          shown_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          greeting_message: string
+          greeting_title: string
+          id?: string
+          shown_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          greeting_message?: string
+          greeting_title?: string
+          id?: string
+          shown_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       light_acknowledgements: {
         Row: {
           acknowledgement_type: string

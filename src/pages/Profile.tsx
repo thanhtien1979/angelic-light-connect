@@ -3,7 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart } from "lucide-react";
+import GreetingHistory from "@/components/GreetingHistory";
 import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import { LightJournal } from "@/components/LightJournal";
 import { ReflectionModal } from "@/components/ReflectionModal";
@@ -267,7 +268,24 @@ const Profile = () => {
           <LightJournal showTitle={false} maxItems={10} showCoins={true} />
         </motion.section>
 
-        {/* Chat History */}
+        {/* Greeting History Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 shadow-lg"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 rounded-full bg-gold/20">
+              <Heart className="w-5 h-5 text-gold" />
+            </div>
+            <div>
+              <h3 className="font-serif text-xl text-foreground">Lời Chào Ánh Sáng</h3>
+              <p className="text-xs text-muted-foreground">Những thông điệp thiêng liêng mỗi sáng</p>
+            </div>
+          </div>
+          <GreetingHistory />
+        </motion.section>
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
