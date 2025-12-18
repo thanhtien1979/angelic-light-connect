@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sun } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,11 +9,19 @@ import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 
-const navLinks = [
+interface NavLink {
+  id: string;
+  label: string;
+  isPage?: boolean;
+  path?: string;
+}
+
+const navLinks: NavLink[] = [
   { id: "hero", label: "Trang Chủ" },
   { id: "chat", label: "Chat Portal" },
   { id: "meditation", label: "Thiền Định" },
   { id: "testimonials", label: "Nhân Chứng" },
+  { id: "community", label: "Cộng Đồng", isPage: true, path: "/community" },
 ];
 
 const LightIndicator = () => {
@@ -143,28 +152,40 @@ const NavigationHeader = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <motion.button
-                  key={link.id}
-                  onClick={() => scrollToSection(link.id)}
-                  className={`relative px-4 py-2 text-sm font-medium transition-colors ${
-                    activeSection === link.id
-                      ? "text-gold"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {link.label}
-                  {activeSection === link.id && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-gold/70 to-gold rounded-full"
-                      style={{ boxShadow: "0 0 10px hsla(348, 80%, 75%, 0.5)" }}
-                    />
-                  )}
-                </motion.button>
-              ))}
+              {navLinks.map((link) => 
+                link.isPage && link.path ? (
+                  <Link key={link.id} to={link.path}>
+                    <motion.span
+                      className="relative px-4 py-2 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground inline-block"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {link.label}
+                    </motion.span>
+                  </Link>
+                ) : (
+                  <motion.button
+                    key={link.id}
+                    onClick={() => scrollToSection(link.id)}
+                    className={`relative px-4 py-2 text-sm font-medium transition-colors ${
+                      activeSection === link.id
+                        ? "text-gold"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {link.label}
+                    {activeSection === link.id && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-gold/70 to-gold rounded-full"
+                        style={{ boxShadow: "0 0 10px hsla(348, 80%, 75%, 0.5)" }}
+                      />
+                    )}
+                  </motion.button>
+                )
+              )}
             </nav>
 
             {/* Light Indicator, User Menu & Mobile Menu Button */}
@@ -200,22 +221,39 @@ const NavigationHeader = () => {
             className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/30 shadow-lg md:hidden"
           >
             <nav className="flex flex-col p-4 gap-1">
-              {navLinks.map((link, index) => (
-                <motion.button
-                  key={link.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => scrollToSection(link.id)}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition-colors ${
-                    activeSection === link.id
-                      ? "bg-gold/15 text-gold"
-                      : "text-foreground hover:bg-gold/10"
-                  }`}
-                >
-                  {link.label}
-                </motion.button>
-              ))}
+              {navLinks.map((link, index) => 
+                link.isPage && link.path ? (
+                  <motion.div
+                    key={link.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Link
+                      to={link.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block w-full text-left px-4 py-3 rounded-xl transition-colors text-foreground hover:bg-gold/10"
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                ) : (
+                  <motion.button
+                    key={link.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    onClick={() => scrollToSection(link.id)}
+                    className={`w-full text-left px-4 py-3 rounded-xl transition-colors ${
+                      activeSection === link.id
+                        ? "bg-gold/15 text-gold"
+                        : "text-foreground hover:bg-gold/10"
+                    }`}
+                  >
+                    {link.label}
+                  </motion.button>
+                )
+              )}
             </nav>
           </motion.div>
         )}
