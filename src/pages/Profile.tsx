@@ -7,6 +7,7 @@ import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Spark
 import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import { LightJournal } from "@/components/LightJournal";
 import { ReflectionModal } from "@/components/ReflectionModal";
+import SacredGeometryWatermark from "@/components/SacredGeometryWatermark";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -139,6 +140,9 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5 relative">
+      {/* Sacred Geometry Watermark */}
+      <SacredGeometryWatermark />
+      
       {/* Ambient Sacred Glow */}
       <div 
         className="fixed inset-0 pointer-events-none overflow-hidden"
@@ -152,6 +156,7 @@ const Profile = () => {
           style={{ animationDelay: "-5s" }}
         />
       </div>
+      
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
