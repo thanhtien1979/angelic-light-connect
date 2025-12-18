@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wind, X, Play, Square } from 'lucide-react';
+import { useBreathingCompletionSound } from '@/hooks/useBreathingCompletionSound';
 
 type BreathPhase = 'idle' | 'inhale' | 'exhale' | 'complete';
 
@@ -14,12 +15,14 @@ const QuickBreathingWidget = () => {
   const [phase, setPhase] = useState<BreathPhase>('idle');
   const [cycleCount, setCycleCount] = useState(0);
   const [isDismissed, setIsDismissed] = useState(false);
+  const { playCompletionSound, enableAudioContext } = useBreathingCompletionSound();
 
   const startSession = useCallback(() => {
+    enableAudioContext(); // Enable audio on user interaction
     setIsActive(true);
     setPhase('inhale');
     setCycleCount(0);
-  }, []);
+  }, [enableAudioContext]);
 
   const stopSession = useCallback(() => {
     setIsActive(false);
@@ -46,6 +49,7 @@ const QuickBreathingWidget = () => {
         if (newCount >= TOTAL_CYCLES) {
           setPhase('complete');
           setIsActive(false);
+          playCompletionSound(); // Play gentle chime on completion
         } else {
           setPhase('inhale');
         }
