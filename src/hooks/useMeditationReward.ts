@@ -17,6 +17,28 @@ interface RewardResult {
   alreadyRewarded?: boolean;
 }
 
+const REWARDED_TRACKS_KEY = "meditation_rewarded_tracks";
+
+// Get rewarded tracks from localStorage
+const getRewardedTracks = (): Set<string> => {
+  try {
+    const stored = localStorage.getItem(REWARDED_TRACKS_KEY);
+    if (stored) {
+      return new Set(JSON.parse(stored));
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return new Set();
+};
+
+// Save rewarded track to localStorage
+const saveRewardedTrack = (trackId: string) => {
+  const tracks = getRewardedTracks();
+  tracks.add(trackId);
+  localStorage.setItem(REWARDED_TRACKS_KEY, JSON.stringify([...tracks]));
+};
+
 export const useMeditationReward = ({
   currentTime,
   duration,
@@ -30,8 +52,9 @@ export const useMeditationReward = ({
   const [lastRewardResult, setLastRewardResult] = useState<RewardResult | null>(null);
   const [showNotification, setShowNotification] = useState(false);
   const previousTrackIdRef = useRef(trackId);
+  const rewardedTracksRef = useRef<Set<string>>(getRewardedTracks());
 
-  // Reset when track changes
+  // Reset session state when track changes (but keep lifetime tracking)
   useEffect(() => {
     if (trackId !== previousTrackIdRef.current) {
       setHasTriggeredReward(false);
@@ -45,6 +68,9 @@ export const useMeditationReward = ({
   const completionPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
   const hasReached80Percent = completionPercent >= 80;
 
+  // Check if track was already rewarded (lifetime)
+  const isTrackAlreadyRewarded = rewardedTracksRef.current.has(trackId);
+
   // Trigger reward at 80% completion
   useEffect(() => {
     const triggerReward = async () => {
@@ -52,6 +78,7 @@ export const useMeditationReward = ({
         user?.id &&
         hasReached80Percent &&
         !hasTriggeredReward &&
+        !isTrackAlreadyRewarded &&
         isPlaying &&
         duration > 30 // Only reward for tracks longer than 30 seconds
       ) {
@@ -68,9 +95,17 @@ export const useMeditationReward = ({
           });
 
           if (result.success) {
+            // Save to localStorage to prevent future attempts
+            saveRewardedTrack(trackId);
+            rewardedTracksRef.current.add(trackId);
+            
             setShowNotification(true);
-            // Auto-hide notification after 5 seconds
-            setTimeout(() => setShowNotification(false), 5000);
+            // Auto-hide notification after 6 seconds for calm experience
+            setTimeout(() => setShowNotification(false), 6000);
+          } else if (result.alreadyRewarded) {
+            // Also save to localStorage if server says already rewarded
+            saveRewardedTrack(trackId);
+            rewardedTracksRef.current.add(trackId);
           }
         }
       }
@@ -81,6 +116,7 @@ export const useMeditationReward = ({
     user?.id,
     hasReached80Percent,
     hasTriggeredReward,
+    isTrackAlreadyRewarded,
     isPlaying,
     duration,
     trackId,
@@ -96,6 +132,7 @@ export const useMeditationReward = ({
     completionPercent,
     hasReached80Percent,
     hasTriggeredReward,
+    isTrackAlreadyRewarded,
     lastRewardResult,
     showNotification,
     dismissNotification,

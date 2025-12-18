@@ -68,44 +68,36 @@ serve(async (req) => {
       );
     }
 
-    // For meditation: check if already rewarded today
+    // For meditation: check if already rewarded for this track (lifetime, not just today)
     if (type === "meditation_completion" && sourceId) {
-      const today = new Date().toISOString().split("T")[0];
-      
-      const { data: existing } = await supabase
+      // Check if this track was EVER rewarded before
+      const { data: existingReward } = await supabase
         .from("meditation_completions")
         .select("id, rewarded")
         .eq("user_id", user.id)
         .eq("track_id", sourceId)
-        .eq("completed_date", today)
-        .single();
+        .eq("rewarded", true)
+        .maybeSingle();
 
-      if (existing?.rewarded) {
+      if (existingReward) {
         return new Response(
           JSON.stringify({
             success: false,
             alreadyRewarded: true,
-            message: "Con đã nhận ánh sáng cho bài thiền này hôm nay rồi. Hãy quay lại ngày mai nhé!",
+            message: "Con đã nhận ánh sáng cho bài thiền này rồi. Hãy thử các bài thiền khác nhé!",
           }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      // Update or insert meditation completion
-      if (existing) {
-        await supabase
-          .from("meditation_completions")
-          .update({ rewarded: true })
-          .eq("id", existing.id);
-      } else {
-        await supabase.from("meditation_completions").insert({
-          user_id: user.id,
-          track_id: sourceId,
-          track_name: sourceName || "Unknown Track",
-          completion_percent: 80,
-          rewarded: true,
-        });
-      }
+      // Record the new meditation completion with reward
+      await supabase.from("meditation_completions").insert({
+        user_id: user.id,
+        track_id: sourceId,
+        track_name: sourceName || "Unknown Track",
+        completion_percent: 80,
+        rewarded: true,
+      });
     }
 
     // Generate spiritual message
