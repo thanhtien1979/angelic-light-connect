@@ -3,11 +3,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine } from "lucide-react";
-import { CamlyCoinDisplay } from "@/components/CamlyCoinDisplay";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun } from "lucide-react";
+import { CamlyCoinDisplay, CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import { LightJournal } from "@/components/LightJournal";
 import { ReflectionModal } from "@/components/ReflectionModal";
-import { CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
+import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -34,10 +34,17 @@ interface ChatSession {
 
 const Profile = () => {
   const { user, signOut } = useAuth();
+  const { balance, formatCoins, isLoading: coinLoading } = useCamlyCoin();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isReflectionOpen, setIsReflectionOpen] = useState(false);
+  const [coinNotification, setCoinNotification] = useState<{ show: boolean; coins: number; message: string }>({
+    show: false,
+    coins: 0,
+    message: "",
+  });
 
   useEffect(() => {
     const fetchChatHistory = async () => {
@@ -100,7 +107,6 @@ const Profile = () => {
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
     try {
-      // Delete all chat messages first
       const { error: deleteMessagesError } = await supabase
         .from("chat_messages")
         .delete()
@@ -108,7 +114,6 @@ const Profile = () => {
 
       if (deleteMessagesError) throw deleteMessagesError;
 
-      // Sign out the user (actual account deletion would require edge function with service role)
       await signOut();
       toast.success("Tài khoản đã được xóa");
       window.location.href = "/";
@@ -118,6 +123,14 @@ const Profile = () => {
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const handleReflectionSuccess = (result: { coins: number; message: string }) => {
+    setCoinNotification({
+      show: true,
+      coins: result.coins,
+      message: result.message,
+    });
   };
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Người dùng";
@@ -137,31 +150,98 @@ const Profile = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        {/* Profile Card */}
+        {/* Profile Card with Camly Coin */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          className="p-6 rounded-2xl bg-gradient-to-br from-card/80 via-card/60 to-primary/10 backdrop-blur-sm border border-border/50 shadow-lg"
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            {/* Avatar & Name */}
+            <div className="flex items-center gap-4 flex-1">
+              <Avatar className="w-20 h-20 ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-lg">
+                <AvatarImage src={avatarUrl} alt={displayName} />
+                <AvatarFallback className="bg-primary/20 text-primary font-serif text-xl">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-2xl font-serif font-semibold text-foreground truncate">{displayName}</h2>
+                <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+              </div>
+            </div>
+
+            {/* Total Light Accumulated */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="p-4 rounded-xl bg-gradient-to-br from-gold/20 via-gold-light/10 to-transparent border border-gold/30 text-center md:text-right"
+            >
+              <div className="flex items-center justify-center md:justify-end gap-2 mb-1">
+                <Sun className="w-4 h-4 text-gold" />
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">Total Light Accumulated</span>
+              </div>
+              {coinLoading ? (
+                <div className="h-8 w-24 bg-muted/30 rounded animate-pulse mx-auto md:ml-auto md:mr-0" />
+              ) : (
+                <motion.div
+                  key={balance.total_coins}
+                  initial={{ scale: 1.1 }}
+                  animate={{ scale: 1 }}
+                  className="flex items-center justify-center md:justify-end gap-2"
+                >
+                  <Star className="w-5 h-5 text-gold fill-gold/30" />
+                  <span className="text-2xl font-bold text-gold">
+                    {balance.total_coins.toLocaleString("vi-VN")}
+                  </span>
+                  <Sparkles className="w-4 h-4 text-gold/70" />
+                </motion.div>
+              )}
+              <p className="text-xs text-muted-foreground/70 mt-1">Happy Camly Coin</p>
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* Light Journal Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
           className="p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 shadow-lg"
         >
-          <div className="flex items-center gap-4">
-            <Avatar className="w-16 h-16 ring-2 ring-primary/30 ring-offset-2 ring-offset-background">
-              <AvatarImage src={avatarUrl} alt={displayName} />
-              <AvatarFallback className="bg-primary/20 text-primary font-medium">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-semibold text-foreground truncate">{displayName}</h2>
-              <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+          {/* Section Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-full bg-gold/20">
+                <BookOpen className="w-5 h-5 text-gold" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl text-foreground">Nhật Ký Ánh Sáng</h3>
+                <p className="text-xs text-muted-foreground">Hành trình tâm linh của bạn</p>
+              </div>
             </div>
+            
+            {/* Write Reflection Button */}
+            <Button
+              onClick={() => setIsReflectionOpen(true)}
+              className="bg-gradient-to-r from-gold/80 to-gold hover:from-gold hover:to-gold-dark text-background gap-2 shadow-lg shadow-gold/20"
+            >
+              <PenLine className="w-4 h-4" />
+              <span className="hidden sm:inline">Viết Suy Ngẫm</span>
+              <span className="sm:hidden">Viết</span>
+            </Button>
           </div>
+
+          {/* Light Journal Content */}
+          <LightJournal showTitle={false} maxItems={10} showCoins={true} />
         </motion.section>
 
         {/* Chat History */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.2 }}
           className="space-y-4"
         >
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -209,9 +289,9 @@ const Profile = () => {
                             {session.keyThemes.slice(0, 2).map((theme, i) => (
                               <span
                                 key={i}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gold/15 text-gold-dark border border-gold-light/30"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gold/15 text-foreground/80 border border-gold/30"
                               >
-                                <Sparkles className="w-2.5 h-2.5" />
+                                <Sparkles className="w-2.5 h-2.5 text-gold" />
                                 {theme}
                               </span>
                             ))}
@@ -231,7 +311,7 @@ const Profile = () => {
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.3 }}
           className="space-y-4"
         >
           <h3 className="text-lg font-semibold text-foreground">Cài Đặt Tài Khoản</h3>
@@ -330,6 +410,21 @@ const Profile = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Reflection Modal */}
+      <ReflectionModal
+        isOpen={isReflectionOpen}
+        onClose={() => setIsReflectionOpen(false)}
+        onSuccess={handleReflectionSuccess}
+      />
+
+      {/* Coin Notification */}
+      <CamlyCoinNotification
+        show={coinNotification.show}
+        coins={coinNotification.coins}
+        message={coinNotification.message}
+        onClose={() => setCoinNotification({ ...coinNotification, show: false })}
+      />
     </div>
   );
 };
