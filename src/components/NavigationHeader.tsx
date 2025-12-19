@@ -1,15 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun, Link2, Loader2, Check, Unlink, ChevronDown, Coins } from "lucide-react";
+import { Menu, X, Sun, Wallet, Loader2, Check, Unlink, ChevronDown, Coins } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
 import CoinLightMotes from "./CoinLightMotes";
+import WalletConnectDialog from "./WalletConnectDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBalanceShimmer } from "@/hooks/useBalanceShimmer";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
-import { useWallet, NETWORKS, NetworkId } from "@/hooks/useWallet";
+import { useWallet, NETWORKS, NetworkId, WALLET_PROVIDERS } from "@/hooks/useWallet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
@@ -145,7 +146,11 @@ const WalletIndicator = () => {
     currentNetwork, 
     networkId,
     isSwitchingNetwork,
-    connectWallet, 
+    walletType,
+    connectingProvider,
+    isDialogOpen,
+    setIsDialogOpen,
+    connectWithProvider,
     disconnectWallet,
     switchNetwork 
   } = useWallet();
@@ -240,60 +245,62 @@ const WalletIndicator = () => {
 
   // Connect wallet button - always visible
   return (
-    <TooltipProvider delayDuration={300}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.05, boxShadow: "0 0 20px hsla(35, 100%, 60%, 0.4)" }}
-            whileTap={{ scale: 0.95 }}
-            onClick={connectWallet}
-            disabled={isConnecting}
-            className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-400/50 text-orange-500 dark:text-orange-400 hover:from-orange-500/30 hover:to-amber-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_hsla(35,100%,60%,0.2)]"
+    <>
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px hsla(35, 100%, 60%, 0.4)" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsDialogOpen(true)}
+              disabled={isConnecting}
+              className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-400/50 text-orange-500 dark:text-orange-400 hover:from-orange-500/30 hover:to-amber-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_hsla(35,100%,60%,0.2)]"
+            >
+              {isConnecting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-xs sm:text-sm font-medium hidden sm:inline">Đang kết nối...</span>
+                </>
+              ) : (
+                <>
+                  <Wallet className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-xs sm:text-sm font-medium">Web3</span>
+                </>
+              )}
+            </motion.button>
+          </TooltipTrigger>
+          <TooltipContent 
+            side="bottom" 
+            className="max-w-[280px] bg-card/95 backdrop-blur-sm border-orange-400/30 p-3"
           >
-            {isConnecting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-xs sm:text-sm font-medium hidden sm:inline">Đang kết nối...</span>
-              </>
-            ) : (
-              <>
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" 
-                  alt="MetaMask" 
-                  className="w-4 h-4 sm:w-5 sm:h-5"
-                />
-                <span className="text-xs sm:text-sm font-medium">Web3</span>
-              </>
-            )}
-          </motion.button>
-        </TooltipTrigger>
-        <TooltipContent 
-          side="bottom" 
-          className="max-w-[280px] bg-card/95 backdrop-blur-sm border-orange-400/30 p-3"
-        >
-          <div className="space-y-2">
-            <p className="font-serif text-sm text-foreground flex items-center gap-2">
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" 
-                alt="MetaMask" 
-                className="w-5 h-5"
-              />
-              Kết nối ví Web3
-            </p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Kết nối ví MetaMask để nhận Happy Camly Coin, mint NFT và lưu trữ tác phẩm nghệ thuật trên blockchain.
-            </p>
-            {!user && (
-              <p className="text-xs text-amber-500 pt-1">
-                💡 Đăng nhập để lưu liên kết ví vĩnh viễn
+            <div className="space-y-2">
+              <p className="font-serif text-sm text-foreground flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-orange-500" />
+                Kết nối ví Web3
               </p>
-            )}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Hỗ trợ MetaMask, Trust Wallet, Bitget, Coinbase, OKX và nhiều ví khác.
+              </p>
+              {!user && (
+                <p className="text-xs text-amber-500 pt-1">
+                  💡 Đăng nhập để lưu liên kết ví vĩnh viễn
+                </p>
+              )}
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <WalletConnectDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onConnect={connectWithProvider}
+        isConnecting={isConnecting}
+        connectingProvider={connectingProvider}
+      />
+    </>
   );
 };
 

@@ -12,9 +12,22 @@ export const NETWORKS = {
   "0x13882": { name: "Polygon Amoy", symbol: "MATIC", shortName: "Amoy" },
   "0xa4b1": { name: "Arbitrum One", symbol: "ETH", shortName: "Arbitrum" },
   "0xa": { name: "Optimism", symbol: "ETH", shortName: "Optimism" },
+  "0x38": { name: "BNB Chain", symbol: "BNB", shortName: "BSC" },
+  "0x61": { name: "BSC Testnet", symbol: "BNB", shortName: "BSC Test" },
 } as const;
 
 export type NetworkId = keyof typeof NETWORKS;
+
+// Wallet provider types
+export type WalletProviderId = "metamask" | "trust" | "bitget" | "coinbase" | "okx";
+
+export const WALLET_PROVIDERS = {
+  metamask: { name: "MetaMask", type: "metamask" },
+  trust: { name: "Trust Wallet", type: "trust" },
+  bitget: { name: "Bitget Wallet", type: "bitget" },
+  coinbase: { name: "Coinbase Wallet", type: "coinbase" },
+  okx: { name: "OKX Wallet", type: "okx" },
+} as const;
 
 export const useWallet = () => {
   const { user } = useAuth();
@@ -24,6 +37,9 @@ export const useWallet = () => {
   const [balance, setBalance] = useState<string | null>(null);
   const [networkId, setNetworkId] = useState<string | null>(null);
   const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false);
+  const [walletType, setWalletType] = useState<WalletProviderId | null>(null);
+  const [connectingProvider, setConnectingProvider] = useState<WalletProviderId | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const hasInitialized = useRef(false);
 
   // Get current network info
@@ -214,22 +230,23 @@ export const useWallet = () => {
   }, [user, fetchBalance, fetchNetwork]);
 
   // Save wallet to database
-  const saveWallet = useCallback(async (address: string) => {
+  const saveWallet = useCallback(async (address: string, type: WalletProviderId = "metamask") => {
     if (!user) return;
 
     try {
-      console.log("[Wallet] Saving wallet to database:", address);
+      console.log("[Wallet] Saving wallet to database:", address, "type:", type);
       const { error } = await supabase
         .from("user_wallets")
         .upsert({
           user_id: user.id,
           wallet_address: address,
-          wallet_type: "metamask",
+          wallet_type: type,
         }, {
           onConflict: "user_id",
         });
 
       if (error) throw error;
+      setWalletType(type);
       console.log("[Wallet] Wallet saved successfully");
     } catch (error) {
       console.error("[Wallet] Error saving wallet:", error);
@@ -254,25 +271,35 @@ export const useWallet = () => {
     }
   }, [user]);
 
-  // Connect wallet
-  const connectWallet = useCallback(async () => {
-    console.log("[Wallet] Starting wallet connection...");
+  // Connect wallet with specific provider
+  const connectWithProvider = useCallback(async (providerId: WalletProviderId) => {
+    console.log("[Wallet] Starting wallet connection with provider:", providerId);
     
     if (typeof window.ethereum === "undefined") {
-      console.log("[Wallet] MetaMask not detected");
-      toast.error("Vui lòng cài đặt MetaMask để kết nối blockchain", {
+      console.log("[Wallet] No ethereum provider detected");
+      toast.error(`Vui lòng cài đặt ${WALLET_PROVIDERS[providerId].name} để kết nối`, {
         action: {
           label: "Cài đặt",
-          onClick: () => window.open("https://metamask.io/download/", "_blank"),
+          onClick: () => {
+            const urls: Record<WalletProviderId, string> = {
+              metamask: "https://metamask.io/download/",
+              trust: "https://trustwallet.com/download",
+              bitget: "https://web3.bitget.com/",
+              coinbase: "https://www.coinbase.com/wallet/downloads",
+              okx: "https://www.okx.com/web3",
+            };
+            window.open(urls[providerId], "_blank");
+          },
         },
       });
       return;
     }
 
     setIsConnecting(true);
+    setConnectingProvider(providerId);
     
     try {
-      console.log("[Wallet] Requesting accounts from MetaMask...");
+      console.log("[Wallet] Requesting accounts...");
       
       const existingAccounts = await window.ethereum.request({
         method: "eth_accounts",
@@ -293,18 +320,19 @@ export const useWallet = () => {
         const address = accounts[0];
         console.log("[Wallet] Setting wallet address:", address);
         setWalletAddress(address);
+        setWalletType(providerId);
         
         // Fetch network and balance
         await fetchNetwork();
         await fetchBalance(address);
         
         if (user) {
-          await saveWallet(address);
-          toast.success("🔗 Đã kết nối và lưu địa chỉ ví thành công!", {
+          await saveWallet(address, providerId);
+          toast.success(`🔗 Đã kết nối ${WALLET_PROVIDERS[providerId].name}!`, {
             description: `${address.slice(0, 8)}...${address.slice(-6)}`,
           });
         } else {
-          toast.success("🔗 Đã kết nối ví!", {
+          toast.success(`🔗 Đã kết nối ${WALLET_PROVIDERS[providerId].name}!`, {
             description: "Đăng nhập để lưu địa chỉ ví của bạn.",
           });
         }
@@ -320,24 +348,42 @@ export const useWallet = () => {
       if (err.code === 4001) {
         toast.error("Bạn đã từ chối kết nối ví");
       } else if (err.code === -32002) {
-        toast.error("Vui lòng mở MetaMask và chấp nhận yêu cầu kết nối", {
-          description: "Có thể popup MetaMask đang chờ phản hồi",
+        toast.error(`Vui lòng mở ${WALLET_PROVIDERS[providerId].name} và chấp nhận yêu cầu`, {
+          description: "Có thể popup đang chờ phản hồi",
         });
       } else {
         toast.error("Không thể kết nối ví", {
           description: err.message || "Vui lòng thử lại",
         });
       }
+      throw error;
     } finally {
       setIsConnecting(false);
+      setConnectingProvider(null);
     }
   }, [user, saveWallet, fetchBalance, fetchNetwork]);
+
+  // Open wallet selection dialog
+  const openWalletDialog = useCallback(() => {
+    setIsDialogOpen(true);
+  }, []);
+
+  // Close wallet selection dialog
+  const closeWalletDialog = useCallback(() => {
+    setIsDialogOpen(false);
+  }, []);
+
+  // Legacy connect wallet (opens dialog)
+  const connectWallet = useCallback(() => {
+    setIsDialogOpen(true);
+  }, []);
 
   // Disconnect wallet
   const disconnectWallet = useCallback(async () => {
     console.log("[Wallet] Disconnecting wallet...");
     setWalletAddress(null);
     setBalance(null);
+    setWalletType(null);
     
     if (user) {
       await removeWallet();
@@ -354,7 +400,14 @@ export const useWallet = () => {
     networkId,
     currentNetwork,
     isSwitchingNetwork,
+    walletType,
+    connectingProvider,
+    isDialogOpen,
     connectWallet,
+    connectWithProvider,
+    openWalletDialog,
+    closeWalletDialog,
+    setIsDialogOpen,
     disconnectWallet,
     switchNetwork,
     fetchBalance,
