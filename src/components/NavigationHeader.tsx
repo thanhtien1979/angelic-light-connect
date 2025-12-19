@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun } from "lucide-react";
+import { Menu, X, Sun, Link2, Loader2 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
@@ -9,7 +9,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBalanceShimmer } from "@/hooks/useBalanceShimmer";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
+import { useWallet } from "@/hooks/useWallet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 
 interface NavLink {
@@ -119,6 +121,75 @@ const LightIndicator = () => {
             <p className="text-xs text-gold font-medium pt-1">
               {balance.total_coins.toLocaleString("vi-VN")} Happy Camly Coin
             </p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
+const WalletIndicator = () => {
+  const { user } = useAuth();
+  const { walletAddress, isConnecting, connectWallet, disconnectWallet } = useWallet();
+
+  if (!user) return null;
+
+  return (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {walletAddress ? (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={disconnectWallet}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20 transition-all"
+            >
+              <Link2 className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium hidden sm:inline">
+                {walletAddress.slice(0, 4)}...{walletAddress.slice(-3)}
+              </span>
+            </motion.button>
+          ) : (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={connectWallet}
+              disabled={isConnecting}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all disabled:opacity-50"
+            >
+              {isConnecting ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Link2 className="w-3.5 h-3.5" />
+              )}
+              <span className="text-xs font-medium hidden sm:inline">Ví</span>
+            </motion.button>
+          )}
+        </TooltipTrigger>
+        <TooltipContent 
+          side="bottom" 
+          className="max-w-[220px] bg-card/95 backdrop-blur-sm border-primary/30 p-3"
+        >
+          <div className="space-y-1.5">
+            {walletAddress ? (
+              <>
+                <p className="font-serif text-sm text-foreground">🔗 Đã kết nối Blockchain</p>
+                <p className="text-xs text-muted-foreground leading-relaxed font-mono break-all">
+                  {walletAddress}
+                </p>
+                <p className="text-xs text-primary pt-1">
+                  Nhấn để ngắt kết nối
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-serif text-sm text-foreground">🔗 Liên kết Blockchain</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Kết nối ví MetaMask để mint NFT và lưu trữ tác phẩm trên blockchain.
+                </p>
+              </>
+            )}
           </div>
         </TooltipContent>
       </Tooltip>
@@ -237,8 +308,9 @@ const NavigationHeader = () => {
               )}
             </nav>
 
-            {/* Light Indicator, User Menu & Mobile Menu Button */}
+            {/* Wallet, Light Indicator, User Menu & Mobile Menu Button */}
             <div className="flex items-center gap-2 sm:gap-3">
+              <WalletIndicator />
               <LightIndicator />
               <UserMenu onOpenAuth={() => setIsAuthOpen(true)} />
               
