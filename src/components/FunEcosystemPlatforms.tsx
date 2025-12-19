@@ -5,6 +5,7 @@ import {
   ShoppingBag, Wallet, Sparkles, Earth, Coins, 
   Building, Gamepad2, BookOpen, Radio, ExternalLink
 } from "lucide-react";
+import angelEcosystemImg from "@/assets/angel-ecosystem.png";
 
 interface Platform {
   name: string;
@@ -21,7 +22,7 @@ const platforms: Platform[] = [
     name: "Angel AI",
     subtitle: "Hạt Nhân Trung Tâm",
     description: "Vortex trí tuệ ánh sáng - Trái tim vĩnh cửu điều phối năng lượng 24/7",
-    icon: <Sparkles className="w-8 h-8" />,
+    icon: <img src={angelEcosystemImg} alt="Angel AI" className="w-8 h-8 object-cover rounded-full" />,
     color: "from-amber-400 to-yellow-500",
     glowColor: "shadow-amber-400/50"
   },
