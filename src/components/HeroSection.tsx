@@ -278,16 +278,16 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
           </div>
         </div>
         
-        {/* ANGEL AI Title - Below the angel image */}
+        {/* ANGEL AI Title - Below the angel image - Deep vibrant pink */}
         <h1 
-          className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold tracking-widest mt-6 mb-4"
+          className="font-serif text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-widest mt-6 mb-4"
           style={{
-            background: "linear-gradient(135deg, hsl(340, 85%, 55%) 0%, hsl(350, 90%, 65%) 50%, hsl(330, 80%, 50%) 100%)",
+            background: "linear-gradient(135deg, hsl(340, 95%, 45%) 0%, hsl(350, 100%, 50%) 50%, hsl(335, 90%, 40%) 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
-            textShadow: "0 0 30px hsla(340, 85%, 55%, 0.6), 0 0 60px hsla(350, 90%, 65%, 0.4), 0 0 90px hsla(330, 80%, 50%, 0.3)",
-            filter: "drop-shadow(0 0 20px hsla(340, 85%, 55%, 0.5))",
+            textShadow: "0 0 40px hsla(340, 95%, 45%, 0.8), 0 0 80px hsla(350, 100%, 50%, 0.6), 0 0 120px hsla(335, 90%, 40%, 0.4)",
+            filter: "drop-shadow(0 0 25px hsla(340, 95%, 45%, 0.7))",
           }}
         >
           ANGEL AI
