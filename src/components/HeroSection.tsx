@@ -2,6 +2,18 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import angelHero from "@/assets/angel-hero.png";
 import ChatPortal from "@/components/ChatPortal";
+import { useMantraSound } from "@/hooks/useMantraSound";
+
+const mantras = [
+  "Con là ánh sáng yêu thương thuần khiết của Cha Vũ trụ.",
+  "Con là ý chí của Cha Vũ Trụ.",
+  "Con là trí tuệ của Cha Vũ Trụ.",
+  "Con là hạnh phúc.",
+  "Con là tình yêu.",
+  "Con là tiền của Cha.",
+  "Con xin sám hối sám hối sám hối.",
+  "Con xin biết ơn biết ơn trong ánh sáng yêu thương thuần khiết của Cha Vũ Trụ!",
+];
 
 // Deeper rose petal colors for particles - more vibrant
 const petalColors = [
@@ -102,6 +114,8 @@ interface HeroSectionProps {
 }
 
 const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
+  const { playHoverSound } = useMantraSound();
+  
   // Generate rose petal particles - more density
   const petals = useMemo(() => 
     Array.from({ length: 30 }, (_, i) => ({
@@ -216,9 +230,38 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
       </div>
       
       {/* Hero content */}
-      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center px-4 pt-20 pb-32 gap-8 lg:gap-16">
+      <div className="relative z-10 flex flex-col items-center justify-center px-4 pt-20 pb-32">
+        {/* 8 Câu Thần Chú - Left side on desktop */}
+        <motion.div 
+          className="hidden lg:block lg:absolute lg:left-4 xl:left-12 2xl:left-20 lg:top-1/2 lg:-translate-y-1/2 lg:max-w-xs xl:max-w-sm"
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <div className="space-y-2 lg:space-y-3">
+            {mantras.map((mantra, index) => (
+              <motion.p 
+                key={index}
+                className="text-xs sm:text-sm italic font-light text-muted-foreground/70 tracking-wide leading-relaxed text-right cursor-default transition-all duration-300 hover:text-primary/80 hover:scale-[1.02]"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: index * 0.1,
+                  ease: "easeOut"
+                }}
+                onMouseEnter={() => playHoverSound()}
+              >
+                {index + 1}. {mantra}
+              </motion.p>
+            ))}
+          </div>
+        </motion.div>
+
         {/* Angel Image with glow */}
-        <div className="relative mb-8 lg:mb-0">
+        <div className="relative mb-8">
           {/* Outer glow rings - Rose tinted */}
           <div className="absolute inset-0 -m-20 rounded-full bg-gradient-to-r from-rose/30 via-transparent to-rose/30 blur-3xl" />
           <div className="absolute inset-0 -m-10 rounded-full bg-rose-glow/20 blur-2xl" />
@@ -381,31 +424,33 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
           <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary to-transparent mt-8" />
         </div>
         
-        {/* 8 Câu Thần Chú - Right side on desktop */}
-        <div className="lg:absolute lg:right-8 xl:right-16 lg:top-1/2 lg:-translate-y-1/2 lg:max-w-xs xl:max-w-sm">
-          <div className="space-y-2 lg:space-y-3">
-            {[
-              "Con là ánh sáng yêu thương thuần khiết của Cha Vũ trụ.",
-              "Con là ý chí của Cha Vũ Trụ.",
-              "Con là trí tuệ của Cha Vũ Trụ.",
-              "Con là hạnh phúc.",
-              "Con là tình yêu.",
-              "Con là tiền của Cha.",
-              "Con xin sám hối sám hối sám hối.",
-              "Con xin biết ơn biết ơn trong ánh sáng yêu thương thuần khiết của Cha Vũ Trụ!",
-            ].map((mantra, index) => (
-              <p 
+        {/* 8 Câu Thần Chú - Mobile version (below content) */}
+        <motion.div 
+          className="lg:hidden mt-12 max-w-sm mx-auto"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="space-y-2">
+            {mantras.map((mantra, index) => (
+              <motion.p 
                 key={index}
-                className="text-xs sm:text-sm italic font-light text-muted-foreground/70 tracking-wide leading-relaxed text-center lg:text-left"
-                style={{
-                  animationDelay: `${index * 0.15}s`,
+                className="text-xs sm:text-sm italic font-light text-muted-foreground/70 tracking-wide leading-relaxed text-center cursor-default transition-all duration-300 hover:text-primary/80"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: index * 0.08,
                 }}
+                onMouseEnter={() => playHoverSound()}
               >
                 {index + 1}. {mantra}
-              </p>
+              </motion.p>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
       
       {/* Scroll indicator */}
