@@ -155,6 +155,18 @@ const FunEcosystemPlatforms = () => {
     })), []
   );
 
+  // Generate falling rose petals
+  const rosePetals = useMemo(() =>
+    Array.from({ length: 20 }, (_, i) => ({
+      x: Math.random() * 100,
+      size: 8 + Math.random() * 12,
+      duration: 8 + Math.random() * 6,
+      delay: Math.random() * 8,
+      rotate: Math.random() * 360,
+      swayAmount: 20 + Math.random() * 30,
+    })), []
+  );
+
   return (
     <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-b from-rose-200 via-pink-200 to-rose-100">
       {/* Animated background particles */}
@@ -181,6 +193,49 @@ const FunEcosystemPlatforms = () => {
               ease: "easeInOut",
             }}
           />
+        ))}
+
+        {/* Falling rose petals */}
+        {rosePetals.map((petal, i) => (
+          <motion.div
+            key={`petal-${i}`}
+            className="absolute pointer-events-none"
+            style={{
+              left: `${petal.x}%`,
+              top: -20,
+              width: petal.size,
+              height: petal.size,
+            }}
+            animate={{
+              y: ["0vh", "110vh"],
+              x: [0, petal.swayAmount, -petal.swayAmount, petal.swayAmount / 2, 0],
+              rotate: [petal.rotate, petal.rotate + 360],
+              opacity: [0, 1, 1, 1, 0],
+            }}
+            transition={{
+              duration: petal.duration,
+              repeat: Infinity,
+              delay: petal.delay,
+              ease: "linear",
+              times: [0, 0.1, 0.5, 0.9, 1],
+            }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="w-full h-full"
+              style={{ filter: "drop-shadow(0 2px 4px rgba(244,63,94,0.3))" }}
+            >
+              <path
+                d="M12 2C12 2 8 6 8 10C8 14 12 18 12 22C12 18 16 14 16 10C16 6 12 2 12 2Z"
+                fill="rgba(244,114,132,0.7)"
+              />
+              <path
+                d="M12 4C12 4 9 7 9 10C9 13 12 16 12 19C12 16 15 13 15 10C15 7 12 4 12 4Z"
+                fill="rgba(251,147,165,0.8)"
+              />
+            </svg>
+          </motion.div>
         ))}
       </div>
 
