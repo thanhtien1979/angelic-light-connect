@@ -58,10 +58,10 @@ export function useImageGallery() {
     }
   };
 
-  const saveImage = async (imageBase64: string, prompt: string): Promise<boolean> => {
+  const saveImage = async (imageBase64: string, prompt: string): Promise<string | null> => {
     if (!user) {
       toast.error("Vui lòng đăng nhập để lưu ảnh");
-      return false;
+      return null;
     }
 
     try {
@@ -89,24 +89,26 @@ export function useImageGallery() {
         .getPublicUrl(fileName);
 
       // Save to database
-      const { error: dbError } = await supabase
+      const { data: insertedData, error: dbError } = await supabase
         .from("generated_images")
         .insert({
           user_id: user.id,
           image_url: urlData.publicUrl,
           prompt,
           is_public: false,
-        });
+        })
+        .select("id")
+        .single();
 
       if (dbError) throw dbError;
 
       toast.success("Đã lưu ảnh vào gallery!");
       fetchMyImages();
-      return true;
+      return insertedData?.id || null;
     } catch (err) {
       console.error("Error saving image:", err);
       toast.error("Lỗi khi lưu ảnh");
-      return false;
+      return null;
     }
   };
 

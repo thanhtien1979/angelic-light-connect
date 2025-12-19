@@ -148,27 +148,33 @@ export type Database = {
           created_at: string
           id: string
           image_url: string
+          is_minted: boolean
           is_public: boolean
           likes_count: number
           prompt: string
+          token_id: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           image_url: string
+          is_minted?: boolean
           is_public?: boolean
           likes_count?: number
           prompt: string
+          token_id?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           image_url?: string
+          is_minted?: boolean
           is_public?: boolean
           likes_count?: number
           prompt?: string
+          token_id?: string | null
           user_id?: string
         }
         Relationships: []
@@ -325,6 +331,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      nft_transactions: {
+        Row: {
+          blockchain: string
+          confirmed_at: string | null
+          created_at: string
+          gas_fee: number | null
+          id: string
+          image_id: string | null
+          metadata: Json | null
+          status: string
+          token_id: string
+          transaction_hash: string
+          user_id: string
+          wallet_address: string
+        }
+        Insert: {
+          blockchain?: string
+          confirmed_at?: string | null
+          created_at?: string
+          gas_fee?: number | null
+          id?: string
+          image_id?: string | null
+          metadata?: Json | null
+          status?: string
+          token_id: string
+          transaction_hash: string
+          user_id: string
+          wallet_address: string
+        }
+        Update: {
+          blockchain?: string
+          confirmed_at?: string | null
+          created_at?: string
+          gas_fee?: number | null
+          id?: string
+          image_id?: string | null
+          metadata?: Json | null
+          status?: string
+          token_id?: string
+          transaction_hash?: string
+          user_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nft_transactions_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "generated_images"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rate_limits: {
         Row: {
