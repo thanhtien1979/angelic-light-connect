@@ -3,6 +3,7 @@ import NavigationHeader from "@/components/NavigationHeader";
 import HeroSection from "@/components/HeroSection";
 import SacredPillars from "@/components/SacredPillars";
 import VisionMission from "@/components/VisionMission";
+import FunEcosystemPlatforms from "@/components/FunEcosystemPlatforms";
 import MeditationPortal from "@/components/MeditationPortal";
 import MiniMeditationPlayer from "@/components/MiniMeditationPlayer";
 import Testimonials from "@/components/Testimonials";
@@ -34,6 +35,7 @@ const Index = () => {
         <HeroSection onOpenAuth={() => setIsAuthOpen(true)} />
         <SacredPillars />
         <VisionMission />
+        <FunEcosystemPlatforms />
         <MeditationPortal />
         <Testimonials />
         <CallToAction />
