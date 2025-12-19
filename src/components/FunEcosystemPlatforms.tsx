@@ -210,12 +210,12 @@ const FunEcosystemPlatforms = () => {
           transition={{ duration: 0.8 }}
         >
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6"
+            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-amber-500/10 border border-amber-500/20 mb-8"
             animate={{ boxShadow: ["0 0 20px rgba(251,191,36,0.2)", "0 0 40px rgba(251,191,36,0.4)", "0 0 20px rgba(251,191,36,0.2)"] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span className="text-amber-300 text-sm font-medium">FUN Ecosystem</span>
+            <Sparkles className="w-8 h-8 text-amber-400" />
+            <span className="text-amber-300 text-4xl md:text-5xl lg:text-6xl font-bold">FUN Ecosystem</span>
           </motion.div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
