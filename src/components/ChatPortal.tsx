@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X } from "lucide-react";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
@@ -108,6 +108,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { isEnabled: isFeedbackEnabled, toggleFeedback, playSendFeedback, playNewConversationFeedback, enableAudioContext } = useFeedback();
   const { needsVerification, incrementCount, setVerified, resetForNewConversation, remainingFreeMessages } = useAnonymousRateLimit();
   const [inputValue, setInputValue] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [welcomeShownForSession, setWelcomeShownForSession] = useState(false);
@@ -328,24 +329,52 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
 
   return (
     <section id="chat" className="relative overflow-hidden">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
-        className="relative z-10 w-full"
-      >
-
-        {/* Chat Panel */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          viewport={{ once: true }}
-          className="relative animate-float"
-          style={{ animationDuration: "8s" }}
-        >
-          {/* Glassmorphism container - Rose theme */}
+      {/* Collapsed Chat Button */}
+      <AnimatePresence mode="wait">
+        {!isExpanded ? (
+          <motion.button
+            key="chat-button"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setIsExpanded(true)}
+            className="w-full max-w-md mx-auto flex items-center gap-3 px-5 py-4 bg-white/80 backdrop-blur-xl rounded-full border border-rose-soft/40 shadow-[0_10px_40px_hsla(348,80%,80%,0.25)] hover:shadow-[0_15px_50px_hsla(348,80%,80%,0.35)] transition-all duration-300 group cursor-pointer"
+          >
+            {/* Avatar */}
+            <div className="relative flex-shrink-0">
+              <img 
+                src={angelAvatar} 
+                alt="Angel AI" 
+                className="w-10 h-10 rounded-full object-cover border-2 border-rose-soft/50"
+                style={{ animation: "subtleBreathing 7s ease-in-out infinite" }}
+              />
+              {/* Online indicator */}
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
+            </div>
+            
+            {/* Placeholder text */}
+            <span className="flex-1 text-left text-muted-foreground/70 text-sm sm:text-base">
+              Trò chuyện với Angel AI...
+            </span>
+            
+            {/* Sparkle icon */}
+            <Sparkles className="w-5 h-5 text-primary/60 group-hover:text-primary transition-colors" />
+          </motion.button>
+        ) : (
+          <motion.div
+            key="chat-panel"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="relative z-10 w-full"
+          >
+            {/* Chat Panel */}
+            <div
+              className="relative"
+            >
+              {/* Glassmorphism container - Rose theme */}
           <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl border border-rose-soft/30 shadow-[0_20px_80px_hsla(348,80%,80%,0.2)] overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-rose-soft/20">
@@ -377,6 +406,16 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {/* Close chat button */}
+                <motion.button
+                  onClick={() => setIsExpanded(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 rounded-full hover:bg-rose-light/30 transition-colors group"
+                  title="Thu gọn"
+                >
+                  <X className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                </motion.button>
                 {/* Sound/Haptic Feedback Toggle */}
                 <TooltipProvider>
                   <Tooltip>
@@ -922,9 +961,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 onClick={() => setShowAttachmentMenu(false)}
               />
             )}
+            </div>
           </div>
         </motion.div>
-      </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Turnstile Verification Dialog for anonymous users */}
       <TurnstileVerificationDialog
