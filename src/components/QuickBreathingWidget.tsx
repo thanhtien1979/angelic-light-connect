@@ -308,29 +308,188 @@ const QuickBreathingWidget = () => {
                 {/* Content */}
                 <div className="p-4 pt-2">
                   {phase === 'complete' ? (
-                    // Completion message
+                    // Completion blessing animation
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-center py-6"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center py-6 relative overflow-visible"
                     >
+                      {/* Radiating blessing particles */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        {/* Soft golden light rays */}
+                        {[...Array(8)].map((_, i) => (
+                          <motion.div
+                            key={`ray-${i}`}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ 
+                              scale: [0, 1.5, 2],
+                              opacity: [0, 0.6, 0],
+                            }}
+                            transition={{
+                              duration: 3,
+                              delay: i * 0.1,
+                              ease: 'easeOut',
+                            }}
+                            className="absolute w-1 h-16 bg-gradient-to-t from-transparent via-[hsl(45,70%,70%)] to-transparent"
+                            style={{
+                              transform: `rotate(${i * 45}deg)`,
+                              transformOrigin: 'center bottom',
+                            }}
+                          />
+                        ))}
+                        
+                        {/* Floating blessing particles - soft gold */}
+                        {[...Array(6)].map((_, i) => (
+                          <motion.div
+                            key={`gold-${i}`}
+                            initial={{ scale: 0, x: 0, y: 0, opacity: 0 }}
+                            animate={{
+                              scale: [0, 1, 0.5],
+                              x: [0, Math.cos(i * 60 * Math.PI / 180) * 60],
+                              y: [0, Math.sin(i * 60 * Math.PI / 180) * 60 - 20],
+                              opacity: [0, 0.8, 0],
+                            }}
+                            transition={{
+                              duration: 2.5,
+                              delay: 0.3 + i * 0.15,
+                              ease: 'easeOut',
+                            }}
+                            className="absolute w-2 h-2 rounded-full bg-[hsl(45,70%,65%)]"
+                            style={{
+                              boxShadow: '0 0 12px hsl(45, 70%, 65%, 0.8)',
+                            }}
+                          />
+                        ))}
+                        
+                        {/* Pearl white particles */}
+                        {[...Array(5)].map((_, i) => (
+                          <motion.div
+                            key={`pearl-${i}`}
+                            initial={{ scale: 0, x: 0, y: 0, opacity: 0 }}
+                            animate={{
+                              scale: [0, 0.8, 0.3],
+                              x: [0, Math.cos((i * 72 + 36) * Math.PI / 180) * 50],
+                              y: [0, Math.sin((i * 72 + 36) * Math.PI / 180) * 50 - 15],
+                              opacity: [0, 0.7, 0],
+                            }}
+                            transition={{
+                              duration: 2.8,
+                              delay: 0.5 + i * 0.12,
+                              ease: 'easeOut',
+                            }}
+                            className="absolute w-1.5 h-1.5 rounded-full bg-[hsl(40,20%,95%)]"
+                            style={{
+                              boxShadow: '0 0 10px hsl(40, 20%, 95%, 0.9)',
+                            }}
+                          />
+                        ))}
+                        
+                        {/* Warm rose particles */}
+                        {[...Array(4)].map((_, i) => (
+                          <motion.div
+                            key={`rose-${i}`}
+                            initial={{ scale: 0, x: 0, y: 0, opacity: 0 }}
+                            animate={{
+                              scale: [0, 0.7, 0.2],
+                              x: [0, Math.cos((i * 90 + 45) * Math.PI / 180) * 45],
+                              y: [0, Math.sin((i * 90 + 45) * Math.PI / 180) * 45 - 10],
+                              opacity: [0, 0.6, 0],
+                            }}
+                            transition={{
+                              duration: 2.6,
+                              delay: 0.7 + i * 0.18,
+                              ease: 'easeOut',
+                            }}
+                            className="absolute w-1.5 h-1.5 rounded-full bg-[hsl(350,60%,75%)]"
+                            style={{
+                              boxShadow: '0 0 8px hsl(350, 60%, 75%, 0.7)',
+                            }}
+                          />
+                        ))}
+                        
+                        {/* Expanding blessing ring */}
+                        <motion.div
+                          initial={{ scale: 0.3, opacity: 0 }}
+                          animate={{
+                            scale: [0.3, 1.8],
+                            opacity: [0, 0.4, 0],
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            delay: 0.2,
+                            ease: 'easeOut',
+                          }}
+                          className="absolute w-24 h-24 rounded-full border border-[hsl(45,50%,70%)]"
+                          style={{
+                            boxShadow: '0 0 20px hsl(45, 50%, 70%, 0.3)',
+                          }}
+                        />
+                        
+                        {/* Second blessing ring */}
+                        <motion.div
+                          initial={{ scale: 0.2, opacity: 0 }}
+                          animate={{
+                            scale: [0.2, 1.5],
+                            opacity: [0, 0.3, 0],
+                          }}
+                          transition={{
+                            duration: 3,
+                            delay: 0.5,
+                            ease: 'easeOut',
+                          }}
+                          className="absolute w-20 h-20 rounded-full border border-[hsl(40,30%,85%)]"
+                          style={{
+                            boxShadow: '0 0 15px hsl(40, 30%, 85%, 0.4)',
+                          }}
+                        />
+                      </div>
+                      
+                      {/* Central icon with gentle glow */}
                       <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', damping: 15 }}
-                        className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ 
+                          type: 'spring', 
+                          damping: 20,
+                          delay: 0.1,
+                        }}
+                        className="relative w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[hsl(45,50%,70%)]/20 via-primary/10 to-[hsl(350,40%,75%)]/20 flex items-center justify-center"
+                        style={{
+                          boxShadow: '0 0 30px hsl(45, 50%, 70%, 0.3)',
+                        }}
                       >
-                        <Wind className="w-8 h-8 text-primary" />
+                        <motion.div
+                          animate={{
+                            scale: [1, 1.05, 1],
+                            opacity: [0.8, 1, 0.8],
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                          }}
+                        >
+                          <Wind className="w-8 h-8 text-primary/70" />
+                        </motion.div>
                       </motion.div>
-                      <p className="text-sm text-foreground/80 italic">
+                      
+                      <motion.p 
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.8 }}
+                        className="text-sm text-foreground/80 italic"
+                      >
                         One minute of presence has passed.
-                      </p>
-                      <button
+                      </motion.p>
+                      <motion.button
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1.5 }}
                         onClick={handleClose}
                         className="mt-4 text-xs text-muted-foreground hover:text-foreground transition-colors"
                       >
                         Close
-                      </button>
+                      </motion.button>
                     </motion.div>
                   ) : (
                     <>
