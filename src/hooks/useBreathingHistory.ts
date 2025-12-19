@@ -69,6 +69,27 @@ export const useBreathingHistory = () => {
     }
   }, [user, fetchHistory]);
 
+  const deleteSession = useCallback(async (sessionId: string) => {
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase
+        .from('breathing_session_history')
+        .delete()
+        .eq('id', sessionId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      // Remove from local state immediately for smooth UX
+      setSessions(prev => prev.filter(s => s.id !== sessionId));
+      return true;
+    } catch (error) {
+      console.error('Error deleting breathing session:', error);
+      return false;
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
@@ -77,6 +98,7 @@ export const useBreathingHistory = () => {
     sessions,
     isLoading,
     saveSession,
+    deleteSession,
     refreshHistory: fetchHistory,
   };
 };
