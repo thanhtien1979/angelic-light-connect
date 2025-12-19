@@ -327,7 +327,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   };
 
   return (
-    <section id="chat" className="relative py-24 px-4 overflow-hidden">
+    <section id="chat" className="relative py-12 md:py-16 px-4 sm:px-6 overflow-hidden">
       {/* Background effects - Rose divine */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-rose-light/20 to-background" />
       
@@ -336,12 +336,12 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true, margin: "-100px" }}
-        className="relative z-10 max-w-4xl mx-auto"
+        className="relative z-10 max-w-[680px] mx-auto"
       >
         {/* Section Header with circular video */}
-        <div className="relative text-center mb-12 py-16 md:py-20 px-4">
+        <div className="relative text-center mb-8 py-8 md:py-10 px-4">
           {/* Circular video container */}
-          <div className="relative mx-auto w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] mb-8">
+          <div className="relative mx-auto w-[200px] h-[200px] sm:w-[240px] sm:h-[240px] md:w-[280px] md:h-[280px] mb-6">
             {/* Animated rose-gold glow ring */}
             <motion.div 
               className="absolute -inset-2 rounded-full"
@@ -408,7 +408,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
           {/* Glassmorphism container - Rose theme */}
           <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl border border-rose-soft/30 shadow-[0_20px_80px_hsla(348,80%,80%,0.2)] overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-rose-soft/20">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-rose-soft/20">
               <div className="flex items-center gap-4">
                 {/* Angel Avatar with divine breathing halo */}
                 <div className="relative">
@@ -877,7 +877,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
             </AnimatePresence>
 
             {/* Input bar - Rose theme */}
-            <form onSubmit={handleSubmit} className="p-4 border-t border-rose-soft/20 bg-white/50">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-5 border-t border-rose-soft/20 bg-white/50">
               {/* Hidden file input */}
               <input
                 type="file"
@@ -888,7 +888,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 className="hidden"
               />
               
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 sm:gap-3 items-center">
                 {/* Attachment button */}
                 <div className="relative">
                   <motion.button
@@ -939,7 +939,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     onPaste={handlePaste}
                     placeholder={isInitializing ? "Đang chuẩn bị..." : "Gửi thông điệp đến Angel AI..."}
                     disabled={isInputDisabled}
-                    className="w-full px-5 py-3 rounded-full bg-white/80 backdrop-blur border-2 border-rose-soft/40 focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50"
+                    className="w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-full bg-white/80 backdrop-blur border-2 border-rose-soft/40 focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50 text-sm sm:text-base"
                   />
                   {isInitializing && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
