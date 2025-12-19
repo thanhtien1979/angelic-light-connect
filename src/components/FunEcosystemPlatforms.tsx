@@ -351,11 +351,11 @@ const FunEcosystemPlatforms = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          <div className="inline-block p-8 rounded-3xl bg-white/50 border border-rose-300/40 backdrop-blur-sm shadow-lg shadow-rose-200/20">
-            <p className="text-lg md:text-xl text-rose-800 italic mb-4">
+          <div className="inline-block p-8 rounded-3xl bg-gradient-to-br from-rose-400 to-pink-500 border border-rose-500/50 backdrop-blur-sm shadow-xl shadow-rose-400/30">
+            <p className="text-lg md:text-xl text-white italic mb-4 drop-shadow-sm">
               "Tiền tuôn vào – tuôn ra – quay về – khuếch đại – tăng trưởng mãi mãi"
             </p>
-            <p className="text-rose-600 font-medium">
+            <p className="text-rose-100 font-medium drop-shadow-sm">
               Một mô hình thịnh vượng bất tận, cho tất cả mọi người
             </p>
           </div>
@@ -376,11 +376,11 @@ const FunEcosystemPlatforms = () => {
           ].map((principle, index) => (
             <motion.div
               key={index}
-              className="flex items-center gap-3 p-4 rounded-xl bg-white/50 border border-rose-300/30 shadow-sm"
-              whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.7)" }}
+              className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-rose-400 to-pink-500 border border-rose-500/40 shadow-lg shadow-rose-400/25"
+              whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(244,63,94,0.4)" }}
             >
               <span className="text-2xl">{principle.icon}</span>
-              <span className="text-rose-800/80 text-sm">{principle.text}</span>
+              <span className="text-white text-sm font-medium drop-shadow-sm">{principle.text}</span>
             </motion.div>
           ))}
         </motion.div>
