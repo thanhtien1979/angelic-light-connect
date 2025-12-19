@@ -9,9 +9,11 @@ interface CallState {
   isConnected: boolean;
   isVideoEnabled: boolean;
   isAudioEnabled: boolean;
+  isScreenSharing: boolean;
   callType: 'video' | 'audio' | null;
   remoteUserId: string | null;
   remoteUserName: string | null;
+  callStartTime: number | null;
 }
 
 interface SignalingMessage {
@@ -37,14 +39,17 @@ export const useVideoCall = () => {
     isConnected: false,
     isVideoEnabled: true,
     isAudioEnabled: true,
+    isScreenSharing: false,
     callType: null,
     remoteUserId: null,
     remoteUserName: null,
+    callStartTime: null,
   });
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
@@ -137,7 +142,13 @@ export const useVideoCall = () => {
     pc.onconnectionstatechange = () => {
       console.log('Connection state:', pc.connectionState);
       if (pc.connectionState === 'connected') {
-        setCallState(prev => ({ ...prev, isConnected: true, isCalling: false, isReceiving: false }));
+        setCallState(prev => ({ 
+          ...prev, 
+          isConnected: true, 
+          isCalling: false, 
+          isReceiving: false,
+          callStartTime: Date.now() 
+        }));
       } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
         endCall();
       }
@@ -174,9 +185,11 @@ export const useVideoCall = () => {
       isConnected: false,
       isVideoEnabled: callType === 'video',
       isAudioEnabled: true,
+      isScreenSharing: false,
       callType,
       remoteUserId,
       remoteUserName,
+      callStartTime: null,
     });
 
     // Get user's display name
@@ -203,9 +216,11 @@ export const useVideoCall = () => {
       isConnected: false,
       isVideoEnabled: message.callType === 'video',
       isAudioEnabled: true,
+      isScreenSharing: false,
       callType: message.callType || 'audio',
       remoteUserId: message.from,
       remoteUserName: message.fromName || null,
+      callStartTime: null,
     });
   };
 
@@ -331,6 +346,7 @@ export const useVideoCall = () => {
     // Stop all tracks
     localStreamRef.current?.getTracks().forEach(track => track.stop());
     remoteStreamRef.current?.getTracks().forEach(track => track.stop());
+    screenStreamRef.current?.getTracks().forEach(track => track.stop());
 
     // Close peer connection
     peerConnectionRef.current?.close();
@@ -338,6 +354,7 @@ export const useVideoCall = () => {
     // Reset state
     localStreamRef.current = null;
     remoteStreamRef.current = null;
+    screenStreamRef.current = null;
     peerConnectionRef.current = null;
     setLocalStream(null);
     setRemoteStream(null);
@@ -349,9 +366,11 @@ export const useVideoCall = () => {
       isConnected: false,
       isVideoEnabled: true,
       isAudioEnabled: true,
+      isScreenSharing: false,
       callType: null,
       remoteUserId: null,
       remoteUserName: null,
+      callStartTime: null,
     });
   };
 
@@ -375,6 +394,76 @@ export const useVideoCall = () => {
     }
   };
 
+  const toggleScreenShare = async () => {
+    const pc = peerConnectionRef.current;
+    if (!pc) return;
+
+    try {
+      if (callState.isScreenSharing) {
+        // Stop screen sharing, restore camera
+        screenStreamRef.current?.getTracks().forEach(track => track.stop());
+        screenStreamRef.current = null;
+
+        if (callState.callType === 'video') {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          const videoTrack = stream.getVideoTracks()[0];
+          
+          const sender = pc.getSenders().find(s => s.track?.kind === 'video');
+          if (sender && videoTrack) {
+            await sender.replaceTrack(videoTrack);
+          }
+
+          // Update local stream
+          if (localStreamRef.current) {
+            const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
+            if (oldVideoTrack) {
+              localStreamRef.current.removeTrack(oldVideoTrack);
+            }
+            localStreamRef.current.addTrack(videoTrack);
+            setLocalStream(new MediaStream(localStreamRef.current.getTracks()));
+          }
+        }
+
+        setCallState(prev => ({ ...prev, isScreenSharing: false }));
+      } else {
+        // Start screen sharing
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+          video: true,
+          audio: false 
+        });
+        screenStreamRef.current = screenStream;
+
+        const screenTrack = screenStream.getVideoTracks()[0];
+        
+        // Replace video track with screen track
+        const sender = pc.getSenders().find(s => s.track?.kind === 'video');
+        if (sender) {
+          await sender.replaceTrack(screenTrack);
+        }
+
+        // Update local stream for preview
+        if (localStreamRef.current) {
+          const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
+          if (oldVideoTrack) {
+            localStreamRef.current.removeTrack(oldVideoTrack);
+            oldVideoTrack.stop();
+          }
+          localStreamRef.current.addTrack(screenTrack);
+          setLocalStream(new MediaStream(localStreamRef.current.getTracks()));
+        }
+
+        // Handle when user stops sharing via browser UI
+        screenTrack.onended = () => {
+          toggleScreenShare();
+        };
+
+        setCallState(prev => ({ ...prev, isScreenSharing: true }));
+      }
+    } catch (error) {
+      console.error('Error toggling screen share:', error);
+    }
+  };
+
   return {
     callState,
     localStream,
@@ -385,5 +474,6 @@ export const useVideoCall = () => {
     endCall,
     toggleVideo,
     toggleAudio,
+    toggleScreenShare,
   };
 };

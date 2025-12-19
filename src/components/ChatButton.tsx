@@ -23,6 +23,7 @@ const ChatButton = () => {
     endCall,
     toggleVideo,
     toggleAudio,
+    toggleScreenShare,
   } = useVideoCall();
 
   if (!user) return null;
@@ -68,6 +69,7 @@ const ChatButton = () => {
         onEnd={endCall}
         onToggleVideo={toggleVideo}
         onToggleAudio={toggleAudio}
+        onToggleScreenShare={toggleScreenShare}
       />
     </>
   );
