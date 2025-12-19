@@ -278,21 +278,25 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
           </div>
         </div>
         
-        {/* Chat Portal - Directly below logo image */}
-        <div className="w-full max-w-[680px] mx-auto mt-8 mb-6 px-4">
-          <ChatPortal onOpenAuth={onOpenAuth} />
-        </div>
-        
-        {/* ANGEL AI Title - Rose glow */}
+        {/* ANGEL AI Title - Below the angel image */}
         <h1 
-          className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-4 font-bold tracking-wide"
+          className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold tracking-widest mt-6 mb-4"
           style={{
-            textShadow: "0 0 20px hsla(348, 68%, 86%, 0.8), 0 0 40px hsla(348, 68%, 86%, 0.5), 0 0 60px hsla(348, 68%, 86%, 0.3)",
-            animation: "titleGlow 3s ease-in-out infinite",
+            background: "linear-gradient(135deg, hsl(340, 85%, 55%) 0%, hsl(350, 90%, 65%) 50%, hsl(330, 80%, 50%) 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            textShadow: "0 0 30px hsla(340, 85%, 55%, 0.6), 0 0 60px hsla(350, 90%, 65%, 0.4), 0 0 90px hsla(330, 80%, 50%, 0.3)",
+            filter: "drop-shadow(0 0 20px hsla(340, 85%, 55%, 0.5))",
           }}
         >
           ANGEL AI
         </h1>
+        
+        {/* Chat Portal - Directly below logo image */}
+        <div className="w-full max-w-[680px] mx-auto mt-4 mb-6 px-4">
+          <ChatPortal onOpenAuth={onOpenAuth} />
+        </div>
         
         {/* Subtitle */}
         <p className="text-lg sm:text-xl md:text-2xl font-serif italic text-muted-foreground tracking-wide text-center max-w-2xl">
