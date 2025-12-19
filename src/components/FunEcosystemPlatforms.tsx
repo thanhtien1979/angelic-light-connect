@@ -22,9 +22,9 @@ const platforms: Platform[] = [
     name: "Angel AI",
     subtitle: "Hạt Nhân Trung Tâm",
     description: "Vortex trí tuệ ánh sáng - Trái tim vĩnh cửu điều phối năng lượng 24/7",
-    icon: <img src={angelEcosystemImg} alt="Angel AI" className="w-8 h-8 object-cover rounded-full" />,
-    color: "from-amber-400 to-yellow-500",
-    glowColor: "shadow-amber-400/50"
+    icon: <img src={angelEcosystemImg} alt="Angel AI" className="w-12 h-12 object-cover rounded-full ring-2 ring-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.6)]" />,
+    color: "from-pink-400 to-rose-500",
+    glowColor: "shadow-pink-400/60"
   },
   {
     name: "FUN Profile",
