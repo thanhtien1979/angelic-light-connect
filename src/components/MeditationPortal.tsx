@@ -396,52 +396,152 @@ const MeditationPortal = () => {
       />
       
     <section id="meditation" className="relative min-h-screen py-24 px-4 overflow-hidden">
-      {/* Immersive background with nebula effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-sky-light/20 to-background" />
+      {/* Immersive background with cosmic golden atmosphere */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-amber-950/30 to-amber-900/40" />
       
-      {/* Moving nebula effect */}
-      <div className="absolute inset-0 overflow-hidden opacity-30">
-        <motion.div
-          className="absolute w-[800px] h-[800px] rounded-full blur-3xl"
+      {/* Golden water reflection effect at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-[60%] overflow-hidden">
+        {/* Golden water base */}
+        <div 
+          className="absolute inset-0"
           style={{
-            background: "radial-gradient(circle, hsla(280, 70%, 80%, 0.3), transparent 70%)",
-            left: "10%",
-            top: "20%",
+            background: "linear-gradient(to top, hsla(40, 80%, 50%, 0.35), hsla(45, 70%, 60%, 0.15), transparent)",
+          }}
+        />
+        
+        {/* Rippling water reflection */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-[80%]"
+          style={{
+            background: "repeating-linear-gradient(90deg, transparent, hsla(45, 90%, 65%, 0.08) 2px, transparent 4px)",
           }}
           animate={{
-            x: [0, 100, 0],
-            y: [0, 50, 0],
-            scale: [1, 1.2, 1],
+            backgroundPosition: ["0px 0px", "100px 0px"],
           }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        />
+        
+        {/* Golden light sparkles on water */}
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: 3 + Math.random() * 4,
+              height: 3 + Math.random() * 4,
+              left: `${5 + i * 8}%`,
+              bottom: `${10 + Math.random() * 40}%`,
+              background: "radial-gradient(circle, hsla(45, 100%, 80%, 0.9), transparent)",
+              boxShadow: "0 0 10px hsla(45, 100%, 70%, 0.6)",
+            }}
+            animate={{
+              opacity: [0.3, 1, 0.3],
+              scale: [0.8, 1.2, 0.8],
+              y: [0, -10, 0],
+            }}
+            transition={{
+              duration: 2 + Math.random() * 2,
+              repeat: Infinity,
+              delay: i * 0.3,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+      
+      {/* Celestial planets */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Saturn-like planet top left */}
+        <motion.div
+          className="absolute top-[10%] left-[10%] w-24 h-24 md:w-32 md:h-32"
+          animate={{ y: [0, 10, 0], rotate: [0, 5, 0] }}
           transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <div 
+            className="w-full h-full rounded-full"
+            style={{
+              background: "linear-gradient(135deg, hsla(35, 60%, 65%, 1), hsla(30, 50%, 45%, 1))",
+              boxShadow: "inset -8px -8px 20px hsla(30, 40%, 30%, 0.5), 0 0 40px hsla(40, 60%, 50%, 0.3)",
+            }}
+          />
+          {/* Ring */}
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[30%] rounded-full border-2 border-amber-300/40"
+            style={{ transform: "translate(-50%, -50%) rotateX(70deg)" }}
+          />
+        </motion.div>
+        
+        {/* Orange planet top right */}
+        <motion.div
+          className="absolute top-[8%] right-[15%] w-20 h-20 md:w-28 md:h-28 rounded-full"
+          style={{
+            background: "radial-gradient(circle at 30% 30%, hsla(25, 70%, 60%, 1), hsla(20, 50%, 40%, 1))",
+            boxShadow: "inset -6px -6px 15px hsla(20, 40%, 25%, 0.6), 0 0 30px hsla(30, 60%, 50%, 0.25)",
+          }}
+          animate={{ y: [0, 15, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        />
+        
+        {/* Small moon */}
+        <motion.div
+          className="absolute top-[20%] right-[35%] w-8 h-8 md:w-10 md:h-10 rounded-full"
+          style={{
+            background: "radial-gradient(circle at 30% 30%, hsla(35, 50%, 70%, 1), hsla(30, 40%, 50%, 1))",
+            boxShadow: "0 0 15px hsla(35, 50%, 50%, 0.3)",
+          }}
+          animate={{ y: [0, 8, 0], x: [0, 5, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+      
+      {/* Cosmic clouds/nebula */}
+      <div className="absolute top-0 left-0 right-0 h-[50%] overflow-hidden opacity-40">
+        <motion.div
+          className="absolute w-full h-full"
+          style={{
+            background: "linear-gradient(135deg, transparent 30%, hsla(35, 40%, 60%, 0.15) 50%, transparent 70%)",
+          }}
+          animate={{
+            x: ["-20%", "20%", "-20%"],
+          }}
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute w-[600px] h-[600px] rounded-full blur-3xl"
+          className="absolute top-[5%] left-[20%] w-[60%] h-[40%] blur-2xl"
           style={{
-            background: "radial-gradient(circle, hsla(200, 80%, 80%, 0.3), transparent 70%)",
-            right: "10%",
-            bottom: "20%",
+            background: "radial-gradient(ellipse, hsla(40, 50%, 70%, 0.2), transparent 70%)",
           }}
           animate={{
-            x: [0, -80, 0],
-            y: [0, -60, 0],
-            scale: [1, 1.1, 1],
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
           }}
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
         />
-        <motion.div
-          className="absolute w-[500px] h-[500px] rounded-full blur-3xl"
-          style={{
-            background: "radial-gradient(circle, hsla(45, 100%, 80%, 0.2), transparent 70%)",
-            left: "40%",
-            top: "40%",
-          }}
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
+      </div>
+
+      {/* Golden dust particles rising */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={`dust-${i}`}
+            className="absolute w-1 h-1 rounded-full bg-gold/60"
+            style={{
+              left: `${Math.random() * 100}%`,
+              bottom: "20%",
+            }}
+            animate={{
+              y: [0, -300, -600],
+              opacity: [0, 0.8, 0],
+              x: [0, Math.sin(i) * 30, Math.sin(i) * 60],
+            }}
+            transition={{
+              duration: 6 + Math.random() * 4,
+              repeat: Infinity,
+              delay: i * 0.5,
+              ease: "easeOut",
+            }}
+          />
+        ))}
       </div>
 
       {/* Sacred geometry background */}
