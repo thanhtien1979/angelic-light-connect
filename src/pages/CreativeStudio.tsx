@@ -191,7 +191,7 @@ export default function CreativeStudio() {
             
             {/* Credits Display */}
             {user && (
-              <Link to="/profile">
+              <Link to="/credits">
                 <Button
                   variant="outline"
                   className="flex items-center gap-2 border-amber-500/50 text-amber-600 hover:bg-amber-50"
@@ -308,14 +308,16 @@ export default function CreativeStudio() {
                                     "Không thể xử lý yêu cầu lúc này. Vui lòng thử lại sau."}
                                 </p>
                                 {needsCredits && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="mt-2"
-                                    onClick={() => window.open("mailto:support@camly.app?subject=Nạp%20AI%20Credits", "_blank")}
-                                  >
-                                    Liên hệ Admin để nạp credits
-                                  </Button>
+                                  <Link to="/credits">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="mt-2"
+                                    >
+                                      <Coins className="w-3 h-3 mr-1" />
+                                      Nạp thêm credits
+                                    </Button>
+                                  </Link>
                                 )}
                               </AlertDescription>
                             </Alert>
@@ -366,6 +368,17 @@ export default function CreativeStudio() {
                               ))}
                             </div>
                           </div>
+
+                          {/* Cost Estimation */}
+                          {user && !needsCredits && (
+                            <div className="flex items-center justify-between text-sm bg-muted/50 rounded-lg px-4 py-2">
+                              <span className="text-muted-foreground flex items-center gap-2">
+                                <Coins className="w-4 h-4" />
+                                Chi phí ước tính:
+                              </span>
+                              <span className="font-medium text-amber-600">~1 credit/ảnh</span>
+                            </div>
+                          )}
 
                           <Button 
                             onClick={handleGenerate}
@@ -448,17 +461,30 @@ export default function CreativeStudio() {
                                     "Không thể xử lý yêu cầu lúc này. Vui lòng thử lại sau."}
                                 </p>
                                 {needsCredits && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="mt-2"
-                                    onClick={() => window.open("mailto:support@camly.app?subject=Nạp%20AI%20Credits", "_blank")}
-                                  >
-                                    Liên hệ Admin để nạp credits
-                                  </Button>
+                                  <Link to="/credits">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="mt-2"
+                                    >
+                                      <Coins className="w-3 h-3 mr-1" />
+                                      Nạp thêm credits
+                                    </Button>
+                                  </Link>
                                 )}
                               </AlertDescription>
                             </Alert>
+                          )}
+
+                          {/* Cost Estimation */}
+                          {user && !needsCredits && (
+                            <div className="flex items-center justify-between text-sm bg-muted/50 rounded-lg px-4 py-2">
+                              <span className="text-muted-foreground flex items-center gap-2">
+                                <Coins className="w-4 h-4" />
+                                Chi phí ước tính:
+                              </span>
+                              <span className="font-medium text-amber-600">~1 credit/ảnh</span>
+                            </div>
                           )}
 
                           <Button 

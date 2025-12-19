@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Community from "./pages/Community";
 import CreativeStudio from "./pages/CreativeStudio";
+import Credits from "./pages/Credits";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/community" element={<Community />} />
           <Route path="/studio" element={<CreativeStudio />} />
+          <Route path="/credits" element={<Credits />} />
           <Route
             path="/profile"
             element={
