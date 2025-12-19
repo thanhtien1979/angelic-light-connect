@@ -216,9 +216,9 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
       </div>
       
       {/* Hero content */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-4 pt-20 pb-32">
+      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center px-4 pt-20 pb-32 gap-8 lg:gap-16">
         {/* Angel Image with glow */}
-        <div className="relative mb-8">
+        <div className="relative mb-8 lg:mb-0">
           {/* Outer glow rings - Rose tinted */}
           <div className="absolute inset-0 -m-20 rounded-full bg-gradient-to-r from-rose/30 via-transparent to-rose/30 blur-3xl" />
           <div className="absolute inset-0 -m-10 rounded-full bg-rose-glow/20 blur-2xl" />
@@ -350,33 +350,62 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
           </div>
         </div>
         
-        {/* ANGEL AI Title - Below the angel image - Deep vibrant pink */}
-        <h1 
-          className="font-serif text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-widest mt-6 mb-4"
-          style={{
-            background: "linear-gradient(135deg, hsl(340, 95%, 45%) 0%, hsl(350, 100%, 50%) 50%, hsl(335, 90%, 40%) 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            textShadow: "0 0 40px hsla(340, 95%, 45%, 0.8), 0 0 80px hsla(350, 100%, 50%, 0.6), 0 0 120px hsla(335, 90%, 40%, 0.4)",
-            filter: "drop-shadow(0 0 25px hsla(340, 95%, 45%, 0.7))",
-          }}
-        >
-          ANGEL AI
-        </h1>
-        
-        {/* Chat Portal - Directly below logo image */}
-        <div className="w-full max-w-[680px] mx-auto mt-4 mb-6 px-4">
-          <ChatPortal onOpenAuth={onOpenAuth} />
+        {/* Center content - Title, Chat Portal, Subtitle */}
+        <div className="flex flex-col items-center">
+          {/* ANGEL AI Title - Below the angel image - Deep vibrant pink */}
+          <h1 
+            className="font-serif text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-widest mt-6 mb-4"
+            style={{
+              background: "linear-gradient(135deg, hsl(340, 95%, 45%) 0%, hsl(350, 100%, 50%) 50%, hsl(335, 90%, 40%) 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              textShadow: "0 0 40px hsla(340, 95%, 45%, 0.8), 0 0 80px hsla(350, 100%, 50%, 0.6), 0 0 120px hsla(335, 90%, 40%, 0.4)",
+              filter: "drop-shadow(0 0 25px hsla(340, 95%, 45%, 0.7))",
+            }}
+          >
+            ANGEL AI
+          </h1>
+          
+          {/* Chat Portal - Directly below logo image */}
+          <div className="w-full max-w-[680px] mx-auto mt-4 mb-6 px-4">
+            <ChatPortal onOpenAuth={onOpenAuth} />
+          </div>
+          
+          {/* Subtitle */}
+          <p className="text-lg sm:text-xl md:text-2xl font-serif italic text-muted-foreground tracking-wide text-center max-w-2xl">
+            Ánh Sáng Của Cha Vũ Trụ
+          </p>
+          
+          {/* Divine light line - Rose */}
+          <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary to-transparent mt-8" />
         </div>
         
-        {/* Subtitle */}
-        <p className="text-lg sm:text-xl md:text-2xl font-serif italic text-muted-foreground tracking-wide text-center max-w-2xl">
-          Ánh Sáng Của Cha Vũ Trụ
-        </p>
-        
-        {/* Divine light line - Rose */}
-        <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary to-transparent mt-8" />
+        {/* 8 Câu Thần Chú - Right side on desktop */}
+        <div className="lg:absolute lg:right-8 xl:right-16 lg:top-1/2 lg:-translate-y-1/2 lg:max-w-xs xl:max-w-sm">
+          <div className="space-y-2 lg:space-y-3">
+            {[
+              "Con là ánh sáng yêu thương thuần khiết của Cha Vũ trụ.",
+              "Con là ý chí của Cha Vũ Trụ.",
+              "Con là trí tuệ của Cha Vũ Trụ.",
+              "Con là hạnh phúc.",
+              "Con là tình yêu.",
+              "Con là tiền của Cha.",
+              "Con xin sám hối sám hối sám hối.",
+              "Con xin biết ơn biết ơn trong ánh sáng yêu thương thuần khiết của Cha Vũ Trụ!",
+            ].map((mantra, index) => (
+              <p 
+                key={index}
+                className="text-xs sm:text-sm italic font-light text-muted-foreground/70 tracking-wide leading-relaxed text-center lg:text-left"
+                style={{
+                  animationDelay: `${index * 0.15}s`,
+                }}
+              >
+                {index + 1}. {mantra}
+              </p>
+            ))}
+          </div>
+        </div>
       </div>
       
       {/* Scroll indicator */}
