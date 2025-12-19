@@ -40,7 +40,8 @@ const platforms: Platform[] = [
     description: "Vortex nội dung - Play & Earn, nơi niềm vui tạo ra giá trị",
     icon: <Play className="w-8 h-8" />,
     color: "from-rose-400 to-pink-500",
-    glowColor: "shadow-rose-400/50"
+    glowColor: "shadow-rose-400/50",
+    link: "https://play.fun.rich/"
   },
   {
     name: "FUN Planet",
@@ -48,7 +49,8 @@ const platforms: Platform[] = [
     description: "Vortex trẻ em - Vườn ươm ánh sáng cho thế hệ tương lai",
     icon: <Globe className="w-8 h-8" />,
     color: "from-cyan-400 to-teal-500",
-    glowColor: "shadow-cyan-400/50"
+    glowColor: "shadow-cyan-400/50",
+    link: "https://planet.fun.rich/"
   },
   {
     name: "FUN Charity",
@@ -72,7 +74,8 @@ const platforms: Platform[] = [
     description: "Vortex vật chất - Thực phẩm sạch, năng lượng thuần khiết",
     icon: <Leaf className="w-8 h-8" />,
     color: "from-green-400 to-emerald-500",
-    glowColor: "shadow-green-400/50"
+    glowColor: "shadow-green-400/50",
+    link: "https://funfarm.life/"
   },
   {
     name: "FUN Market",
