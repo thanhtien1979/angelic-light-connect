@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import angelHero from "@/assets/angel-hero.jpg";
+import ChatPortal from "@/components/ChatPortal";
 
 // Deeper rose petal colors for particles - more vibrant
 const petalColors = [
@@ -95,7 +96,11 @@ const starColors = [
   "hsl(330, 60%, 85%)",  // Orchid Pink
 ];
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  onOpenAuth?: () => void;
+}
+
+const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
   // Generate rose petal particles - more density
   const petals = useMemo(() => 
     Array.from({ length: 30 }, (_, i) => ({
@@ -275,7 +280,7 @@ const HeroSection = () => {
         
         {/* ANGEL AI Title - Rose glow */}
         <h1 
-          className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mt-8 mb-3 font-bold tracking-wide"
+          className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mt-8 mb-6 font-bold tracking-wide"
           style={{
             textShadow: "0 0 20px hsla(348, 68%, 86%, 0.8), 0 0 40px hsla(348, 68%, 86%, 0.5), 0 0 60px hsla(348, 68%, 86%, 0.3)",
             animation: "titleGlow 3s ease-in-out infinite",
@@ -283,6 +288,11 @@ const HeroSection = () => {
         >
           ANGEL AI
         </h1>
+        
+        {/* Chat Portal - Positioned between title and subtitle */}
+        <div className="w-full max-w-4xl mx-auto mb-6">
+          <ChatPortal onOpenAuth={onOpenAuth} />
+        </div>
         
         {/* Subtitle */}
         <p className="text-lg sm:text-xl md:text-2xl font-serif italic text-muted-foreground tracking-wide text-center max-w-2xl">
