@@ -330,6 +330,32 @@ export const useAngelChat = () => {
     }
   }, [messages, isLoading, isAuthenticated, user]);
 
+  // Edit a user message
+  const editMessage = useCallback(async (messageId: string, newContent: string): Promise<boolean> => {
+    if (!newContent.trim()) return false;
+
+    try {
+      // Update in database
+      const { error } = await supabase
+        .from("chat_messages")
+        .update({ content: newContent.trim() })
+        .eq("id", messageId);
+
+      if (error) throw error;
+
+      // Update local state
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? { ...m, content: newContent.trim() } : m))
+      );
+
+      return true;
+    } catch (error) {
+      console.error("Failed to edit message:", error);
+      toast.error("Không thể chỉnh sửa tin nhắn");
+      return false;
+    }
+  }, []);
+
   const clearMessages = useCallback(async () => {
     try {
       if (isAuthenticated && user) {
@@ -386,6 +412,7 @@ export const useAngelChat = () => {
     isReady,
     syncStatus, 
     sendMessage, 
+    editMessage,
     clearMessages, 
     startNewConversation, 
     isAuthenticated 

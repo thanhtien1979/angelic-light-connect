@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil } from "lucide-react";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
 import { useChatAttachments, type Attachment } from "@/hooks/useChatAttachments";
 import { useAnonymousRateLimit } from "@/hooks/useAnonymousRateLimit";
 import { useChatReward } from "@/hooks/useChatReward";
+import { useVoiceRecording } from "@/hooks/useVoiceRecording";
 import { CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import ChatAttachmentPreview from "@/components/ChatAttachmentPreview";
@@ -105,11 +106,12 @@ const shouldShowDailyBlessing = (): boolean => {
 };
 
 const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
-  const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
+  const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, editMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
   const { summary, clearSummary } = useConversationSummary();
   const { isEnabled: isFeedbackEnabled, toggleFeedback, playSendFeedback, playNewConversationFeedback, enableAudioContext } = useFeedback();
   const { needsVerification, incrementCount, setVerified, resetForNewConversation, remainingFreeMessages } = useAnonymousRateLimit();
   const { tryAwardChatReward, lastRewardResult, showNotification: showCoinNotification, dismissNotification: dismissCoinNotification } = useChatReward();
+  const { isRecording, isTranscribing, startRecording, stopRecording, cancelRecording } = useVoiceRecording();
   const [inputValue, setInputValue] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -129,6 +131,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   });
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<{ content: string; images?: Array<{ type: "image"; base64: string; mimeType: string }> } | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatRewardTriedRef = useRef(false);
@@ -338,8 +342,42 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
     });
   }, [detectLinksInText, addLinkAttachment]);
 
+  // Handle edit message
+  const handleEditMessage = useCallback((messageId: string, content: string) => {
+    setEditingMessageId(messageId);
+    setEditingContent(content);
+  }, []);
+
+  const handleSaveEdit = useCallback(async () => {
+    if (!editingMessageId || !editingContent.trim()) return;
+    
+    const success = await editMessage(editingMessageId, editingContent);
+    if (success) {
+      toast.success("Tin nhắn đã được cập nhật ✨");
+    }
+    setEditingMessageId(null);
+    setEditingContent("");
+  }, [editingMessageId, editingContent, editMessage]);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingMessageId(null);
+    setEditingContent("");
+  }, []);
+
+  // Handle voice recording
+  const handleMicClick = useCallback(async () => {
+    if (isRecording) {
+      const transcribedText = await stopRecording();
+      if (transcribedText) {
+        setInputValue((prev) => prev ? `${prev} ${transcribedText}` : transcribedText);
+      }
+    } else {
+      await startRecording();
+    }
+  }, [isRecording, startRecording, stopRecording]);
+
   // Check if input should be disabled
-  const isInputDisabled = isLoading || !isReady;
+  const isInputDisabled = isLoading || !isReady || isTranscribing;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -774,7 +812,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.4 }}
-                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} group`}
                   >
                     {message.role === "assistant" && (
                       <div className="relative mr-3 flex-shrink-0">
@@ -791,6 +829,20 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                         />
                       </div>
                     )}
+                    
+                    {/* Edit button for user messages - show on hover, position before message */}
+                    {message.role === "user" && !isLoading && (
+                      <motion.button
+                        onClick={() => handleEditMessage(message.id, message.content)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity mr-2 self-center p-1.5 rounded-full hover:bg-rose-light/30 text-muted-foreground hover:text-primary"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        title="Chỉnh sửa tin nhắn"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </motion.button>
+                    )}
+                    
                     <div
                       className={`relative max-w-[80%] px-5 py-3 rounded-2xl ${
                         message.role === "user"
@@ -840,7 +892,34 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                           isUserMessage={message.role === "user"} 
                         />
                       )}
-                      <p className="text-foreground relative z-10 whitespace-pre-wrap">{message.content}</p>
+                      
+                      {/* Editing mode or normal display */}
+                      {editingMessageId === message.id ? (
+                        <div className="space-y-2">
+                          <textarea
+                            value={editingContent}
+                            onChange={(e) => setEditingContent(e.target.value)}
+                            className="w-full min-h-[60px] p-2 rounded-lg border border-rose-soft/40 bg-white/80 text-foreground text-sm resize-none focus:outline-none focus:border-primary"
+                            autoFocus
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-3 py-1 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground transition-colors"
+                            >
+                              Hủy
+                            </button>
+                            <button
+                              onClick={handleSaveEdit}
+                              className="px-3 py-1 text-xs rounded-full bg-primary text-foreground hover:bg-primary/90 transition-colors"
+                            >
+                              Lưu
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-foreground relative z-10 whitespace-pre-wrap">{message.content}</p>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -982,6 +1061,31 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     visible={showEmotionalIndicator}
                   />
                 </div>
+                
+                {/* Microphone button for voice input */}
+                <motion.button
+                  type="button"
+                  onClick={handleMicClick}
+                  disabled={isInputDisabled}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-50 ${
+                    isRecording 
+                      ? "bg-red-500 text-white animate-pulse" 
+                      : isTranscribing
+                        ? "bg-amber-500 text-white"
+                        : "bg-rose-light/30 hover:bg-rose-light/50 text-primary"
+                  }`}
+                  title={isRecording ? "Dừng ghi âm" : isTranscribing ? "Đang xử lý..." : "Nói để nhập văn bản"}
+                >
+                  {isTranscribing ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : isRecording ? (
+                    <MicOff className="w-5 h-5" />
+                  ) : (
+                    <Mic className="w-5 h-5" />
+                  )}
+                </motion.button>
                 
                 {/* Send button with divine glow */}
                 <motion.button
