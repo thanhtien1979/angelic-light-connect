@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wind, X, Play, Square, Volume2, VolumeX, ChevronDown, Sparkles, History } from 'lucide-react';
+import { Wind, X, Play, Square, Volume2, VolumeX, ChevronDown, Sparkles, History, Lightbulb } from 'lucide-react';
 import { useBreathingCompletionSound } from '@/hooks/useBreathingCompletionSound';
 import { useAmbientSound, AMBIENT_SOUNDS, SOUND_CATEGORIES, type AmbientSoundType } from '@/hooks/useAmbientSound';
 import { useBreathingHistory } from '@/hooks/useBreathingHistory';
+import { usePatternRecommendation } from '@/hooks/usePatternRecommendation';
 import { BreathingSessionHistory } from '@/components/BreathingSessionHistory';
+import BreathingVisualization from '@/components/BreathingVisualization';
 import { Slider } from '@/components/ui/slider';
 
 type BreathPhase = 'idle' | 'inhale' | 'hold-in' | 'exhale' | 'hold-out' | 'next-cycle' | 'complete';
@@ -94,6 +96,7 @@ const QuickBreathingWidget = () => {
   const [showSoundPicker, setShowSoundPicker] = useState(false);
   const [showPatternPicker, setShowPatternPicker] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showRecommendation, setShowRecommendation] = useState(false);
   const [sessionProgress, setSessionProgress] = useState(0);
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [selectedPattern, setSelectedPattern] = useState<BreathingPattern>(() => {
@@ -114,6 +117,25 @@ const QuickBreathingWidget = () => {
     stopSound 
   } = useAmbientSound();
   const { saveSession } = useBreathingHistory();
+  const { recommendation, isLoading: isRecommendationLoading, fetchRecommendation, clearRecommendation } = usePatternRecommendation();
+
+  // Fetch recommendation when widget opens
+  useEffect(() => {
+    if (isOpen && !isActive) {
+      fetchRecommendation();
+    }
+  }, [isOpen, isActive, fetchRecommendation]);
+
+  // Apply recommendation
+  const applyRecommendation = useCallback(() => {
+    if (recommendation) {
+      const pattern = BREATHING_PATTERNS.find(p => p.id === recommendation.patternId);
+      if (pattern) {
+        setSelectedPattern(pattern);
+        setShowRecommendation(false);
+      }
+    }
+  }, [recommendation]);
 
   // Calculate total session duration
   const getTotalSessionDuration = useCallback(() => {
@@ -518,12 +540,12 @@ const QuickBreathingWidget = () => {
                     </motion.div>
                   ) : (
                     <>
-                      {/* Breathing Circle */}
+                      {/* Breathing Circle with Enhanced Visualization */}
                       <div className="flex flex-col items-center py-4">
                         <div className="relative w-36 h-36 flex items-center justify-center">
                           {/* Progress ring - sacred light closing */}
                           <svg 
-                            className="absolute inset-0 w-full h-full -rotate-90"
+                            className="absolute inset-0 w-full h-full -rotate-90 z-10"
                             viewBox="0 0 144 144"
                           >
                             {/* Background ring - subtle trace */}
@@ -555,54 +577,16 @@ const QuickBreathingWidget = () => {
                               }}
                               transition={{ duration: 0.8, ease: 'easeOut' }}
                             />
-                            {/* Secondary glow ring */}
-                            <motion.circle
-                              cx="72"
-                              cy="72"
-                              r="68"
-                              fill="none"
-                              strokeWidth="6"
-                              strokeLinecap="round"
-                              className="stroke-[hsl(45,70%,75%)]"
-                              style={{
-                                strokeDasharray: 2 * Math.PI * 68,
-                                strokeDashoffset: 2 * Math.PI * 68 * (1 - sessionProgress),
-                                filter: 'blur(4px)',
-                              }}
-                              initial={{ opacity: 0 }}
-                              animate={{ 
-                                opacity: isActive ? 0.3 : 0,
-                              }}
-                              transition={{ duration: 0.8, ease: 'easeOut' }}
-                            />
                           </svg>
 
-                          {/* Outer breathing ring */}
-                          <motion.div
-                            animate={{
-                              scale: phase === 'inhale' ? 1 : phase === 'exhale' ? 0.65 : 0.82,
-                              opacity: isActive ? 0.3 : 0.1,
-                            }}
-                            transition={{
-                              duration: phase === 'inhale' ? selectedPattern.inhale : phase === 'exhale' ? selectedPattern.exhale : 0.5,
-                              ease: 'easeInOut',
-                            }}
-                            className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 border border-primary/20"
+                          {/* Enhanced Breathing Visualization */}
+                          <BreathingVisualization
+                            phase={phase}
+                            isActive={isActive}
+                            selectedSound={selectedSound}
+                            inhaleDuration={selectedPattern.inhale}
+                            exhaleDuration={selectedPattern.exhale}
                           />
-                          
-                          {/* Inner breathing circle */}
-                          <motion.div
-                            animate={{
-                              scale: phase === 'inhale' ? 1 : phase === 'exhale' ? 0.5 : 0.75,
-                            }}
-                            transition={{
-                              duration: phase === 'inhale' ? selectedPattern.inhale : phase === 'exhale' ? selectedPattern.exhale : 0.5,
-                              ease: 'easeInOut',
-                            }}
-                            className={`w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 border border-primary/30 flex items-center justify-center ${isActive ? 'shadow-[0_0_40px_hsl(var(--primary)/0.3)]' : 'shadow-[0_0_20px_hsl(var(--primary)/0.1)]'}`}
-                          >
-                            <Wind className="w-8 h-8 text-primary/60" />
-                          </motion.div>
                         </div>
 
                         {/* Phase text */}
@@ -654,6 +638,44 @@ const QuickBreathingWidget = () => {
                       <p className="text-center text-xs text-muted-foreground/60 mt-4">
                         {isActive ? `${cycleCount + 1} of ${selectedPattern.cycles}` : selectedPattern.description}
                       </p>
+
+                      {/* AI Pattern Recommendation */}
+                      {!isActive && recommendation && recommendation.patternId !== selectedPattern.id && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className="mt-4 p-3 rounded-xl bg-gradient-to-br from-[hsl(45,50%,70%)]/10 via-primary/5 to-transparent border border-[hsl(45,50%,70%)]/20"
+                        >
+                          <div className="flex items-start gap-2">
+                            <div className="p-1.5 rounded-full bg-[hsl(45,50%,70%)]/20 mt-0.5">
+                              <Lightbulb className="w-3 h-3 text-[hsl(45,50%,60%)]" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] text-muted-foreground/70 mb-1">
+                                {recommendation.greeting}
+                              </p>
+                              <p className="text-xs text-foreground/80 italic mb-2">
+                                {recommendation.reason}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={applyRecommendation}
+                                  className="text-[10px] px-2 py-1 rounded-full bg-[hsl(45,50%,60%)]/20 text-[hsl(45,50%,50%)] hover:bg-[hsl(45,50%,60%)]/30 transition-colors"
+                                >
+                                  Try {BREATHING_PATTERNS.find(p => p.id === recommendation.patternId)?.name}
+                                </button>
+                                <button
+                                  onClick={clearRecommendation}
+                                  className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground/70 transition-colors"
+                                >
+                                  Dismiss
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
 
                       {/* Pattern Selector */}
                       <div className="mt-4 pt-4 border-t border-border/20">
