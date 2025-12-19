@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { 
   User, Play, Globe, Heart, GraduationCap, Leaf, 
   ShoppingBag, Wallet, Sparkles, Earth, Coins, 
-  Building, Gamepad2, BookOpen, Radio
+  Building, Gamepad2, BookOpen, Radio, ExternalLink
 } from "lucide-react";
 
 interface Platform {
@@ -296,14 +296,23 @@ const FunEcosystemPlatforms = () => {
                       </p>
                     </div>
 
-                    {/* Sparkle decorations */}
-                    <motion.div
-                      className="absolute top-3 right-3 text-white/20"
-                      animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-                      transition={{ duration: 4, repeat: Infinity }}
-                    >
-                      <Sparkles className="w-4 h-4" />
-                    </motion.div>
+                    {/* External link icon or Sparkle decorations */}
+                    {platform.link ? (
+                      <motion.div
+                        className="absolute top-3 right-3 text-white/40 group-hover:text-white/80 transition-colors"
+                        whileHover={{ scale: 1.2 }}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        className="absolute top-3 right-3 text-white/20"
+                        animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                      >
+                        <Sparkles className="w-4 h-4" />
+                      </motion.div>
+                    )}
                   </motion.div>
                 </CardWrapper>
               </motion.div>
