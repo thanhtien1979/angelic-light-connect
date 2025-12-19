@@ -1,14 +1,5 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-declare global {
-  interface Window {
-    ethereum?: {
-      request: (args: { method: string; params?: unknown[] }) => Promise<string[]>;
-      on?: (event: string, callback: (...args: unknown[]) => void) => void;
-    };
-  }
-}
 import { 
   Sparkles, 
   Wand2, 
@@ -25,7 +16,6 @@ import {
   Settings2,
   Link2
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,6 +23,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useImageGeneration } from "@/hooks/useImageGeneration";
 import { useImageGallery } from "@/hooks/useImageGallery";
 import { useAuth } from "@/hooks/useAuth";
+import { useWallet } from "@/hooks/useWallet";
 import { Link } from "react-router-dom";
 import NavigationHeader from "@/components/NavigationHeader";
 import Footer from "@/components/Footer";
@@ -56,45 +47,12 @@ export default function CreativeStudio() {
   const [mainView, setMainView] = useState<"create" | "gallery">("create");
   const [isSaving, setIsSaving] = useState(false);
   const [showPromptBuilder, setShowPromptBuilder] = useState(true);
-  const [isConnectingWallet, setIsConnectingWallet] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { user } = useAuth();
   const { isGenerating, generatedImage, generateImage, editImage, clearImage } = useImageGeneration();
   const { saveImage, refetch } = useImageGallery();
-
-  const connectBlockchain = async () => {
-    if (typeof window.ethereum === "undefined") {
-      toast.error("Vui lòng cài đặt MetaMask để kết nối blockchain");
-      window.open("https://metamask.io/download/", "_blank");
-      return;
-    }
-
-    setIsConnectingWallet(true);
-    try {
-      const accounts = await window.ethereum.request({ 
-        method: "eth_requestAccounts" 
-      });
-      if (accounts && accounts.length > 0) {
-        setWalletAddress(accounts[0]);
-        toast.success("Kết nối blockchain thành công!");
-      }
-    } catch (error: any) {
-      if (error.code === 4001) {
-        toast.error("Bạn đã từ chối kết nối ví");
-      } else {
-        toast.error("Không thể kết nối blockchain");
-      }
-    } finally {
-      setIsConnectingWallet(false);
-    }
-  };
-
-  const disconnectWallet = () => {
-    setWalletAddress(null);
-    toast.success("Đã ngắt kết nối ví");
-  };
+  const { walletAddress, isConnecting: isConnectingWallet, connectWallet, disconnectWallet } = useWallet();
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -209,7 +167,7 @@ export default function CreativeStudio() {
             ) : (
               <Button
                 variant="outline"
-                onClick={connectBlockchain}
+                onClick={connectWallet}
                 disabled={isConnectingWallet}
                 className="flex items-center gap-2 border-primary/50 hover:bg-primary/5"
               >
