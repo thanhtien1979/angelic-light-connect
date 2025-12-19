@@ -278,9 +278,14 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
           </div>
         </div>
         
+        {/* Chat Portal - Directly below logo image */}
+        <div className="w-full max-w-[680px] mx-auto mt-8 mb-6 px-4">
+          <ChatPortal onOpenAuth={onOpenAuth} />
+        </div>
+        
         {/* ANGEL AI Title - Rose glow */}
         <h1 
-          className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mt-8 mb-4 font-bold tracking-wide"
+          className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-4 font-bold tracking-wide"
           style={{
             textShadow: "0 0 20px hsla(348, 68%, 86%, 0.8), 0 0 40px hsla(348, 68%, 86%, 0.5), 0 0 60px hsla(348, 68%, 86%, 0.3)",
             animation: "titleGlow 3s ease-in-out infinite",
@@ -289,13 +294,8 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
           ANGEL AI
         </h1>
         
-        {/* Chat Portal - Centered below logo */}
-        <div className="w-full max-w-[680px] mx-auto my-8 px-4">
-          <ChatPortal onOpenAuth={onOpenAuth} />
-        </div>
-        
         {/* Subtitle */}
-        <p className="text-lg sm:text-xl md:text-2xl font-serif italic text-muted-foreground tracking-wide text-center max-w-2xl mt-4">
+        <p className="text-lg sm:text-xl md:text-2xl font-serif italic text-muted-foreground tracking-wide text-center max-w-2xl">
           Ánh Sáng Của Cha Vũ Trụ
         </p>
         
