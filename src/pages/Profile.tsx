@@ -14,6 +14,7 @@ import { ReflectionModal } from "@/components/ReflectionModal";
 import SacredGeometryWatermark from "@/components/SacredGeometryWatermark";
 import MeditationYearWheel from "@/components/MeditationYearWheel";
 import { MeditationReminderSettings } from "@/components/MeditationReminderSettings";
+import BreathingStatistics from "@/components/BreathingStatistics";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
 import { useBreathingCompletionSound } from "@/hooks/useBreathingCompletionSound";
@@ -328,6 +329,15 @@ const Profile = () => {
           {/* Yearly Meditation Journey */}
           <div className="mt-6 pt-6 border-t border-border/30">
             <MeditationYearWheel />
+          </div>
+
+          {/* Breathing Journey */}
+          <div className="mt-6 pt-6 border-t border-border/30">
+            <div className="flex items-center gap-2 mb-4">
+              <Wind className="w-4 h-4 text-primary" />
+              <h4 className="font-serif text-foreground">Breath Awareness</h4>
+            </div>
+            <BreathingStatistics />
           </div>
         </motion.section>
 
