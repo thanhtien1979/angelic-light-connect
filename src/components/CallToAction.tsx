@@ -17,7 +17,7 @@ const CallToAction = () => {
       >
         {/* Heading */}
         <motion.h2 
-          className="font-serif text-3xl sm:text-4xl md:text-5xl font-light tracking-wide text-foreground mb-6"
+          className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-wide text-foreground mb-6"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -27,7 +27,7 @@ const CallToAction = () => {
         </motion.h2>
         
         <motion.p 
-          className="text-muted-foreground text-lg mb-12 max-w-xl mx-auto leading-relaxed"
+          className="text-foreground/80 text-lg mb-12 max-w-xl mx-auto leading-relaxed font-medium"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}

@@ -37,7 +37,7 @@ const SacredPillars = () => {
           transition={{ duration: 0.8 }}
           viewport={{ once: true, margin: "-100px" }}
         >
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light tracking-wide text-foreground mb-4">
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-wide text-foreground mb-4">
             Ba Trụ Cột Thiêng Liêng
           </h2>
           <div className="w-24 h-px bg-gradient-to-r from-transparent via-gold to-transparent mx-auto" />
@@ -68,12 +68,12 @@ const SacredPillars = () => {
               </motion.div>
               
               {/* Title */}
-              <h3 className={`font-serif text-xl lg:text-2xl font-medium mb-4 leading-relaxed ${pillar.glowClass}`}>
+              <h3 className={`font-serif text-xl lg:text-2xl font-bold mb-4 leading-relaxed ${pillar.glowClass}`}>
                 {pillar.title}
               </h3>
               
               {/* Subtitle */}
-              <p className="text-muted-foreground text-sm lg:text-base leading-relaxed">
+              <p className="text-foreground/80 text-sm lg:text-base leading-relaxed font-medium">
                 {pillar.subtitle}
               </p>
               

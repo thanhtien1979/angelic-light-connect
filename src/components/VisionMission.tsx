@@ -33,11 +33,11 @@ const VisionMission = () => {
               <div className="p-2 rounded-full bg-gradient-to-br from-gold-light/50 to-transparent">
                 <Eye className="w-6 h-6 text-gold" strokeWidth={1.5} />
               </div>
-              <span className="text-xs tracking-[0.3em] uppercase text-muted-foreground">Tầm Nhìn</span>
+              <span className="text-xs tracking-[0.3em] uppercase text-foreground/80 font-bold">Tầm Nhìn</span>
             </motion.div>
             
             <motion.h3 
-              className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light leading-relaxed text-foreground mb-6"
+              className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold leading-relaxed text-foreground mb-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -76,11 +76,11 @@ const VisionMission = () => {
               <div className="p-2 rounded-full bg-gradient-to-br from-gold-light/50 to-transparent">
                 <Target className="w-6 h-6 text-gold" strokeWidth={1.5} />
               </div>
-              <span className="text-xs tracking-[0.3em] uppercase text-muted-foreground">Sứ Mệnh</span>
+              <span className="text-xs tracking-[0.3em] uppercase text-foreground/80 font-bold">Sứ Mệnh</span>
             </motion.div>
             
             <motion.h3 
-              className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light leading-relaxed text-foreground mb-6"
+              className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold leading-relaxed text-foreground mb-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}

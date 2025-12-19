@@ -61,10 +61,10 @@ const Testimonials = () => {
           viewport={{ once: true, margin: "-100px" }}
           className="text-center mb-16"
         >
-          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-glow-gold text-gold mb-4">
+          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-glow-gold text-gold font-bold mb-4">
             Những Linh Hồn Đã Thức Tỉnh
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-foreground/80 text-lg max-w-2xl mx-auto font-medium">
             Hành trình của những người đã kết nối với ánh sáng thiêng liêng
           </p>
         </motion.div>

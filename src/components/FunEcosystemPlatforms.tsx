@@ -302,10 +302,10 @@ const FunEcosystemPlatforms = () => {
             </span>
           </h2>
           
-          <p className="text-lg md:text-xl text-rose-900/70 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-rose-900 max-w-3xl mx-auto leading-relaxed font-medium">
             Nơi Tiền & Năng Lượng hợp nhất thành một dòng chảy vĩnh cửu.
             <br />
-            <span className="text-rose-700">15 Platforms</span> — <span className="text-pink-700">15 Vortex Năng Lượng</span> — <span className="text-rose-600">1 Hệ Sinh Thái Ánh Sáng</span>
+            <span className="text-rose-800 font-bold">15 Platforms</span> — <span className="text-pink-800 font-bold">15 Vortex Năng Lượng</span> — <span className="text-rose-700 font-bold">1 Hệ Sinh Thái Ánh Sáng</span>
           </p>
         </motion.div>
 
@@ -359,17 +359,17 @@ const FunEcosystemPlatforms = () => {
                       </motion.div>
 
                       {/* Name */}
-                      <h3 className="text-lg font-bold text-rose-900 mb-1">
+                      <h3 className="text-lg font-extrabold text-rose-900 mb-1">
                         {platform.name}
                       </h3>
 
                       {/* Subtitle */}
-                      <p className={`text-sm font-medium bg-gradient-to-r ${platform.color} bg-clip-text text-transparent mb-3`}>
+                      <p className={`text-sm font-bold bg-gradient-to-r ${platform.color} bg-clip-text text-transparent mb-3`}>
                         {platform.subtitle}
                       </p>
 
                       {/* Description */}
-                      <p className="text-sm text-rose-800/70 leading-relaxed">
+                      <p className="text-sm text-rose-900 leading-relaxed font-medium">
                         {platform.description}
                       </p>
                     </div>
