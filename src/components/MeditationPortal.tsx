@@ -402,50 +402,105 @@ const MeditationPortal = () => {
       {/* Immersive background with cosmic golden atmosphere */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-amber-950/30 to-amber-900/40" />
       
-      {/* Golden water reflection effect at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-[60%] overflow-hidden">
-        {/* Golden water base */}
+      {/* Forest silhouettes on sides */}
+      <div className="absolute bottom-0 left-0 right-0 h-[70%] overflow-hidden pointer-events-none">
+        {/* Left forest */}
+        <svg className="absolute left-0 bottom-0 h-[60%] w-[25%]" viewBox="0 0 200 300" preserveAspectRatio="xMinYMax slice">
+          <defs>
+            <linearGradient id="treeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="hsla(35, 30%, 25%, 0.9)" />
+              <stop offset="100%" stopColor="hsla(30, 25%, 15%, 0.95)" />
+            </linearGradient>
+          </defs>
+          {/* Tree silhouettes */}
+          <path d="M0 300 L0 180 Q10 170 20 180 L20 120 Q30 100 40 120 L40 90 Q50 60 60 90 L60 140 Q70 130 80 140 L80 200 Q90 190 100 200 L100 160 Q115 130 130 160 L130 220 Q145 210 160 220 L160 250 Q170 240 180 250 L200 250 L200 300 Z" fill="url(#treeGradient)" />
+          {/* Individual tall trees */}
+          <ellipse cx="30" cy="100" rx="25" ry="60" fill="hsla(35, 25%, 20%, 0.8)" />
+          <rect x="27" y="140" width="6" height="160" fill="hsla(30, 20%, 15%, 0.9)" />
+          <ellipse cx="80" cy="120" rx="30" ry="70" fill="hsla(32, 25%, 22%, 0.75)" />
+          <rect x="77" y="170" width="6" height="130" fill="hsla(30, 20%, 15%, 0.9)" />
+          <ellipse cx="140" cy="140" rx="28" ry="65" fill="hsla(35, 25%, 18%, 0.85)" />
+          <rect x="137" y="190" width="6" height="110" fill="hsla(30, 20%, 15%, 0.9)" />
+        </svg>
+        
+        {/* Right forest */}
+        <svg className="absolute right-0 bottom-0 h-[60%] w-[25%]" viewBox="0 0 200 300" preserveAspectRatio="xMaxYMax slice">
+          <path d="M0 250 Q15 240 30 250 L30 220 Q45 210 60 220 L60 170 Q75 150 90 170 L90 130 Q105 100 120 130 L120 90 Q135 60 150 90 L150 120 Q160 110 170 120 L170 180 Q180 170 190 180 L200 180 L200 300 L0 300 Z" fill="url(#treeGradient)" />
+          <ellipse cx="60" cy="140" rx="28" ry="65" fill="hsla(32, 25%, 20%, 0.8)" />
+          <rect x="57" y="190" width="6" height="110" fill="hsla(30, 20%, 15%, 0.9)" />
+          <ellipse cx="120" cy="110" rx="30" ry="70" fill="hsla(35, 25%, 18%, 0.85)" />
+          <rect x="117" y="160" width="6" height="140" fill="hsla(30, 20%, 15%, 0.9)" />
+          <ellipse cx="170" cy="130" rx="25" ry="55" fill="hsla(32, 25%, 22%, 0.75)" />
+          <rect x="167" y="170" width="6" height="130" fill="hsla(30, 20%, 15%, 0.9)" />
+        </svg>
+      </div>
+
+      {/* Golden water lake at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-[35%] overflow-hidden">
+        {/* Water base with golden reflection */}
         <div 
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(to top, hsla(40, 80%, 50%, 0.35), hsla(45, 70%, 60%, 0.15), transparent)",
+            background: "linear-gradient(to top, hsla(40, 70%, 45%, 0.5), hsla(45, 60%, 55%, 0.3), hsla(40, 50%, 60%, 0.15), transparent)",
           }}
         />
         
-        {/* Rippling water reflection */}
+        {/* Animated water ripples */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 h-[80%]"
+          className="absolute inset-0"
           style={{
-            background: "repeating-linear-gradient(90deg, transparent, hsla(45, 90%, 65%, 0.08) 2px, transparent 4px)",
+            background: "repeating-linear-gradient(0deg, transparent, hsla(45, 80%, 70%, 0.06) 1px, transparent 2px)",
           }}
           animate={{
-            backgroundPosition: ["0px 0px", "100px 0px"],
+            backgroundPosition: ["0px 0px", "0px 20px"],
           }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
         />
         
-        {/* Golden light sparkles on water */}
-        {[...Array(12)].map((_, i) => (
+        {/* Horizontal water lines */}
+        {[...Array(8)].map((_, i) => (
           <motion.div
-            key={i}
+            key={`waterline-${i}`}
+            className="absolute left-0 right-0 h-[1px]"
+            style={{
+              top: `${15 + i * 12}%`,
+              background: "linear-gradient(90deg, transparent, hsla(45, 90%, 70%, 0.3), hsla(45, 100%, 75%, 0.5), hsla(45, 90%, 70%, 0.3), transparent)",
+            }}
+            animate={{
+              opacity: [0.2, 0.6, 0.2],
+              scaleX: [0.8, 1, 0.8],
+            }}
+            transition={{
+              duration: 3 + i * 0.5,
+              repeat: Infinity,
+              delay: i * 0.3,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+        
+        {/* Golden light reflections on water */}
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={`reflect-${i}`}
             className="absolute rounded-full"
             style={{
-              width: 3 + Math.random() * 4,
-              height: 3 + Math.random() * 4,
-              left: `${5 + i * 8}%`,
-              bottom: `${10 + Math.random() * 40}%`,
-              background: "radial-gradient(circle, hsla(45, 100%, 80%, 0.9), transparent)",
-              boxShadow: "0 0 10px hsla(45, 100%, 70%, 0.6)",
+              width: 4 + Math.random() * 8,
+              height: 2 + Math.random() * 4,
+              left: `${5 + i * 6.5}%`,
+              top: `${20 + Math.random() * 60}%`,
+              background: "radial-gradient(ellipse, hsla(45, 100%, 80%, 0.9), transparent)",
+              boxShadow: "0 0 15px hsla(45, 100%, 70%, 0.7)",
             }}
             animate={{
               opacity: [0.3, 1, 0.3],
-              scale: [0.8, 1.2, 0.8],
-              y: [0, -10, 0],
+              scaleX: [1, 1.5, 1],
+              x: [0, Math.sin(i) * 5, 0],
             }}
             transition={{
               duration: 2 + Math.random() * 2,
               repeat: Infinity,
-              delay: i * 0.3,
+              delay: i * 0.2,
               ease: "easeInOut",
             }}
           />
@@ -522,78 +577,159 @@ const MeditationPortal = () => {
         />
       </div>
 
-      {/* Flying Angels at bottom */}
-      <div className="absolute bottom-[5%] left-0 right-0 h-[40%] overflow-hidden pointer-events-none">
-        {/* Angel 1 - Left */}
+      {/* Flying Angels at bottom with wing flapping */}
+      <div className="absolute bottom-[8%] left-0 right-0 h-[45%] overflow-hidden pointer-events-none">
+        {/* Angel 1 - Left with wing animation */}
         <motion.div
-          className="absolute left-[10%] bottom-[15%] w-28 h-28 md:w-40 md:h-40"
+          className="absolute left-[12%] bottom-[20%] w-28 h-28 md:w-40 md:h-40"
           animate={{
             y: [0, -15, 0],
             x: [0, 5, 0],
-            rotate: [-2, 2, -2],
           }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         >
+          {/* Wing flapping effect - left wing */}
+          <motion.div
+            className="absolute -left-4 top-[20%] w-12 h-16 md:w-16 md:h-20 origin-right"
+            style={{
+              background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.9), hsla(0, 0%, 95%, 0.7))",
+              borderRadius: "50% 0 50% 50%",
+              filter: "blur(1px)",
+            }}
+            animate={{
+              rotateY: [0, 30, 0],
+              scaleX: [1, 0.7, 1],
+            }}
+            transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut" }}
+          />
+          {/* Wing flapping effect - right wing */}
+          <motion.div
+            className="absolute -right-4 top-[20%] w-12 h-16 md:w-16 md:h-20 origin-left"
+            style={{
+              background: "linear-gradient(-135deg, hsla(0, 0%, 100%, 0.9), hsla(0, 0%, 95%, 0.7))",
+              borderRadius: "0 50% 50% 50%",
+              filter: "blur(1px)",
+            }}
+            animate={{
+              rotateY: [0, -30, 0],
+              scaleX: [1, 0.7, 1],
+            }}
+            transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut" }}
+          />
           <img 
             src={flyingAngel1} 
             alt="Flying angel" 
-            className="w-full h-full object-contain drop-shadow-[0_0_30px_hsla(45,80%,70%,0.5)]"
+            className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_30px_hsla(45,80%,70%,0.5)]"
           />
         </motion.div>
 
-        {/* Angel 2 - Center */}
+        {/* Angel 2 - Center with wing animation */}
         <motion.div
-          className="absolute left-1/2 -translate-x-1/2 bottom-[10%] w-32 h-32 md:w-48 md:h-48"
+          className="absolute left-1/2 -translate-x-1/2 bottom-[15%] w-32 h-32 md:w-48 md:h-48"
           animate={{
             y: [0, -20, 0],
-            scale: [1, 1.02, 1],
           }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
         >
+          {/* Large wings for center angel */}
+          <motion.div
+            className="absolute -left-8 top-[15%] w-16 h-24 md:w-24 md:h-32 origin-right"
+            style={{
+              background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.95), hsla(45, 20%, 95%, 0.8))",
+              borderRadius: "50% 0 50% 50%",
+              filter: "blur(1px)",
+              boxShadow: "0 0 20px hsla(45, 50%, 80%, 0.4)",
+            }}
+            animate={{
+              rotateY: [0, 25, 0],
+              scaleX: [1, 0.75, 1],
+            }}
+            transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -right-8 top-[15%] w-16 h-24 md:w-24 md:h-32 origin-left"
+            style={{
+              background: "linear-gradient(-135deg, hsla(0, 0%, 100%, 0.95), hsla(45, 20%, 95%, 0.8))",
+              borderRadius: "0 50% 50% 50%",
+              filter: "blur(1px)",
+              boxShadow: "0 0 20px hsla(45, 50%, 80%, 0.4)",
+            }}
+            animate={{
+              rotateY: [0, -25, 0],
+              scaleX: [1, 0.75, 1],
+            }}
+            transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
+          />
           <img 
             src={flyingAngel2} 
             alt="Flying angel" 
-            className="w-full h-full object-contain drop-shadow-[0_0_40px_hsla(45,80%,70%,0.6)]"
+            className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_40px_hsla(45,80%,70%,0.6)]"
           />
           {/* Golden sparkle trail */}
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 w-2 h-20"
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-16"
             style={{
               background: "linear-gradient(to bottom, hsla(45, 100%, 70%, 0.8), transparent)",
             }}
             animate={{
               opacity: [0.3, 0.8, 0.3],
-              height: [60, 100, 60],
+              height: [50, 80, 50],
             }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
         </motion.div>
 
-        {/* Angel 3 - Right */}
+        {/* Angel 3 - Right with wing animation */}
         <motion.div
-          className="absolute right-[10%] bottom-[18%] w-28 h-28 md:w-40 md:h-40"
+          className="absolute right-[12%] bottom-[22%] w-28 h-28 md:w-40 md:h-40"
           animate={{
             y: [0, -12, 0],
             x: [0, -8, 0],
-            rotate: [2, -2, 2],
           }}
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         >
+          {/* Wings */}
+          <motion.div
+            className="absolute -left-4 top-[20%] w-12 h-16 md:w-16 md:h-20 origin-right"
+            style={{
+              background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.9), hsla(0, 0%, 95%, 0.7))",
+              borderRadius: "50% 0 50% 50%",
+              filter: "blur(1px)",
+            }}
+            animate={{
+              rotateY: [0, 35, 0],
+              scaleX: [1, 0.65, 1],
+            }}
+            transition={{ duration: 0.35, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -right-4 top-[20%] w-12 h-16 md:w-16 md:h-20 origin-left"
+            style={{
+              background: "linear-gradient(-135deg, hsla(0, 0%, 100%, 0.9), hsla(0, 0%, 95%, 0.7))",
+              borderRadius: "0 50% 50% 50%",
+              filter: "blur(1px)",
+            }}
+            animate={{
+              rotateY: [0, -35, 0],
+              scaleX: [1, 0.65, 1],
+            }}
+            transition={{ duration: 0.35, repeat: Infinity, ease: "easeInOut" }}
+          />
           <img 
             src={flyingAngel3} 
             alt="Flying angel" 
-            className="w-full h-full object-contain drop-shadow-[0_0_30px_hsla(45,80%,70%,0.5)]"
+            className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_30px_hsla(45,80%,70%,0.5)]"
           />
         </motion.div>
 
         {/* Glowing orbs under angels (like floating spheres they sit on) */}
-        {[15, 50, 85].map((left, i) => (
+        {[18, 50, 82].map((left, i) => (
           <motion.div
             key={`orb-${i}`}
-            className="absolute w-12 h-12 md:w-16 md:h-16 rounded-full"
+            className="absolute w-10 h-10 md:w-14 md:h-14 rounded-full"
             style={{
               left: `${left}%`,
-              bottom: `${5 + i * 3}%`,
+              bottom: `${8 + i * 5}%`,
               transform: "translateX(-50%)",
               background: "radial-gradient(circle at 30% 30%, hsla(35, 60%, 65%, 0.9), hsla(30, 50%, 45%, 0.7))",
               boxShadow: "inset -4px -4px 10px hsla(30, 40%, 30%, 0.4), 0 0 30px hsla(40, 70%, 60%, 0.5)",
