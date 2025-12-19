@@ -27,6 +27,7 @@ import { useImageGallery } from "@/hooks/useImageGallery";
 import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
 import { useNFT } from "@/hooks/useNFT";
+import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { Link } from "react-router-dom";
 import NavigationHeader from "@/components/NavigationHeader";
 import Footer from "@/components/Footer";
@@ -59,6 +60,7 @@ export default function CreativeStudio() {
   const { saveImage, refetch } = useImageGallery();
   const { walletAddress, isConnecting: isConnectingWallet, connectWallet, disconnectWallet } = useWallet();
   const { isMinting, mintNFT } = useNFT();
+  const { balance, formatCoins, isLoading: isLoadingCoins } = useCamlyCoin();
 
   const handleMintNFT = async () => {
     if (!generatedImage || !walletAddress || !user) return;
@@ -187,6 +189,23 @@ export default function CreativeStudio() {
               NFT History
             </Button>
             
+            {/* Credits Display */}
+            {user && (
+              <Link to="/profile">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 border-amber-500/50 text-amber-600 hover:bg-amber-50"
+                >
+                  <Coins className="w-4 h-4" />
+                  {isLoadingCoins ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <span>{formatCoins(balance.total_coins)} Camly</span>
+                  )}
+                </Button>
+              </Link>
+            )}
+            
             {/* Blockchain Connect Button */}
             {walletAddress ? (
               <Button
@@ -279,12 +298,25 @@ export default function CreativeStudio() {
 
                           {(needsCredits || generationError) && (
                             <Alert variant={needsCredits ? "destructive" : "default"}>
+                              <Coins className="h-4 w-4" />
                               <AlertTitle>
                                 {needsCredits ? "Hết AI credits" : "Không thể tạo ảnh"}
                               </AlertTitle>
-                              <AlertDescription>
-                                {generationError ||
-                                  "Không thể xử lý yêu cầu lúc này. Vui lòng thử lại sau."}
+                              <AlertDescription className="space-y-2">
+                                <p>
+                                  {generationError ||
+                                    "Không thể xử lý yêu cầu lúc này. Vui lòng thử lại sau."}
+                                </p>
+                                {needsCredits && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="mt-2"
+                                    onClick={() => window.open("mailto:support@camly.app?subject=Nạp%20AI%20Credits", "_blank")}
+                                  >
+                                    Liên hệ Admin để nạp credits
+                                  </Button>
+                                )}
                               </AlertDescription>
                             </Alert>
                           )}
@@ -402,6 +434,32 @@ export default function CreativeStudio() {
                             onChange={(e) => setEditPrompt(e.target.value)}
                             className="min-h-[100px] resize-none border-rose-soft/40 focus:border-primary"
                           />
+
+                          {/* Credits Alert for Edit Tab */}
+                          {(needsCredits || generationError) && (
+                            <Alert variant={needsCredits ? "destructive" : "default"}>
+                              <Coins className="h-4 w-4" />
+                              <AlertTitle>
+                                {needsCredits ? "Hết AI credits" : "Không thể chỉnh sửa"}
+                              </AlertTitle>
+                              <AlertDescription className="space-y-2">
+                                <p>
+                                  {generationError ||
+                                    "Không thể xử lý yêu cầu lúc này. Vui lòng thử lại sau."}
+                                </p>
+                                {needsCredits && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="mt-2"
+                                    onClick={() => window.open("mailto:support@camly.app?subject=Nạp%20AI%20Credits", "_blank")}
+                                  >
+                                    Liên hệ Admin để nạp credits
+                                  </Button>
+                                )}
+                              </AlertDescription>
+                            </Alert>
+                          )}
 
                           <Button 
                             onClick={handleEdit}
