@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun, Link2, Loader2 } from "lucide-react";
+import { Menu, X, Sun, Link2, Loader2, Check, Unlink } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
@@ -130,9 +130,18 @@ const LightIndicator = () => {
 
 const WalletIndicator = () => {
   const { user } = useAuth();
-  const { walletAddress, isConnecting, connectWallet, disconnectWallet } = useWallet();
+  const { walletAddress, isConnecting, isLoading, connectWallet, disconnectWallet } = useWallet();
 
   if (!user) return null;
+  
+  // Don't show anything while loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border/30">
+        <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -142,52 +151,79 @@ const WalletIndicator = () => {
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={disconnectWallet}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20 transition-all"
+              className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-red-500/15 hover:border-red-500/40 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
             >
-              <Link2 className="w-3.5 h-3.5" />
+              <Check className="w-3.5 h-3.5 group-hover:hidden" />
+              <Unlink className="w-3.5 h-3.5 hidden group-hover:block" />
               <span className="text-xs font-medium hidden sm:inline">
-                {walletAddress.slice(0, 4)}...{walletAddress.slice(-3)}
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
               </span>
             </motion.button>
           ) : (
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={connectWallet}
               disabled={isConnecting}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isConnecting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span className="text-xs font-medium hidden sm:inline">Đang kết nối...</span>
+                </>
               ) : (
-                <Link2 className="w-3.5 h-3.5" />
+                <>
+                  <Link2 className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium hidden sm:inline">Kết nối ví</span>
+                </>
               )}
-              <span className="text-xs font-medium hidden sm:inline">Ví</span>
             </motion.button>
           )}
         </TooltipTrigger>
         <TooltipContent 
           side="bottom" 
-          className="max-w-[220px] bg-card/95 backdrop-blur-sm border-primary/30 p-3"
+          className="max-w-[260px] bg-card/95 backdrop-blur-sm border-primary/30 p-3"
         >
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {walletAddress ? (
               <>
-                <p className="font-serif text-sm text-foreground">🔗 Đã kết nối Blockchain</p>
-                <p className="text-xs text-muted-foreground leading-relaxed font-mono break-all">
-                  {walletAddress}
-                </p>
-                <p className="text-xs text-primary pt-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="font-serif text-sm text-foreground">Đã kết nối Blockchain</p>
+                </div>
+                <div className="bg-muted/50 rounded-md p-2">
+                  <p className="text-xs text-muted-foreground font-mono break-all">
+                    {walletAddress}
+                  </p>
+                </div>
+                <p className="text-xs text-red-500/80 pt-1 flex items-center gap-1">
+                  <Unlink className="w-3 h-3" />
                   Nhấn để ngắt kết nối
                 </p>
               </>
             ) : (
               <>
-                <p className="font-serif text-sm text-foreground">🔗 Liên kết Blockchain</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Kết nối ví MetaMask để mint NFT và lưu trữ tác phẩm trên blockchain.
+                <p className="font-serif text-sm text-foreground flex items-center gap-2">
+                  <Link2 className="w-4 h-4 text-primary" />
+                  Liên kết Blockchain
                 </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Kết nối ví MetaMask để mint NFT và lưu trữ tác phẩm nghệ thuật của bạn trên blockchain.
+                </p>
+                <div className="flex items-center gap-2 pt-1 text-xs text-primary">
+                  <img 
+                    src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" 
+                    alt="MetaMask" 
+                    className="w-4 h-4"
+                  />
+                  <span>MetaMask được hỗ trợ</span>
+                </div>
               </>
             )}
           </div>
