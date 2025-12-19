@@ -156,13 +156,13 @@ const FunEcosystemPlatforms = () => {
   );
 
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-b from-pink-950 via-rose-950 to-pink-950">
+    <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-b from-rose-200 via-pink-200 to-rose-100">
       {/* Animated background particles */}
       <div className="absolute inset-0 pointer-events-none">
         {particles.map((particle, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full bg-pink-400/30"
+            className="absolute rounded-full bg-rose-400/40"
             style={{
               left: `${particle.x}%`,
               top: `${particle.y}%`,
@@ -187,7 +187,7 @@ const FunEcosystemPlatforms = () => {
       {/* Central glow effect */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <motion.div
-          className="w-[600px] h-[600px] rounded-full bg-gradient-to-r from-pink-500/10 via-rose-500/10 to-pink-400/10 blur-3xl"
+          className="w-[600px] h-[600px] rounded-full bg-gradient-to-r from-rose-300/30 via-pink-300/30 to-rose-200/30 blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3],
@@ -210,24 +210,24 @@ const FunEcosystemPlatforms = () => {
           transition={{ duration: 0.8 }}
         >
           <motion.div
-            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-amber-500/10 border border-amber-500/20 mb-8"
-            animate={{ boxShadow: ["0 0 20px rgba(251,191,36,0.2)", "0 0 40px rgba(251,191,36,0.4)", "0 0 20px rgba(251,191,36,0.2)"] }}
+            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-rose-500/20 border border-rose-400/40 mb-8"
+            animate={{ boxShadow: ["0 0 20px rgba(244,63,94,0.2)", "0 0 40px rgba(244,63,94,0.4)", "0 0 20px rgba(244,63,94,0.2)"] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
-            <Sparkles className="w-8 h-8 text-amber-400" />
-            <span className="text-amber-300 text-4xl md:text-5xl lg:text-6xl font-bold">FUN Ecosystem</span>
+            <Sparkles className="w-8 h-8 text-rose-500" />
+            <span className="text-rose-600 text-4xl md:text-5xl lg:text-6xl font-bold">FUN Ecosystem</span>
           </motion.div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-amber-300 via-rose-300 to-violet-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-rose-600 via-pink-600 to-rose-500 bg-clip-text text-transparent">
               Mô Hình Kinh Tế Ánh Sáng 5D
             </span>
           </h2>
           
-          <p className="text-lg md:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-rose-900/70 max-w-3xl mx-auto leading-relaxed">
             Nơi Tiền & Năng Lượng hợp nhất thành một dòng chảy vĩnh cửu.
             <br />
-            <span className="text-amber-300/80">15 Platforms</span> — <span className="text-rose-300/80">15 Vortex Năng Lượng</span> — <span className="text-violet-300/80">1 Hệ Sinh Thái Ánh Sáng</span>
+            <span className="text-rose-700">15 Platforms</span> — <span className="text-pink-700">15 Vortex Năng Lượng</span> — <span className="text-rose-600">1 Hệ Sinh Thái Ánh Sáng</span>
           </p>
         </motion.div>
 
@@ -248,7 +248,7 @@ const FunEcosystemPlatforms = () => {
               >
                 <CardWrapper {...cardProps}>
                   <motion.div
-                    className={`relative p-6 rounded-2xl bg-gradient-to-br from-pink-500/30 via-rose-500/20 to-pink-400/25 backdrop-blur-sm border border-pink-400/30 hover:border-pink-400/50 transition-all duration-500 h-full cursor-pointer overflow-hidden`}
+                    className={`relative p-6 rounded-2xl bg-white/60 backdrop-blur-sm border border-rose-300/50 hover:border-rose-400/70 transition-all duration-500 h-full cursor-pointer overflow-hidden shadow-lg shadow-rose-200/30`}
                     whileHover={{ 
                       scale: 1.02, 
                       y: -5,
@@ -281,7 +281,7 @@ const FunEcosystemPlatforms = () => {
                       </motion.div>
 
                       {/* Name */}
-                      <h3 className="text-lg font-bold text-white mb-1">
+                      <h3 className="text-lg font-bold text-rose-900 mb-1">
                         {platform.name}
                       </h3>
 
@@ -291,7 +291,7 @@ const FunEcosystemPlatforms = () => {
                       </p>
 
                       {/* Description */}
-                      <p className="text-sm text-white/60 leading-relaxed">
+                      <p className="text-sm text-rose-800/70 leading-relaxed">
                         {platform.description}
                       </p>
                     </div>
@@ -299,14 +299,14 @@ const FunEcosystemPlatforms = () => {
                     {/* External link icon or Sparkle decorations */}
                     {platform.link ? (
                       <motion.div
-                        className="absolute top-3 right-3 text-white/40 group-hover:text-white/80 transition-colors"
+                        className="absolute top-3 right-3 text-rose-400 group-hover:text-rose-600 transition-colors"
                         whileHover={{ scale: 1.2 }}
                       >
                         <ExternalLink className="w-4 h-4" />
                       </motion.div>
                     ) : (
                       <motion.div
-                        className="absolute top-3 right-3 text-white/20"
+                        className="absolute top-3 right-3 text-rose-300"
                         animate={{ rotate: 360, scale: [1, 1.2, 1] }}
                         transition={{ duration: 4, repeat: Infinity }}
                       >
@@ -328,11 +328,11 @@ const FunEcosystemPlatforms = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          <div className="inline-block p-8 rounded-3xl bg-gradient-to-br from-pink-500/10 via-rose-500/10 to-pink-400/10 border border-pink-400/20 backdrop-blur-sm">
-            <p className="text-lg md:text-xl text-white/80 italic mb-4">
+          <div className="inline-block p-8 rounded-3xl bg-white/50 border border-rose-300/40 backdrop-blur-sm shadow-lg shadow-rose-200/20">
+            <p className="text-lg md:text-xl text-rose-800 italic mb-4">
               "Tiền tuôn vào – tuôn ra – quay về – khuếch đại – tăng trưởng mãi mãi"
             </p>
-            <p className="text-amber-300 font-medium">
+            <p className="text-rose-600 font-medium">
               Một mô hình thịnh vượng bất tận, cho tất cả mọi người
             </p>
           </div>
@@ -353,11 +353,11 @@ const FunEcosystemPlatforms = () => {
           ].map((principle, index) => (
             <motion.div
               key={index}
-              className="flex items-center gap-3 p-4 rounded-xl bg-pink-500/10 border border-pink-400/20"
-              whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.08)" }}
+              className="flex items-center gap-3 p-4 rounded-xl bg-white/50 border border-rose-300/30 shadow-sm"
+              whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.7)" }}
             >
               <span className="text-2xl">{principle.icon}</span>
-              <span className="text-white/70 text-sm">{principle.text}</span>
+              <span className="text-rose-800/80 text-sm">{principle.text}</span>
             </motion.div>
           ))}
         </motion.div>
