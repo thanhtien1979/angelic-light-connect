@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wind, X, Play, Square, Volume2, VolumeX, ChevronDown, Sparkles, History } from 'lucide-react';
 import { useBreathingCompletionSound } from '@/hooks/useBreathingCompletionSound';
-import { useAmbientSound, AMBIENT_SOUNDS, type AmbientSoundType } from '@/hooks/useAmbientSound';
+import { useAmbientSound, AMBIENT_SOUNDS, SOUND_CATEGORIES, type AmbientSoundType } from '@/hooks/useAmbientSound';
 import { useBreathingHistory } from '@/hooks/useBreathingHistory';
 import { BreathingSessionHistory } from '@/components/BreathingSessionHistory';
 import { Slider } from '@/components/ui/slider';
@@ -82,10 +82,8 @@ const BREATHING_PATTERNS: BreathingPattern[] = [
 
 const PATTERN_STORAGE_KEY = 'breathing-pattern-preference';
 
-// Subset of sounds for quick breathing (calming ambient only)
-const BREATHING_SOUNDS = AMBIENT_SOUNDS.filter(s => 
-  ['silence', 'rain', 'forest', 'ocean'].includes(s.id)
-);
+// All sounds are available for breathing sessions
+const BREATHING_SOUNDS = AMBIENT_SOUNDS;
 
 const QuickBreathingWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -731,27 +729,52 @@ const QuickBreathingWidget = () => {
                             <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${showSoundPicker ? 'rotate-180' : ''}`} />
                           </button>
 
-                          {/* Sound options dropdown */}
+                          {/* Sound options dropdown with categories */}
                           <AnimatePresence>
                             {showSoundPicker && (
                               <motion.div
                                 initial={{ opacity: 0, y: -5 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -5 }}
-                                className="absolute bottom-full left-0 right-0 mb-1 bg-card/95 backdrop-blur-lg rounded-lg border border-border/40 shadow-lg overflow-hidden z-10"
+                                className="absolute bottom-full left-0 right-0 mb-1 bg-card/95 backdrop-blur-lg rounded-lg border border-border/40 shadow-lg overflow-hidden z-10 max-h-64 overflow-y-auto"
                               >
-                                {BREATHING_SOUNDS.map((sound) => (
-                                  <button
-                                    key={sound.id}
-                                    onClick={() => handleSoundSelect(sound.id)}
-                                    className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-muted/50 transition-colors ${
-                                      selectedSound === sound.id ? 'bg-primary/10 text-primary' : 'text-foreground/70'
-                                    }`}
-                                  >
-                                    <span>{sound.icon}</span>
-                                    <span>{sound.name}</span>
-                                  </button>
-                                ))}
+                                {/* Silence option first */}
+                                <button
+                                  onClick={() => handleSoundSelect('silence')}
+                                  className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-muted/50 transition-colors ${
+                                    selectedSound === 'silence' ? 'bg-primary/10 text-primary' : 'text-foreground/70'
+                                  }`}
+                                >
+                                  <span>🤫</span>
+                                  <span>Silence</span>
+                                </button>
+                                
+                                {/* Grouped by category */}
+                                {SOUND_CATEGORIES.map((category) => {
+                                  const categorySounds = BREATHING_SOUNDS.filter(s => s.category === category.id && s.id !== 'silence');
+                                  if (categorySounds.length === 0) return null;
+                                  
+                                  return (
+                                    <div key={category.id}>
+                                      <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground/50 bg-muted/20 flex items-center gap-1.5">
+                                        <span>{category.icon}</span>
+                                        <span>{category.name}</span>
+                                      </div>
+                                      {categorySounds.map((sound) => (
+                                        <button
+                                          key={sound.id}
+                                          onClick={() => handleSoundSelect(sound.id)}
+                                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-muted/50 transition-colors ${
+                                            selectedSound === sound.id ? 'bg-primary/10 text-primary' : 'text-foreground/70'
+                                          }`}
+                                        >
+                                          <span>{sound.icon}</span>
+                                          <span>{sound.name}</span>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  );
+                                })}
                               </motion.div>
                             )}
                           </AnimatePresence>

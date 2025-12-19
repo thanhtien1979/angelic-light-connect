@@ -9,75 +9,130 @@ export type AmbientSoundType =
   | "rain"
   | "ocean"
   | "temple-bells"
-  | "night";
+  | "night"
+  | "healing-tones"
+  | "soft-piano"
+  | "crystal-bowls";
+
+export type AmbientSoundCategory = 'nature' | 'music' | 'sacred';
 
 interface AmbientSoundOption {
   id: AmbientSoundType;
   name: string;
   nameVi: string;
   icon: string;
+  category: AmbientSoundCategory;
   audioUrl?: string;
 }
 
 // High-quality ambient audio files from free CDN sources
 export const AMBIENT_SOUNDS: AmbientSoundOption[] = [
-  { id: "silence", name: "Silence", nameVi: "Tĩnh lặng", icon: "🤫" },
+  // Silence
+  { id: "silence", name: "Silence", nameVi: "Tĩnh lặng", icon: "🤫", category: 'nature' },
+  
+  // Nature sounds
   { 
-    id: "singing-bowl", 
-    name: "Singing Bowl", 
-    nameVi: "Chuông bát", 
-    icon: "🔔",
-    audioUrl: "https://cdn.pixabay.com/audio/2024/11/04/audio_4956b1e816.mp3"
-  },
-  { 
-    id: "wind", 
-    name: "Wind", 
-    nameVi: "Gió", 
-    icon: "🌬️",
-    audioUrl: "https://cdn.pixabay.com/audio/2022/05/16/audio_1d51bbfd3d.mp3"
-  },
-  { 
-    id: "water", 
-    name: "Water", 
-    nameVi: "Suối", 
-    icon: "💧",
-    audioUrl: "https://cdn.pixabay.com/audio/2024/04/11/audio_149acae47b.mp3"
+    id: "rain", 
+    name: "Light Rain", 
+    nameVi: "Mưa nhẹ", 
+    icon: "🌧️",
+    category: 'nature',
+    audioUrl: "https://cdn.pixabay.com/audio/2022/05/13/audio_257112220f.mp3"
   },
   { 
     id: "forest", 
     name: "Forest", 
     nameVi: "Rừng", 
     icon: "🌿",
+    category: 'nature',
     audioUrl: "https://cdn.pixabay.com/audio/2022/08/31/audio_419263fc12.mp3"
-  },
-  { 
-    id: "rain", 
-    name: "Light Rain", 
-    nameVi: "Mưa nhẹ", 
-    icon: "🌧️",
-    audioUrl: "https://cdn.pixabay.com/audio/2022/05/13/audio_257112220f.mp3"
   },
   { 
     id: "ocean", 
     name: "Ocean Waves", 
     nameVi: "Sóng biển", 
     icon: "🌊",
+    category: 'nature',
     audioUrl: "https://cdn.pixabay.com/audio/2024/06/05/audio_96e7c82c3a.mp3"
   },
   { 
-    id: "temple-bells", 
-    name: "Temple Bells", 
-    nameVi: "Chuông chùa", 
-    icon: "🛕",
-    audioUrl: "https://cdn.pixabay.com/audio/2022/10/30/audio_1bf4957317.mp3"
+    id: "wind", 
+    name: "Gentle Wind", 
+    nameVi: "Gió", 
+    icon: "🌬️",
+    category: 'nature',
+    audioUrl: "https://cdn.pixabay.com/audio/2022/05/16/audio_1d51bbfd3d.mp3"
+  },
+  { 
+    id: "water", 
+    name: "Stream", 
+    nameVi: "Suối", 
+    icon: "💧",
+    category: 'nature',
+    audioUrl: "https://cdn.pixabay.com/audio/2024/04/11/audio_149acae47b.mp3"
   },
   { 
     id: "night", 
     name: "Night Nature", 
     nameVi: "Đêm tĩnh", 
     icon: "🌙",
+    category: 'nature',
     audioUrl: "https://cdn.pixabay.com/audio/2022/02/07/audio_f8a7c19695.mp3"
   },
+  
+  // Music & healing tones
+  { 
+    id: "soft-piano", 
+    name: "Soft Piano", 
+    nameVi: "Piano nhẹ", 
+    icon: "🎹",
+    category: 'music',
+    audioUrl: "https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3"
+  },
+  { 
+    id: "healing-tones", 
+    name: "Healing Tones", 
+    nameVi: "Âm chữa lành", 
+    icon: "✨",
+    category: 'music',
+    audioUrl: "https://cdn.pixabay.com/audio/2024/02/15/audio_63e013545e.mp3"
+  },
+  
+  // Sacred sounds
+  { 
+    id: "singing-bowl", 
+    name: "Singing Bowl", 
+    nameVi: "Chuông bát", 
+    icon: "🔔",
+    category: 'sacred',
+    audioUrl: "https://cdn.pixabay.com/audio/2024/11/04/audio_4956b1e816.mp3"
+  },
+  { 
+    id: "temple-bells", 
+    name: "Temple Bells", 
+    nameVi: "Chuông chùa", 
+    icon: "🛕",
+    category: 'sacred',
+    audioUrl: "https://cdn.pixabay.com/audio/2022/10/30/audio_1bf4957317.mp3"
+  },
+  { 
+    id: "crystal-bowls", 
+    name: "Crystal Bowls", 
+    nameVi: "Bát pha lê", 
+    icon: "💎",
+    category: 'sacred',
+    audioUrl: "https://cdn.pixabay.com/audio/2022/03/10/audio_8c9c04f397.mp3"
+  },
+];
+
+// Helper to get sounds by category
+export const getSoundsByCategory = (category: AmbientSoundCategory) => 
+  AMBIENT_SOUNDS.filter(s => s.category === category);
+
+export const SOUND_CATEGORIES: { id: AmbientSoundCategory; name: string; icon: string }[] = [
+  { id: 'nature', name: 'Nature', icon: '🌿' },
+  { id: 'music', name: 'Music', icon: '🎵' },
+  { id: 'sacred', name: 'Sacred', icon: '✨' },
 ];
 
 const STORAGE_KEY = "meditation-ambient-sound";
