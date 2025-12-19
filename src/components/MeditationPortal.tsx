@@ -4,7 +4,7 @@ import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { useMeditationReward } from "@/hooks/useMeditationReward";
-import { CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
+import CoinRewardAnimation from "@/components/CoinRewardAnimation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import flyingAngel1 from "@/assets/flying-angel.png";
@@ -391,11 +391,12 @@ const MeditationPortal = () => {
       />
       
       {/* Camly Coin reward notification */}
-      <CamlyCoinNotification
+      <CoinRewardAnimation
         show={showNotification && lastRewardResult?.success === true}
-        coins={lastRewardResult?.coins || 50000}
+        coins={lastRewardResult?.coins || 1000}
         message={lastRewardResult?.message || "Ánh sáng đang lan tỏa qua con!"}
         onClose={dismissNotification}
+        variant="meditation"
       />
       
     <section id="meditation" className="relative min-h-screen py-24 px-4 overflow-hidden">

@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Sparkles, Sun, Heart } from "lucide-react";
 import { useDailyGreeting } from "@/hooks/useDailyGreeting";
+import { useDailyLoginReward } from "@/hooks/useDailyLoginReward";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import GreetingMeditationInvite from "./GreetingMeditationInvite";
+import CoinRewardAnimation from "./CoinRewardAnimation";
 
 const spiritualGreetings = [
   {
@@ -40,6 +42,7 @@ const spiritualGreetings = [
 const DailyLightGreeting = () => {
   const { user } = useAuth();
   const { shouldShowGreeting, dismissGreeting, isLoading } = useDailyGreeting();
+  const { checkAndAwardDailyLogin, showNotification, lastRewardResult, dismissNotification } = useDailyLoginReward();
   const prefersReducedMotion = useReducedMotion();
   const [isVisible, setIsVisible] = useState(false);
   const [greeting, setGreeting] = useState(spiritualGreetings[0]);
@@ -68,12 +71,15 @@ const DailyLightGreeting = () => {
       };
       saveGreetingHistory();
       
+      // Award daily login bonus
+      checkAndAwardDailyLogin();
+      
       // Show after a small delay for smoother experience
       setTimeout(() => {
         setIsVisible(true);
       }, 1500);
     }
-  }, [user, shouldShowGreeting, isLoading]);
+  }, [user, shouldShowGreeting, isLoading, checkAndAwardDailyLogin]);
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -191,6 +197,15 @@ const DailyLightGreeting = () => {
           onClose={handleMeditationClose}
         />
       )}
+      
+      {/* Daily login reward animation */}
+      <CoinRewardAnimation
+        show={showNotification}
+        coins={lastRewardResult?.coinsAwarded || 500}
+        message={lastRewardResult?.message || "Chào mừng con trở lại!"}
+        onClose={dismissNotification}
+        variant="daily_login"
+      />
     </>
   );
 };

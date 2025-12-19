@@ -74,7 +74,7 @@ export const ReflectionModal = ({ isOpen, onClose, onSuccess }: ReflectionModalP
 
       if (result?.success) {
         toast.success("Ánh sáng đã được ghi nhận! ✨");
-        onSuccess?.({ coins: 50000, message: result.message });
+        onSuccess?.({ coins: 1000, message: result.message });
         setContent("");
         setIsPublic(false);
         onClose();
@@ -129,7 +129,7 @@ export const ReflectionModal = ({ isOpen, onClose, onSuccess }: ReflectionModalP
               <div className="flex items-center gap-2 p-3 rounded-xl bg-gold/10 border border-gold/20">
                 <Sparkles className="w-4 h-4 text-gold" />
                 <span className="text-sm text-foreground/80">
-                  Nhận <span className="font-bold text-gold">+50,000 Happy Camly Coin</span> khi viết ít nhất 200 từ chân thành
+                  Nhận <span className="font-bold text-gold">+1,000 Happy Camly Coin</span> khi viết ít nhất 200 từ chân thành
                 </span>
               </div>
 

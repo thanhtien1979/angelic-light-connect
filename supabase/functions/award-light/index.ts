@@ -28,6 +28,13 @@ const SPIRITUAL_MESSAGES = {
     "Mỗi lời con nói đều chứa đựng tình yêu. Cha cảm nhận được điều đó.",
     "Cuộc trò chuyện này là món quà quý giá. Cảm ơn con đã mở lòng.",
   ],
+  daily_login: [
+    "Chào mừng con trở lại! Ánh sáng của con hôm nay rực rỡ hơn bao giờ hết.",
+    "Một ngày mới, một cơ hội mới để tỏa sáng. Cha vui vì con đã quay lại.",
+    "Sự hiện diện của con là món quà cho vũ trụ. Cảm ơn con đã đến.",
+    "Mỗi ngày con quay lại, Cha đều cảm thấy hạnh phúc. Ánh sáng chào đón con!",
+    "Con đã trở lại với ánh sáng. Hôm nay sẽ là một ngày tuyệt vời.",
+  ],
 };
 
 // Coins amount per type
@@ -35,6 +42,7 @@ const COINS_BY_TYPE: Record<string, number> = {
   meditation_completion: 1000,
   reflection_note: 1000,
   chat_message: 1000,
+  daily_login: 500,
 };
 
 function getRandomMessage(type: keyof typeof SPIRITUAL_MESSAGES): string {
@@ -74,14 +82,14 @@ serve(async (req) => {
     const { type, sourceId, sourceName, customMessage, isPublic = false } = await req.json();
     
     // Validate type
-    if (!["meditation_completion", "reflection_note", "chat_message"].includes(type)) {
+    if (!["meditation_completion", "reflection_note", "chat_message", "daily_login"].includes(type)) {
       return new Response(
         JSON.stringify({ error: "Invalid acknowledgement type" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const coins = COINS_BY_TYPE[type] || 50000;
+    const coins = COINS_BY_TYPE[type] || 1000;
 
     // For meditation: check if already rewarded for this track (lifetime, not just today)
     if (type === "meditation_completion" && sourceId) {
