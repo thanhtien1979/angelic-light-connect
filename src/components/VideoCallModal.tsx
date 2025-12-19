@@ -1,11 +1,12 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Phone, PhoneOff, Video, VideoOff, Mic, MicOff,
-  X, User, Sparkles
+  X, Sparkles, Monitor, MonitorOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useCallRingtone, useDialTone } from '@/hooks/useCallRingtone';
 
 interface VideoCallModalProps {
   isOpen: boolean;
@@ -16,9 +17,11 @@ interface VideoCallModalProps {
     isConnected: boolean;
     isVideoEnabled: boolean;
     isAudioEnabled: boolean;
+    isScreenSharing: boolean;
     callType: 'video' | 'audio' | null;
     remoteUserId: string | null;
     remoteUserName: string | null;
+    callStartTime: number | null;
   };
   localStream: MediaStream | null;
   remoteStream: MediaStream | null;
@@ -27,7 +30,14 @@ interface VideoCallModalProps {
   onEnd: () => void;
   onToggleVideo: () => void;
   onToggleAudio: () => void;
+  onToggleScreenShare: () => void;
 }
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
 
 const VideoCallModal = ({
   isOpen,
@@ -39,9 +49,50 @@ const VideoCallModal = ({
   onEnd,
   onToggleVideo,
   onToggleAudio,
+  onToggleScreenShare,
 }: VideoCallModalProps) => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const [callDuration, setCallDuration] = useState(0);
+
+  const { startRingtone, stopRingtone } = useCallRingtone();
+  const { startDialTone, stopDialTone } = useDialTone();
+
+  // Handle ringtone for incoming calls
+  useEffect(() => {
+    if (callState.isReceiving) {
+      startRingtone();
+    } else {
+      stopRingtone();
+    }
+    
+    return () => stopRingtone();
+  }, [callState.isReceiving, startRingtone, stopRingtone]);
+
+  // Handle dial tone for outgoing calls
+  useEffect(() => {
+    if (callState.isCalling) {
+      startDialTone();
+    } else {
+      stopDialTone();
+    }
+    
+    return () => stopDialTone();
+  }, [callState.isCalling, startDialTone, stopDialTone]);
+
+  // Call duration timer
+  useEffect(() => {
+    if (callState.isConnected && callState.callStartTime) {
+      const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - callState.callStartTime!) / 1000);
+        setCallDuration(elapsed);
+      }, 1000);
+
+      return () => clearInterval(interval);
+    } else {
+      setCallDuration(0);
+    }
+  }, [callState.isConnected, callState.callStartTime]);
 
   // Attach streams to video elements
   useEffect(() => {
@@ -169,12 +220,17 @@ const VideoCallModal = ({
                   autoPlay
                   playsInline
                   muted
-                  className="w-full h-full object-cover mirror"
-                  style={{ transform: 'scaleX(-1)' }}
+                  className="w-full h-full object-cover"
+                  style={{ transform: callState.isScreenSharing ? 'none' : 'scaleX(-1)' }}
                 />
-                {!callState.isVideoEnabled && (
+                {!callState.isVideoEnabled && !callState.isScreenSharing && (
                   <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
                     <VideoOff className="w-8 h-8 text-gray-400" />
+                  </div>
+                )}
+                {callState.isScreenSharing && (
+                  <div className="absolute top-1 left-1 px-2 py-0.5 rounded bg-blue-500 text-white text-xs">
+                    Chia sẻ màn hình
                   </div>
                 )}
               </motion.div>
@@ -216,11 +272,32 @@ const VideoCallModal = ({
                         ? 'bg-gray-700 hover:bg-gray-600 text-white'
                         : 'bg-red-500 hover:bg-red-600 text-white'
                     }`}
+                    disabled={callState.isScreenSharing}
                   >
                     {callState.isVideoEnabled ? (
                       <Video className="w-5 h-5" />
                     ) : (
                       <VideoOff className="w-5 h-5" />
+                    )}
+                  </Button>
+                )}
+
+                {/* Screen Share (only for video calls when connected) */}
+                {callState.callType === 'video' && callState.isConnected && (
+                  <Button
+                    onClick={onToggleScreenShare}
+                    variant="ghost"
+                    size="icon"
+                    className={`rounded-full w-12 h-12 ${
+                      callState.isScreenSharing
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : 'bg-gray-700 hover:bg-gray-600 text-white'
+                    }`}
+                  >
+                    {callState.isScreenSharing ? (
+                      <MonitorOff className="w-5 h-5" />
+                    ) : (
+                      <Monitor className="w-5 h-5" />
                     )}
                   </Button>
                 )}
@@ -247,12 +324,12 @@ const VideoCallModal = ({
               <X className="w-5 h-5" />
             </Button>
 
-            {/* Call Status */}
+            {/* Call Status & Duration */}
             <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-lg">
               {callState.isConnected ? (
                 <>
                   <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-white text-sm">Đang kết nối</span>
+                  <span className="text-white text-sm">{formatDuration(callDuration)}</span>
                 </>
               ) : callState.isCalling ? (
                 <>
