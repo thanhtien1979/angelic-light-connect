@@ -248,7 +248,7 @@ const FunEcosystemPlatforms = () => {
               >
                 <CardWrapper {...cardProps}>
                   <motion.div
-                    className={`relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-500 h-full cursor-pointer overflow-hidden`}
+                    className={`relative p-6 rounded-2xl bg-pink-500/20 backdrop-blur-sm border border-pink-400/30 hover:border-pink-400/50 transition-all duration-500 h-full cursor-pointer overflow-hidden`}
                     whileHover={{ 
                       scale: 1.02, 
                       y: -5,
