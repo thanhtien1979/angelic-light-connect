@@ -96,11 +96,15 @@ export function useImageGeneration() {
         throw new Error(parsed.message || "Lỗi khi gọi API");
       }
 
-      if (data?.error) {
-        const msg =
-          typeof data.error === "string" ? data.error : "Lỗi khi tạo hình ảnh";
-        setError(msg);
-        toast.error(msg);
+      // Handle error returned in data (4xx responses may come through data)
+      if (data?.error || data?.error_code) {
+        const parsed: ParsedFnError = {
+          message: typeof data.error === "string" ? data.error : "Lỗi khi tạo hình ảnh",
+          code: data.error_code,
+        };
+        if (handleKnownHttpErrors(parsed)) return null;
+        setError(parsed.message!);
+        toast.error(parsed.message!);
         return null;
       }
 
@@ -145,11 +149,15 @@ export function useImageGeneration() {
         throw new Error(parsed.message || "Lỗi khi gọi API");
       }
 
-      if (data?.error) {
-        const msg =
-          typeof data.error === "string" ? data.error : "Lỗi khi chỉnh sửa hình ảnh";
-        setError(msg);
-        toast.error(msg);
+      // Handle error returned in data (4xx responses may come through data)
+      if (data?.error || data?.error_code) {
+        const parsed: ParsedFnError = {
+          message: typeof data.error === "string" ? data.error : "Lỗi khi chỉnh sửa hình ảnh",
+          code: data.error_code,
+        };
+        if (handleKnownHttpErrors(parsed)) return null;
+        setError(parsed.message!);
+        toast.error(parsed.message!);
         return null;
       }
 
