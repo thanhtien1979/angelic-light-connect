@@ -11,8 +11,18 @@ import Credits from "./pages/Credits";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
+import ChatButton from "./components/ChatButton";
+import { usePresence } from "./hooks/usePresence";
+import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
 
 const queryClient = new QueryClient();
+
+// Component to initialize presence and notifications
+const AppInitializer = ({ children }: { children: React.ReactNode }) => {
+  usePresence();
+  useFriendRequestSound();
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -20,23 +30,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <DailyLightGreeting />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/studio" element={<CreativeStudio />} />
-          <Route path="/credits" element={<Credits />} />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppInitializer>
+          <DailyLightGreeting />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/studio" element={<CreativeStudio />} />
+            <Route path="/credits" element={<Credits />} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <ChatButton />
+        </AppInitializer>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

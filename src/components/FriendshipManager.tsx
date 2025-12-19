@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, UserPlus, Search, Check, X, 
-  Heart, Clock, Send, UserMinus, Sparkles 
+  Heart, Clock, Send, UserMinus, Sparkles, Circle, MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -151,17 +151,24 @@ const FriendshipManager = () => {
                       className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200"
                     >
                       <div className="flex items-center gap-3">
-                        <Avatar className="w-10 h-10 ring-2 ring-pink-300">
-                          <AvatarImage src={profile?.avatar_url || ''} />
-                          <AvatarFallback className="bg-gradient-to-br from-rose-400 to-pink-500 text-white">
-                            {getInitials(profile?.display_name)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                          <Avatar className="w-10 h-10 ring-2 ring-pink-300">
+                            <AvatarImage src={profile?.avatar_url || ''} />
+                            <AvatarFallback className="bg-gradient-to-br from-rose-400 to-pink-500 text-white">
+                              {getInitials(profile?.display_name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          {profile?.is_online && (
+                            <Circle className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 fill-green-400 text-green-400 ring-2 ring-white" />
+                          )}
+                        </div>
                         <div>
                           <p className="font-semibold text-rose-800">
                             {profile?.display_name || 'Người dùng'}
                           </p>
-                          <p className="text-xs text-rose-500">Bạn bè ánh sáng ✨</p>
+                          <p className="text-xs text-rose-500">
+                            {profile?.is_online ? '🟢 Online' : 'Bạn bè ánh sáng ✨'}
+                          </p>
                         </div>
                       </div>
                       <Button
