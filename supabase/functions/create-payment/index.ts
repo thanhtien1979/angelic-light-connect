@@ -80,6 +80,7 @@ serve(async (req) => {
     // For now, return bank transfer info (VNPay/MoMo integration requires API keys)
     const bankInfo = {
       bankName: "Vietcombank",
+      bankCode: "VCB", // Mã ngân hàng cho VietQR (VCB = Vietcombank)
       accountNumber: "1234567890",
       accountName: "CAMLY APP",
       amount: pkg.price,
