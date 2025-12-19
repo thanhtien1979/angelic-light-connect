@@ -13,6 +13,7 @@ interface Platform {
   icon: React.ReactNode;
   color: string;
   glowColor: string;
+  link?: string;
 }
 
 const platforms: Platform[] = [
@@ -30,7 +31,8 @@ const platforms: Platform[] = [
     description: "Vortex danh tính - Nơi linh hồn được định danh trong vũ trụ số",
     icon: <User className="w-8 h-8" />,
     color: "from-violet-400 to-purple-500",
-    glowColor: "shadow-violet-400/50"
+    glowColor: "shadow-violet-400/50",
+    link: "https://funprofile.lovable.app/"
   },
   {
     name: "FUN Play",
@@ -228,75 +230,82 @@ const FunEcosystemPlatforms = () => {
 
         {/* Platforms Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
-          {platforms.map((platform, index) => (
-            <motion.div
-              key={platform.name}
-              className="group relative"
-              initial={{ opacity: 0, y: 30, scale: 0.9 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-            >
+          {platforms.map((platform, index) => {
+            const CardWrapper = platform.link ? 'a' : 'div';
+            const cardProps = platform.link ? { href: platform.link, target: "_blank", rel: "noopener noreferrer" } : {};
+            
+            return (
               <motion.div
-                className={`relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-500 h-full cursor-pointer overflow-hidden`}
-                whileHover={{ 
-                  scale: 1.02, 
-                  y: -5,
-                }}
+                key={platform.name}
+                className="group relative"
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
               >
-                {/* Glow effect on hover */}
-                <motion.div
-                  className={`absolute inset-0 bg-gradient-to-br ${platform.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`}
-                />
-                
-                {/* Rotating border effect */}
-                <motion.div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{
-                    background: `conic-gradient(from 0deg, transparent, ${platform.color.includes('amber') ? 'rgba(251,191,36,0.3)' : platform.color.includes('rose') ? 'rgba(244,63,94,0.3)' : 'rgba(139,92,246,0.3)'}, transparent)`,
-                  }}
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                />
-
-                {/* Content */}
-                <div className="relative z-10">
-                  {/* Icon */}
+                <CardWrapper {...cardProps}>
                   <motion.div
-                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${platform.color} flex items-center justify-center text-white mb-4 shadow-lg ${platform.glowColor} shadow-lg`}
-                    whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
+                    className={`relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-500 h-full cursor-pointer overflow-hidden`}
+                    whileHover={{ 
+                      scale: 1.02, 
+                      y: -5,
+                    }}
                   >
-                    {platform.icon}
+                    {/* Glow effect on hover */}
+                    <motion.div
+                      className={`absolute inset-0 bg-gradient-to-br ${platform.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`}
+                    />
+                    
+                    {/* Rotating border effect */}
+                    <motion.div
+                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        background: `conic-gradient(from 0deg, transparent, ${platform.color.includes('amber') ? 'rgba(251,191,36,0.3)' : platform.color.includes('rose') ? 'rgba(244,63,94,0.3)' : 'rgba(139,92,246,0.3)'}, transparent)`,
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    />
+
+                    {/* Content */}
+                    <div className="relative z-10">
+                      {/* Icon */}
+                      <motion.div
+                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${platform.color} flex items-center justify-center text-white mb-4 shadow-lg ${platform.glowColor} shadow-lg`}
+                        whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        {platform.icon}
+                      </motion.div>
+
+                      {/* Name */}
+                      <h3 className="text-lg font-bold text-white mb-1">
+                        {platform.name}
+                      </h3>
+
+                      {/* Subtitle */}
+                      <p className={`text-sm font-medium bg-gradient-to-r ${platform.color} bg-clip-text text-transparent mb-3`}>
+                        {platform.subtitle}
+                      </p>
+
+                      {/* Description */}
+                      <p className="text-sm text-white/60 leading-relaxed">
+                        {platform.description}
+                      </p>
+                    </div>
+
+                    {/* Sparkle decorations */}
+                    <motion.div
+                      className="absolute top-3 right-3 text-white/20"
+                      animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                      transition={{ duration: 4, repeat: Infinity }}
+                    >
+                      <Sparkles className="w-4 h-4" />
+                    </motion.div>
                   </motion.div>
-
-                  {/* Name */}
-                  <h3 className="text-lg font-bold text-white mb-1">
-                    {platform.name}
-                  </h3>
-
-                  {/* Subtitle */}
-                  <p className={`text-sm font-medium bg-gradient-to-r ${platform.color} bg-clip-text text-transparent mb-3`}>
-                    {platform.subtitle}
-                  </p>
-
-                  {/* Description */}
-                  <p className="text-sm text-white/60 leading-relaxed">
-                    {platform.description}
-                  </p>
-                </div>
-
-                {/* Sparkle decorations */}
-                <motion.div
-                  className="absolute top-3 right-3 text-white/20"
-                  animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                >
-                  <Sparkles className="w-4 h-4" />
-                </motion.div>
+                </CardWrapper>
               </motion.div>
-            </motion.div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Bottom Quote */}
