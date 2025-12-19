@@ -8,6 +8,7 @@ export interface PrivateMessage {
   sender_id: string;
   receiver_id: string;
   content: string;
+  image_url?: string | null;
   is_read: boolean;
   created_at: string;
   sender_profile?: {
@@ -180,7 +181,7 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
     }
   }, [user, selectedFriendId]);
 
-  // Send a message
+  // Send a text message
   const sendMessage = async (content: string) => {
     if (!user || !selectedFriendId || !content.trim()) return false;
 
@@ -201,6 +202,34 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Không thể gửi tin nhắn');
+      return false;
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // Send an image message
+  const sendImageMessage = async (imageUrl: string, caption?: string) => {
+    if (!user || !selectedFriendId) return false;
+
+    try {
+      setSending(true);
+      
+      const { error } = await supabase
+        .from('private_messages')
+        .insert({
+          sender_id: user.id,
+          receiver_id: selectedFriendId,
+          content: caption || '📷 Hình ảnh',
+          image_url: imageUrl,
+        });
+
+      if (error) throw error;
+      
+      return true;
+    } catch (error) {
+      console.error('Error sending image:', error);
+      toast.error('Không thể gửi hình ảnh');
       return false;
     } finally {
       setSending(false);
@@ -268,6 +297,7 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
     loading,
     sending,
     sendMessage,
+    sendImageMessage,
     getTotalUnread,
     refetchMessages: fetchMessages,
     refetchConversations: fetchConversations,
