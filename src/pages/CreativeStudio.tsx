@@ -18,7 +18,7 @@ import {
   Coins,
   History
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"; import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,7 +55,7 @@ export default function CreativeStudio() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { user } = useAuth();
-  const { isGenerating, generatedImage, generateImage, editImage, clearImage } = useImageGeneration();
+  const { isGenerating, generatedImage, error: generationError, needsCredits, generateImage, editImage, clearImage } = useImageGeneration();
   const { saveImage, refetch } = useImageGallery();
   const { walletAddress, isConnecting: isConnectingWallet, connectWallet, disconnectWallet } = useWallet();
   const { isMinting, mintNFT } = useNFT();
@@ -276,6 +276,18 @@ export default function CreativeStudio() {
                             }}
                             className="min-h-[100px] resize-none border-rose-soft/40 focus:border-primary"
                           />
+
+                          {(needsCredits || generationError) && (
+                            <Alert variant={needsCredits ? "destructive" : "default"}>
+                              <AlertTitle>
+                                {needsCredits ? "Hết AI credits" : "Không thể tạo ảnh"}
+                              </AlertTitle>
+                              <AlertDescription>
+                                {generationError ||
+                                  "Không thể xử lý yêu cầu lúc này. Vui lòng thử lại sau."}
+                              </AlertDescription>
+                            </Alert>
+                          )}
                           
                           {/* Prompt Builder Toggle */}
                           <div className="flex items-center justify-between">
@@ -325,7 +337,7 @@ export default function CreativeStudio() {
 
                           <Button 
                             onClick={handleGenerate}
-                            disabled={isGenerating || !prompt.trim()}
+                            disabled={isGenerating || !prompt.trim() || needsCredits}
                             className="w-full bg-gradient-to-r from-primary to-rose-soft hover:opacity-90"
                           >
                             {isGenerating ? (
@@ -393,7 +405,7 @@ export default function CreativeStudio() {
 
                           <Button 
                             onClick={handleEdit}
-                            disabled={isGenerating || !editPrompt.trim() || !uploadedImage}
+                            disabled={isGenerating || !editPrompt.trim() || !uploadedImage || needsCredits}
                             className="w-full bg-gradient-to-r from-primary to-rose-soft hover:opacity-90"
                           >
                             {isGenerating ? (

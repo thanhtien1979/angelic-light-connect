@@ -68,25 +68,31 @@ serve(async (req) => {
 
     if (!response.ok) {
       if (response.status === 429) {
-        console.error("Rate limit exceeded");
+        console.warn("Rate limit exceeded");
         return new Response(
-          JSON.stringify({ error: "Đã vượt quá giới hạn yêu cầu. Vui lòng thử lại sau." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({
+            error: "Đã vượt quá giới hạn yêu cầu. Vui lòng thử lại sau.",
+            error_code: "RATE_LIMITED",
+          }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
       if (response.status === 402) {
-        console.error("Payment required");
+        console.warn("Payment required (AI credits depleted)");
         return new Response(
-          JSON.stringify({ error: "Cần nạp thêm credits. Vui lòng liên hệ admin." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({
+            error: "Cần nạp thêm credits. Vui lòng liên hệ admin.",
+            error_code: "PAYMENT_REQUIRED",
+          }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      
+
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
       return new Response(
-        JSON.stringify({ error: "Lỗi khi tạo hình ảnh" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Lỗi khi tạo hình ảnh", error_code: "AI_GATEWAY_ERROR" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
