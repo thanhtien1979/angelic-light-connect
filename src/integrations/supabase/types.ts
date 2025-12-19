@@ -107,6 +107,45 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          package_id: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          status: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          package_id?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          package_id?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       custom_breathing_patterns: {
         Row: {
           created_at: string
@@ -658,6 +697,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_credits: {
+        Args: {
+          p_amount: number
+          p_description: string
+          p_package_id?: string
+          p_payment_method?: string
+          p_payment_reference?: string
+          p_transaction_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       award_camly_coins: {
         Args: {
           p_coins: number
@@ -677,6 +728,10 @@ export type Database = {
           p_window_minutes?: number
         }
         Returns: boolean
+      }
+      record_credit_usage: {
+        Args: { p_amount: number; p_description?: string; p_user_id: string }
+        Returns: string
       }
     }
     Enums: {
