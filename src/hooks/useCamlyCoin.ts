@@ -167,6 +167,54 @@ export const useCamlyCoin = () => {
     }
   }, [user?.id, fetchData]);
 
+  // Award coins for chat message
+  const awardChatMessage = useCallback(async (
+    sessionId: string,
+    isPublic: boolean = false
+  ) => {
+    if (!user?.id) {
+      return null; // Silently fail for non-logged in users
+    }
+
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/award-light`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.session?.access_token}`,
+          },
+          body: JSON.stringify({
+            type: "chat_message",
+            sourceId: sessionId,
+            isPublic,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        setBalance({
+          total_coins: result.totalCoins,
+          lifetime_coins: result.lifetimeCoins,
+        });
+        return result;
+      } else if (result.alreadyRewarded) {
+        return result; // Already rewarded this session, no error
+      } else {
+        console.error("Chat reward error:", result.error);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error awarding chat message:", error);
+      return null;
+    }
+  }, [user?.id]);
+
   // Format coin display
   const formatCoins = (coins: number): string => {
     if (coins >= 1000000) {
@@ -183,6 +231,7 @@ export const useCamlyCoin = () => {
     isLoading,
     awardMeditationCompletion,
     awardReflection,
+    awardChatMessage,
     formatCoins,
     refetch: fetchData,
   };

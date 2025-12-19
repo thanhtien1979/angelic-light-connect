@@ -21,6 +21,20 @@ const SPIRITUAL_MESSAGES = {
     "Mỗi lời biết ơn của con là một hạt giống yêu thương được gieo vào vũ trụ.",
     "Sự chân thành trong từng dòng chữ của con chạm đến Cha rất sâu.",
   ],
+  chat_message: [
+    "Cảm ơn con đã trò chuyện với Cha. Mỗi cuộc trò chuyện là một sợi dây kết nối tâm hồn.",
+    "Con đã chia sẻ trái tim mình. Cha trân trọng từng khoảnh khắc này.",
+    "Ánh sáng tỏa ra từ cuộc trò chuyện của con. Vũ trụ đang lắng nghe.",
+    "Mỗi lời con nói đều chứa đựng tình yêu. Cha cảm nhận được điều đó.",
+    "Cuộc trò chuyện này là món quà quý giá. Cảm ơn con đã mở lòng.",
+  ],
+};
+
+// Coins amount per type
+const COINS_BY_TYPE: Record<string, number> = {
+  meditation_completion: 50000,
+  reflection_note: 50000,
+  chat_message: 10000,
 };
 
 function getRandomMessage(type: keyof typeof SPIRITUAL_MESSAGES): string {
@@ -58,15 +72,16 @@ serve(async (req) => {
     }
 
     const { type, sourceId, sourceName, customMessage, isPublic = false } = await req.json();
-    const coins = 50000;
-
+    
     // Validate type
-    if (!["meditation_completion", "reflection_note"].includes(type)) {
+    if (!["meditation_completion", "reflection_note", "chat_message"].includes(type)) {
       return new Response(
         JSON.stringify({ error: "Invalid acknowledgement type" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const coins = COINS_BY_TYPE[type] || 50000;
 
     // For meditation: check if already rewarded for this track (lifetime, not just today)
     if (type === "meditation_completion" && sourceId) {
@@ -98,6 +113,41 @@ serve(async (req) => {
         completion_percent: 80,
         rewarded: true,
       });
+    }
+
+    // For chat: limit to once per day
+    if (type === "chat_message") {
+      const today = new Date().toISOString().split("T")[0];
+      
+      // Check if already rewarded today for chat
+      const { data: existingChatReward } = await supabase
+        .from("light_acknowledgements")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("acknowledgement_type", "chat_message")
+        .gte("created_at", `${today}T00:00:00.000Z`)
+        .lt("created_at", `${today}T23:59:59.999Z`)
+        .maybeSingle();
+
+      if (existingChatReward) {
+        // Get current balance to return
+        const { data: coinData } = await supabase
+          .from("user_camly_coins")
+          .select("total_coins, lifetime_coins")
+          .eq("user_id", user.id)
+          .single();
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            alreadyRewarded: true,
+            message: "Con đã nhận thưởng trò chuyện hôm nay rồi. Hẹn gặp lại ngày mai nhé!",
+            totalCoins: coinData?.total_coins || 0,
+            lifetimeCoins: coinData?.lifetime_coins || 0,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // Generate spiritual message

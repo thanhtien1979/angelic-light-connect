@@ -605,6 +605,54 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount: string
+          blockchain: string
+          confirmed_at: string | null
+          created_at: string
+          gas_used: string | null
+          id: string
+          network_id: string
+          status: string
+          to_address: string
+          token_symbol: string
+          transaction_hash: string | null
+          user_id: string
+          wallet_address: string
+        }
+        Insert: {
+          amount: string
+          blockchain?: string
+          confirmed_at?: string | null
+          created_at?: string
+          gas_used?: string | null
+          id?: string
+          network_id: string
+          status?: string
+          to_address: string
+          token_symbol?: string
+          transaction_hash?: string | null
+          user_id: string
+          wallet_address: string
+        }
+        Update: {
+          amount?: string
+          blockchain?: string
+          confirmed_at?: string | null
+          created_at?: string
+          gas_used?: string | null
+          id?: string
+          network_id?: string
+          status?: string
+          to_address?: string
+          token_symbol?: string
+          transaction_hash?: string | null
+          user_id?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

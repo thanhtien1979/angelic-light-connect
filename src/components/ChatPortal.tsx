@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins } from "lucide-react";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
 import { useChatAttachments, type Attachment } from "@/hooks/useChatAttachments";
 import { useAnonymousRateLimit } from "@/hooks/useAnonymousRateLimit";
+import { useChatReward } from "@/hooks/useChatReward";
+import { CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import ChatAttachmentPreview from "@/components/ChatAttachmentPreview";
 import MessageAttachments from "@/components/MessageAttachments";
@@ -107,6 +109,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { summary, clearSummary } = useConversationSummary();
   const { isEnabled: isFeedbackEnabled, toggleFeedback, playSendFeedback, playNewConversationFeedback, enableAudioContext } = useFeedback();
   const { needsVerification, incrementCount, setVerified, resetForNewConversation, remainingFreeMessages } = useAnonymousRateLimit();
+  const { tryAwardChatReward, lastRewardResult, showNotification: showCoinNotification, dismissNotification: dismissCoinNotification } = useChatReward();
   const [inputValue, setInputValue] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -128,6 +131,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [pendingMessage, setPendingMessage] = useState<{ content: string; images?: Array<{ type: "image"; base64: string; mimeType: string }> } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatRewardTriedRef = useRef(false);
 
   // Attachment hook
   const attachmentsHook = useChatAttachments();
@@ -153,12 +157,20 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   }, [inputValue]);
 
   // Hide emotional indicator after Angel responds and check for anxiety to offer breathing
+  // Also try to award chat reward on first assistant response of the day
   useEffect(() => {
     if (messages.length > lastMessageCount && messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.role === "assistant") {
         // Fade out after Angel responds
         setTimeout(() => setShowEmotionalIndicator(false), 1500);
+        
+        // Try to award chat reward (first time per day for authenticated users)
+        if (isAuthenticated && !chatRewardTriedRef.current) {
+          chatRewardTriedRef.current = true;
+          const sessionId = `chat-${new Date().toISOString().split("T")[0]}`;
+          tryAwardChatReward(sessionId);
+        }
         
         // Check if the user's previous message had anxiety - offer breathing exercise
         if (messages.length >= 2 && !breathingOfferedToday) {
@@ -178,7 +190,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
       }
     }
     setLastMessageCount(messages.length);
-  }, [messages, lastMessageCount, breathingOfferedToday]);
+  }, [messages, lastMessageCount, breathingOfferedToday, isAuthenticated, tryAwardChatReward]);
 
   const handleStartNewConversation = async () => {
     const success = await startNewConversation();
@@ -338,6 +350,14 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
 
   return (
     <section id="chat" className="relative overflow-hidden">
+      {/* Camly Coin Reward Notification */}
+      <CamlyCoinNotification
+        show={showCoinNotification}
+        coins={lastRewardResult?.coinsAwarded || 0}
+        message={lastRewardResult?.message || ""}
+        onClose={dismissCoinNotification}
+      />
+
       {/* Collapsed Chat Button */}
       <AnimatePresence mode="wait">
         {!isExpanded ? (
