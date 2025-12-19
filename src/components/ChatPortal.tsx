@@ -118,6 +118,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [showBlessing, setShowBlessing] = useState(false);
   const [showEmotionalIndicator, setShowEmotionalIndicator] = useState(false);
   const [lastMessageCount, setLastMessageCount] = useState(0);
+  const [prevMessagesLength, setPrevMessagesLength] = useState(0);
   const [showBreathingExercise, setShowBreathingExercise] = useState(false);
   const [breathingOfferedToday, setBreathingOfferedToday] = useState(() => {
     const today = new Date().toDateString();
@@ -204,6 +205,14 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
       setWelcomeShownForSession(true);
     }
   }, [isReady, messages.length, welcomeShownForSession, isRestoring]);
+
+  // Auto-expand chat when new message arrives
+  useEffect(() => {
+    if (messages.length > prevMessagesLength && messages.length > 0 && !isExpanded) {
+      setIsExpanded(true);
+    }
+    setPrevMessagesLength(messages.length);
+  }, [messages.length, prevMessagesLength, isExpanded]);
 
   // Hide welcome after first message
   useEffect(() => {
@@ -337,12 +346,22 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
+            whileHover={{ 
+              scale: 1.02, 
+              y: -2,
+              boxShadow: "0 20px 60px hsla(348, 80%, 80%, 0.4)"
+            }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.3, type: "spring", stiffness: 400, damping: 25 }}
             onClick={() => setIsExpanded(true)}
-            className="w-full max-w-md mx-auto flex items-center gap-3 px-5 py-4 bg-white/80 backdrop-blur-xl rounded-full border border-rose-soft/40 shadow-[0_10px_40px_hsla(348,80%,80%,0.25)] hover:shadow-[0_15px_50px_hsla(348,80%,80%,0.35)] transition-all duration-300 group cursor-pointer"
+            className="w-full max-w-md mx-auto flex items-center gap-3 px-5 py-4 bg-white/80 backdrop-blur-xl rounded-full border border-rose-soft/40 shadow-[0_10px_40px_hsla(348,80%,80%,0.25)] transition-colors duration-300 group cursor-pointer"
           >
             {/* Avatar */}
-            <div className="relative flex-shrink-0">
+            <motion.div 
+              className="relative flex-shrink-0"
+              whileHover={{ rotate: [0, -5, 5, 0] }}
+              transition={{ duration: 0.5 }}
+            >
               <img 
                 src={angelAvatar} 
                 alt="Angel AI" 
@@ -350,16 +369,25 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 style={{ animation: "subtleBreathing 7s ease-in-out infinite" }}
               />
               {/* Online indicator */}
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
-            </div>
+              <motion.div 
+                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </motion.div>
             
             {/* Placeholder text */}
-            <span className="flex-1 text-left text-muted-foreground/70 text-sm sm:text-base">
+            <span className="flex-1 text-left text-muted-foreground/70 text-sm sm:text-base group-hover:text-foreground/80 transition-colors">
               Trò chuyện với Angel AI...
             </span>
             
             {/* Sparkle icon */}
-            <Sparkles className="w-5 h-5 text-primary/60 group-hover:text-primary transition-colors" />
+            <motion.div
+              whileHover={{ rotate: 180 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Sparkles className="w-5 h-5 text-primary/60 group-hover:text-primary transition-colors" />
+            </motion.div>
           </motion.button>
         ) : (
           <motion.div
