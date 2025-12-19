@@ -18,11 +18,26 @@ interface CoinBalance {
   lifetime_coins: number;
 }
 
+interface CreditTransaction {
+  id: string;
+  transaction_type: string;
+  amount: number;
+  description: string | null;
+  payment_method: string | null;
+  payment_reference: string | null;
+  status: string;
+  created_at: string;
+}
+
+const LOW_CREDIT_THRESHOLD = 5;
+
 export const useCamlyCoin = () => {
   const { user } = useAuth();
   const [balance, setBalance] = useState<CoinBalance>({ total_coins: 0, lifetime_coins: 0 });
   const [acknowledgements, setAcknowledgements] = useState<LightAcknowledgement[]>([]);
+  const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
 
   // Fetch balance and acknowledgements
   const fetchData = useCallback(async () => {
@@ -60,6 +75,52 @@ export const useCamlyCoin = () => {
       setIsLoading(false);
     }
   }, [user?.id]);
+
+  // Fetch transaction history
+  const fetchTransactions = useCallback(async () => {
+    if (!user?.id) return;
+
+    setIsLoadingTransactions(true);
+    try {
+      const { data, error } = await supabase
+        .from("credit_transactions")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+      setTransactions(data || []);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    } finally {
+      setIsLoadingTransactions(false);
+    }
+  }, [user?.id]);
+
+  // Check if credits are low
+  const checkLowCredits = useCallback(() => {
+    if (balance.total_coins < LOW_CREDIT_THRESHOLD && balance.total_coins >= 0) {
+      return true;
+    }
+    return false;
+  }, [balance.total_coins]);
+
+  // Show low credit warning toast
+  const showLowCreditWarning = useCallback(() => {
+    if (checkLowCredits()) {
+      toast.warning(
+        `Credits sắp hết! Bạn chỉ còn ${balance.total_coins} credits.`,
+        {
+          action: {
+            label: "Nạp thêm",
+            onClick: () => window.location.href = "/credits",
+          },
+          duration: 5000,
+        }
+      );
+    }
+  }, [balance.total_coins, checkLowCredits]);
 
   useEffect(() => {
     fetchData();
@@ -215,6 +276,46 @@ export const useCamlyCoin = () => {
     }
   }, [user?.id]);
 
+  // Create payment for credit purchase
+  const createPayment = useCallback(async (
+    packageId: string,
+    paymentMethod: string = "bank_transfer"
+  ) => {
+    if (!user?.id) {
+      toast.error("Vui lòng đăng nhập để nạp credits");
+      return null;
+    }
+
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-payment`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.session?.access_token}`,
+          },
+          body: JSON.stringify({ packageId, paymentMethod }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        await fetchTransactions();
+        return result;
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      toast.error("Có lỗi xảy ra khi tạo giao dịch");
+      return null;
+    }
+  }, [user?.id, fetchTransactions]);
+
   // Format coin display
   const formatCoins = (coins: number): string => {
     if (coins >= 1000000) {
@@ -228,11 +329,18 @@ export const useCamlyCoin = () => {
   return {
     balance,
     acknowledgements,
+    transactions,
     isLoading,
+    isLoadingTransactions,
     awardMeditationCompletion,
     awardReflection,
     awardChatMessage,
+    createPayment,
     formatCoins,
     refetch: fetchData,
+    fetchTransactions,
+    checkLowCredits,
+    showLowCreditWarning,
+    LOW_CREDIT_THRESHOLD,
   };
 };
