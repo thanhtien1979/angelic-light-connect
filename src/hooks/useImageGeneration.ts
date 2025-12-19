@@ -15,12 +15,20 @@ type ParsedFnError = {
 
 const parseFunctionError = (fnError: unknown): ParsedFnError => {
   const anyErr = fnError as any;
-  const status = anyErr?.context?.status as number | undefined;
-  const body = anyErr?.context?.body as unknown;
-
+  
+  // Try multiple locations where Supabase SDK might put error info
+  const status = anyErr?.status || anyErr?.context?.status as number | undefined;
+  
+  // Try to get body from various locations
+  let body = anyErr?.context?.body || anyErr?.body;
+  
+  // For FunctionsHttpError, the message might contain the JSON body
+  const errorMessage = anyErr?.message || "";
+  
   let message: string | undefined;
   let code: string | undefined;
 
+  // Try parsing from body first
   if (typeof body === "string") {
     try {
       const parsed = JSON.parse(body);
@@ -34,10 +42,31 @@ const parseFunctionError = (fnError: unknown): ParsedFnError => {
     code = (body as any).error_code ?? (body as any).errorCode;
   }
 
-  // Fallback to SDK error message
-  message = message || anyErr?.message;
+  // Try extracting JSON from error message (Edge function returned 402: Payment Required, {...})
+  if (!message && errorMessage) {
+    const jsonMatch = errorMessage.match(/\{[^}]+\}/);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0]);
+        message = parsed?.error || message;
+        code = parsed?.error_code ?? parsed?.errorCode ?? code;
+      } catch {
+        // ignore
+      }
+    }
+  }
 
-  return { status, message, code };
+  // Check for status in error message
+  let extractedStatus = status;
+  if (!extractedStatus && errorMessage) {
+    if (errorMessage.includes("402")) extractedStatus = 402;
+    else if (errorMessage.includes("429")) extractedStatus = 429;
+  }
+
+  // Fallback to SDK error message
+  message = message || errorMessage || "Lỗi không xác định";
+
+  return { status: extractedStatus, message, code };
 };
 
 export function useImageGeneration() {
