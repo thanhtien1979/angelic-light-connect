@@ -210,19 +210,21 @@ const FunEcosystemPlatforms = () => {
           transition={{ duration: 0.8 }}
         >
           <motion.div
-            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-amber-500/20 border border-amber-400/40 mb-8"
-            animate={{ boxShadow: ["0 0 20px rgba(217,164,65,0.3)", "0 0 40px rgba(217,164,65,0.5)", "0 0 20px rgba(217,164,65,0.3)"] }}
+            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-red-500/10 via-yellow-500/10 to-violet-500/10 border border-white/30 mb-8"
+            animate={{ boxShadow: ["0 0 20px rgba(255,100,100,0.2)", "0 0 40px rgba(100,255,100,0.3)", "0 0 20px rgba(100,100,255,0.2)"] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
             <Sparkles className="w-8 h-8 text-amber-500" />
             <span 
               className="text-4xl md:text-5xl lg:text-6xl font-bold"
               style={{
-                background: "linear-gradient(135deg, #D4AF37 0%, #F4D03F 25%, #C5A028 50%, #E8C252 75%, #B8860B 100%)",
+                background: "linear-gradient(90deg, #FF0000 0%, #FF7F00 14%, #FFFF00 28%, #00FF00 42%, #0000FF 57%, #4B0082 71%, #9400D3 85%, #FF0000 100%)",
+                backgroundSize: "200% 100%",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                filter: "drop-shadow(0 2px 4px rgba(180,130,40,0.4))",
+                animation: "rainbowShift 4s linear infinite",
+                filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.2))",
               }}
             >
               FUN Ecosystem
@@ -232,11 +234,13 @@ const FunEcosystemPlatforms = () => {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
             <span 
               style={{
-                background: "linear-gradient(135deg, #D4AF37 0%, #F4D03F 20%, #DAA520 40%, #E8C252 60%, #C5A028 80%, #B8860B 100%)",
+                background: "linear-gradient(90deg, #FF0000 0%, #FF7F00 14%, #FFFF00 28%, #00FF00 42%, #0000FF 57%, #4B0082 71%, #9400D3 85%, #FF0000 100%)",
+                backgroundSize: "200% 100%",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                filter: "drop-shadow(0 2px 4px rgba(180,130,40,0.4))",
+                animation: "rainbowShift 5s linear infinite",
+                filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.2))",
               }}
             >
               Mô Hình Kinh Tế Ánh Sáng 5D
