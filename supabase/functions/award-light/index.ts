@@ -32,9 +32,9 @@ const SPIRITUAL_MESSAGES = {
 
 // Coins amount per type
 const COINS_BY_TYPE: Record<string, number> = {
-  meditation_completion: 50000,
-  reflection_note: 50000,
-  chat_message: 10000,
+  meditation_completion: 1000,
+  reflection_note: 1000,
+  chat_message: 1000,
 };
 
 function getRandomMessage(type: keyof typeof SPIRITUAL_MESSAGES): string {
