@@ -4,29 +4,143 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import "@/types/ethereum.d.ts";
 
+// Supported networks
+export const NETWORKS = {
+  "0x1": { name: "Ethereum", symbol: "ETH", shortName: "Mainnet" },
+  "0xaa36a7": { name: "Sepolia", symbol: "ETH", shortName: "Sepolia" },
+  "0x89": { name: "Polygon", symbol: "MATIC", shortName: "Polygon" },
+  "0x13882": { name: "Polygon Amoy", symbol: "MATIC", shortName: "Amoy" },
+  "0xa4b1": { name: "Arbitrum One", symbol: "ETH", shortName: "Arbitrum" },
+  "0xa": { name: "Optimism", symbol: "ETH", shortName: "Optimism" },
+} as const;
+
+export type NetworkId = keyof typeof NETWORKS;
+
 export const useWallet = () => {
   const { user } = useAuth();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [balance, setBalance] = useState<string | null>(null);
+  const [networkId, setNetworkId] = useState<string | null>(null);
+  const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false);
   const hasInitialized = useRef(false);
+
+  // Get current network info
+  const currentNetwork = networkId && networkId in NETWORKS 
+    ? NETWORKS[networkId as NetworkId] 
+    : null;
+
+  // Fetch ETH balance
+  const fetchBalance = useCallback(async (address: string) => {
+    if (typeof window.ethereum === "undefined" || !address) return;
+    
+    try {
+      const result = await window.ethereum.request({
+        method: "eth_getBalance",
+        params: [address, "latest"],
+      });
+      
+      const balanceHex = Array.isArray(result) ? result[0] : result;
+      
+      // Convert from wei to ETH (18 decimals)
+      const balanceWei = parseInt(balanceHex as string, 16);
+      const balanceEth = balanceWei / 1e18;
+      
+      // Format to max 4 decimal places
+      const formatted = balanceEth < 0.0001 && balanceEth > 0
+        ? "< 0.0001"
+        : balanceEth.toFixed(4).replace(/\.?0+$/, "");
+      
+      setBalance(formatted);
+      console.log("[Wallet] Balance fetched:", formatted);
+    } catch (error) {
+      console.error("[Wallet] Error fetching balance:", error);
+      setBalance(null);
+    }
+  }, []);
+
+  // Fetch current network
+  const fetchNetwork = useCallback(async () => {
+    if (typeof window.ethereum === "undefined") return;
+    
+    try {
+      const result = await window.ethereum.request({
+        method: "eth_chainId",
+      });
+      
+      const chainId = Array.isArray(result) ? result[0] : result;
+      setNetworkId(chainId as string);
+      console.log("[Wallet] Network fetched:", chainId);
+    } catch (error) {
+      console.error("[Wallet] Error fetching network:", error);
+    }
+  }, []);
+
+  // Switch network
+  const switchNetwork = useCallback(async (targetChainId: NetworkId) => {
+    if (typeof window.ethereum === "undefined") return;
+    
+    setIsSwitchingNetwork(true);
+    
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: targetChainId }],
+      });
+      
+      setNetworkId(targetChainId);
+      toast.success(`Đã chuyển sang ${NETWORKS[targetChainId].name}`);
+      
+      // Refetch balance after network switch
+      if (walletAddress) {
+        await fetchBalance(walletAddress);
+      }
+    } catch (error: unknown) {
+      const err = error as { code?: number };
+      
+      if (err.code === 4902) {
+        toast.error("Mạng này chưa được thêm vào MetaMask", {
+          description: "Vui lòng thêm mạng thủ công trong MetaMask",
+        });
+      } else if (err.code === 4001) {
+        toast.error("Bạn đã từ chối chuyển mạng");
+      } else {
+        toast.error("Không thể chuyển mạng");
+      }
+    } finally {
+      setIsSwitchingNetwork(false);
+    }
+  }, [walletAddress, fetchBalance]);
 
   // Handle account changes from MetaMask
   const handleAccountsChanged = useCallback((accounts: unknown[]) => {
     console.log("[Wallet] Accounts changed:", accounts);
     
     if (accounts.length === 0) {
-      // User disconnected from MetaMask
       setWalletAddress(null);
+      setBalance(null);
       toast.info("Ví đã ngắt kết nối từ MetaMask");
     } else {
       const newAddress = accounts[0] as string;
       if (newAddress !== walletAddress) {
         setWalletAddress(newAddress);
+        fetchBalance(newAddress);
         toast.success("Đã chuyển sang tài khoản ví mới");
       }
     }
-  }, [walletAddress]);
+  }, [walletAddress, fetchBalance]);
+
+  // Handle chain/network changes
+  const handleChainChanged = useCallback((chainId: unknown) => {
+    console.log("[Wallet] Chain changed:", chainId);
+    setNetworkId(chainId as string);
+    
+    // Refetch balance on new chain
+    if (walletAddress) {
+      fetchBalance(walletAddress);
+    }
+  }, [walletAddress, fetchBalance]);
 
   // Setup MetaMask event listeners
   useEffect(() => {
@@ -34,19 +148,21 @@ export const useWallet = () => {
 
     const ethereum = window.ethereum;
     
-    // Listen for account changes
     ethereum.on?.("accountsChanged", handleAccountsChanged);
+    ethereum.on?.("chainChanged", handleChainChanged);
 
     return () => {
       ethereum.removeListener?.("accountsChanged", handleAccountsChanged);
+      ethereum.removeListener?.("chainChanged", handleChainChanged);
     };
-  }, [handleAccountsChanged]);
+  }, [handleAccountsChanged, handleChainChanged]);
 
   // Load saved wallet from database
   useEffect(() => {
     const loadSavedWallet = async () => {
       if (!user) {
         setWalletAddress(null);
+        setBalance(null);
         setIsLoading(false);
         return;
       }
@@ -64,6 +180,10 @@ export const useWallet = () => {
           console.log("[Wallet] Found saved wallet:", data.wallet_address);
           setWalletAddress(data.wallet_address);
           
+          // Fetch network and balance
+          await fetchNetwork();
+          await fetchBalance(data.wallet_address);
+          
           // Try to verify if still connected to MetaMask
           if (typeof window.ethereum !== "undefined" && !hasInitialized.current) {
             hasInitialized.current = true;
@@ -75,6 +195,7 @@ export const useWallet = () => {
                 if (currentAddress !== savedAddress) {
                   console.log("[Wallet] MetaMask account differs from saved, updating...");
                   setWalletAddress(accounts[0]);
+                  await fetchBalance(accounts[0]);
                 }
               }
             } catch (e) {
@@ -90,7 +211,7 @@ export const useWallet = () => {
     };
 
     loadSavedWallet();
-  }, [user]);
+  }, [user, fetchBalance, fetchNetwork]);
 
   // Save wallet to database
   const saveWallet = useCallback(async (address: string) => {
@@ -153,14 +274,12 @@ export const useWallet = () => {
     try {
       console.log("[Wallet] Requesting accounts from MetaMask...");
       
-      // First check if already connected
       const existingAccounts = await window.ethereum.request({
         method: "eth_accounts",
       });
       
       let accounts = existingAccounts;
       
-      // If no existing accounts, request connection
       if (!existingAccounts || existingAccounts.length === 0) {
         console.log("[Wallet] No existing accounts, requesting connection...");
         accounts = await window.ethereum.request({
@@ -174,6 +293,10 @@ export const useWallet = () => {
         const address = accounts[0];
         console.log("[Wallet] Setting wallet address:", address);
         setWalletAddress(address);
+        
+        // Fetch network and balance
+        await fetchNetwork();
+        await fetchBalance(address);
         
         if (user) {
           await saveWallet(address);
@@ -208,12 +331,13 @@ export const useWallet = () => {
     } finally {
       setIsConnecting(false);
     }
-  }, [user, saveWallet]);
+  }, [user, saveWallet, fetchBalance, fetchNetwork]);
 
   // Disconnect wallet
   const disconnectWallet = useCallback(async () => {
     console.log("[Wallet] Disconnecting wallet...");
     setWalletAddress(null);
+    setBalance(null);
     
     if (user) {
       await removeWallet();
@@ -226,7 +350,13 @@ export const useWallet = () => {
     walletAddress,
     isConnecting,
     isLoading,
+    balance,
+    networkId,
+    currentNetwork,
+    isSwitchingNetwork,
     connectWallet,
     disconnectWallet,
+    switchNetwork,
+    fetchBalance,
   };
 };
