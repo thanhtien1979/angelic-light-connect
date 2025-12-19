@@ -7,6 +7,7 @@ export interface Profile {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
+  is_online?: boolean;
 }
 
 export interface Friendship {
@@ -49,23 +50,49 @@ export const useFriendships = () => {
 
       const friendshipsWithProfiles: Friendship[] = [];
       
-      // Fetch profiles for each friendship
+      // Get all other user IDs
+      const otherUserIds = (data || []).map(f => 
+        f.requester_id === user.id ? f.addressee_id : f.requester_id
+      );
+
+      // Batch fetch profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .in('id', otherUserIds);
+
+      // Batch fetch presence
+      const { data: presenceData } = await supabase
+        .from('user_presence')
+        .select('user_id, is_online')
+        .in('user_id', otherUserIds);
+
+      const profileMap = new Map(
+        (profiles || []).map(p => [p.id, p])
+      );
+      const presenceMap = new Map(
+        (presenceData || []).map(p => [p.user_id, p.is_online])
+      );
+
+      // Build friendships with profiles and presence
       for (const friendship of data || []) {
         const otherUserId = friendship.requester_id === user.id 
           ? friendship.addressee_id 
           : friendship.requester_id;
         
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('id, display_name, avatar_url')
-          .eq('id', otherUserId)
-          .maybeSingle();
+        const profile = profileMap.get(otherUserId);
+        const isOnline = presenceMap.get(otherUserId) || false;
+
+        const profileWithPresence = profile ? {
+          ...profile,
+          is_online: isOnline,
+        } : undefined;
 
         friendshipsWithProfiles.push({
           ...friendship,
           status: friendship.status as 'pending' | 'accepted' | 'rejected',
-          requester: friendship.requester_id === user.id ? undefined : profileData || undefined,
-          addressee: friendship.addressee_id === user.id ? undefined : profileData || undefined,
+          requester: friendship.requester_id === user.id ? undefined : profileWithPresence,
+          addressee: friendship.addressee_id === user.id ? undefined : profileWithPresence,
         });
       }
 
