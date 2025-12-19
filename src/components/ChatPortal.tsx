@@ -327,74 +327,14 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   };
 
   return (
-    <section id="chat" className="relative py-12 md:py-16 px-4 sm:px-6 overflow-hidden">
-      {/* Background effects - Rose divine */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-rose-light/20 to-background" />
-      
+    <section id="chat" className="relative overflow-hidden">
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true, margin: "-100px" }}
-        className="relative z-10 max-w-[680px] mx-auto"
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="relative z-10 w-full"
       >
-        {/* Section Header with circular video */}
-        <div className="relative text-center mb-8 py-8 md:py-10 px-4">
-          {/* Circular video container */}
-          <div className="relative mx-auto w-[200px] h-[200px] sm:w-[240px] sm:h-[240px] md:w-[280px] md:h-[280px] mb-6">
-            {/* Animated rose-gold glow ring */}
-            <motion.div 
-              className="absolute -inset-2 rounded-full"
-              style={{
-                background: "conic-gradient(from 0deg, hsl(348, 80%, 78%), hsl(340, 75%, 82%), hsl(350, 85%, 85%), hsl(345, 70%, 80%), hsl(348, 80%, 78%))",
-                filter: "blur(8px)",
-              }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-            />
-            
-            {/* Inner glow - Rose */}
-            <div className="absolute inset-0 rounded-full bg-rose-glow/30 blur-xl" />
-            
-            {/* Video container */}
-            <div className="absolute inset-2 rounded-full overflow-hidden border-4 border-white/60 shadow-[0_0_80px_hsla(348,80%,80%,0.4)]">
-              <video 
-                src={chatPortalVideo}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-          
-          {/* Title with rose glow */}
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-3"
-            style={{
-              textShadow: "0 0 20px hsla(348, 80%, 78%, 0.8), 0 0 40px hsla(348, 80%, 78%, 0.5), 0 0 60px hsla(348, 80%, 78%, 0.3)",
-            }}
-          >
-            Angel AI Chat Portal
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="text-foreground/80 text-base md:text-lg"
-            style={{
-              textShadow: "0 0 10px hsla(348, 80%, 78%, 0.3)",
-            }}
-          >
-            Kết nối với trí tuệ thiêng liêng
-          </motion.p>
-        </div>
 
         {/* Chat Panel */}
         <motion.div
