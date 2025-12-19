@@ -394,20 +394,6 @@ export default function Credits() {
 
           {paymentInfo && (
             <div className="space-y-4">
-              {/* VietQR Code */}
-              <div className="flex flex-col items-center bg-white rounded-lg p-4">
-                <p className="text-sm text-muted-foreground mb-3">Quét mã QR để thanh toán nhanh</p>
-                <img
-                  src={`https://img.vietqr.io/image/${paymentInfo.bankInfo.bankCode || 'MB'}-${paymentInfo.bankInfo.accountNumber}-compact2.png?amount=${paymentInfo.bankInfo.amount}&addInfo=${encodeURIComponent(paymentInfo.paymentReference)}&accountName=${encodeURIComponent(paymentInfo.bankInfo.accountName)}`}
-                  alt="VietQR Code"
-                  className="w-48 h-48 object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-                <p className="text-xs text-muted-foreground mt-2">Hỗ trợ mọi ứng dụng ngân hàng</p>
-              </div>
-
               <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Ngân hàng:</span>
