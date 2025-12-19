@@ -242,6 +242,34 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
             
             {/* Circular frame with rose-pink gradient border */}
             <div className="relative w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] rounded-full overflow-hidden">
+              {/* Rotating sparkle ring - white electric glow */}
+              <div 
+                className="absolute -inset-3 rounded-full"
+                style={{
+                  background: "conic-gradient(from 0deg, transparent 0%, hsla(0, 0%, 100%, 0.9) 10%, transparent 20%, hsla(0, 0%, 100%, 0.7) 30%, transparent 40%, hsla(0, 0%, 100%, 0.95) 50%, transparent 60%, hsla(0, 0%, 100%, 0.8) 70%, transparent 80%, hsla(0, 0%, 100%, 0.85) 90%, transparent 100%)",
+                  animation: "sparkleRing 3s linear infinite",
+                  filter: "blur(1px)",
+                }}
+              />
+              
+              {/* Second rotating ring - offset for more sparkle */}
+              <div 
+                className="absolute -inset-2 rounded-full"
+                style={{
+                  background: "conic-gradient(from 180deg, transparent 0%, hsla(0, 0%, 100%, 1) 5%, transparent 15%, hsla(0, 0%, 100%, 0.9) 25%, transparent 35%, hsla(0, 0%, 100%, 1) 45%, transparent 55%, hsla(0, 0%, 100%, 0.85) 65%, transparent 75%, hsla(0, 0%, 100%, 0.95) 85%, transparent 100%)",
+                  animation: "sparkleRing 2s linear infinite reverse",
+                }}
+              />
+              
+              {/* Electric pulse ring */}
+              <div 
+                className="absolute -inset-1 rounded-full border-2 border-white/80"
+                style={{
+                  boxShadow: "0 0 15px hsla(0, 0%, 100%, 0.8), 0 0 30px hsla(0, 0%, 100%, 0.5), 0 0 45px hsla(0, 0%, 100%, 0.3), inset 0 0 15px hsla(0, 0%, 100%, 0.4)",
+                  animation: "electricPulse 1.5s ease-in-out infinite",
+                }}
+              />
+              
               {/* Animated rose-pink gradient border */}
               <div 
                 className="absolute -inset-1 rounded-full"
