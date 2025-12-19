@@ -456,6 +456,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          image_url: string | null
           is_read: boolean
           receiver_id: string
           sender_id: string
@@ -464,6 +465,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           receiver_id: string
           sender_id: string
@@ -472,6 +474,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           receiver_id?: string
           sender_id?: string
@@ -634,6 +637,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      typing_status: {
+        Row: {
+          chat_partner_id: string
+          id: string
+          is_typing: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chat_partner_id: string
+          id?: string
+          is_typing?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chat_partner_id?: string
+          id?: string
+          is_typing?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_camly_coins: {
         Row: {

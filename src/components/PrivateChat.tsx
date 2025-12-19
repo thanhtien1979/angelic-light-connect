@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Send, ArrowLeft, X, Circle,
-  Sparkles, Heart
+  Sparkles, Heart, Image as ImageIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +11,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { usePrivateMessages, Conversation } from '@/hooks/usePrivateMessages';
 import { useAuth } from '@/hooks/useAuth';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import EmojiPicker from './EmojiPicker';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface PrivateChatProps {
   isOpen: boolean;
@@ -23,7 +27,9 @@ const PrivateChat = ({ isOpen, onClose }: PrivateChatProps) => {
   const { user } = useAuth();
   const [selectedFriend, setSelectedFriend] = useState<Conversation | null>(null);
   const [messageInput, setMessageInput] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { 
     messages, 
@@ -31,8 +37,15 @@ const PrivateChat = ({ isOpen, onClose }: PrivateChatProps) => {
     loading, 
     sending,
     sendMessage,
+    sendImageMessage,
     getTotalUnread 
   } = usePrivateMessages(selectedFriend?.friendId);
+
+  const { 
+    isPartnerTyping, 
+    handleTypingStart, 
+    stopTyping 
+  } = useTypingIndicator(selectedFriend?.friendId);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -47,9 +60,67 @@ const PrivateChat = ({ isOpen, onClose }: PrivateChatProps) => {
   const handleSend = async () => {
     if (!messageInput.trim() || sending) return;
     
+    stopTyping();
     const success = await sendMessage(messageInput);
     if (success) {
       setMessageInput('');
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageInput(e.target.value);
+    handleTypingStart();
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setMessageInput(prev => prev + emoji);
+    handleTypingStart();
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !selectedFriend) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      toast.error('Chỉ hỗ trợ file hình ảnh');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Hình ảnh phải nhỏ hơn 5MB');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('generated-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('generated-images')
+        .getPublicUrl(fileName);
+
+      // Send image message
+      await sendImageMessage(urlData.publicUrl);
+      toast.success('Đã gửi hình ảnh! 📷');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Không thể tải lên hình ảnh');
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -110,7 +181,14 @@ const PrivateChat = ({ isOpen, onClose }: PrivateChatProps) => {
                   <div>
                     <p className="font-semibold text-sm">{selectedFriend.friendName}</p>
                     <p className="text-xs text-white/80">
-                      {selectedFriend.isOnline ? 'Đang online' : 'Offline'}
+                      {isPartnerTyping ? (
+                        <span className="flex items-center gap-1">
+                          <span className="animate-bounce">●</span>
+                          <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>●</span>
+                          <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>●</span>
+                          <span className="ml-1">đang gõ...</span>
+                        </span>
+                      ) : selectedFriend.isOnline ? 'Đang online' : 'Offline'}
                     </p>
                   </div>
                 </div>
@@ -169,7 +247,17 @@ const PrivateChat = ({ isOpen, onClose }: PrivateChatProps) => {
                                 : 'bg-gray-100 text-gray-800 rounded-bl-sm'
                             }`}
                           >
-                            <p className="text-sm">{msg.content}</p>
+                            {msg.image_url && (
+                              <img 
+                                src={msg.image_url} 
+                                alt="Shared image" 
+                                className="rounded-lg mb-2 max-w-full cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => window.open(msg.image_url!, '_blank')}
+                              />
+                            )}
+                            {msg.content && msg.content !== '📷 Hình ảnh' && (
+                              <p className="text-sm">{msg.content}</p>
+                            )}
                             <p className={`text-[10px] mt-1 ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
                               {format(new Date(msg.created_at), 'HH:mm')}
                             </p>
@@ -182,20 +270,64 @@ const PrivateChat = ({ isOpen, onClose }: PrivateChatProps) => {
                 )}
               </ScrollArea>
 
+              {/* Typing Indicator */}
+              {isPartnerTyping && (
+                <div className="px-4 pb-2">
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2 text-rose-400 text-xs"
+                  >
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 rounded-full bg-rose-400 animate-bounce" />
+                      <span className="w-2 h-2 rounded-full bg-rose-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
+                      <span className="w-2 h-2 rounded-full bg-rose-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                    </div>
+                    <span>{selectedFriend?.friendName} đang gõ...</span>
+                  </motion.div>
+                </div>
+              )}
+
               {/* Message Input */}
               <div className="p-3 border-t border-rose-100">
-                <div className="flex gap-2">
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                
+                <div className="flex items-center gap-1">
+                  <EmojiPicker onSelect={handleEmojiSelect} />
+                  
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-100"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImage}
+                  >
+                    {uploadingImage ? (
+                      <Sparkles className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <ImageIcon className="w-5 h-5" />
+                    )}
+                  </Button>
+                  
                   <Input
                     value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
+                    onChange={handleInputChange}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Nhập tin nhắn..."
                     className="flex-1 border-rose-200 focus:border-pink-400"
-                    disabled={sending}
+                    disabled={sending || uploadingImage}
                   />
+                  
                   <Button
                     onClick={handleSend}
-                    disabled={!messageInput.trim() || sending}
+                    disabled={!messageInput.trim() || sending || uploadingImage}
                     className="bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600"
                   >
                     {sending ? (
