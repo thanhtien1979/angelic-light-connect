@@ -13,6 +13,7 @@ import AuthModal from "@/components/AuthModal";
 import GlobalAngelicAura from "@/components/GlobalAngelicAura";
 import { GentleMeditationReminder } from "@/components/GentleMeditationReminder";
 import QuickBreathingWidget from "@/components/QuickBreathingWidget";
+import WeeklyReflectionPrompt from "@/components/WeeklyReflectionPrompt";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -48,6 +49,9 @@ const Index = () => {
 
       {/* Quick Breathing Widget */}
       <QuickBreathingWidget />
+
+      {/* Weekly Reflection Prompt */}
+      <WeeklyReflectionPrompt />
     </div>
   );
 };
