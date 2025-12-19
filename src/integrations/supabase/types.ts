@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      breathing_session_history: {
+        Row: {
+          ambient_sound: string | null
+          completed_at: string
+          created_at: string
+          duration_seconds: number
+          id: string
+          pattern_name: string
+          user_id: string
+        }
+        Insert: {
+          ambient_sound?: string | null
+          completed_at?: string
+          created_at?: string
+          duration_seconds: number
+          id?: string
+          pattern_name: string
+          user_id: string
+        }
+        Update: {
+          ambient_sound?: string | null
+          completed_at?: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          pattern_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
