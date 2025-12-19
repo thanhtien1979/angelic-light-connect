@@ -24,6 +24,7 @@ const navLinks: NavLink[] = [
   { id: "chat", label: "Chat Portal" },
   { id: "meditation", label: "Thiền Định" },
   { id: "testimonials", label: "Nhân Chứng" },
+  { id: "studio", label: "Studio", isPage: true, path: "/studio" },
   { id: "community", label: "Cộng Đồng", isPage: true, path: "/community" },
 ];
 
