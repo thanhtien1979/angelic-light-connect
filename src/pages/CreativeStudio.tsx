@@ -1,5 +1,14 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: unknown[] }) => Promise<string[]>;
+      on?: (event: string, callback: (...args: unknown[]) => void) => void;
+    };
+  }
+}
 import { 
   Sparkles, 
   Wand2, 
@@ -13,8 +22,10 @@ import {
   Palette,
   Save,
   Images,
-  Settings2
+  Settings2,
+  Link2
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -45,11 +56,45 @@ export default function CreativeStudio() {
   const [mainView, setMainView] = useState<"create" | "gallery">("create");
   const [isSaving, setIsSaving] = useState(false);
   const [showPromptBuilder, setShowPromptBuilder] = useState(true);
+  const [isConnectingWallet, setIsConnectingWallet] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { user } = useAuth();
   const { isGenerating, generatedImage, generateImage, editImage, clearImage } = useImageGeneration();
   const { saveImage, refetch } = useImageGallery();
+
+  const connectBlockchain = async () => {
+    if (typeof window.ethereum === "undefined") {
+      toast.error("Vui lòng cài đặt MetaMask để kết nối blockchain");
+      window.open("https://metamask.io/download/", "_blank");
+      return;
+    }
+
+    setIsConnectingWallet(true);
+    try {
+      const accounts = await window.ethereum.request({ 
+        method: "eth_requestAccounts" 
+      });
+      if (accounts && accounts.length > 0) {
+        setWalletAddress(accounts[0]);
+        toast.success("Kết nối blockchain thành công!");
+      }
+    } catch (error: any) {
+      if (error.code === 4001) {
+        toast.error("Bạn đã từ chối kết nối ví");
+      } else {
+        toast.error("Không thể kết nối blockchain");
+      }
+    } finally {
+      setIsConnectingWallet(false);
+    }
+  };
+
+  const disconnectWallet = () => {
+    setWalletAddress(null);
+    toast.success("Đã ngắt kết nối ví");
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -133,7 +178,7 @@ export default function CreativeStudio() {
           </p>
 
           {/* Main View Toggle */}
-          <div className="flex justify-center gap-2">
+          <div className="flex justify-center gap-2 flex-wrap">
             <Button
               variant={mainView === "create" ? "default" : "outline"}
               onClick={() => setMainView("create")}
@@ -150,6 +195,32 @@ export default function CreativeStudio() {
               <Images className="w-4 h-4" />
               Gallery
             </Button>
+            
+            {/* Blockchain Connect Button */}
+            {walletAddress ? (
+              <Button
+                variant="outline"
+                onClick={disconnectWallet}
+                className="flex items-center gap-2 border-emerald-500/50 text-emerald-600 hover:bg-emerald-50"
+              >
+                <Link2 className="w-4 h-4" />
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={connectBlockchain}
+                disabled={isConnectingWallet}
+                className="flex items-center gap-2 border-primary/50 hover:bg-primary/5"
+              >
+                {isConnectingWallet ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Link2 className="w-4 h-4" />
+                )}
+                Liên kết Blockchain
+              </Button>
+            )}
           </div>
         </motion.div>
 
