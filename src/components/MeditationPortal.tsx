@@ -7,6 +7,9 @@ import { useMeditationReward } from "@/hooks/useMeditationReward";
 import { CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import angelAvatar from "@/assets/angel-avatar.jpg";
+import flyingAngel1 from "@/assets/flying-angel.png";
+import flyingAngel2 from "@/assets/flying-angel-2.png";
+import flyingAngel3 from "@/assets/flying-angel-3.png";
 
 const meditationCards = [
   {
@@ -517,6 +520,95 @@ const MeditationPortal = () => {
           }}
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
         />
+      </div>
+
+      {/* Flying Angels at bottom */}
+      <div className="absolute bottom-[5%] left-0 right-0 h-[40%] overflow-hidden pointer-events-none">
+        {/* Angel 1 - Left */}
+        <motion.div
+          className="absolute left-[10%] bottom-[15%] w-28 h-28 md:w-40 md:h-40"
+          animate={{
+            y: [0, -15, 0],
+            x: [0, 5, 0],
+            rotate: [-2, 2, -2],
+          }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <img 
+            src={flyingAngel1} 
+            alt="Flying angel" 
+            className="w-full h-full object-contain drop-shadow-[0_0_30px_hsla(45,80%,70%,0.5)]"
+          />
+        </motion.div>
+
+        {/* Angel 2 - Center */}
+        <motion.div
+          className="absolute left-1/2 -translate-x-1/2 bottom-[10%] w-32 h-32 md:w-48 md:h-48"
+          animate={{
+            y: [0, -20, 0],
+            scale: [1, 1.02, 1],
+          }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        >
+          <img 
+            src={flyingAngel2} 
+            alt="Flying angel" 
+            className="w-full h-full object-contain drop-shadow-[0_0_40px_hsla(45,80%,70%,0.6)]"
+          />
+          {/* Golden sparkle trail */}
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 w-2 h-20"
+            style={{
+              background: "linear-gradient(to bottom, hsla(45, 100%, 70%, 0.8), transparent)",
+            }}
+            animate={{
+              opacity: [0.3, 0.8, 0.3],
+              height: [60, 100, 60],
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.div>
+
+        {/* Angel 3 - Right */}
+        <motion.div
+          className="absolute right-[10%] bottom-[18%] w-28 h-28 md:w-40 md:h-40"
+          animate={{
+            y: [0, -12, 0],
+            x: [0, -8, 0],
+            rotate: [2, -2, 2],
+          }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        >
+          <img 
+            src={flyingAngel3} 
+            alt="Flying angel" 
+            className="w-full h-full object-contain drop-shadow-[0_0_30px_hsla(45,80%,70%,0.5)]"
+          />
+        </motion.div>
+
+        {/* Glowing orbs under angels (like floating spheres they sit on) */}
+        {[15, 50, 85].map((left, i) => (
+          <motion.div
+            key={`orb-${i}`}
+            className="absolute w-12 h-12 md:w-16 md:h-16 rounded-full"
+            style={{
+              left: `${left}%`,
+              bottom: `${5 + i * 3}%`,
+              transform: "translateX(-50%)",
+              background: "radial-gradient(circle at 30% 30%, hsla(35, 60%, 65%, 0.9), hsla(30, 50%, 45%, 0.7))",
+              boxShadow: "inset -4px -4px 10px hsla(30, 40%, 30%, 0.4), 0 0 30px hsla(40, 70%, 60%, 0.5)",
+            }}
+            animate={{
+              y: [0, -8, 0],
+              boxShadow: [
+                "inset -4px -4px 10px hsla(30, 40%, 30%, 0.4), 0 0 30px hsla(40, 70%, 60%, 0.5)",
+                "inset -4px -4px 10px hsla(30, 40%, 30%, 0.4), 0 0 50px hsla(40, 70%, 60%, 0.7)",
+                "inset -4px -4px 10px hsla(30, 40%, 30%, 0.4), 0 0 30px hsla(40, 70%, 60%, 0.5)",
+              ],
+            }}
+            transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.8 }}
+          />
+        ))}
       </div>
 
       {/* Golden dust particles rising */}
