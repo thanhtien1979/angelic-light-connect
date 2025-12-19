@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,7 +78,49 @@ serve(async (req) => {
   }
 
   try {
-    const { content, userId } = await req.json();
+    // Authenticate request
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.error("Missing authorization header");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - Missing authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify the JWT token
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error("Auth error:", authError?.message || "Invalid token");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Rate limiting - 10 requests per minute per user
+    const { data: canProceed } = await supabase.rpc("check_rate_limit", {
+      p_identifier: user.id,
+      p_endpoint: "validate-reflection",
+      p_max_requests: 10,
+      p_window_minutes: 1,
+    });
+
+    if (!canProceed) {
+      console.log(`Rate limit exceeded for user ${user.id}`);
+      return new Response(
+        JSON.stringify({ error: "Quá nhiều yêu cầu. Vui lòng thử lại sau." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { content } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!content || typeof content !== "string") {
@@ -126,6 +169,8 @@ serve(async (req) => {
     // Use AI to validate sincerity
     const validation = await generateValidationResponse(content, true, LOVABLE_API_KEY || "");
     const isApproved = validation.sincerityScore >= 0.5;
+
+    console.log(`Reflection validated for user ${user.id}: approved=${isApproved}, score=${validation.sincerityScore}`);
 
     return new Response(
       JSON.stringify({
