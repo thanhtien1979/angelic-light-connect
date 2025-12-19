@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Community from "./pages/Community";
+import CreativeStudio from "./pages/CreativeStudio";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -22,6 +23,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/community" element={<Community />} />
+          <Route path="/studio" element={<CreativeStudio />} />
           <Route
             path="/profile"
             element={
