@@ -14,7 +14,9 @@ import {
   Save,
   Images,
   Settings2,
-  Link2
+  Link2,
+  Coins,
+  History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,11 +26,13 @@ import { useImageGeneration } from "@/hooks/useImageGeneration";
 import { useImageGallery } from "@/hooks/useImageGallery";
 import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
+import { useNFT } from "@/hooks/useNFT";
 import { Link } from "react-router-dom";
 import NavigationHeader from "@/components/NavigationHeader";
 import Footer from "@/components/Footer";
 import ImageGallery from "@/components/ImageGallery";
 import PromptBuilder from "@/components/PromptBuilder";
+import NFTTransactionHistory from "@/components/NFTTransactionHistory";
 
 const promptSuggestions = [
   "Thiên thần đang bay trên bầu trời hoàng hôn với đôi cánh vàng rực rỡ",
@@ -44,15 +48,35 @@ export default function CreativeStudio() {
   const [editPrompt, setEditPrompt] = useState("");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("generate");
-  const [mainView, setMainView] = useState<"create" | "gallery">("create");
+  const [mainView, setMainView] = useState<"create" | "gallery" | "nft">("create");
   const [isSaving, setIsSaving] = useState(false);
   const [showPromptBuilder, setShowPromptBuilder] = useState(true);
+  const [lastSavedImageId, setLastSavedImageId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { user } = useAuth();
   const { isGenerating, generatedImage, generateImage, editImage, clearImage } = useImageGeneration();
   const { saveImage, refetch } = useImageGallery();
   const { walletAddress, isConnecting: isConnectingWallet, connectWallet, disconnectWallet } = useWallet();
+  const { isMinting, mintNFT } = useNFT();
+
+  const handleMintNFT = async () => {
+    if (!generatedImage || !walletAddress || !user) return;
+    
+    // First save image to gallery if not already saved
+    let imageId = lastSavedImageId;
+    if (!imageId) {
+      const saved = await saveImage(generatedImage, prompt);
+      if (saved) {
+        imageId = saved;
+        setLastSavedImageId(saved);
+      }
+    }
+    
+    if (imageId) {
+      await mintNFT(imageId, generatedImage, prompt, walletAddress);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -93,8 +117,9 @@ export default function CreativeStudio() {
   const handleSaveToGallery = async () => {
     if (!generatedImage || !prompt.trim()) return;
     setIsSaving(true);
-    const success = await saveImage(generatedImage, prompt);
-    if (success) {
+    const imageId = await saveImage(generatedImage, prompt);
+    if (imageId) {
+      setLastSavedImageId(imageId);
       refetch();
     }
     setIsSaving(false);
@@ -152,6 +177,14 @@ export default function CreativeStudio() {
             >
               <Images className="w-4 h-4" />
               Gallery
+            </Button>
+            <Button
+              variant={mainView === "nft" ? "default" : "outline"}
+              onClick={() => setMainView("nft")}
+              className="flex items-center gap-2"
+            >
+              <History className="w-4 h-4" />
+              NFT History
             </Button>
             
             {/* Blockchain Connect Button */}
@@ -449,25 +482,42 @@ export default function CreativeStudio() {
                                 </div>
                               </div>
                               
-                              <div className="flex gap-2">
+                              <div className="flex flex-wrap gap-2">
                                 {user && (
                                   <Button
                                     variant="default"
                                     className="flex-1 bg-gradient-to-r from-primary to-rose-soft"
                                     onClick={handleSaveToGallery}
-                                    disabled={isSaving}
+                                    disabled={isSaving || !!lastSavedImageId}
                                   >
                                     {isSaving ? (
                                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                     ) : (
                                       <Save className="w-4 h-4 mr-2" />
                                     )}
-                                    Lưu vào Gallery
+                                    {lastSavedImageId ? "Đã lưu" : "Lưu vào Gallery"}
                                   </Button>
                                 )}
+                                
+                                {/* Mint NFT Button */}
+                                {user && walletAddress && (
+                                  <Button
+                                    variant="outline"
+                                    className="flex-1 border-amber-500/50 text-amber-600 hover:bg-amber-50"
+                                    onClick={handleMintNFT}
+                                    disabled={isMinting}
+                                  >
+                                    {isMinting ? (
+                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    ) : (
+                                      <Coins className="w-4 h-4 mr-2" />
+                                    )}
+                                    {isMinting ? "Đang mint..." : "Mint NFT"}
+                                  </Button>
+                                )}
+                                
                                 <Button
                                   variant="outline"
-                                  className={user ? "" : "flex-1"}
                                   onClick={handleDownload}
                                 >
                                   <Download className="w-4 h-4 mr-2" />
@@ -478,6 +528,7 @@ export default function CreativeStudio() {
                                   onClick={() => {
                                     clearImage();
                                     setPrompt("");
+                                    setLastSavedImageId(null);
                                   }}
                                 >
                                   <RefreshCw className="w-4 h-4" />
@@ -505,7 +556,7 @@ export default function CreativeStudio() {
                 </div>
               </Tabs>
             </motion.div>
-          ) : (
+          ) : mainView === "gallery" ? (
             <motion.div
               key="gallery"
               initial={{ opacity: 0, x: 20 }}
@@ -514,6 +565,16 @@ export default function CreativeStudio() {
               className="max-w-6xl mx-auto"
             >
               <ImageGallery />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="nft"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-4xl mx-auto"
+            >
+              <NFTTransactionHistory />
             </motion.div>
           )}
         </AnimatePresence>
