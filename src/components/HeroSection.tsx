@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import angelHero from "@/assets/angel-hero.jpg";
+import angelHero from "@/assets/angel-hero.png";
 import ChatPortal from "@/components/ChatPortal";
 
 // Deeper rose petal colors for particles - more vibrant
