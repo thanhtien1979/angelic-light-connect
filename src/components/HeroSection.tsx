@@ -270,11 +270,11 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
                 }}
               />
               
-              {/* Animated rose-pink gradient border */}
+              {/* Animated rose-pink gradient border - deeper pink */}
               <div 
                 className="absolute -inset-1 rounded-full"
                 style={{
-                  background: "linear-gradient(90deg, hsl(348, 80%, 78%), hsl(349, 65%, 72%), hsl(350, 85%, 85%), hsl(340, 75%, 80%), hsl(348, 80%, 78%))",
+                  background: "linear-gradient(90deg, hsl(340, 90%, 60%), hsl(350, 85%, 55%), hsl(345, 95%, 65%), hsl(335, 90%, 58%), hsl(340, 90%, 60%))",
                   backgroundSize: "300% 100%",
                   animation: "roseGradientShift 8s ease-in-out infinite, borderPulse 3s ease-in-out infinite",
                   filter: "blur(2px)",
