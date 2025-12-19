@@ -210,16 +210,35 @@ const FunEcosystemPlatforms = () => {
           transition={{ duration: 0.8 }}
         >
           <motion.div
-            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-rose-500/20 border border-rose-400/40 mb-8"
-            animate={{ boxShadow: ["0 0 20px rgba(244,63,94,0.2)", "0 0 40px rgba(244,63,94,0.4)", "0 0 20px rgba(244,63,94,0.2)"] }}
+            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-amber-500/20 border border-amber-400/40 mb-8"
+            animate={{ boxShadow: ["0 0 20px rgba(217,164,65,0.3)", "0 0 40px rgba(217,164,65,0.5)", "0 0 20px rgba(217,164,65,0.3)"] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
-            <Sparkles className="w-8 h-8 text-rose-500" />
-            <span className="text-rose-600 text-4xl md:text-5xl lg:text-6xl font-bold">FUN Ecosystem</span>
+            <Sparkles className="w-8 h-8 text-amber-500" />
+            <span 
+              className="text-4xl md:text-5xl lg:text-6xl font-bold"
+              style={{
+                background: "linear-gradient(135deg, #D4AF37 0%, #F4D03F 25%, #C5A028 50%, #E8C252 75%, #B8860B 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: "drop-shadow(0 2px 4px rgba(180,130,40,0.4))",
+              }}
+            >
+              FUN Ecosystem
+            </span>
           </motion.div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-rose-600 via-pink-600 to-rose-500 bg-clip-text text-transparent">
+            <span 
+              style={{
+                background: "linear-gradient(135deg, #D4AF37 0%, #F4D03F 20%, #DAA520 40%, #E8C252 60%, #C5A028 80%, #B8860B 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: "drop-shadow(0 2px 4px rgba(180,130,40,0.4))",
+              }}
+            >
               Mô Hình Kinh Tế Ánh Sáng 5D
             </span>
           </h2>
