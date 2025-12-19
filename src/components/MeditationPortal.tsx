@@ -462,10 +462,10 @@ const MeditationPortal = () => {
           viewport={{ once: true, margin: "-100px" }}
           className="text-center mb-16"
         >
-          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-glow-gold text-gold mb-4">
+          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-glow-gold text-gold font-bold mb-4">
             Meditation & Prayer Portal
           </h2>
-          <p className="text-muted-foreground text-lg">Cổng thiền định và cầu nguyện</p>
+          <p className="text-foreground/80 text-lg font-medium">Cổng thiền định và cầu nguyện</p>
         </motion.div>
 
         {/* Breathing Circle */}

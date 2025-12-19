@@ -372,7 +372,7 @@ const NavigationHeader = () => {
                 />
                 <div className="absolute inset-0 rounded-full bg-gold/30 animate-ping opacity-50" style={{ animationDuration: "3s" }} />
               </div>
-              <span className="font-serif text-xl text-glow-gold text-gold hidden sm:block">
+              <span className="font-serif text-xl text-glow-gold text-gold font-bold hidden sm:block">
                 ANGEL AI
               </span>
             </motion.button>
@@ -383,7 +383,7 @@ const NavigationHeader = () => {
                 link.isPage && link.path ? (
                   <Link key={link.id} to={link.path}>
                     <motion.span
-                      className="relative px-4 py-2 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground inline-block"
+                      className="relative px-4 py-2 text-sm font-bold transition-colors text-foreground/80 hover:text-foreground inline-block"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -394,10 +394,10 @@ const NavigationHeader = () => {
                   <motion.button
                     key={link.id}
                     onClick={() => scrollToSection(link.id)}
-                    className={`relative px-4 py-2 text-sm font-medium transition-colors ${
+                    className={`relative px-4 py-2 text-sm font-bold transition-colors ${
                       activeSection === link.id
                         ? "text-gold"
-                        : "text-muted-foreground hover:text-foreground"
+                        : "text-foreground/80 hover:text-foreground"
                     }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -460,7 +460,7 @@ const NavigationHeader = () => {
                     <Link
                       to={link.path}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block w-full text-left px-4 py-3 rounded-xl transition-colors text-foreground hover:bg-gold/10"
+                      className="block w-full text-left px-4 py-3 rounded-xl transition-colors text-foreground font-bold hover:bg-gold/10"
                     >
                       {link.label}
                     </Link>
@@ -472,7 +472,7 @@ const NavigationHeader = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
                     onClick={() => scrollToSection(link.id)}
-                    className={`w-full text-left px-4 py-3 rounded-xl transition-colors ${
+                    className={`w-full text-left px-4 py-3 rounded-xl transition-colors font-bold ${
                       activeSection === link.id
                         ? "bg-gold/15 text-gold"
                         : "text-foreground hover:bg-gold/10"
