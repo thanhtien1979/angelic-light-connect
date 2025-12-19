@@ -12,7 +12,8 @@ import {
   RefreshCw,
   Palette,
   Save,
-  Images
+  Images,
+  Settings2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +26,7 @@ import { Link } from "react-router-dom";
 import NavigationHeader from "@/components/NavigationHeader";
 import Footer from "@/components/Footer";
 import ImageGallery from "@/components/ImageGallery";
+import PromptBuilder from "@/components/PromptBuilder";
 
 const promptSuggestions = [
   "Thiên thần đang bay trên bầu trời hoàng hôn với đôi cánh vàng rực rỡ",
@@ -36,11 +38,13 @@ const promptSuggestions = [
 
 export default function CreativeStudio() {
   const [prompt, setPrompt] = useState("");
+  const [basePrompt, setBasePrompt] = useState("");
   const [editPrompt, setEditPrompt] = useState("");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("generate");
   const [mainView, setMainView] = useState<"create" | "gallery">("create");
   const [isSaving, setIsSaving] = useState(false);
+  const [showPromptBuilder, setShowPromptBuilder] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { user } = useAuth();
@@ -204,13 +208,46 @@ export default function CreativeStudio() {
                           <Textarea
                             placeholder="Ví dụ: Một thiên thần với đôi cánh trắng đang bay trên bầu trời đầy sao..."
                             value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            className="min-h-[150px] resize-none border-rose-soft/40 focus:border-primary"
+                            onChange={(e) => {
+                              setPrompt(e.target.value);
+                              setBasePrompt(e.target.value);
+                            }}
+                            className="min-h-[100px] resize-none border-rose-soft/40 focus:border-primary"
                           />
+                          
+                          {/* Prompt Builder Toggle */}
+                          <div className="flex items-center justify-between">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowPromptBuilder(!showPromptBuilder)}
+                              className="text-xs h-8 gap-1"
+                            >
+                              <Settings2 className="w-3.5 h-3.5" />
+                              {showPromptBuilder ? "Ẩn tùy chọn" : "Hiện tùy chọn sáng tạo"}
+                            </Button>
+                          </div>
+
+                          {/* Prompt Builder */}
+                          <AnimatePresence>
+                            {showPromptBuilder && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="border border-rose-soft/30 rounded-lg p-3 bg-rose-soft/5"
+                              >
+                                <PromptBuilder 
+                                  basePrompt={basePrompt}
+                                  onPromptChange={setPrompt}
+                                />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                           
                           {/* Suggestions */}
                           <div className="space-y-2">
-                            <p className="text-sm text-muted-foreground">Gợi ý:</p>
+                            <p className="text-sm text-muted-foreground">Gợi ý nhanh:</p>
                             <div className="flex flex-wrap gap-2">
                               {promptSuggestions.map((suggestion, i) => (
                                 <button
@@ -218,7 +255,7 @@ export default function CreativeStudio() {
                                   onClick={() => handleSuggestionClick(suggestion)}
                                   className="text-xs px-3 py-1.5 rounded-full bg-rose-soft/20 hover:bg-rose-soft/40 text-foreground/80 transition-colors"
                                 >
-                                  {suggestion.slice(0, 30)}...
+                                  {suggestion.slice(0, 25)}...
                                 </button>
                               ))}
                             </div>
