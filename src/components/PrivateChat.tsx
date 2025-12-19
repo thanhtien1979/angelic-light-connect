@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Send, ArrowLeft, X, Circle,
-  Sparkles, Heart, Image as ImageIcon
+  Sparkles, Heart, Image as ImageIcon, Phone, Video
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,9 +21,10 @@ import { toast } from 'sonner';
 interface PrivateChatProps {
   isOpen: boolean;
   onClose: () => void;
+  onStartCall?: (friendId: string, friendName: string, callType: 'video' | 'audio') => void;
 }
 
-const PrivateChat = ({ isOpen, onClose }: PrivateChatProps) => {
+const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
   const { user } = useAuth();
   const [selectedFriend, setSelectedFriend] = useState<Conversation | null>(null);
   const [messageInput, setMessageInput] = useState('');
@@ -178,7 +179,7 @@ const PrivateChat = ({ isOpen, onClose }: PrivateChatProps) => {
                       <Circle className="absolute -bottom-0.5 -right-0.5 w-3 h-3 fill-green-400 text-green-400" />
                     )}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-semibold text-sm">{selectedFriend.friendName}</p>
                     <p className="text-xs text-white/80">
                       {isPartnerTyping ? (
@@ -191,6 +192,23 @@ const PrivateChat = ({ isOpen, onClose }: PrivateChatProps) => {
                       ) : selectedFriend.isOnline ? 'Đang online' : 'Offline'}
                     </p>
                   </div>
+                </div>
+                {/* Call Buttons */}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => onStartCall?.(selectedFriend.friendId, selectedFriend.friendName || 'Người dùng', 'audio')}
+                    className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
+                    title="Gọi thoại"
+                  >
+                    <Phone className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onStartCall?.(selectedFriend.friendId, selectedFriend.friendName || 'Người dùng', 'video')}
+                    className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
+                    title="Gọi video"
+                  >
+                    <Video className="w-4 h-4" />
+                  </button>
                 </div>
               </>
             ) : (

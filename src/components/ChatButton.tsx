@@ -4,16 +4,34 @@ import { MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { usePrivateMessages } from '@/hooks/usePrivateMessages';
 import { useAuth } from '@/hooks/useAuth';
+import { useVideoCall } from '@/hooks/useVideoCall';
 import PrivateChat from './PrivateChat';
+import VideoCallModal from './VideoCallModal';
 
 const ChatButton = () => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const { getTotalUnread } = usePrivateMessages();
 
+  const {
+    callState,
+    localStream,
+    remoteStream,
+    initiateCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+    toggleVideo,
+    toggleAudio,
+  } = useVideoCall();
+
   if (!user) return null;
 
   const unreadCount = getTotalUnread();
+
+  const handleStartCall = (friendId: string, friendName: string, callType: 'video' | 'audio') => {
+    initiateCall(friendId, friendName, callType);
+  };
 
   return (
     <>
@@ -34,7 +52,23 @@ const ChatButton = () => {
         )}
       </motion.button>
 
-      <PrivateChat isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <PrivateChat 
+        isOpen={isOpen} 
+        onClose={() => setIsOpen(false)} 
+        onStartCall={handleStartCall}
+      />
+
+      <VideoCallModal
+        isOpen={callState.isActive}
+        callState={callState}
+        localStream={localStream}
+        remoteStream={remoteStream}
+        onAccept={acceptCall}
+        onReject={rejectCall}
+        onEnd={endCall}
+        onToggleVideo={toggleVideo}
+        onToggleAudio={toggleAudio}
+      />
     </>
   );
 };
