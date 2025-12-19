@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { motion } from "framer-motion";
 import angelHero from "@/assets/angel-hero.png";
 import ChatPortal from "@/components/ChatPortal";
 
@@ -156,6 +157,16 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
 
   const allStars = [...innerStars, ...middleStars, ...outerStars];
 
+  // Generate shooting stars
+  const shootingStars = useMemo(() =>
+    Array.from({ length: 8 }, (_, i) => ({
+      startX: 60 + Math.random() * 40,
+      duration: 1.5 + Math.random() * 1.5,
+      delay: Math.random() * 8,
+      repeatDelay: 5 + Math.random() * 8,
+    })), []
+  );
+
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-20">
       {/* Background gradient - Rose tinted */}
@@ -168,6 +179,39 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
         ))}
         {shimmers.map((shimmer, i) => (
           <Shimmer key={`shimmer-${i}`} {...shimmer} />
+        ))}
+      </div>
+      
+      {/* Shooting stars */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {shootingStars.map((star, i) => (
+          <motion.div
+            key={`shooting-star-${i}`}
+            className="absolute"
+            style={{
+              width: 100,
+              height: 2,
+              background: "linear-gradient(to left, white, transparent)",
+              boxShadow: "0 0 6px white, 0 0 12px hsla(348, 80%, 70%, 0.8)",
+              transform: "rotate(-45deg)",
+            }}
+            initial={{ 
+              x: `${star.startX}vw`, 
+              y: -50, 
+              opacity: 0 
+            }}
+            animate={{ 
+              x: "-20vw", 
+              y: "100vh", 
+              opacity: [0, 1, 1, 0] 
+            }}
+            transition={{
+              duration: star.duration,
+              repeat: Infinity,
+              delay: star.delay,
+              repeatDelay: star.repeatDelay,
+            }}
+          />
         ))}
       </div>
       
