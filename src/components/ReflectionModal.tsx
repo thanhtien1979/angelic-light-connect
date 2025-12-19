@@ -34,13 +34,24 @@ export const ReflectionModal = ({ isOpen, onClose, onSuccess }: ReflectionModalP
     setValidationMessage(null);
 
     try {
-      // Validate reflection with AI
+      // Get session for authenticated request
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session?.access_token) {
+        toast.error("Vui lòng đăng nhập để gửi suy ngẫm");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate reflection with AI (authenticated)
       const validateResponse = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-reflection`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content, userId: user.id }),
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({ content }),
         }
       );
 
