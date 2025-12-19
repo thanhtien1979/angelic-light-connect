@@ -156,13 +156,13 @@ const FunEcosystemPlatforms = () => {
   );
 
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-950">
+    <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-b from-pink-950 via-rose-950 to-pink-950">
       {/* Animated background particles */}
       <div className="absolute inset-0 pointer-events-none">
         {particles.map((particle, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full bg-amber-400/30"
+            className="absolute rounded-full bg-pink-400/30"
             style={{
               left: `${particle.x}%`,
               top: `${particle.y}%`,
@@ -187,7 +187,7 @@ const FunEcosystemPlatforms = () => {
       {/* Central glow effect */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <motion.div
-          className="w-[600px] h-[600px] rounded-full bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-violet-500/10 blur-3xl"
+          className="w-[600px] h-[600px] rounded-full bg-gradient-to-r from-pink-500/10 via-rose-500/10 to-pink-400/10 blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3],
@@ -248,7 +248,7 @@ const FunEcosystemPlatforms = () => {
               >
                 <CardWrapper {...cardProps}>
                   <motion.div
-                    className={`relative p-6 rounded-2xl bg-pink-500/20 backdrop-blur-sm border border-pink-400/30 hover:border-pink-400/50 transition-all duration-500 h-full cursor-pointer overflow-hidden`}
+                    className={`relative p-6 rounded-2xl bg-gradient-to-br from-pink-500/30 via-rose-500/20 to-pink-400/25 backdrop-blur-sm border border-pink-400/30 hover:border-pink-400/50 transition-all duration-500 h-full cursor-pointer overflow-hidden`}
                     whileHover={{ 
                       scale: 1.02, 
                       y: -5,
@@ -328,7 +328,7 @@ const FunEcosystemPlatforms = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          <div className="inline-block p-8 rounded-3xl bg-gradient-to-br from-amber-500/5 via-rose-500/5 to-violet-500/5 border border-white/10 backdrop-blur-sm">
+          <div className="inline-block p-8 rounded-3xl bg-gradient-to-br from-pink-500/10 via-rose-500/10 to-pink-400/10 border border-pink-400/20 backdrop-blur-sm">
             <p className="text-lg md:text-xl text-white/80 italic mb-4">
               "Tiền tuôn vào – tuôn ra – quay về – khuếch đại – tăng trưởng mãi mãi"
             </p>
@@ -353,7 +353,7 @@ const FunEcosystemPlatforms = () => {
           ].map((principle, index) => (
             <motion.div
               key={index}
-              className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10"
+              className="flex items-center gap-3 p-4 rounded-xl bg-pink-500/10 border border-pink-400/20"
               whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.08)" }}
             >
               <span className="text-2xl">{principle.icon}</span>
