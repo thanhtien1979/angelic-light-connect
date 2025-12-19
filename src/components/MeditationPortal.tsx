@@ -400,6 +400,32 @@ const MeditationPortal = () => {
       {/* Immersive background with cosmic golden atmosphere */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-amber-950/30 to-amber-900/40" />
       
+      {/* Twinkling stars */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(50)].map((_, i) => (
+          <motion.div
+            key={`star-${i}`}
+            className="absolute rounded-full bg-white"
+            style={{
+              width: Math.random() * 3 + 1,
+              height: Math.random() * 3 + 1,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 70}%`,
+              boxShadow: "0 0 4px hsla(45, 100%, 90%, 0.8)",
+            }}
+            animate={{
+              opacity: [0.2, 0.8, 0.2],
+              scale: [0.8, 1.2, 0.8],
+            }}
+            transition={{
+              duration: 2 + Math.random() * 3,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
 
       {/* Sacred geometry background */}
       <div className="absolute inset-0 opacity-10">
