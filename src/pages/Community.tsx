@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Heart, Sparkles, BookOpen, MessageCircle, Leaf, Sun } from "lucide-react";
+import { ArrowLeft, Heart, Sparkles, BookOpen, MessageCircle, Leaf, Sun, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import FriendshipManager from "@/components/FriendshipManager";
 
 interface SharedMoment {
   id: string;
@@ -210,6 +211,15 @@ const Community = () => {
         transition={{ duration: 0.45, ease: "easeOut" }}
         className="max-w-4xl mx-auto px-4 py-8"
       >
+        {/* Friendship Manager Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10"
+        >
+          <FriendshipManager />
+        </motion.div>
+
         {/* Page Title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
