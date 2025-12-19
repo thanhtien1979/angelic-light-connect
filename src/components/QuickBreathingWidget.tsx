@@ -93,6 +93,8 @@ const QuickBreathingWidget = () => {
   const [isDismissed, setIsDismissed] = useState(false);
   const [showSoundPicker, setShowSoundPicker] = useState(false);
   const [showPatternPicker, setShowPatternPicker] = useState(false);
+  const [sessionProgress, setSessionProgress] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [selectedPattern, setSelectedPattern] = useState<BreathingPattern>(() => {
     const stored = localStorage.getItem(PATTERN_STORAGE_KEY);
     const found = BREATHING_PATTERNS.find(p => p.id === stored);
@@ -111,6 +113,33 @@ const QuickBreathingWidget = () => {
     stopSound 
   } = useAmbientSound();
 
+  // Calculate total session duration
+  const getTotalSessionDuration = useCallback(() => {
+    const { inhale, holdIn, exhale, holdOut, cycles } = selectedPattern;
+    return (inhale + holdIn + exhale + holdOut) * cycles * 1000;
+  }, [selectedPattern]);
+
+  // Update session progress
+  useEffect(() => {
+    if (!isActive || !sessionStartTime) {
+      if (!isActive) setSessionProgress(0);
+      return;
+    }
+
+    const totalDuration = getTotalSessionDuration();
+    
+    const updateProgress = () => {
+      const elapsed = Date.now() - sessionStartTime;
+      const progress = Math.min(elapsed / totalDuration, 1);
+      setSessionProgress(progress);
+    };
+
+    const interval = setInterval(updateProgress, 50);
+    updateProgress();
+
+    return () => clearInterval(interval);
+  }, [isActive, sessionStartTime, getTotalSessionDuration]);
+
   // Save pattern preference
   useEffect(() => {
     localStorage.setItem(PATTERN_STORAGE_KEY, selectedPattern.id);
@@ -121,6 +150,8 @@ const QuickBreathingWidget = () => {
     setIsActive(true);
     setPhase('inhale');
     setCycleCount(0);
+    setSessionStartTime(Date.now());
+    setSessionProgress(0);
     // Start ambient sound if one is selected
     if (selectedSound !== 'silence') {
       playSound(selectedSound);
@@ -131,6 +162,8 @@ const QuickBreathingWidget = () => {
     setIsActive(false);
     setPhase('idle');
     setCycleCount(0);
+    setSessionStartTime(null);
+    setSessionProgress(0);
     stopSound();
   }, [stopSound]);
 
@@ -303,18 +336,74 @@ const QuickBreathingWidget = () => {
                     <>
                       {/* Breathing Circle */}
                       <div className="flex flex-col items-center py-4">
-                        <div className="relative w-32 h-32 flex items-center justify-center">
-                          {/* Outer ring */}
+                        <div className="relative w-36 h-36 flex items-center justify-center">
+                          {/* Progress ring - sacred light closing */}
+                          <svg 
+                            className="absolute inset-0 w-full h-full -rotate-90"
+                            viewBox="0 0 144 144"
+                          >
+                            {/* Background ring - subtle trace */}
+                            <circle
+                              cx="72"
+                              cy="72"
+                              r="68"
+                              fill="none"
+                              strokeWidth="3"
+                              className="stroke-primary/10"
+                            />
+                            {/* Progress ring - sacred golden light */}
+                            <motion.circle
+                              cx="72"
+                              cy="72"
+                              r="68"
+                              fill="none"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              className="stroke-[hsl(45,70%,65%)]"
+                              style={{
+                                strokeDasharray: 2 * Math.PI * 68,
+                                strokeDashoffset: 2 * Math.PI * 68 * (1 - sessionProgress),
+                                filter: isActive ? 'drop-shadow(0 0 8px hsl(45, 70%, 65%, 0.5))' : 'none',
+                              }}
+                              initial={{ opacity: 0 }}
+                              animate={{ 
+                                opacity: isActive ? 0.8 : 0,
+                              }}
+                              transition={{ duration: 0.8, ease: 'easeOut' }}
+                            />
+                            {/* Secondary glow ring */}
+                            <motion.circle
+                              cx="72"
+                              cy="72"
+                              r="68"
+                              fill="none"
+                              strokeWidth="6"
+                              strokeLinecap="round"
+                              className="stroke-[hsl(45,70%,75%)]"
+                              style={{
+                                strokeDasharray: 2 * Math.PI * 68,
+                                strokeDashoffset: 2 * Math.PI * 68 * (1 - sessionProgress),
+                                filter: 'blur(4px)',
+                              }}
+                              initial={{ opacity: 0 }}
+                              animate={{ 
+                                opacity: isActive ? 0.3 : 0,
+                              }}
+                              transition={{ duration: 0.8, ease: 'easeOut' }}
+                            />
+                          </svg>
+
+                          {/* Outer breathing ring */}
                           <motion.div
                             animate={{
-                              scale: phase === 'inhale' ? 1 : phase === 'exhale' ? 0.6 : 0.8,
+                              scale: phase === 'inhale' ? 1 : phase === 'exhale' ? 0.65 : 0.82,
                               opacity: isActive ? 0.3 : 0.1,
                             }}
                             transition={{
                               duration: phase === 'inhale' ? selectedPattern.inhale : phase === 'exhale' ? selectedPattern.exhale : 0.5,
                               ease: 'easeInOut',
                             }}
-                            className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 border border-primary/20"
+                            className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 border border-primary/20"
                           />
                           
                           {/* Inner breathing circle */}
