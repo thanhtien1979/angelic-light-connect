@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wind, X, Play, Square, Volume2, VolumeX, ChevronDown, Sparkles } from 'lucide-react';
+import { Wind, X, Play, Square, Volume2, VolumeX, ChevronDown, Sparkles, History } from 'lucide-react';
 import { useBreathingCompletionSound } from '@/hooks/useBreathingCompletionSound';
 import { useAmbientSound, AMBIENT_SOUNDS, type AmbientSoundType } from '@/hooks/useAmbientSound';
+import { useBreathingHistory } from '@/hooks/useBreathingHistory';
+import { BreathingSessionHistory } from '@/components/BreathingSessionHistory';
 import { Slider } from '@/components/ui/slider';
 
 type BreathPhase = 'idle' | 'inhale' | 'hold-in' | 'exhale' | 'hold-out' | 'next-cycle' | 'complete';
@@ -93,6 +95,7 @@ const QuickBreathingWidget = () => {
   const [isDismissed, setIsDismissed] = useState(false);
   const [showSoundPicker, setShowSoundPicker] = useState(false);
   const [showPatternPicker, setShowPatternPicker] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [sessionProgress, setSessionProgress] = useState(0);
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [selectedPattern, setSelectedPattern] = useState<BreathingPattern>(() => {
@@ -112,6 +115,7 @@ const QuickBreathingWidget = () => {
     playSound, 
     stopSound 
   } = useAmbientSound();
+  const { saveSession } = useBreathingHistory();
 
   // Calculate total session duration
   const getTotalSessionDuration = useCallback(() => {
@@ -210,11 +214,15 @@ const QuickBreathingWidget = () => {
         setIsActive(false);
         playCompletionSound();
         stopSound();
+        
+        // Save completed session
+        const totalDuration = Math.round(getTotalSessionDuration() / 1000);
+        saveSession(selectedPattern.name, totalDuration, selectedSound !== 'silence' ? selectedSound : undefined);
       } else {
         setPhase('inhale');
       }
     }
-  }, [isActive, phase, cycleCount, selectedPattern, playCompletionSound, stopSound]);
+  }, [isActive, phase, cycleCount, selectedPattern, playCompletionSound, stopSound, getTotalSessionDuration, saveSession, selectedSound]);
 
   // Reset complete state after viewing
   const handleClose = () => {
@@ -292,9 +300,19 @@ const QuickBreathingWidget = () => {
                 <div className="flex items-center justify-between p-4 pb-2">
                   <div className="flex items-center gap-2">
                     <Wind className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium text-foreground">One Minute of Breath</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {showHistory ? 'Your Journey' : 'One Minute of Breath'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setShowHistory(!showHistory)}
+                      disabled={isActive}
+                      className={`p-1.5 rounded-full hover:bg-muted/50 transition-colors ${showHistory ? 'text-primary' : 'text-muted-foreground hover:text-foreground'} disabled:opacity-50`}
+                      aria-label="View history"
+                    >
+                      <History className="w-3.5 h-3.5" />
+                    </button>
                     <button
                       onClick={() => setIsDismissed(true)}
                       className="p-1.5 rounded-full hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
@@ -307,7 +325,16 @@ const QuickBreathingWidget = () => {
 
                 {/* Content */}
                 <div className="p-4 pt-2">
-                  {phase === 'complete' ? (
+                  {showHistory ? (
+                    // History view
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
+                      <BreathingSessionHistory compact />
+                    </motion.div>
+                  ) : phase === 'complete' ? (
                     // Completion blessing animation
                     <motion.div
                       initial={{ opacity: 0 }}
@@ -774,7 +801,7 @@ const QuickBreathingWidget = () => {
                 </div>
 
                 {/* Close panel button */}
-                {phase !== 'complete' && (
+                {phase !== 'complete' && !showHistory && (
                   <button
                     onClick={handleClose}
                     className="w-full py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors border-t border-border/20"
