@@ -150,10 +150,8 @@ const WalletIndicator = () => {
     switchNetwork 
   } = useWallet();
 
-  if (!user) return null;
-  
-  // Don't show anything while loading
-  if (isLoading) {
+  // Show loading state only for logged-in users
+  if (user && isLoading) {
     return (
       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border/30">
         <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
@@ -161,6 +159,7 @@ const WalletIndicator = () => {
     );
   }
 
+  // Connected wallet view
   if (walletAddress) {
     return (
       <DropdownMenu>
@@ -239,6 +238,7 @@ const WalletIndicator = () => {
     );
   }
 
+  // Connect wallet button - always visible
   return (
     <TooltipProvider delayDuration={300}>
       <Tooltip>
@@ -246,45 +246,50 @@ const WalletIndicator = () => {
           <motion.button
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px hsla(35, 100%, 60%, 0.4)" }}
             whileTap={{ scale: 0.95 }}
             onClick={connectWallet}
             disabled={isConnecting}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-400/50 text-orange-500 dark:text-orange-400 hover:from-orange-500/30 hover:to-amber-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_hsla(35,100%,60%,0.2)]"
           >
             {isConnecting ? (
               <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span className="text-xs font-medium hidden sm:inline">Đang kết nối...</span>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-xs sm:text-sm font-medium hidden sm:inline">Đang kết nối...</span>
               </>
             ) : (
               <>
-                <Link2 className="w-3.5 h-3.5" />
-                <span className="text-xs font-medium hidden sm:inline">Kết nối ví</span>
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" 
+                  alt="MetaMask" 
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                />
+                <span className="text-xs sm:text-sm font-medium">Web3</span>
               </>
             )}
           </motion.button>
         </TooltipTrigger>
         <TooltipContent 
           side="bottom" 
-          className="max-w-[260px] bg-card/95 backdrop-blur-sm border-primary/30 p-3"
+          className="max-w-[280px] bg-card/95 backdrop-blur-sm border-orange-400/30 p-3"
         >
           <div className="space-y-2">
             <p className="font-serif text-sm text-foreground flex items-center gap-2">
-              <Link2 className="w-4 h-4 text-primary" />
-              Liên kết Blockchain
-            </p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Kết nối ví MetaMask để mint NFT và lưu trữ tác phẩm nghệ thuật của bạn trên blockchain.
-            </p>
-            <div className="flex items-center gap-2 pt-1 text-xs text-primary">
               <img 
                 src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" 
                 alt="MetaMask" 
-                className="w-4 h-4"
+                className="w-5 h-5"
               />
-              <span>MetaMask được hỗ trợ</span>
-            </div>
+              Kết nối ví Web3
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Kết nối ví MetaMask để nhận Happy Camly Coin, mint NFT và lưu trữ tác phẩm nghệ thuật trên blockchain.
+            </p>
+            {!user && (
+              <p className="text-xs text-amber-500 pt-1">
+                💡 Đăng nhập để lưu liên kết ví vĩnh viễn
+              </p>
+            )}
           </div>
         </TooltipContent>
       </Tooltip>
