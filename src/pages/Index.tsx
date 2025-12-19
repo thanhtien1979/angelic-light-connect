@@ -13,6 +13,7 @@ import GlobalAngelicAura from "@/components/GlobalAngelicAura";
 import { GentleMeditationReminder } from "@/components/GentleMeditationReminder";
 import QuickBreathingWidget from "@/components/QuickBreathingWidget";
 import WeeklyReflectionPrompt from "@/components/WeeklyReflectionPrompt";
+import WalletLinkBanner from "@/components/WalletLinkBanner";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -50,6 +51,9 @@ const Index = () => {
 
       {/* Weekly Reflection Prompt */}
       <WeeklyReflectionPrompt />
+
+      {/* Wallet Link Banner */}
+      <WalletLinkBanner />
     </div>
   );
 };
