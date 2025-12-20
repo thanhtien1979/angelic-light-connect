@@ -47,7 +47,7 @@ const Footer = () => {
             {mantras.map((mantra, index) => (
               <p 
                 key={index}
-                className="text-lg font-bold text-foreground tracking-wide leading-relaxed"
+                className="text-lg font-bold text-foreground tracking-wide leading-relaxed cursor-pointer transition-all duration-300 hover:text-gold hover:drop-shadow-[0_0_12px_hsla(45,100%,60%,0.8)]"
               >
                 {index + 1}. {mantra}
               </p>
