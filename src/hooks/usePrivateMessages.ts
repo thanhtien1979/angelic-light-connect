@@ -13,12 +13,14 @@ export interface PrivateMessage {
   file_url?: string | null;
   file_name?: string | null;
   file_type?: string | null;
+  reply_to_id?: string | null;
   is_read: boolean;
   created_at: string;
   sender_profile?: {
     display_name: string | null;
     avatar_url: string | null;
   };
+  reply_to?: PrivateMessage | null;
 }
 
 export interface Conversation {
@@ -160,10 +162,20 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
         (profiles || []).map(p => [p.id, p])
       );
 
-      const messagesWithProfiles = (data || []).map(msg => ({
-        ...msg,
-        sender_profile: profileMap.get(msg.sender_id) || undefined,
-      }));
+      // Create a map for quick lookup of messages by id
+      const messageMap = new Map((data || []).map(m => [m.id, m]));
+
+      const messagesWithProfiles = (data || []).map(msg => {
+        const replyToMsg = msg.reply_to_id ? messageMap.get(msg.reply_to_id) : null;
+        return {
+          ...msg,
+          sender_profile: profileMap.get(msg.sender_id) || undefined,
+          reply_to: replyToMsg ? {
+            ...replyToMsg,
+            sender_profile: profileMap.get(replyToMsg.sender_id) || undefined,
+          } : null,
+        };
+      });
 
       setMessages(messagesWithProfiles);
 
@@ -186,7 +198,7 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
   }, [user, selectedFriendId]);
 
   // Send a text message
-  const sendMessage = async (content: string) => {
+  const sendMessage = async (content: string, replyToId?: string) => {
     if (!user || !selectedFriendId || !content.trim()) return false;
 
     try {
@@ -198,6 +210,7 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
           sender_id: user.id,
           receiver_id: selectedFriendId,
           content: content.trim(),
+          reply_to_id: replyToId || null,
         });
 
       if (error) throw error;

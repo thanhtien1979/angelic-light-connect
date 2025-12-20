@@ -2,14 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Send, ArrowLeft, X, Users, Plus,
-  Sparkles, Image as ImageIcon, Settings, UserPlus, LogOut, Paperclip, Download
+  Sparkles, Image as ImageIcon, Settings, UserPlus, LogOut, Paperclip, Download, Reply, CornerUpLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { useGroupChat, GroupChat as GroupChatType } from '@/hooks/useGroupChat';
+import { useGroupChat, GroupChat as GroupChatType, GroupMessage } from '@/hooks/useGroupChat';
 import { useAuth } from '@/hooks/useAuth';
 import EmojiPicker from './EmojiPicker';
 import StickerPicker, { STICKER_PACKS } from './StickerPicker';
@@ -32,6 +32,7 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<GroupMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -62,10 +63,19 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
   const handleSend = async () => {
     if (!messageInput.trim() || sending) return;
     
-    const success = await sendMessage(messageInput);
+    const success = await sendMessage(messageInput, undefined, replyingTo?.id);
     if (success) {
       setMessageInput('');
+      setReplyingTo(null);
     }
+  };
+
+  const handleReply = (msg: GroupMessage) => {
+    setReplyingTo(msg);
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
   };
 
   const handleEmojiSelect = (emoji: string) => {
@@ -335,9 +345,20 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
                               key={msg.id}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
+                              className={`flex ${isMine ? 'justify-end' : 'justify-start'} group`}
                             >
-                              <div className="flex gap-2 max-w-[85%]">
+                              <div className="flex gap-2 max-w-[85%] items-end">
+                                {/* Reply button for other's messages */}
+                                {!isMine && (
+                                  <button
+                                    onClick={() => handleReply(msg)}
+                                    className="p-1 rounded-full hover:bg-purple-100 opacity-0 group-hover:opacity-100 transition-opacity mb-1"
+                                    title="Trả lời"
+                                  >
+                                    <CornerUpLeft className="w-3.5 h-3.5 text-purple-400" />
+                                  </button>
+                                )}
+                                
                                 {!isMine && (
                                   <Avatar className="w-6 h-6 mt-1">
                                     <AvatarImage src={msg.sender_profile?.avatar_url || ''} />
@@ -359,6 +380,24 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
                                         : 'bg-gray-100 text-gray-800 rounded-bl-sm'
                                     }`}
                                   >
+                                    {/* Reply preview */}
+                                    {msg.reply_to && (
+                                      <div className={`text-xs mb-2 p-2 rounded-lg border-l-2 ${
+                                        isMine 
+                                          ? 'bg-white/20 border-white/50' 
+                                          : 'bg-gray-200 border-purple-300'
+                                      }`}>
+                                        <p className={`font-medium ${isMine ? 'text-white/90' : 'text-purple-500'}`}>
+                                          {msg.reply_to.sender_id === user.id 
+                                            ? 'Bạn' 
+                                            : msg.reply_to.sender_profile?.display_name || 'Người dùng'}
+                                        </p>
+                                        <p className={`truncate ${isMine ? 'text-white/70' : 'text-gray-600'}`}>
+                                          {msg.reply_to.content}
+                                        </p>
+                                      </div>
+                                    )}
+                                    
                                     {msg.sticker_id && (
                                       <span className="text-4xl block text-center">
                                         {getStickerEmoji(msg.sticker_id)}
@@ -401,6 +440,17 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
                                     </p>
                                   </div>
                                 </div>
+                                
+                                {/* Reply button for my messages */}
+                                {isMine && (
+                                  <button
+                                    onClick={() => handleReply(msg)}
+                                    className="p-1 rounded-full hover:bg-purple-100 opacity-0 group-hover:opacity-100 transition-opacity mb-1"
+                                    title="Trả lời"
+                                  >
+                                    <CornerUpLeft className="w-3.5 h-3.5 text-purple-400" />
+                                  </button>
+                                )}
                               </div>
                             </motion.div>
                           );
@@ -412,6 +462,25 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
 
                   {/* Message Input */}
                   <div className="p-3 border-t border-purple-100">
+                    {/* Reply indicator */}
+                    {replyingTo && (
+                      <div className="flex items-center gap-2 mb-2 p-2 bg-purple-50 rounded-lg border-l-2 border-purple-400">
+                        <Reply className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-purple-500 font-medium">
+                            Đang trả lời {replyingTo.sender_id === user.id ? 'chính mình' : replyingTo.sender_profile?.display_name || 'Người dùng'}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">{replyingTo.content}</p>
+                        </div>
+                        <button 
+                          onClick={cancelReply}
+                          className="p-1 hover:bg-purple-100 rounded-full"
+                        >
+                          <X className="w-3 h-3 text-purple-400" />
+                        </button>
+                      </div>
+                    )}
+
                     <input
                       type="file"
                       ref={fileInputRef}

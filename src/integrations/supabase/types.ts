@@ -365,6 +365,7 @@ export type Database = {
           group_id: string
           id: string
           image_url: string | null
+          reply_to_id: string | null
           sender_id: string
           sticker_id: string | null
         }
@@ -377,6 +378,7 @@ export type Database = {
           group_id: string
           id?: string
           image_url?: string | null
+          reply_to_id?: string | null
           sender_id: string
           sticker_id?: string | null
         }
@@ -389,6 +391,7 @@ export type Database = {
           group_id?: string
           id?: string
           image_url?: string | null
+          reply_to_id?: string | null
           sender_id?: string
           sticker_id?: string | null
         }
@@ -398,6 +401,13 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "group_chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "group_messages"
             referencedColumns: ["id"]
           },
         ]
@@ -592,6 +602,7 @@ export type Database = {
           image_url: string | null
           is_read: boolean
           receiver_id: string
+          reply_to_id: string | null
           sender_id: string
           sticker_id: string | null
         }
@@ -605,6 +616,7 @@ export type Database = {
           image_url?: string | null
           is_read?: boolean
           receiver_id: string
+          reply_to_id?: string | null
           sender_id: string
           sticker_id?: string | null
         }
@@ -618,10 +630,19 @@ export type Database = {
           image_url?: string | null
           is_read?: boolean
           receiver_id?: string
+          reply_to_id?: string | null
           sender_id?: string
           sticker_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "private_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "private_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

@@ -2,14 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Send, ArrowLeft, X, Circle,
-  Sparkles, Heart, Image as ImageIcon, Phone, Video, Paperclip, FileText, Download
+  Sparkles, Heart, Image as ImageIcon, Phone, Video, Paperclip, FileText, Download, Reply, CornerUpLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { usePrivateMessages, Conversation } from '@/hooks/usePrivateMessages';
+import { usePrivateMessages, Conversation, PrivateMessage } from '@/hooks/usePrivateMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import EmojiPicker from './EmojiPicker';
@@ -31,6 +31,7 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
   const [messageInput, setMessageInput] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<PrivateMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -66,10 +67,19 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
     if (!messageInput.trim() || sending) return;
     
     stopTyping();
-    const success = await sendMessage(messageInput);
+    const success = await sendMessage(messageInput, replyingTo?.id);
     if (success) {
       setMessageInput('');
+      setReplyingTo(null);
     }
+  };
+
+  const handleReply = (msg: PrivateMessage) => {
+    setReplyingTo(msg);
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -315,50 +325,92 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
                           key={msg.id}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
+                          className={`flex ${isMine ? 'justify-end' : 'justify-start'} group`}
                         >
-                          <div
-                            className={`max-w-[80%] px-3 py-2 rounded-2xl ${
-                              isMine
-                                ? 'bg-gradient-to-r from-rose-400 to-pink-500 text-white rounded-br-sm'
-                                : 'bg-gray-100 text-gray-800 rounded-bl-sm'
-                            }`}
-                          >
-                            {msg.image_url && (
-                              <img 
-                                src={msg.image_url} 
-                                alt="Shared image" 
-                                className="rounded-lg mb-2 max-w-full cursor-pointer hover:opacity-90 transition-opacity"
-                                onClick={() => window.open(msg.image_url!, '_blank')}
-                              />
-                            )}
-                            {msg.file_url && msg.file_name && (
-                              <a
-                                href={msg.file_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`flex items-center gap-2 p-2 rounded-lg mb-2 ${
-                                  isMine ? 'bg-white/20 hover:bg-white/30' : 'bg-white hover:bg-gray-50'
-                                } transition-colors`}
+                          <div className="flex items-end gap-1 max-w-[85%]">
+                            {/* Reply button for other's messages */}
+                            {!isMine && (
+                              <button
+                                onClick={() => handleReply(msg)}
+                                className="p-1 rounded-full hover:bg-rose-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Trả lời"
                               >
-                                <span className="text-2xl">{getFileIcon(msg.file_type || '')}</span>
-                                <div className="flex-1 min-w-0">
-                                  <p className={`text-sm font-medium truncate ${isMine ? 'text-white' : 'text-gray-800'}`}>
-                                    {msg.file_name}
+                                <CornerUpLeft className="w-3.5 h-3.5 text-rose-400" />
+                              </button>
+                            )}
+                            
+                            <div
+                              className={`px-3 py-2 rounded-2xl ${
+                                isMine
+                                  ? 'bg-gradient-to-r from-rose-400 to-pink-500 text-white rounded-br-sm'
+                                  : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                              }`}
+                            >
+                              {/* Reply preview */}
+                              {msg.reply_to && (
+                                <div className={`text-xs mb-2 p-2 rounded-lg border-l-2 ${
+                                  isMine 
+                                    ? 'bg-white/20 border-white/50' 
+                                    : 'bg-gray-200 border-rose-300'
+                                }`}>
+                                  <p className={`font-medium ${isMine ? 'text-white/90' : 'text-rose-500'}`}>
+                                    {msg.reply_to.sender_id === user.id 
+                                      ? 'Bạn' 
+                                      : msg.reply_to.sender_profile?.display_name || 'Người dùng'}
                                   </p>
-                                  <p className={`text-xs ${isMine ? 'text-white/70' : 'text-gray-500'}`}>
-                                    Nhấn để tải xuống
+                                  <p className={`truncate ${isMine ? 'text-white/70' : 'text-gray-600'}`}>
+                                    {msg.reply_to.content}
                                   </p>
                                 </div>
-                                <Download className={`w-4 h-4 ${isMine ? 'text-white/80' : 'text-gray-600'}`} />
-                              </a>
+                              )}
+                              
+                              {msg.image_url && (
+                                <img 
+                                  src={msg.image_url} 
+                                  alt="Shared image" 
+                                  className="rounded-lg mb-2 max-w-full cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => window.open(msg.image_url!, '_blank')}
+                                />
+                              )}
+                              {msg.file_url && msg.file_name && (
+                                <a
+                                  href={msg.file_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`flex items-center gap-2 p-2 rounded-lg mb-2 ${
+                                    isMine ? 'bg-white/20 hover:bg-white/30' : 'bg-white hover:bg-gray-50'
+                                  } transition-colors`}
+                                >
+                                  <span className="text-2xl">{getFileIcon(msg.file_type || '')}</span>
+                                  <div className="flex-1 min-w-0">
+                                    <p className={`text-sm font-medium truncate ${isMine ? 'text-white' : 'text-gray-800'}`}>
+                                      {msg.file_name}
+                                    </p>
+                                    <p className={`text-xs ${isMine ? 'text-white/70' : 'text-gray-500'}`}>
+                                      Nhấn để tải xuống
+                                    </p>
+                                  </div>
+                                  <Download className={`w-4 h-4 ${isMine ? 'text-white/80' : 'text-gray-600'}`} />
+                                </a>
+                              )}
+                              {msg.content && msg.content !== '📷 Hình ảnh' && !msg.content.startsWith('📎') && (
+                                <p className="text-sm">{msg.content}</p>
+                              )}
+                              <p className={`text-[10px] mt-1 ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
+                                {format(new Date(msg.created_at), 'HH:mm')}
+                              </p>
+                            </div>
+                            
+                            {/* Reply button for my messages */}
+                            {isMine && (
+                              <button
+                                onClick={() => handleReply(msg)}
+                                className="p-1 rounded-full hover:bg-rose-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Trả lời"
+                              >
+                                <CornerUpLeft className="w-3.5 h-3.5 text-rose-400" />
+                              </button>
                             )}
-                            {msg.content && msg.content !== '📷 Hình ảnh' && !msg.content.startsWith('📎') && (
-                              <p className="text-sm">{msg.content}</p>
-                            )}
-                            <p className={`text-[10px] mt-1 ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
-                              {format(new Date(msg.created_at), 'HH:mm')}
-                            </p>
                           </div>
                         </motion.div>
                       );
@@ -388,6 +440,25 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
 
               {/* Message Input */}
               <div className="p-3 border-t border-rose-100">
+                {/* Reply indicator */}
+                {replyingTo && (
+                  <div className="flex items-center gap-2 mb-2 p-2 bg-rose-50 rounded-lg border-l-2 border-rose-400">
+                    <Reply className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-rose-500 font-medium">
+                        Đang trả lời {replyingTo.sender_id === user.id ? 'chính mình' : selectedFriend?.friendName}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{replyingTo.content}</p>
+                    </div>
+                    <button 
+                      onClick={cancelReply}
+                      className="p-1 hover:bg-rose-100 rounded-full"
+                    >
+                      <X className="w-3 h-3 text-rose-400" />
+                    </button>
+                  </div>
+                )}
+
                 {/* Hidden file inputs */}
                 <input
                   type="file"
