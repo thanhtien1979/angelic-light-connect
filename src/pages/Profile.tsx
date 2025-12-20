@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind, Wallet } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind, Wallet, Shield } from "lucide-react";
 import GreetingHistory from "@/components/GreetingHistory";
 import SavedGreetings from "@/components/SavedGreetings";
 import GreetingDigest from "@/components/GreetingDigest";
@@ -578,6 +578,16 @@ const Profile = () => {
           </div>
 
           <div className="space-y-2">
+            <Link to="/privacy">
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3 h-12 text-primary border-primary/30 hover:bg-primary/10"
+              >
+                <Shield className="w-4 h-4" />
+                Quyền Riêng Tư & Dữ Liệu (GDPR)
+              </Button>
+            </Link>
+
             <Button
               variant="outline"
               className="w-full justify-start gap-3 h-12"

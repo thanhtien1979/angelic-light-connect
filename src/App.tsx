@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
+import Privacy from "./pages/Privacy";
 import Community from "./pages/Community";
 import CreativeStudio from "./pages/CreativeStudio";
 import Credits from "./pages/Credits";
@@ -44,6 +45,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/privacy"
+              element={
+                <ProtectedRoute>
+                  <Privacy />
                 </ProtectedRoute>
               }
             />
