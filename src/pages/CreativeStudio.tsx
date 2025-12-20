@@ -16,7 +16,12 @@ import {
   Settings2,
   Link2,
   Coins,
-  History
+  History,
+  Type,
+  Brush,
+  Sticker,
+  SlidersHorizontal,
+  Layout
 } from "lucide-react";
 import { Button } from "@/components/ui/button"; import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +39,12 @@ import Footer from "@/components/Footer";
 import ImageGallery from "@/components/ImageGallery";
 import PromptBuilder from "@/components/PromptBuilder";
 import NFTTransactionHistory from "@/components/NFTTransactionHistory";
+import TextOverlay from "@/components/studio/TextOverlay";
+import ArtStyles from "@/components/studio/ArtStyles";
+import StickerPack from "@/components/studio/StickerPack";
+import ImageFilters from "@/components/studio/ImageFilters";
+import Templates from "@/components/studio/Templates";
+import { toast } from "sonner";
 
 const promptSuggestions = [
   "Thiên thần đang bay trên bầu trời hoàng hôn với đôi cánh vàng rực rỡ",
@@ -53,6 +64,8 @@ export default function CreativeStudio() {
   const [isSaving, setIsSaving] = useState(false);
   const [showPromptBuilder, setShowPromptBuilder] = useState(true);
   const [lastSavedImageId, setLastSavedImageId] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState<"none" | "text" | "stickers" | "filters" | "styles">("none");
+  const [toolsTab, setToolsTab] = useState("generate");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { user } = useAuth();
@@ -129,6 +142,27 @@ export default function CreativeStudio() {
 
   const handleSuggestionClick = (suggestion: string) => {
     setPrompt(suggestion);
+  };
+
+  const handleTemplateSelect = (templatePrompt: string) => {
+    setPrompt(templatePrompt);
+    generateImage(templatePrompt);
+  };
+
+  const handleArtStyleApply = async (styledPrompt: string) => {
+    if (!generatedImage) return;
+    await editImage(styledPrompt, generatedImage);
+  };
+
+  const handleCanvasApply = (canvas: HTMLCanvasElement) => {
+    const dataUrl = canvas.toDataURL("image/png");
+    clearImage();
+    // Set the edited image as the new generated image by triggering a fake generation
+    setTimeout(() => {
+      (window as any).__tempGeneratedImage = dataUrl;
+    }, 0);
+    setEditMode("none");
+    toast.success("Đã áp dụng thay đổi!");
   };
 
   return (
