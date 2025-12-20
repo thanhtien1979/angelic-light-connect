@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
@@ -266,7 +266,43 @@ export const useFriendships = () => {
     fetchFriendships();
   }, [fetchFriendships]);
 
-  // Realtime subscription
+  // Track previous pending requests count to detect new ones
+  const prevPendingCountRef = useRef<number>(0);
+  const isInitialLoadRef = useRef<boolean>(true);
+
+  // Update ref when pending requests change
+  useEffect(() => {
+    if (isInitialLoadRef.current) {
+      prevPendingCountRef.current = pendingRequests.length;
+      isInitialLoadRef.current = false;
+      return;
+    }
+
+    // Check if we have new pending requests
+    if (pendingRequests.length > prevPendingCountRef.current) {
+      const newRequest = pendingRequests[0]; // Most recent request
+      const senderName = newRequest?.requester?.display_name || 'Ai đó';
+      
+      // Show notification toast
+      toast.success(
+        `💌 ${senderName} đã gửi lời mời kết bạn!`,
+        {
+          description: 'Nhấn vào đây để xem lời mời',
+          duration: 5000,
+          action: {
+            label: 'Xem',
+            onClick: () => {
+              window.location.href = '/community';
+            },
+          },
+        }
+      );
+    }
+
+    prevPendingCountRef.current = pendingRequests.length;
+  }, [pendingRequests]);
+
+  // Realtime subscription with notification
   useEffect(() => {
     if (!user) return;
 
@@ -275,12 +311,48 @@ export const useFriendships = () => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
+          schema: 'public',
+          table: 'friendships',
+          filter: `addressee_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('New friend request received:', payload);
+          // Just refresh - notification is handled by useFriendRequestSound
+          fetchFriendships();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
           schema: 'public',
           table: 'friendships',
           filter: `requester_id=eq.${user.id}`
         },
-        () => fetchFriendships()
+        async (payload) => {
+          console.log('Friend request updated:', payload);
+          
+          if (payload.new.status === 'accepted') {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('display_name')
+              .eq('id', payload.new.addressee_id)
+              .maybeSingle();
+            
+            const friendName = profile?.display_name || 'Ai đó';
+            
+            toast.success(
+              `🎉 ${friendName} đã chấp nhận lời mời kết bạn!`,
+              {
+                description: 'Giờ các bạn có thể nhắn tin với nhau',
+                duration: 5000,
+              }
+            );
+          }
+          
+          fetchFriendships();
+        }
       )
       .on(
         'postgres_changes',
