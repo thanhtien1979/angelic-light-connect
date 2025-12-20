@@ -283,6 +283,54 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
     }
   };
 
+  // Delete a message
+  const deleteMessage = async (messageId: string) => {
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase
+        .from('private_messages')
+        .delete()
+        .eq('id', messageId)
+        .eq('sender_id', user.id);
+
+      if (error) throw error;
+      
+      setMessages(prev => prev.filter(m => m.id !== messageId));
+      toast.success('Đã xóa tin nhắn');
+      return true;
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      toast.error('Không thể xóa tin nhắn');
+      return false;
+    }
+  };
+
+  // Edit a message
+  const editMessage = async (messageId: string, newContent: string) => {
+    if (!user || !newContent.trim()) return false;
+
+    try {
+      const { error } = await supabase
+        .from('private_messages')
+        .update({ content: newContent.trim() })
+        .eq('id', messageId)
+        .eq('sender_id', user.id);
+
+      if (error) throw error;
+      
+      setMessages(prev => prev.map(m => 
+        m.id === messageId ? { ...m, content: newContent.trim() } : m
+      ));
+      toast.success('Đã chỉnh sửa tin nhắn');
+      return true;
+    } catch (error) {
+      console.error('Error editing message:', error);
+      toast.error('Không thể chỉnh sửa tin nhắn');
+      return false;
+    }
+  };
+
   // Get total unread count
   const getTotalUnread = useCallback(() => {
     return conversations.reduce((sum, c) => sum + c.unreadCount, 0);
@@ -346,6 +394,8 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
     sendMessage,
     sendImageMessage,
     sendFileMessage,
+    deleteMessage,
+    editMessage,
     getTotalUnread,
     refetchMessages: fetchMessages,
     refetchConversations: fetchConversations,
