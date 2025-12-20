@@ -13,6 +13,7 @@ import { usePrivateMessages, Conversation } from '@/hooks/usePrivateMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import EmojiPicker from './EmojiPicker';
+import StickerPicker, { STICKER_PACKS } from './StickerPicker';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -319,6 +320,9 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
                 
                 <div className="flex items-center gap-1">
                   <EmojiPicker onSelect={handleEmojiSelect} />
+                  <StickerPicker onSelect={async (stickerId, emoji) => {
+                    await sendMessage(emoji);
+                  }} />
                   
                   <Button
                     variant="ghost"
