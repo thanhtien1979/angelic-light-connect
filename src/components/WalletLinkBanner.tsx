@@ -10,8 +10,14 @@ const WalletLinkBanner = () => {
   const [isDismissed, setIsDismissed] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
 
-  // Check if banner was dismissed today
+  // Check if banner was dismissed today or permanently
   useEffect(() => {
+    const dismissedPermanently = localStorage.getItem("wallet_banner_dismissed_permanently");
+    if (dismissedPermanently === "true") {
+      setIsDismissed(true);
+      return;
+    }
+    
     const dismissedDate = localStorage.getItem("wallet_banner_dismissed_date");
     const today = new Date().toDateString();
     
@@ -36,6 +42,12 @@ const WalletLinkBanner = () => {
     setIsDismissed(true);
     setShowBanner(false);
     localStorage.setItem("wallet_banner_dismissed_date", new Date().toDateString());
+  };
+
+  const handleDismissPermanently = () => {
+    setIsDismissed(true);
+    setShowBanner(false);
+    localStorage.setItem("wallet_banner_dismissed_permanently", "true");
   };
 
   const handleConnect = () => {
@@ -121,6 +133,13 @@ const WalletLinkBanner = () => {
                     </>
                   )}
                 </motion.button>
+                {/* Don't remind button */}
+                <button
+                  onClick={handleDismissPermanently}
+                  className="mt-2 text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors underline underline-offset-2"
+                >
+                  Không nhắc lại
+                </button>
               </div>
             </div>
 
