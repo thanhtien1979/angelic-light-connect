@@ -40,7 +40,7 @@ const navLinks: NavLink[] = [
   { id: "testimonials", label: "Nhân Chứng" },
   { id: "studio", label: "Studio", isPage: true, path: "/studio" },
   { id: "community", label: "Cộng Đồng", isPage: true, path: "/community", showBadge: true },
-  { id: "friends", label: "Kết Bạn", isPage: true, path: "/community", showBadge: true },
+  { id: "friends", label: "Kết Bạn", isPage: true, path: "/friends", showBadge: true },
 ];
 
 const BLESSING_MESSAGES = [
