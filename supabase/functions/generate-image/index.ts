@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +13,34 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.error("No authorization header provided");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - No token provided" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      console.error("Invalid token:", userError?.message);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Authenticated user:", user.id);
+
     const { prompt, editImage } = await req.json();
     
     if (!prompt) {
@@ -32,6 +61,7 @@ serve(async (req) => {
 
     console.log("Generating image with prompt:", prompt);
     console.log("Edit mode:", !!editImage);
+    console.log("User ID:", user.id);
 
     // Build messages array
     const messages: any[] = [];
@@ -68,7 +98,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       if (response.status === 429) {
-        console.warn("Rate limit exceeded");
+        console.warn("Rate limit exceeded for user:", user.id);
         return new Response(
           JSON.stringify({
             error: "Đã vượt quá giới hạn yêu cầu. Vui lòng thử lại sau.",
@@ -78,7 +108,7 @@ serve(async (req) => {
         );
       }
       if (response.status === 402) {
-        console.warn("Payment required (AI credits depleted)");
+        console.warn("Payment required (AI credits depleted) for user:", user.id);
         return new Response(
           JSON.stringify({
             error: "Cần nạp thêm credits. Vui lòng liên hệ admin.",
@@ -97,7 +127,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log("AI response received");
+    console.log("AI response received for user:", user.id);
     
     const message = data.choices?.[0]?.message;
     const imageUrl = message?.images?.[0]?.image_url?.url;
