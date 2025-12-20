@@ -2,13 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Send, ArrowLeft, X, Circle,
-  Sparkles, Heart, Image as ImageIcon, Phone, Video, Paperclip, FileText, Download, Reply, CornerUpLeft
+  Sparkles, Heart, Image as ImageIcon, Phone, Video, Paperclip, FileText, Download, Reply, CornerUpLeft, Trash2, Pencil, MoreVertical, Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { usePrivateMessages, Conversation, PrivateMessage } from '@/hooks/usePrivateMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
@@ -32,6 +33,8 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [replyingTo, setReplyingTo] = useState<PrivateMessage | null>(null);
+  const [editingMessage, setEditingMessage] = useState<PrivateMessage | null>(null);
+  const [editInput, setEditInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -44,6 +47,8 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
     sendMessage,
     sendImageMessage,
     sendFileMessage,
+    deleteMessage,
+    editMessage,
     getTotalUnread 
   } = usePrivateMessages(selectedFriend?.friendId);
 
@@ -76,10 +81,36 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
 
   const handleReply = (msg: PrivateMessage) => {
     setReplyingTo(msg);
+    setEditingMessage(null);
   };
 
   const cancelReply = () => {
     setReplyingTo(null);
+  };
+
+  const handleStartEdit = (msg: PrivateMessage) => {
+    setEditingMessage(msg);
+    setEditInput(msg.content);
+    setReplyingTo(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+    setEditInput('');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingMessage || !editInput.trim()) return;
+    
+    const success = await editMessage(editingMessage.id, editInput);
+    if (success) {
+      setEditingMessage(null);
+      setEditInput('');
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    await deleteMessage(messageId);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -339,77 +370,120 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
                               </button>
                             )}
                             
-                            <div
-                              className={`px-3 py-2 rounded-2xl ${
-                                isMine
-                                  ? 'bg-gradient-to-r from-rose-400 to-pink-500 text-white rounded-br-sm'
-                                  : 'bg-gray-100 text-gray-800 rounded-bl-sm'
-                              }`}
-                            >
-                              {/* Reply preview */}
-                              {msg.reply_to && (
-                                <div className={`text-xs mb-2 p-2 rounded-lg border-l-2 ${
-                                  isMine 
-                                    ? 'bg-white/20 border-white/50' 
-                                    : 'bg-gray-200 border-rose-300'
-                                }`}>
-                                  <p className={`font-medium ${isMine ? 'text-white/90' : 'text-rose-500'}`}>
-                                    {msg.reply_to.sender_id === user.id 
-                                      ? 'Bạn' 
-                                      : msg.reply_to.sender_profile?.display_name || 'Người dùng'}
-                                  </p>
-                                  <p className={`truncate ${isMine ? 'text-white/70' : 'text-gray-600'}`}>
-                                    {msg.reply_to.content}
-                                  </p>
-                                </div>
-                              )}
-                              
-                              {msg.image_url && (
-                                <img 
-                                  src={msg.image_url} 
-                                  alt="Shared image" 
-                                  className="rounded-lg mb-2 max-w-full cursor-pointer hover:opacity-90 transition-opacity"
-                                  onClick={() => window.open(msg.image_url!, '_blank')}
+                            {/* Editing mode */}
+                            {editingMessage?.id === msg.id ? (
+                              <div className="flex items-center gap-2 bg-rose-50 rounded-2xl p-2">
+                                <Input
+                                  value={editInput}
+                                  onChange={(e) => setEditInput(e.target.value)}
+                                  className="text-sm border-rose-200 focus:ring-rose-400"
+                                  onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
                                 />
-                              )}
-                              {msg.file_url && msg.file_name && (
-                                <a
-                                  href={msg.file_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={`flex items-center gap-2 p-2 rounded-lg mb-2 ${
-                                    isMine ? 'bg-white/20 hover:bg-white/30' : 'bg-white hover:bg-gray-50'
-                                  } transition-colors`}
+                                <button
+                                  onClick={handleSaveEdit}
+                                  className="p-1 rounded-full bg-rose-500 text-white hover:bg-rose-600"
                                 >
-                                  <span className="text-2xl">{getFileIcon(msg.file_type || '')}</span>
-                                  <div className="flex-1 min-w-0">
-                                    <p className={`text-sm font-medium truncate ${isMine ? 'text-white' : 'text-gray-800'}`}>
-                                      {msg.file_name}
+                                  <Check className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={handleCancelEdit}
+                                  className="p-1 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div
+                                className={`px-3 py-2 rounded-2xl ${
+                                  isMine
+                                    ? 'bg-gradient-to-r from-rose-400 to-pink-500 text-white rounded-br-sm'
+                                    : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                                }`}
+                              >
+                                {/* Reply preview */}
+                                {msg.reply_to && (
+                                  <div className={`text-xs mb-2 p-2 rounded-lg border-l-2 ${
+                                    isMine 
+                                      ? 'bg-white/20 border-white/50' 
+                                      : 'bg-gray-200 border-rose-300'
+                                  }`}>
+                                    <p className={`font-medium ${isMine ? 'text-white/90' : 'text-rose-500'}`}>
+                                      {msg.reply_to.sender_id === user.id 
+                                        ? 'Bạn' 
+                                        : msg.reply_to.sender_profile?.display_name || 'Người dùng'}
                                     </p>
-                                    <p className={`text-xs ${isMine ? 'text-white/70' : 'text-gray-500'}`}>
-                                      Nhấn để tải xuống
+                                    <p className={`truncate ${isMine ? 'text-white/70' : 'text-gray-600'}`}>
+                                      {msg.reply_to.content}
                                     </p>
                                   </div>
-                                  <Download className={`w-4 h-4 ${isMine ? 'text-white/80' : 'text-gray-600'}`} />
-                                </a>
-                              )}
-                              {msg.content && msg.content !== '📷 Hình ảnh' && !msg.content.startsWith('📎') && (
-                                <p className="text-sm">{msg.content}</p>
-                              )}
-                              <p className={`text-[10px] mt-1 ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
-                                {format(new Date(msg.created_at), 'HH:mm')}
-                              </p>
-                            </div>
+                                )}
+                                
+                                {msg.image_url && (
+                                  <img 
+                                    src={msg.image_url} 
+                                    alt="Shared image" 
+                                    className="rounded-lg mb-2 max-w-full cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => window.open(msg.image_url!, '_blank')}
+                                  />
+                                )}
+                                {msg.file_url && msg.file_name && (
+                                  <a
+                                    href={msg.file_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`flex items-center gap-2 p-2 rounded-lg mb-2 ${
+                                      isMine ? 'bg-white/20 hover:bg-white/30' : 'bg-white hover:bg-gray-50'
+                                    } transition-colors`}
+                                  >
+                                    <span className="text-2xl">{getFileIcon(msg.file_type || '')}</span>
+                                    <div className="flex-1 min-w-0">
+                                      <p className={`text-sm font-medium truncate ${isMine ? 'text-white' : 'text-gray-800'}`}>
+                                        {msg.file_name}
+                                      </p>
+                                      <p className={`text-xs ${isMine ? 'text-white/70' : 'text-gray-500'}`}>
+                                        Nhấn để tải xuống
+                                      </p>
+                                    </div>
+                                    <Download className={`w-4 h-4 ${isMine ? 'text-white/80' : 'text-gray-600'}`} />
+                                  </a>
+                                )}
+                                {msg.content && msg.content !== '📷 Hình ảnh' && !msg.content.startsWith('📎') && (
+                                  <p className="text-sm">{msg.content}</p>
+                                )}
+                                <p className={`text-[10px] mt-1 ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
+                                  {format(new Date(msg.created_at), 'HH:mm')}
+                                </p>
+                              </div>
+                            )}
                             
-                            {/* Reply button for my messages */}
-                            {isMine && (
-                              <button
-                                onClick={() => handleReply(msg)}
-                                className="p-1 rounded-full hover:bg-rose-100 opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="Trả lời"
-                              >
-                                <CornerUpLeft className="w-3.5 h-3.5 text-rose-400" />
-                              </button>
+                            {/* Action buttons for my messages */}
+                            {isMine && !editingMessage && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button className="p-1 rounded-full hover:bg-rose-100 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <MoreVertical className="w-3.5 h-3.5 text-rose-400" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-36">
+                                  <DropdownMenuItem onClick={() => handleReply(msg)}>
+                                    <CornerUpLeft className="w-4 h-4 mr-2" />
+                                    Trả lời
+                                  </DropdownMenuItem>
+                                  {!msg.image_url && !msg.file_url && (
+                                    <DropdownMenuItem onClick={() => handleStartEdit(msg)}>
+                                      <Pencil className="w-4 h-4 mr-2" />
+                                      Chỉnh sửa
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDeleteMessage(msg.id)}
+                                    className="text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Xóa
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             )}
                           </div>
                         </motion.div>
