@@ -12,7 +12,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { AlertTriangle, Flag } from 'lucide-react';
-import { useUserReports, ReportReason, REPORT_REASONS } from '@/hooks/useUserReports';
+import { useUserReports, ReportReason } from '@/hooks/useUserReports';
+
+const REPORT_REASONS_MAP: Record<ReportReason, string> = {
+  spam: 'Spam hoặc quảng cáo',
+  harassment: 'Quấy rối hoặc bắt nạt',
+  inappropriate_content: 'Nội dung không phù hợp',
+  fake_account: 'Tài khoản giả mạo',
+  other: 'Lý do khác'
+};
 
 interface ReportUserDialogProps {
   isOpen: boolean;
@@ -52,11 +60,11 @@ const ReportUserDialog = ({ isOpen, onClose, userId, userName }: ReportUserDialo
           <div className="space-y-3">
             <Label className="text-sm font-medium">Lý do báo cáo</Label>
             <RadioGroup value={reason} onValueChange={(v) => setReason(v as ReportReason)}>
-              {(Object.keys(REPORT_REASONS) as ReportReason[]).map((key) => (
+              {(Object.keys(REPORT_REASONS_MAP) as ReportReason[]).map((key) => (
                 <div key={key} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <RadioGroupItem value={key} id={key} />
                   <Label htmlFor={key} className="cursor-pointer text-sm">
-                    {REPORT_REASONS[key]}
+                    {REPORT_REASONS_MAP[key]}
                   </Label>
                 </div>
               ))}

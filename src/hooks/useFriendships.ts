@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
-import { useBlockedUsers } from './useBlockedUsers';
 
 export interface Profile {
   id: string;
@@ -24,7 +23,6 @@ export interface Friendship {
 
 export const useFriendships = () => {
   const { user } = useAuth();
-  const { blockedUsers, isBlocked } = useBlockedUsers();
   const [friends, setFriends] = useState<Friendship[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Friendship[]>([]);
   const [sentRequests, setSentRequests] = useState<Friendship[]>([]);
@@ -248,6 +246,18 @@ export const useFriendships = () => {
     if (!query.trim() || query.length < 2) return [];
 
     try {
+      // Get blocked users first
+      const { data: blockedData } = await supabase
+        .from('blocked_users')
+        .select('blocked_id, blocker_id')
+        .or(`blocker_id.eq.${user?.id},blocked_id.eq.${user?.id}`);
+
+      const blockedIds = new Set<string>();
+      (blockedData || []).forEach(b => {
+        if (b.blocker_id === user?.id) blockedIds.add(b.blocked_id);
+        if (b.blocked_id === user?.id) blockedIds.add(b.blocker_id);
+      });
+
       const { data, error } = await supabase
         .from('profiles')
         .select('id, display_name, avatar_url')
@@ -265,7 +275,7 @@ export const useFriendships = () => {
       
       return (data || []).filter(p => 
         p.id !== user?.id && 
-        !isBlocked(p.id) &&
+        !blockedIds.has(p.id) &&
         !existingFriendIds.has(p.id)
       );
     } catch (error) {
