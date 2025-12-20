@@ -34,6 +34,9 @@ export interface GroupMessage {
   content: string;
   image_url: string | null;
   sticker_id: string | null;
+  file_url: string | null;
+  file_name: string | null;
+  file_type: string | null;
   created_at: string;
   sender_profile?: {
     display_name: string | null;
@@ -299,6 +302,39 @@ export const useGroupChat = (selectedGroupId?: string) => {
     }
   };
 
+  // Send file message
+  const sendFileMessage = async (fileUrl: string, fileName: string, fileType: string) => {
+    if (!user || !selectedGroupId) return false;
+
+    try {
+      setSending(true);
+
+      const { error } = await supabase.from('group_messages').insert({
+        group_id: selectedGroupId,
+        sender_id: user.id,
+        content: `📎 ${fileName}`,
+        file_url: fileUrl,
+        file_name: fileName,
+        file_type: fileType,
+      });
+
+      if (error) throw error;
+
+      await supabase
+        .from('group_chats')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', selectedGroupId);
+
+      return true;
+    } catch (error) {
+      console.error('Error sending file:', error);
+      toast.error('Không thể gửi file');
+      return false;
+    } finally {
+      setSending(false);
+    }
+  };
+
   // Add member to group
   const addMember = async (userId: string) => {
     if (!user || !selectedGroupId) return false;
@@ -411,6 +447,7 @@ export const useGroupChat = (selectedGroupId?: string) => {
     createGroup,
     sendMessage,
     sendImageMessage,
+    sendFileMessage,
     addMember,
     removeMember,
     leaveGroup,

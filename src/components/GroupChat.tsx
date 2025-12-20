@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Send, ArrowLeft, X, Users, Plus,
-  Sparkles, Image as ImageIcon, Settings, UserPlus, LogOut
+  Sparkles, Image as ImageIcon, Settings, UserPlus, LogOut, Paperclip, Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,10 +29,12 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
   const [selectedGroup, setSelectedGroup] = useState<GroupChatType | null>(null);
   const [messageInput, setMessageInput] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
 
   const { 
     groups,
@@ -43,6 +45,7 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
     createGroup,
     sendMessage,
     sendImageMessage,
+    sendFileMessage,
     leaveGroup,
   } = useGroupChat(selectedGroup?.id);
 
@@ -116,6 +119,57 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !selectedGroup) return;
+
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Chỉ hỗ trợ file PDF, Word, Excel hoặc Text');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File phải nhỏ hơn 10MB');
+      return;
+    }
+
+    try {
+      setUploadingFile(true);
+
+      const fileName = `groups/${selectedGroup.id}/${Date.now()}_${file.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('documents')
+        .getPublicUrl(fileName);
+
+      await sendFileMessage(urlData.publicUrl, file.name, file.type);
+      toast.success('Đã gửi file! 📎');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Không thể tải lên file');
+    } finally {
+      setUploadingFile(false);
+      if (docInputRef.current) {
+        docInputRef.current.value = '';
+      }
+    }
+  };
+
   const getInitials = (name: string | null) => {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -127,6 +181,13 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
       if (sticker) return sticker.emoji;
     }
     return '🎭';
+  };
+
+  const getFileIcon = (fileType: string) => {
+    if (fileType?.includes('pdf')) return '📄';
+    if (fileType?.includes('word') || fileType?.includes('document')) return '📝';
+    if (fileType?.includes('excel') || fileType?.includes('sheet')) return '📊';
+    return '📎';
   };
 
   const formatTime = (dateStr: string) => {
@@ -311,7 +372,28 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
                                         onClick={() => window.open(msg.image_url!, '_blank')}
                                       />
                                     )}
-                                    {!msg.sticker_id && msg.content && msg.content !== '📷 Hình ảnh' && (
+                                    {msg.file_url && msg.file_name && (
+                                      <a
+                                        href={msg.file_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex items-center gap-2 p-2 rounded-lg mb-2 ${
+                                          isMine ? 'bg-white/20 hover:bg-white/30' : 'bg-white hover:bg-gray-50'
+                                        } transition-colors`}
+                                      >
+                                        <span className="text-2xl">{getFileIcon(msg.file_type || '')}</span>
+                                        <div className="flex-1 min-w-0">
+                                          <p className={`text-sm font-medium truncate ${isMine ? 'text-white' : 'text-gray-800'}`}>
+                                            {msg.file_name}
+                                          </p>
+                                          <p className={`text-xs ${isMine ? 'text-white/70' : 'text-gray-500'}`}>
+                                            Nhấn để tải xuống
+                                          </p>
+                                        </div>
+                                        <Download className={`w-4 h-4 ${isMine ? 'text-white/80' : 'text-gray-600'}`} />
+                                      </a>
+                                    )}
+                                    {!msg.sticker_id && msg.content && msg.content !== '📷 Hình ảnh' && !msg.content.startsWith('📎') && (
                                       <p className="text-sm">{msg.content}</p>
                                     )}
                                     <p className={`text-[10px] mt-1 ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
@@ -337,6 +419,13 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
                       accept="image/*"
                       className="hidden"
                     />
+                    <input
+                      type="file"
+                      ref={docInputRef}
+                      onChange={handleFileUpload}
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+                      className="hidden"
+                    />
                     
                     <div className="flex items-center gap-1">
                       <EmojiPicker onSelect={handleEmojiSelect} />
@@ -347,12 +436,28 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
                         size="icon"
                         className="h-8 w-8 text-purple-400 hover:text-purple-600 hover:bg-purple-100"
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={uploadingImage}
+                        disabled={uploadingImage || uploadingFile}
+                        title="Gửi hình ảnh"
                       >
                         {uploadingImage ? (
                           <Sparkles className="w-5 h-5 animate-spin" />
                         ) : (
                           <ImageIcon className="w-5 h-5" />
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-purple-400 hover:text-purple-600 hover:bg-purple-100"
+                        onClick={() => docInputRef.current?.click()}
+                        disabled={uploadingImage || uploadingFile}
+                        title="Gửi tài liệu"
+                      >
+                        {uploadingFile ? (
+                          <Sparkles className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <Paperclip className="w-5 h-5" />
                         )}
                       </Button>
                       
@@ -362,12 +467,12 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                         placeholder="Nhập tin nhắn..."
                         className="flex-1 border-purple-200 focus:border-indigo-400"
-                        disabled={sending || uploadingImage}
+                        disabled={sending || uploadingImage || uploadingFile}
                       />
                       
                       <Button
                         onClick={handleSend}
-                        disabled={!messageInput.trim() || sending || uploadingImage}
+                        disabled={!messageInput.trim() || sending || uploadingImage || uploadingFile}
                         className="bg-gradient-to-r from-purple-400 to-indigo-500 hover:from-purple-500 hover:to-indigo-600"
                       >
                         {sending ? (

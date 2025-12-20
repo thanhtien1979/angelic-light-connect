@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Send, ArrowLeft, X, Circle,
-  Sparkles, Heart, Image as ImageIcon, Phone, Video
+  Sparkles, Heart, Image as ImageIcon, Phone, Video, Paperclip, FileText, Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,8 +30,10 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
   const [selectedFriend, setSelectedFriend] = useState<Conversation | null>(null);
   const [messageInput, setMessageInput] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
 
   const { 
     messages, 
@@ -40,6 +42,7 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
     sending,
     sendMessage,
     sendImageMessage,
+    sendFileMessage,
     getTotalUnread 
   } = usePrivateMessages(selectedFriend?.friendId);
 
@@ -83,7 +86,6 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
     const file = e.target.files?.[0];
     if (!file || !user || !selectedFriend) return;
 
-    // Validate file
     if (!file.type.startsWith('image/')) {
       toast.error('Chỉ hỗ trợ file hình ảnh');
       return;
@@ -97,22 +99,19 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
     try {
       setUploadingImage(true);
 
-      // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('generated-images')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from('generated-images')
         .getPublicUrl(fileName);
 
-      // Send image message
       await sendImageMessage(urlData.publicUrl);
       toast.success('Đã gửi hình ảnh! 📷');
     } catch (error) {
@@ -124,6 +123,65 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
         fileInputRef.current.value = '';
       }
     }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !selectedFriend) return;
+
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Chỉ hỗ trợ file PDF, Word, Excel hoặc Text');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File phải nhỏ hơn 10MB');
+      return;
+    }
+
+    try {
+      setUploadingFile(true);
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}_${file.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('documents')
+        .getPublicUrl(fileName);
+
+      await sendFileMessage(urlData.publicUrl, file.name, file.type);
+      toast.success('Đã gửi file! 📎');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Không thể tải lên file');
+    } finally {
+      setUploadingFile(false);
+      if (docInputRef.current) {
+        docInputRef.current.value = '';
+      }
+    }
+  };
+
+  const getFileIcon = (fileType: string) => {
+    if (fileType?.includes('pdf')) return '📄';
+    if (fileType?.includes('word') || fileType?.includes('document')) return '📝';
+    if (fileType?.includes('excel') || fileType?.includes('sheet')) return '📊';
+    return '📎';
   };
 
   const getInitials = (name: string | null) => {
@@ -274,7 +332,28 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
                                 onClick={() => window.open(msg.image_url!, '_blank')}
                               />
                             )}
-                            {msg.content && msg.content !== '📷 Hình ảnh' && (
+                            {msg.file_url && msg.file_name && (
+                              <a
+                                href={msg.file_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`flex items-center gap-2 p-2 rounded-lg mb-2 ${
+                                  isMine ? 'bg-white/20 hover:bg-white/30' : 'bg-white hover:bg-gray-50'
+                                } transition-colors`}
+                              >
+                                <span className="text-2xl">{getFileIcon(msg.file_type || '')}</span>
+                                <div className="flex-1 min-w-0">
+                                  <p className={`text-sm font-medium truncate ${isMine ? 'text-white' : 'text-gray-800'}`}>
+                                    {msg.file_name}
+                                  </p>
+                                  <p className={`text-xs ${isMine ? 'text-white/70' : 'text-gray-500'}`}>
+                                    Nhấn để tải xuống
+                                  </p>
+                                </div>
+                                <Download className={`w-4 h-4 ${isMine ? 'text-white/80' : 'text-gray-600'}`} />
+                              </a>
+                            )}
+                            {msg.content && msg.content !== '📷 Hình ảnh' && !msg.content.startsWith('📎') && (
                               <p className="text-sm">{msg.content}</p>
                             )}
                             <p className={`text-[10px] mt-1 ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
@@ -309,12 +388,19 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
 
               {/* Message Input */}
               <div className="p-3 border-t border-rose-100">
-                {/* Hidden file input */}
+                {/* Hidden file inputs */}
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleImageUpload}
                   accept="image/*"
+                  className="hidden"
+                />
+                <input
+                  type="file"
+                  ref={docInputRef}
+                  onChange={handleFileUpload}
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
                   className="hidden"
                 />
                 
@@ -329,12 +415,28 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
                     size="icon"
                     className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-100"
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingImage}
+                    disabled={uploadingImage || uploadingFile}
+                    title="Gửi hình ảnh"
                   >
                     {uploadingImage ? (
                       <Sparkles className="w-5 h-5 animate-spin" />
                     ) : (
                       <ImageIcon className="w-5 h-5" />
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-100"
+                    onClick={() => docInputRef.current?.click()}
+                    disabled={uploadingImage || uploadingFile}
+                    title="Gửi tài liệu"
+                  >
+                    {uploadingFile ? (
+                      <Sparkles className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Paperclip className="w-5 h-5" />
                     )}
                   </Button>
                   
@@ -344,12 +446,12 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Nhập tin nhắn..."
                     className="flex-1 border-rose-200 focus:border-pink-400"
-                    disabled={sending || uploadingImage}
+                    disabled={sending || uploadingImage || uploadingFile}
                   />
                   
                   <Button
                     onClick={handleSend}
-                    disabled={!messageInput.trim() || sending || uploadingImage}
+                    disabled={!messageInput.trim() || sending || uploadingImage || uploadingFile}
                     className="bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600"
                   >
                     {sending ? (
