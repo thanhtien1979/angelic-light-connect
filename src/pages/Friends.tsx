@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, Users, Heart, Sparkles, MessageCircle, 
-  UserPlus, Search, Shield, ShieldOff
+  UserPlus, Search, Shield, ShieldOff, Flag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import PrivateChat from "@/components/PrivateChat";
 import AuthModal from "@/components/AuthModal";
 import BlockUserDialog from "@/components/BlockUserDialog";
 import BlockedUsersList from "@/components/BlockedUsersList";
+import ReportUserDialog from "@/components/ReportUserDialog";
 
 const Friends = () => {
   const { user } = useAuth();
@@ -31,6 +32,8 @@ const Friends = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [userToBlock, setUserToBlock] = useState<{ id: string; name: string } | null>(null);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [userToReport, setUserToReport] = useState<{ id: string; name: string } | null>(null);
 
   const { blockUser, isBlocked } = useBlockedUsers();
 
@@ -85,6 +88,11 @@ const Friends = () => {
     await blockUser(userToBlock.id, reason);
     setBlockDialogOpen(false);
     setUserToBlock(null);
+  };
+
+  const handleReportUser = (userId: string, userName: string) => {
+    setUserToReport({ id: userId, name: userName });
+    setReportDialogOpen(true);
   };
 
   if (!user) {
@@ -298,6 +306,15 @@ const Friends = () => {
                             title="Hủy kết bạn"
                           >
                             <Users className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleReportUser(profile?.id || "", profile?.display_name || "Người dùng")}
+                            className="text-muted-foreground hover:text-amber-600 hover:bg-amber-50"
+                            title="Báo cáo"
+                          >
+                            <Flag className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -529,6 +546,17 @@ const Friends = () => {
         }}
         onConfirm={confirmBlockUser}
         userName={userToBlock?.name || ""}
+      />
+
+      {/* Report User Dialog */}
+      <ReportUserDialog
+        isOpen={reportDialogOpen}
+        onClose={() => {
+          setReportDialogOpen(false);
+          setUserToReport(null);
+        }}
+        userId={userToReport?.id || ""}
+        userName={userToReport?.name || ""}
       />
     </div>
   );
