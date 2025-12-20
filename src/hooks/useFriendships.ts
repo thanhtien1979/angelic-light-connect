@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { useBlockedUsers } from './useBlockedUsers';
 
 export interface Profile {
   id: string;
@@ -23,6 +24,7 @@ export interface Friendship {
 
 export const useFriendships = () => {
   const { user } = useAuth();
+  const { blockedUsers, isBlocked } = useBlockedUsers();
   const [friends, setFriends] = useState<Friendship[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Friendship[]>([]);
   const [sentRequests, setSentRequests] = useState<Friendship[]>([]);
@@ -250,12 +252,22 @@ export const useFriendships = () => {
         .from('profiles')
         .select('id, display_name, avatar_url')
         .ilike('display_name', `%${query}%`)
-        .limit(10);
+        .limit(20);
 
       if (error) throw error;
       
-      // Filter out current user
-      return (data || []).filter(p => p.id !== user?.id);
+      // Filter out current user, blocked users, and existing friendships
+      const existingFriendIds = new Set([
+        ...friends.map(f => f.requester_id === user?.id ? f.addressee_id : f.requester_id),
+        ...pendingRequests.map(f => f.requester_id),
+        ...sentRequests.map(f => f.addressee_id)
+      ]);
+      
+      return (data || []).filter(p => 
+        p.id !== user?.id && 
+        !isBlocked(p.id) &&
+        !existingFriendIds.has(p.id)
+      );
     } catch (error) {
       console.error('Error searching users:', error);
       return [];
