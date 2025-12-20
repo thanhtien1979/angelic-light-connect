@@ -370,11 +370,47 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Get client identifier early for rate limiting
-  const clientId = getClientIdentifier(req);
-  console.log(`Request from client: ${clientId}`);
+  // SECURITY: Require authentication for all chat requests
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return new Response(JSON.stringify({ 
+      error: "Xác thực là bắt buộc để sử dụng Angel AI. Vui lòng đăng nhập." 
+    }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   
-  // Increment counter and cleanup periodically
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error("Missing Supabase configuration");
+    return new Response(JSON.stringify({ error: "Server configuration error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  
+  // Validate the user's JWT token
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  
+  if (authError || !user) {
+    return new Response(JSON.stringify({ 
+      error: "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại." 
+    }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Use authenticated user ID for rate limiting (more secure than IP)
+  const clientId = user.id;
+  
+  // Increment counter and cleanup periodically (no sensitive logging)
   requestCounter++;
   if (requestCounter % 100 === 0) {
     cleanupHourlyLimits();
@@ -448,37 +484,26 @@ serve(async (req) => {
     const validatedMessages = validation.messages!;
 
     // Check rate limit using database function (minute-level)
+    const { data: isAllowed, error: rateLimitError } = await supabase.rpc('check_rate_limit', {
+      p_identifier: clientId,
+      p_endpoint: 'angel-chat',
+      p_max_requests: MAX_REQUESTS_PER_MINUTE,
+      p_window_minutes: 1
+    });
     
-    // Check rate limit using database function
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    
-    if (supabaseUrl && supabaseServiceKey) {
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
-      
-      const { data: isAllowed, error: rateLimitError } = await supabase.rpc('check_rate_limit', {
-        p_identifier: clientId,
-        p_endpoint: 'angel-chat',
-        p_max_requests: MAX_REQUESTS_PER_MINUTE,
-        p_window_minutes: 1
+    if (rateLimitError) {
+      // Continue without rate limiting if there's an error
+    } else if (!isAllowed) {
+      return new Response(JSON.stringify({ 
+        error: "Bạn đang gửi tin nhắn quá nhanh. Xin vui lòng đợi một chút trước khi thử lại." 
+      }), {
+        status: 429,
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Retry-After": "60"
+        },
       });
-      
-      if (rateLimitError) {
-        console.error("Rate limit check error:", rateLimitError);
-        // Continue without rate limiting if there's an error
-      } else if (!isAllowed) {
-        console.log(`Rate limit exceeded for client: ${clientId}`);
-        return new Response(JSON.stringify({ 
-          error: "Bạn đang gửi tin nhắn quá nhanh. Xin vui lòng đợi một chút trước khi thử lại." 
-        }), {
-          status: 429,
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json",
-            "Retry-After": "60"
-          },
-        });
-      }
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -488,12 +513,8 @@ serve(async (req) => {
     }
 
     // Prepare messages (summarize if conversation is long)
-    const { messages: preparedMessages, summaryData } = await prepareMessagesForAI(validatedMessages, LOVABLE_API_KEY);
-    
-    console.log(`Sending ${preparedMessages.length} messages to AI (original: ${validatedMessages.length})`);
-    if (summaryData) {
-      console.log(`Generated summary with themes: ${summaryData.key_themes.join(", ")}`);
-    }
+    // SECURITY: No logging of message content or sensitive data
+    const { messages: preparedMessages } = await prepareMessagesForAI(validatedMessages, LOVABLE_API_KEY);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
