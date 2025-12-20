@@ -37,11 +37,13 @@ export interface GroupMessage {
   file_url: string | null;
   file_name: string | null;
   file_type: string | null;
+  reply_to_id: string | null;
   created_at: string;
   sender_profile?: {
     display_name: string | null;
     avatar_url: string | null;
   };
+  reply_to?: GroupMessage | null;
 }
 
 export const useGroupChat = (selectedGroupId?: string) => {
@@ -144,10 +146,20 @@ export const useGroupChat = (selectedGroupId?: string) => {
         (profiles || []).map(p => [p.id, p])
       );
 
-      const messagesWithProfiles = (data || []).map(msg => ({
-        ...msg,
-        sender_profile: profileMap.get(msg.sender_id) || undefined,
-      }));
+      // Create a map for quick lookup of messages by id
+      const messageMap = new Map((data || []).map(m => [m.id, m]));
+
+      const messagesWithProfiles = (data || []).map(msg => {
+        const replyToMsg = msg.reply_to_id ? messageMap.get(msg.reply_to_id) : null;
+        return {
+          ...msg,
+          sender_profile: profileMap.get(msg.sender_id) || undefined,
+          reply_to: replyToMsg ? {
+            ...replyToMsg,
+            sender_profile: profileMap.get(replyToMsg.sender_id) || undefined,
+          } : null,
+        };
+      });
 
       setMessages(messagesWithProfiles);
     } catch (error) {
@@ -240,7 +252,7 @@ export const useGroupChat = (selectedGroupId?: string) => {
   };
 
   // Send a message to group
-  const sendMessage = async (content: string, stickerId?: string) => {
+  const sendMessage = async (content: string, stickerId?: string, replyToId?: string) => {
     if (!user || !selectedGroupId || (!content.trim() && !stickerId)) return false;
 
     try {
@@ -251,6 +263,7 @@ export const useGroupChat = (selectedGroupId?: string) => {
         sender_id: user.id,
         content: stickerId ? '🎭 Sticker' : content.trim(),
         sticker_id: stickerId || null,
+        reply_to_id: replyToId || null,
       });
 
       if (error) throw error;
