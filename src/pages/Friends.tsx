@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, Users, Heart, Sparkles, MessageCircle, 
-  UserPlus, Search, Shield, ShieldOff, Flag
+  UserPlus, Search, Shield, ShieldOff, Flag, Video, Phone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useFriendships, Profile } from "@/hooks/useFriendships";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { useAuth } from "@/hooks/useAuth";
+import { useVideoCall } from "@/hooks/useVideoCall";
 import NavigationHeader from "@/components/NavigationHeader";
 import SacredGeometryWatermark from "@/components/SacredGeometryWatermark";
 import PrivateChat from "@/components/PrivateChat";
@@ -20,6 +21,7 @@ import AuthModal from "@/components/AuthModal";
 import BlockUserDialog from "@/components/BlockUserDialog";
 import BlockedUsersList from "@/components/BlockedUsersList";
 import ReportUserDialog from "@/components/ReportUserDialog";
+import VideoCallModal from "@/components/VideoCallModal";
 
 const Friends = () => {
   const { user } = useAuth();
@@ -36,6 +38,19 @@ const Friends = () => {
   const [userToReport, setUserToReport] = useState<{ id: string; name: string } | null>(null);
 
   const { blockUser, isBlocked } = useBlockedUsers();
+
+  const {
+    callState,
+    localStream,
+    remoteStream,
+    initiateCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+    toggleVideo,
+    toggleAudio,
+    toggleScreenShare,
+  } = useVideoCall();
 
   const {
     friends,
@@ -289,6 +304,24 @@ const Friends = () => {
                           </div>
                         </div>
                         <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => initiateCall(profile?.id || "", profile?.display_name || "Người dùng", 'video')}
+                            className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                            title="Gọi video"
+                          >
+                            <Video className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => initiateCall(profile?.id || "", profile?.display_name || "Người dùng", 'audio')}
+                            className="text-green-500 hover:text-green-600 hover:bg-green-50"
+                            title="Gọi thoại"
+                          >
+                            <Phone className="w-4 h-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -557,6 +590,20 @@ const Friends = () => {
         }}
         userId={userToReport?.id || ""}
         userName={userToReport?.name || ""}
+      />
+
+      {/* Video Call Modal */}
+      <VideoCallModal
+        isOpen={callState.isActive}
+        callState={callState}
+        localStream={localStream}
+        remoteStream={remoteStream}
+        onAccept={acceptCall}
+        onReject={rejectCall}
+        onEnd={endCall}
+        onToggleVideo={toggleVideo}
+        onToggleAudio={toggleAudio}
+        onToggleScreenShare={toggleScreenShare}
       />
     </div>
   );

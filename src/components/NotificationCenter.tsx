@@ -105,9 +105,9 @@ const NotificationCenter = () => {
 
   const handleNotificationClick = (notif: Notification) => {
     if (notif.type === 'friend_request') {
-      navigate('/community');
+      navigate('/friends');
     } else if (notif.type === 'message') {
-      navigate('/community');
+      navigate('/friends');
     }
     setIsOpen(false);
   };
@@ -274,7 +274,7 @@ const NotificationCenter = () => {
                   <Button
                     variant="ghost"
                     onClick={() => {
-                      navigate('/community');
+                      navigate('/friends');
                       setIsOpen(false);
                     }}
                     className="w-full text-pink-600 hover:text-pink-700 hover:bg-pink-100"
