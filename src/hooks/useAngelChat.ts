@@ -59,12 +59,13 @@ export const useAngelChat = () => {
     };
   }, []);
 
-  // Restore previous messages on mount
+  // SECURITY: Restore messages ONLY for authenticated users
+  // Anonymous users cannot access chat history (privacy-first architecture)
   useEffect(() => {
     const restoreMessages = async () => {
       try {
+        // Only authenticated users can restore messages
         if (isAuthenticated && user) {
-          // Authenticated user: query by user_id
           const { data, error } = await supabase
             .from("chat_messages")
             .select("id, role, content")
@@ -82,30 +83,10 @@ export const useAngelChat = () => {
               }))
             );
           }
-        } else {
-          // Anonymous user: query by session_id stored in localStorage
-          const sessionId = getSessionId();
-          const { data, error } = await supabase
-            .from("chat_messages")
-            .select("id, role, content")
-            .eq("session_id", sessionId)
-            .is("user_id", null)
-            .order("created_at", { ascending: true });
-
-          if (error) throw error;
-
-          if (data && data.length > 0) {
-            setMessages(
-              data.map((m) => ({
-                id: m.id,
-                role: m.role as "user" | "assistant",
-                content: m.content,
-              }))
-            );
-          }
         }
-      } catch (error) {
-        console.error("Failed to restore messages:", error);
+        // Anonymous users start with empty chat (no persistence)
+      } catch {
+        // SECURITY: Don't log error details that might contain sensitive info
       } finally {
         setIsRestoring(false);
       }
@@ -114,12 +95,18 @@ export const useAngelChat = () => {
     restoreMessages();
   }, [isAuthenticated, user]);
 
-  // Save a message to the database with retry logic
+  // SECURITY: Save messages ONLY for authenticated users
+  // Messages are private by default (visibility = 'private')
   const saveMessage = async (
     role: "user" | "assistant", 
     content: string,
     retries = 3
   ): Promise<string | null> => {
+    // SECURITY: Only authenticated users can save messages
+    if (!isAuthenticated || !user) {
+      return null;
+    }
+
     if (!isOnline) {
       setSyncStatus("offline");
       return null;
@@ -129,54 +116,31 @@ export const useAngelChat = () => {
     
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        if (isAuthenticated && user) {
-          // Authenticated user
-          const { data, error } = await supabase
-            .from("chat_messages")
-            .insert({
-              session_id: user.id,
-              user_id: user.id,
-              role,
-              content,
-            })
-            .select("id")
-            .single();
+        // Insert with privacy defaults (visibility = 'private', public_consent = false)
+        const { data, error } = await supabase
+          .from("chat_messages")
+          .insert({
+            session_id: user.id,
+            user_id: user.id,
+            role,
+            content,
+            // visibility defaults to 'private' in database
+            // public_consent defaults to false in database
+          })
+          .select("id")
+          .single();
 
-          if (error) throw error;
-          setSyncStatus("saved");
-          // Reset to idle after showing "saved" briefly
-          setTimeout(() => setSyncStatus("idle"), 2000);
-          return data?.id || null;
-        } else {
-          // Anonymous user
-          const sessionId = getSessionId();
-          const { data, error } = await supabase
-            .from("chat_messages")
-            .insert({
-              session_id: sessionId,
-              user_id: null,
-              role,
-              content,
-            })
-            .select("id")
-            .single();
-
-          if (error) throw error;
-          setSyncStatus("saved");
-          // Reset to idle after showing "saved" briefly
-          setTimeout(() => setSyncStatus("idle"), 2000);
-          return data?.id || null;
-        }
-      } catch (error) {
-        console.error(`Failed to save message (attempt ${attempt}/${retries}):`, error);
+        if (error) throw error;
+        setSyncStatus("saved");
+        setTimeout(() => setSyncStatus("idle"), 2000);
+        return data?.id || null;
+      } catch {
+        // SECURITY: Don't log message content
         if (attempt === retries) {
-          // On final failure, show error
           setSyncStatus("error");
           setTimeout(() => setSyncStatus("idle"), 3000);
-          console.error("Message save failed after all retries:", { role, content });
           return null;
         }
-        // Wait before retry (exponential backoff)
         await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
       }
     }
@@ -237,6 +201,25 @@ export const useAngelChat = () => {
     };
 
     try {
+      // SECURITY: Require authentication for AI chat
+      if (!isAuthenticated || !user) {
+        toast.error("Vui lòng đăng nhập để sử dụng Angel AI");
+        setMessages((prev) => prev.filter((m) => m.id !== tempUserMessageId));
+        setIsLoading(false);
+        return;
+      }
+
+      // Get the user's access token for authenticated API calls
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+
+      if (!accessToken) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        setMessages((prev) => prev.filter((m) => m.id !== tempUserMessageId));
+        setIsLoading(false);
+        return;
+      }
+
       const requestBody: { messages: Array<{ role: string; content: string }>; images?: Array<{ type: "image"; base64: string; mimeType: string }> } = {
         messages: [...messages, userMessage].map((m) => ({
           role: m.role,
@@ -244,7 +227,6 @@ export const useAngelChat = () => {
         })),
       };
 
-      // Include images if present
       if (hasImages) {
         requestBody.images = images;
       }
@@ -253,7 +235,7 @@ export const useAngelChat = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -312,16 +294,12 @@ export const useAngelChat = () => {
         }
       }
     } catch (error) {
-      console.error("Chat error:", error);
+      // SECURITY: Don't log error details that might contain sensitive info
       toast.error(error instanceof Error ? error.message : "Không thể kết nối với Angel AI");
       
-      // Wait for user message save to complete before potentially deleting
       const userMessageId = await saveUserMessagePromise;
-      
-      // Remove the optimistic user message from UI
       setMessages((prev) => prev.filter((m) => m.id !== tempUserMessageId && m.id !== userMessageId));
       
-      // Delete the user message from DB if chat failed
       if (userMessageId) {
         await supabase.from("chat_messages").delete().eq("id", userMessageId);
       }
@@ -330,47 +308,41 @@ export const useAngelChat = () => {
     }
   }, [messages, isLoading, isAuthenticated, user]);
 
-  // Edit a user message
+  // SECURITY: Edit message only for authenticated owner
   const editMessage = useCallback(async (messageId: string, newContent: string): Promise<boolean> => {
-    if (!newContent.trim()) return false;
+    if (!newContent.trim() || !isAuthenticated || !user) return false;
 
     try {
-      // Update in database
+      // Update in database (RLS ensures user can only update own messages)
       const { error } = await supabase
         .from("chat_messages")
         .update({ content: newContent.trim() })
-        .eq("id", messageId);
+        .eq("id", messageId)
+        .eq("user_id", user.id); // Double-check ownership
 
       if (error) throw error;
 
-      // Update local state
       setMessages((prev) =>
         prev.map((m) => (m.id === messageId ? { ...m, content: newContent.trim() } : m))
       );
 
       return true;
-    } catch (error) {
-      console.error("Failed to edit message:", error);
+    } catch {
       toast.error("Không thể chỉnh sửa tin nhắn");
       return false;
     }
-  }, []);
+  }, [isAuthenticated, user]);
 
+  // SECURITY: Clear messages only for authenticated owner
   const clearMessages = useCallback(async () => {
     try {
       if (isAuthenticated && user) {
         await supabase.from("chat_messages").delete().eq("user_id", user.id);
-      } else {
-        const sessionId = getSessionId();
-        await supabase
-          .from("chat_messages")
-          .delete()
-          .eq("session_id", sessionId)
-          .is("user_id", null);
+        setMessages([]);
       }
+      // Anonymous users just clear local state (nothing in DB)
       setMessages([]);
-    } catch (error) {
-      console.error("Failed to clear messages:", error);
+    } catch {
       toast.error("Không thể xóa tin nhắn");
     }
   }, [isAuthenticated, user]);

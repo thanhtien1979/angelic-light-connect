@@ -1,14 +1,32 @@
+# SECURITY: Prevent search engine indexing to protect user privacy
+User-agent: *
+Disallow: /
+
+# Block all major crawlers explicitly
 User-agent: Googlebot
-Allow: /
+Disallow: /
 
 User-agent: Bingbot
-Allow: /
+Disallow: /
 
-User-agent: Twitterbot
-Allow: /
+User-agent: Baiduspider
+Disallow: /
 
-User-agent: facebookexternalhit
-Allow: /
+User-agent: YandexBot
+Disallow: /
 
-User-agent: *
-Allow: /
+User-agent: DuckDuckBot
+Disallow: /
+
+# Block AI crawlers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: CCBot
+Disallow: /

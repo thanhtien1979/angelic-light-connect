@@ -73,25 +73,31 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          public_consent: boolean
           role: string
           session_id: string
           user_id: string | null
+          visibility: Database["public"]["Enums"]["chat_visibility"]
         }
         Insert: {
           content: string
           created_at?: string
           id?: string
+          public_consent?: boolean
           role: string
           session_id: string
           user_id?: string | null
+          visibility?: Database["public"]["Enums"]["chat_visibility"]
         }
         Update: {
           content?: string
           created_at?: string
           id?: string
+          public_consent?: boolean
           role?: string
           session_id?: string
           user_id?: string | null
+          visibility?: Database["public"]["Enums"]["chat_visibility"]
         }
         Relationships: []
       }
@@ -1060,7 +1066,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      chat_visibility: "private" | "public" | "unlisted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1187,6 +1193,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      chat_visibility: ["private", "public", "unlisted"],
+    },
   },
 } as const
