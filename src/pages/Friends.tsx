@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, Users, Heart, Sparkles, MessageCircle, 
-  UserPlus, Search, Shield
+  UserPlus, Search, Shield, ShieldOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,11 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useFriendships, Profile } from "@/hooks/useFriendships";
+import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { useAuth } from "@/hooks/useAuth";
 import NavigationHeader from "@/components/NavigationHeader";
 import SacredGeometryWatermark from "@/components/SacredGeometryWatermark";
 import PrivateChat from "@/components/PrivateChat";
 import AuthModal from "@/components/AuthModal";
+import BlockUserDialog from "@/components/BlockUserDialog";
+import BlockedUsersList from "@/components/BlockedUsersList";
 
 const Friends = () => {
   const { user } = useAuth();
@@ -26,6 +29,10 @@ const Friends = () => {
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [userToBlock, setUserToBlock] = useState<{ id: string; name: string } | null>(null);
+
+  const { blockUser, isBlocked } = useBlockedUsers();
 
   const {
     friends,
@@ -66,6 +73,18 @@ const Friends = () => {
 
   const handleOpenChat = () => {
     setIsChatOpen(true);
+  };
+
+  const handleBlockUser = (userId: string, userName: string) => {
+    setUserToBlock({ id: userId, name: userName });
+    setBlockDialogOpen(true);
+  };
+
+  const confirmBlockUser = async (reason?: string) => {
+    if (!userToBlock) return;
+    await blockUser(userToBlock.id, reason);
+    setBlockDialogOpen(false);
+    setUserToBlock(null);
   };
 
   if (!user) {
@@ -261,12 +280,13 @@ const Friends = () => {
                             </p>
                           </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleOpenChat()}
                             className="text-primary hover:text-primary hover:bg-primary/10"
+                            title="Nhắn tin"
                           >
                             <MessageCircle className="w-4 h-4" />
                           </Button>
@@ -274,9 +294,19 @@ const Friends = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => unfriend(friendship.id)}
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            className="text-muted-foreground hover:text-amber-600 hover:bg-amber-50"
+                            title="Hủy kết bạn"
                           >
                             <Users className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleBlockUser(profile?.id || "", profile?.display_name || "Người dùng")}
+                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            title="Chặn"
+                          >
+                            <ShieldOff className="w-4 h-4" />
                           </Button>
                         </div>
                       </motion.div>
@@ -474,10 +504,31 @@ const Friends = () => {
         </motion.div>
       </motion.main>
 
+      {/* Blocked Users List */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="max-w-4xl mx-auto px-4 pb-8"
+      >
+        <BlockedUsersList />
+      </motion.div>
+
       {/* Private Chat */}
       <PrivateChat 
         isOpen={isChatOpen} 
         onClose={() => setIsChatOpen(false)}
+      />
+
+      {/* Block User Dialog */}
+      <BlockUserDialog
+        isOpen={blockDialogOpen}
+        onClose={() => {
+          setBlockDialogOpen(false);
+          setUserToBlock(null);
+        }}
+        onConfirm={confirmBlockUser}
+        userName={userToBlock?.name || ""}
       />
     </div>
   );
