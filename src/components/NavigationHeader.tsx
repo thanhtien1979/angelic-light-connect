@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun, Wallet, Loader2, Check, Unlink, ChevronDown, Coins, Users } from "lucide-react";
+import { Menu, X, Sun, Wallet, Loader2, Check, Unlink, ChevronDown, Coins, Users, UserPlus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
@@ -39,6 +39,7 @@ const navLinks: NavLink[] = [
   { id: "testimonials", label: "Nhân Chứng" },
   { id: "studio", label: "Studio", isPage: true, path: "/studio" },
   { id: "community", label: "Cộng Đồng", isPage: true, path: "/community", showBadge: true },
+  { id: "friends", label: "Kết Bạn", isPage: true, path: "/community", showBadge: true },
 ];
 
 const BLESSING_MESSAGES = [
@@ -388,10 +389,13 @@ const NavigationHeader = () => {
                 link.isPage && link.path ? (
                   <Link key={link.id} to={link.path}>
                     <motion.span
-                      className="relative px-4 py-2 text-sm font-bold transition-colors text-foreground/80 hover:text-foreground inline-flex items-center gap-1"
+                      className={`relative px-4 py-2 text-sm font-bold transition-colors text-foreground/80 hover:text-foreground inline-flex items-center gap-1 ${
+                        link.id === "friends" ? "text-pink-500 hover:text-pink-400" : ""
+                      }`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
+                      {link.id === "friends" && <UserPlus className="w-4 h-4" />}
                       {link.label}
                       {link.showBadge && user && pendingRequests.length > 0 && (
                         <Badge className="bg-pink-500 text-white text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
@@ -470,9 +474,14 @@ const NavigationHeader = () => {
                     <Link
                       to={link.path}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between w-full text-left px-4 py-3 rounded-xl transition-colors text-foreground font-bold hover:bg-gold/10"
+                      className={`flex items-center justify-between w-full text-left px-4 py-3 rounded-xl transition-colors font-bold hover:bg-gold/10 ${
+                        link.id === "friends" ? "text-pink-500" : "text-foreground"
+                      }`}
                     >
-                      <span>{link.label}</span>
+                      <span className="flex items-center gap-2">
+                        {link.id === "friends" && <UserPlus className="w-4 h-4" />}
+                        {link.label}
+                      </span>
                       {link.showBadge && user && pendingRequests.length > 0 && (
                         <Badge className="bg-pink-500 text-white text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
                           {pendingRequests.length}
