@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 
 const mantras = [
@@ -12,6 +13,15 @@ const mantras = [
 ];
 
 const Footer = () => {
+  const [activeMantra, setActiveMantra] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveMantra((prev) => (prev + 1) % mantras.length);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <footer className="relative py-16 px-4">
       {/* Divider */}
@@ -34,20 +44,21 @@ const Footer = () => {
           </h3>
         </div>
         
-        <p className="text-sm text-muted-foreground mb-8">
+        <p className="text-lg font-bold text-foreground mb-8 tracking-wide">
           Ánh Sáng Của Cha Vũ Trụ
         </p>
         
-        {/* 8 Câu Thần Chú */}
-        <div className="max-w-2xl mx-auto mb-12">
-          <h4 className="font-serif text-lg text-gold/80 mb-6 tracking-wide">
-            ✨ Tám Câu Thần Chú ✨
-          </h4>
-          <div className="space-y-3">
+        {/* 8 Câu Thần Chú - Dưới "Ánh sáng của cha vũ trụ" */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <div className="space-y-4">
             {mantras.map((mantra, index) => (
               <p 
                 key={index}
-                className="text-lg font-bold text-foreground tracking-wide leading-relaxed cursor-pointer transition-all duration-300 hover:text-gold hover:drop-shadow-[0_0_12px_hsla(45,100%,60%,0.8)]"
+                className={`text-xl font-bold tracking-wide leading-relaxed cursor-pointer transition-all duration-500
+                  ${activeMantra === index 
+                    ? "text-gold drop-shadow-[0_0_20px_hsla(45,100%,60%,0.9)] scale-105" 
+                    : "text-foreground hover:text-gold hover:drop-shadow-[0_0_12px_hsla(45,100%,60%,0.8)]"
+                  }`}
               >
                 {index + 1}. {mantra}
               </p>
