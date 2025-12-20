@@ -9,6 +9,10 @@ export interface PrivateMessage {
   receiver_id: string;
   content: string;
   image_url?: string | null;
+  sticker_id?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  file_type?: string | null;
   is_read: boolean;
   created_at: string;
   sender_profile?: {
@@ -236,6 +240,36 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
     }
   };
 
+  // Send a file message
+  const sendFileMessage = async (fileUrl: string, fileName: string, fileType: string) => {
+    if (!user || !selectedFriendId) return false;
+
+    try {
+      setSending(true);
+      
+      const { error } = await supabase
+        .from('private_messages')
+        .insert({
+          sender_id: user.id,
+          receiver_id: selectedFriendId,
+          content: `📎 ${fileName}`,
+          file_url: fileUrl,
+          file_name: fileName,
+          file_type: fileType,
+        });
+
+      if (error) throw error;
+      
+      return true;
+    } catch (error) {
+      console.error('Error sending file:', error);
+      toast.error('Không thể gửi file');
+      return false;
+    } finally {
+      setSending(false);
+    }
+  };
+
   // Get total unread count
   const getTotalUnread = useCallback(() => {
     return conversations.reduce((sum, c) => sum + c.unreadCount, 0);
@@ -298,6 +332,7 @@ export const usePrivateMessages = (selectedFriendId?: string) => {
     sending,
     sendMessage,
     sendImageMessage,
+    sendFileMessage,
     getTotalUnread,
     refetchMessages: fetchMessages,
     refetchConversations: fetchConversations,
