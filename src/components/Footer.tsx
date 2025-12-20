@@ -47,7 +47,7 @@ const Footer = () => {
             {mantras.map((mantra, index) => (
               <p 
                 key={index}
-                className="text-base italic font-semibold text-foreground/90 tracking-wide leading-relaxed"
+                className="text-lg font-bold text-foreground tracking-wide leading-relaxed"
               >
                 {index + 1}. {mantra}
               </p>
