@@ -101,6 +101,46 @@ export const useAuth = () => {
     }
   }, []);
 
+  const signInWithPhone = useCallback(async (phone: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        phone,
+      });
+
+      if (error) {
+        toast.error("Không thể gửi mã OTP. Vui lòng thử lại.");
+        return { error };
+      }
+
+      toast.success("Mã OTP đã được gửi đến số điện thoại của bạn!");
+      return { error: null };
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi. Vui lòng thử lại.");
+      return { error };
+    }
+  }, []);
+
+  const verifyPhoneOtp = useCallback(async (phone: string, token: string) => {
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        phone,
+        token,
+        type: "sms",
+      });
+
+      if (error) {
+        toast.error("Mã OTP không đúng. Vui lòng thử lại.");
+        return { error };
+      }
+
+      toast.success("Đăng nhập thành công!");
+      return { error: null };
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi. Vui lòng thử lại.");
+      return { error };
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -124,6 +164,8 @@ export const useAuth = () => {
     signUp,
     signIn,
     signInWithGoogle,
+    signInWithPhone,
+    verifyPhoneOtp,
     signOut,
   };
 };
