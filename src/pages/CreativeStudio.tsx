@@ -21,7 +21,8 @@ import {
   Brush,
   Sticker,
   SlidersHorizontal,
-  Layout
+  Layout,
+  Eraser
 } from "lucide-react";
 import { Button } from "@/components/ui/button"; import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,6 +45,7 @@ import ArtStyles from "@/components/studio/ArtStyles";
 import StickerPack from "@/components/studio/StickerPack";
 import ImageFilters from "@/components/studio/ImageFilters";
 import Templates from "@/components/studio/Templates";
+import BackgroundRemover from "@/components/studio/BackgroundRemover";
 import { toast } from "sonner";
 
 const promptSuggestions = [
@@ -278,7 +280,7 @@ export default function CreativeStudio() {
               className="max-w-6xl mx-auto"
             >
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+                <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3 mb-8">
                   <TabsTrigger value="generate" className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4" />
                     Tạo Mới
@@ -286,6 +288,10 @@ export default function CreativeStudio() {
                   <TabsTrigger value="edit" className="flex items-center gap-2">
                     <Wand2 className="w-4 h-4" />
                     Chỉnh Sửa
+                  </TabsTrigger>
+                  <TabsTrigger value="background" className="flex items-center gap-2">
+                    <Eraser className="w-4 h-4" />
+                    Xóa Nền
                   </TabsTrigger>
                 </TabsList>
 
@@ -538,6 +544,17 @@ export default function CreativeStudio() {
                               </>
                             )}
                           </Button>
+                        </TabsContent>
+
+                        <TabsContent value="background" className="mt-0">
+                          <BackgroundRemover
+                            imageUrl={generatedImage}
+                            onApply={(resultUrl) => {
+                              setUploadedImage(resultUrl);
+                              setActiveTab("edit");
+                              toast.success("Đã áp dụng ảnh đã xóa nền!");
+                            }}
+                          />
                         </TabsContent>
                       </CardContent>
                     </Card>
