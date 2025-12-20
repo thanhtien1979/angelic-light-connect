@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Community from "./pages/Community";
 import CreativeStudio from "./pages/CreativeStudio";
 import Credits from "./pages/Credits";
+import Friends from "./pages/Friends";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/community" element={<Community />} />
             <Route path="/studio" element={<CreativeStudio />} />
             <Route path="/credits" element={<Credits />} />
+            <Route path="/friends" element={<Friends />} />
             <Route
               path="/profile"
               element={

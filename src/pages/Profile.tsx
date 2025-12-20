@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind, Wallet } from "lucide-react";
 import GreetingHistory from "@/components/GreetingHistory";
 import SavedGreetings from "@/components/SavedGreetings";
 import GreetingDigest from "@/components/GreetingDigest";
@@ -52,6 +52,7 @@ const Profile = () => {
   const { isEnabled: breathingSoundEnabled, toggleSound: toggleBreathingSound } = useBreathingCompletionSound();
   const { greetingEnabled, toggleGreetingEnabled, markGreetingSeen, digestNotificationsEnabled, toggleDigestNotifications } = useDailyGreeting();
   const prefersReducedMotion = useReducedMotion();
+  const [walletBannerDismissed, setWalletBannerDismissed] = useState(false);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,10 +64,19 @@ const Profile = () => {
     message: "",
   });
 
-  // Mark greeting as seen when visiting Profile
+  // Mark greeting as seen when visiting Profile & check wallet banner status
   useEffect(() => {
     markGreetingSeen();
+    const dismissed = localStorage.getItem("wallet_banner_dismissed_permanently");
+    setWalletBannerDismissed(dismissed === "true");
   }, [markGreetingSeen]);
+
+  const handleReEnableWalletBanner = () => {
+    localStorage.removeItem("wallet_banner_dismissed_permanently");
+    localStorage.removeItem("wallet_banner_dismissed_date");
+    setWalletBannerDismissed(false);
+    toast.success("Đã bật lại thông báo kết nối ví");
+  };
 
   useEffect(() => {
     const fetchChatHistory = async () => {
@@ -528,6 +538,43 @@ const Profile = () => {
 
             {/* Meditation Reminder Settings */}
             <MeditationReminderSettings />
+
+            {/* Divider */}
+            <div className="h-px bg-border/50" />
+
+            {/* Wallet Banner Toggle */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-gold/20">
+                  <Wallet className="w-4 h-4 text-gold" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-foreground">
+                    Thông báo kết nối ví
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {walletBannerDismissed 
+                      ? "Bạn đã tắt thông báo kết nối ví" 
+                      : "Thông báo đang được hiển thị"}
+                  </p>
+                </div>
+              </div>
+              {walletBannerDismissed ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReEnableWalletBanner}
+                  className="text-gold border-gold/30 hover:bg-gold/10"
+                >
+                  Bật lại
+                </Button>
+              ) : (
+                <span className="text-xs text-green-500 flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-green-500" />
+                  Đang bật
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
