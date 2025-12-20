@@ -6,6 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import FriendshipManager from "@/components/FriendshipManager";
+import PrivateChat from "@/components/PrivateChat";
+import VideoCallModal from "@/components/VideoCallModal";
+import { Button } from "@/components/ui/button";
+import { useVideoCall } from "@/hooks/useVideoCall";
 
 interface SharedMoment {
   id: string;
@@ -125,6 +129,24 @@ const Community = () => {
   const [moments, setMoments] = useState<SharedMoment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [likedMoments, setLikedMoments] = useState<Set<string>>(new Set());
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const {
+    callState,
+    localStream,
+    remoteStream,
+    initiateCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+    toggleVideo,
+    toggleAudio,
+    toggleScreenShare,
+  } = useVideoCall();
+
+  const handleStartCall = (friendId: string, friendName: string, callType: 'video' | 'audio') => {
+    initiateCall(friendId, friendName, callType);
+  };
 
   useEffect(() => {
     const fetchMoments = async () => {
@@ -194,14 +216,26 @@ const Community = () => {
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link to="/" className="p-2 rounded-full hover:bg-muted transition-colors">
-            <ArrowLeft className="w-5 h-5 text-foreground/70" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <Sun className="w-5 h-5 text-gold" />
-            <h1 className="text-lg font-semibold text-foreground">Khoảnh Khắc Ánh Sáng</h1>
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="p-2 rounded-full hover:bg-muted transition-colors">
+              <ArrowLeft className="w-5 h-5 text-foreground/70" />
+            </Link>
+            <div className="flex items-center gap-2">
+              <Sun className="w-5 h-5 text-gold" />
+              <h1 className="text-lg font-semibold text-foreground">Khoảnh Khắc Ánh Sáng</h1>
+            </div>
           </div>
+          
+          {user && (
+            <Button
+              onClick={() => setIsChatOpen(true)}
+              className="bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Chat Bạn Bè
+            </Button>
+          )}
         </div>
       </header>
 
@@ -283,6 +317,27 @@ const Community = () => {
           </div>
         )}
       </motion.main>
+
+      {/* Private Chat */}
+      <PrivateChat 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)}
+        onStartCall={handleStartCall}
+      />
+
+      {/* Video Call Modal */}
+      <VideoCallModal
+        isOpen={callState.isActive}
+        callState={callState}
+        localStream={localStream}
+        remoteStream={remoteStream}
+        onAccept={acceptCall}
+        onReject={rejectCall}
+        onEnd={endCall}
+        onToggleVideo={toggleVideo}
+        onToggleAudio={toggleAudio}
+        onToggleScreenShare={toggleScreenShare}
+      />
     </div>
   );
 };

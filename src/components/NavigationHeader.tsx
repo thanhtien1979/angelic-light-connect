@@ -5,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
 import CoinLightMotes from "./CoinLightMotes";
+import NotificationCenter from "./NotificationCenter";
 import WalletConnectDialog from "./WalletConnectDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
@@ -429,9 +430,10 @@ const NavigationHeader = () => {
               )}
             </nav>
 
-            {/* Wallet, Light Indicator, User Menu & Mobile Menu Button */}
+            {/* Wallet, Notifications, Light Indicator, User Menu & Mobile Menu Button */}
             <div className="flex items-center gap-2 sm:gap-3">
               <WalletIndicator />
+              <NotificationCenter />
               <LightIndicator />
               <UserMenu onOpenAuth={() => setIsAuthOpen(true)} />
               
