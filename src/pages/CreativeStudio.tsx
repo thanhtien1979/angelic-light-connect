@@ -24,16 +24,19 @@ import {
   Layout,
   Eraser
 } from "lucide-react";
-import { Button } from "@/components/ui/button"; import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button"; 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
 import { useImageGallery } from "@/hooks/useImageGallery";
 import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
 import { useNFT } from "@/hooks/useNFT";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
+import { useR2Upload } from "@/hooks/useR2Upload";
 import { Link } from "react-router-dom";
 import NavigationHeader from "@/components/NavigationHeader";
 import Footer from "@/components/Footer";
@@ -76,6 +79,11 @@ export default function CreativeStudio() {
   const { walletAddress, isConnecting: isConnectingWallet, connectWallet, disconnectWallet } = useWallet();
   const { isMinting, mintNFT } = useNFT();
   const { balance, formatCoins, isLoading: isLoadingCoins } = useCamlyCoin();
+  const { uploadToR2, isUploading: isUploadingR2, progress: uploadProgress } = useR2Upload({ 
+    folder: 'studio-uploads',
+    onSuccess: () => toast.success("Đã tải lên thành công!"),
+    onError: (error) => toast.error("Lỗi upload: " + error)
+  });
 
   const handleMintNFT = async () => {
     if (!generatedImage || !walletAddress || !user) return;
@@ -105,19 +113,20 @@ export default function CreativeStudio() {
     await editImage(editPrompt, uploadedImage);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
+      toast.error("Chỉ chấp nhận file hình ảnh!");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setUploadedImage(event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    // Upload to R2 with compression
+    const result = await uploadToR2(file);
+    if (result) {
+      setUploadedImage(result.url);
+    }
   };
 
   const handleDownload = () => {
@@ -442,10 +451,22 @@ export default function CreativeStudio() {
                         <TabsContent value="edit" className="mt-0 space-y-4">
                           {/* Upload area */}
                           <div 
-                            onClick={() => fileInputRef.current?.click()}
-                            className="border-2 border-dashed border-rose-soft/40 rounded-lg p-6 text-center cursor-pointer hover:border-primary/60 transition-colors"
+                            onClick={() => !isUploadingR2 && fileInputRef.current?.click()}
+                            className={`border-2 border-dashed border-rose-soft/40 rounded-lg p-6 text-center transition-colors ${
+                              isUploadingR2 ? 'cursor-wait opacity-70' : 'cursor-pointer hover:border-primary/60'
+                            }`}
                           >
-                            {uploadedImage ? (
+                            {isUploadingR2 ? (
+                              <div className="space-y-4">
+                                <Loader2 className="w-10 h-10 mx-auto text-primary animate-spin" />
+                                <div className="space-y-2">
+                                  <p className="text-sm text-muted-foreground">
+                                    Đang nén và tải lên... {uploadProgress}%
+                                  </p>
+                                  <Progress value={uploadProgress} className="h-2 max-w-xs mx-auto" />
+                                </div>
+                              </div>
+                            ) : uploadedImage ? (
                               <div className="relative">
                                 <img 
                                   src={uploadedImage} 
@@ -469,6 +490,9 @@ export default function CreativeStudio() {
                                 <Upload className="w-10 h-10 mx-auto text-muted-foreground" />
                                 <p className="text-muted-foreground">
                                   Click để tải lên hình ảnh
+                                </p>
+                                <p className="text-xs text-muted-foreground/60">
+                                  Ảnh sẽ được nén tự động để tối ưu dung lượng
                                 </p>
                               </div>
                             )}
