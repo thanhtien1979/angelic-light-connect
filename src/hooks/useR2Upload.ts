@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { compressImage, isImageFile } from "@/lib/imageCompression";
 
 interface UploadResult {
   url: string;
@@ -11,6 +12,10 @@ interface UploadResult {
 
 interface UseR2UploadOptions {
   folder?: string;
+  compress?: boolean;
+  maxWidth?: number;
+  maxHeight?: number;
+  quality?: number;
   onSuccess?: (result: UploadResult) => void;
   onError?: (error: string) => void;
 }
@@ -24,8 +29,22 @@ export const useR2Upload = (options: UseR2UploadOptions = {}) => {
     setProgress(0);
 
     try {
+      let fileToUpload = file;
+
+      // Compress image if enabled (default: true for images)
+      const shouldCompress = options.compress !== false && isImageFile(file);
+      if (shouldCompress) {
+        setProgress(10);
+        fileToUpload = await compressImage(file, {
+          maxWidth: options.maxWidth,
+          maxHeight: options.maxHeight,
+          quality: options.quality,
+        });
+        setProgress(30);
+      }
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", fileToUpload);
       formData.append("folder", options.folder || "uploads");
 
       // Simulate progress for UX
