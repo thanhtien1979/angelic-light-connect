@@ -12,12 +12,12 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useGroupChat, GroupChat as GroupChatType, GroupMessage } from '@/hooks/useGroupChat';
 import { useAuth } from '@/hooks/useAuth';
+import { useR2Upload } from '@/hooks/useR2Upload';
 import EmojiPicker from './EmojiPicker';
 import StickerPicker, { STICKER_PACKS } from './StickerPicker';
 import CreateGroupDialog from './CreateGroupDialog';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface GroupChatProps {
@@ -54,6 +54,14 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
     editMessage,
     leaveGroup,
   } = useGroupChat(selectedGroup?.id);
+
+  const { uploadToR2: uploadImageToR2, isUploading: isUploadingImageR2 } = useR2Upload({ 
+    folder: 'group-chat' 
+  });
+  const { uploadToR2: uploadDocToR2, isUploading: isUploadingDocR2 } = useR2Upload({ 
+    folder: 'group-documents',
+    compress: false 
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -126,29 +134,19 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Hình ảnh phải nhỏ hơn 5MB');
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Hình ảnh phải nhỏ hơn 10MB');
       return;
     }
 
     try {
       setUploadingImage(true);
+      const result = await uploadImageToR2(file);
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `groups/${selectedGroup.id}/${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('generated-images')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('generated-images')
-        .getPublicUrl(fileName);
-
-      await sendImageMessage(urlData.publicUrl);
-      toast.success('Đã gửi hình ảnh! 📷');
+      if (result) {
+        await sendImageMessage(result.url);
+        toast.success('Đã gửi hình ảnh! 📷');
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error('Không thể tải lên hình ảnh');
@@ -185,21 +183,12 @@ const GroupChatComponent = ({ isOpen, onClose }: GroupChatProps) => {
 
     try {
       setUploadingFile(true);
+      const result = await uploadDocToR2(file);
 
-      const fileName = `groups/${selectedGroup.id}/${Date.now()}_${file.name}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('documents')
-        .getPublicUrl(fileName);
-
-      await sendFileMessage(urlData.publicUrl, file.name, file.type);
-      toast.success('Đã gửi file! 📎');
+      if (result) {
+        await sendFileMessage(result.url, file.name, file.type);
+        toast.success('Đã gửi file! 📎');
+      }
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error('Không thể tải lên file');

@@ -13,11 +13,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { usePrivateMessages, Conversation, PrivateMessage } from '@/hooks/usePrivateMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import { useR2Upload } from '@/hooks/useR2Upload';
 import EmojiPicker from './EmojiPicker';
 import StickerPicker, { STICKER_PACKS } from './StickerPicker';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface PrivateChatProps {
@@ -57,6 +57,14 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
     handleTypingStart, 
     stopTyping 
   } = useTypingIndicator(selectedFriend?.friendId);
+
+  const { uploadToR2: uploadImageToR2, isUploading: isUploadingImageR2 } = useR2Upload({ 
+    folder: 'private-chat' 
+  });
+  const { uploadToR2: uploadDocToR2, isUploading: isUploadingDocR2 } = useR2Upload({ 
+    folder: 'documents',
+    compress: false 
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -132,29 +140,19 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Hình ảnh phải nhỏ hơn 5MB');
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Hình ảnh phải nhỏ hơn 10MB');
       return;
     }
 
     try {
       setUploadingImage(true);
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('generated-images')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('generated-images')
-        .getPublicUrl(fileName);
-
-      await sendImageMessage(urlData.publicUrl);
-      toast.success('Đã gửi hình ảnh! 📷');
+      const result = await uploadImageToR2(file);
+      
+      if (result) {
+        await sendImageMessage(result.url);
+        toast.success('Đã gửi hình ảnh! 📷');
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error('Không thể tải lên hình ảnh');
@@ -191,22 +189,12 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
 
     try {
       setUploadingFile(true);
+      const result = await uploadDocToR2(file);
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}_${file.name}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('documents')
-        .getPublicUrl(fileName);
-
-      await sendFileMessage(urlData.publicUrl, file.name, file.type);
-      toast.success('Đã gửi file! 📎');
+      if (result) {
+        await sendFileMessage(result.url, file.name, file.type);
+        toast.success('Đã gửi file! 📎');
+      }
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error('Không thể tải lên file');

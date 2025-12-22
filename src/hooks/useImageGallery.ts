@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { compressImage } from "@/lib/imageCompression";
 
 interface GeneratedImage {
   id: string;
@@ -74,26 +75,38 @@ export function useImageGallery() {
       }
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: "image/png" });
+      
+      // Create File object for compression
+      const originalFile = new File([blob], `${Date.now()}.png`, { type: "image/png" });
+      
+      // Compress the image
+      const compressedFile = await compressImage(originalFile, {
+        maxWidth: 1920,
+        maxHeight: 1920,
+        quality: 0.85,
+        outputFormat: 'image/webp'
+      });
 
-      // Upload to storage
-      const fileName = `${user.id}/${Date.now()}.png`;
-      const { error: uploadError } = await supabase.storage
-        .from("generated-images")
-        .upload(fileName, blob);
+      // Upload to R2 via edge function
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+      formData.append("folder", "generated-images");
+
+      const { data: uploadData, error: uploadError } = await supabase.functions.invoke("upload-r2", {
+        body: formData,
+      });
 
       if (uploadError) throw uploadError;
+      if (uploadData?.error) throw new Error(uploadData.error);
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("generated-images")
-        .getPublicUrl(fileName);
+      const imageUrl = uploadData.url;
 
       // Save to database
       const { data: insertedData, error: dbError } = await supabase
         .from("generated_images")
         .insert({
           user_id: user.id,
-          image_url: urlData.publicUrl,
+          image_url: imageUrl,
           prompt,
           is_public: false,
         })
@@ -137,13 +150,9 @@ export function useImageGallery() {
     if (!user) return;
 
     try {
-      // Extract file path from URL
-      const urlParts = imageUrl.split("/generated-images/");
-      if (urlParts.length > 1) {
-        const filePath = urlParts[1];
-        await supabase.storage.from("generated-images").remove([filePath]);
-      }
-
+      // Note: R2 files are not deleted here - old Supabase files still work
+      // For R2 files, we could add a delete-r2 edge function if needed
+      
       const { error } = await supabase
         .from("generated_images")
         .delete()
