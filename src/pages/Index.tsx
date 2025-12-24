@@ -15,14 +15,26 @@ import { GentleMeditationReminder } from "@/components/GentleMeditationReminder"
 import QuickBreathingWidget from "@/components/QuickBreathingWidget";
 import WeeklyReflectionPrompt from "@/components/WeeklyReflectionPrompt";
 import WalletLinkBanner from "@/components/WalletLinkBanner";
+import MagicalSparkles from "@/components/MagicalSparkles";
+import AuroraBackground from "@/components/AuroraBackground";
+import StardustTrail from "@/components/StardustTrail";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
+      {/* Aurora Background - Flowing gradient waves */}
+      <AuroraBackground />
+      
       {/* Global Angelic Aura - Divine presence throughout */}
       <GlobalAngelicAura />
+      
+      {/* Magical Sparkles - Twinkling stars */}
+      <MagicalSparkles />
+      
+      {/* Stardust Trail - Follow cursor */}
+      <StardustTrail />
       
       {/* Gentle Meditation Reminder */}
       <GentleMeditationReminder />
