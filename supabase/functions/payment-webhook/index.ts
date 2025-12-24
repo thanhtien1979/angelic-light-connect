@@ -1,10 +1,57 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-signature",
 };
+
+// Verify HMAC signature for webhook authentication
+async function verifyWebhookSignature(payload: string, signature: string | null): Promise<boolean> {
+  const secret = Deno.env.get("PAYMENT_WEBHOOK_SECRET");
+  
+  if (!secret || !signature) {
+    console.error("Missing webhook secret or signature");
+    return false;
+  }
+
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    
+    const signatureBuffer = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      encoder.encode(payload)
+    );
+    
+    const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+    
+    // Constant-time comparison to prevent timing attacks
+    if (signature.length !== expectedSignature.length) {
+      return false;
+    }
+    
+    let result = 0;
+    for (let i = 0; i < signature.length; i++) {
+      result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+    }
+    
+    return result === 0;
+  } catch (error) {
+    console.error("Signature verification error:", error);
+    return false;
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,12 +59,26 @@ serve(async (req) => {
   }
 
   try {
+    // Read raw body for signature verification
+    const rawBody = await req.text();
+    const signature = req.headers.get("x-webhook-signature");
+    
+    // Verify the webhook signature
+    const isValid = await verifyWebhookSignature(rawBody, signature);
+    if (!isValid) {
+      console.error("Invalid webhook signature");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - Invalid signature" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const body = await req.json();
+    const body = JSON.parse(rawBody);
     const { paymentReference, status, source } = body;
 
     console.log(`Webhook received: ${paymentReference}, status: ${status}, source: ${source}`);
