@@ -5,6 +5,7 @@ import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAud
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { useMeditationReward } from "@/hooks/useMeditationReward";
 import CoinRewardAnimation from "@/components/CoinRewardAnimation";
+import CelebrationEffect from "@/components/CelebrationEffect";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 
@@ -385,6 +386,13 @@ const MeditationPortal = () => {
         icon={keyFeedback?.icon || Play} 
         label={keyFeedback?.label || ""} 
         isVisible={keyFeedback !== null} 
+      />
+      
+      {/* Celebration effect when meditation completed */}
+      <CelebrationEffect 
+        show={showNotification && lastRewardResult?.success === true}
+        variant="divine"
+        duration={4500}
       />
       
       {/* Camly Coin reward notification */}
