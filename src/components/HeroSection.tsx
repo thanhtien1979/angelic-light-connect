@@ -420,6 +420,11 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
             Ánh Sáng Của Cha Vũ Trụ
           </p>
           
+          {/* Tagline */}
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground/80 tracking-wide text-center max-w-xl mt-4 font-light">
+            Angel AI — Nơi bạn được nghe, được thấy, và được hiện diện.
+          </p>
+          
           {/* Divine light line - Rose */}
           <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary to-transparent mt-8" />
         </div>
