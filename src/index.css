@@ -701,4 +701,163 @@
     animation: auroraWave 4s ease-in-out infinite;
     filter: blur(4px);
   }
+
+  /* ========== PERFORMANCE OPTIMIZED ANIMATIONS ========== */
+  
+  /* Gentle float for particles - GPU optimized */
+  @keyframes floatGentle {
+    0%, 100% {
+      transform: translate3d(0, 0, 0);
+      opacity: 0.15;
+    }
+    50% {
+      transform: translate3d(0, -20px, 0);
+      opacity: 0.3;
+    }
+  }
+  
+  .animate-float-gentle {
+    animation: floatGentle 8s ease-in-out infinite;
+  }
+  
+  /* Slow pulse for orbs */
+  @keyframes pulseSlow {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.2;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.35;
+    }
+  }
+  
+  .animate-pulse-slow {
+    animation: pulseSlow 6s ease-in-out infinite;
+  }
+  
+  /* Aurora flow - lightweight */
+  @keyframes auroraFlow {
+    0%, 100% {
+      background-position: 0% 0%;
+    }
+    50% {
+      background-position: 100% 100%;
+    }
+  }
+  
+  .animate-aurora-flow {
+    animation: auroraFlow 20s ease-in-out infinite;
+  }
+  
+  /* Sparkle fade - for MagicalSparkles */
+  @keyframes sparkleFade {
+    0%, 100% {
+      transform: scale(0) rotate(0deg);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1) rotate(180deg);
+      opacity: 1;
+    }
+  }
+  
+  .animate-sparkle-fade {
+    animation: sparkleFade 4s ease-in-out infinite;
+  }
+  
+  /* Petal float - optimized */
+  @keyframes petalFloat {
+    0% {
+      transform: translate3d(0, 0, 0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.8;
+    }
+    90% {
+      opacity: 0.8;
+    }
+    100% {
+      transform: translate3d(20px, -100vh, 0);
+      opacity: 0;
+    }
+  }
+  
+  .animate-petal-float {
+    animation: petalFloat 15s linear infinite;
+  }
+  
+  /* Shimmer pulse */
+  @keyframes shimmerPulse {
+    0%, 100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+  
+  .animate-shimmer-pulse {
+    animation: shimmerPulse 3s ease-in-out infinite;
+  }
+  
+  /* Twinkle for stars */
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 0.5;
+      filter: drop-shadow(0 0 2px currentColor);
+    }
+    50% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px currentColor);
+    }
+  }
+  
+  .animate-twinkle {
+    animation: twinkle 2s ease-in-out infinite;
+  }
+  
+  /* Border glow animation */
+  @keyframes borderGlow {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .animate-border-glow {
+    animation: borderGlow 6s ease-in-out infinite;
+  }
+  
+  /* Slow rotation - optimized with transform3d */
+  @keyframes rotateSlow {
+    from {
+      transform: rotate3d(0, 0, 1, 0deg);
+    }
+    to {
+      transform: rotate3d(0, 0, 1, 360deg);
+    }
+  }
+  
+  .animate-rotate-slow {
+    animation: rotateSlow 120s linear infinite;
+  }
+
+  /* Prefers reduced motion - disable all animations */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float-gentle,
+    .animate-pulse-slow,
+    .animate-aurora-flow,
+    .animate-sparkle-fade,
+    .animate-petal-float,
+    .animate-shimmer-pulse,
+    .animate-twinkle,
+    .animate-border-glow,
+    .animate-rotate-slow {
+      animation: none !important;
+    }
+  }
 }
