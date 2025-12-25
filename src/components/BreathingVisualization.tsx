@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Wind } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
 import { type AmbientSoundType } from '@/hooks/useAmbientSound';
 
 interface BreathingVisualizationProps {
@@ -16,20 +17,20 @@ const getSoundTempo = (sound: AmbientSoundType): { baseMultiplier: number; organ
     case 'ocean':
     case 'singing-bowl':
     case 'crystal-bowls':
-      return { baseMultiplier: 1.3, organic: true }; // Slowest, most meditative
+      return { baseMultiplier: 1.3, organic: true };
     case 'water':
     case 'healing-tones':
     case 'soft-piano':
-      return { baseMultiplier: 1.15, organic: true }; // Calm, flowing
+      return { baseMultiplier: 1.15, organic: true };
     case 'forest':
     case 'rain':
     case 'night':
-      return { baseMultiplier: 1.0, organic: true }; // Natural rhythm
+      return { baseMultiplier: 1.0, organic: true };
     case 'wind':
     case 'temple-bells':
-      return { baseMultiplier: 0.95, organic: false }; // Slightly dynamic
+      return { baseMultiplier: 0.95, organic: false };
     default:
-      return { baseMultiplier: 1.1, organic: true }; // Default calm
+      return { baseMultiplier: 1.1, organic: true };
   }
 };
 
@@ -40,6 +41,12 @@ const BreathingVisualization = ({
   inhaleDuration,
   exhaleDuration,
 }: BreathingVisualizationProps) => {
+  const [reducedMotion, setReducedMotion] = useState(false);
+  
+  useEffect(() => {
+    setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }, []);
+
   const { baseMultiplier, organic } = getSoundTempo(selectedSound);
   
   // Calculate scale based on phase
@@ -55,6 +62,7 @@ const BreathingVisualization = ({
   };
 
   const getDuration = () => {
+    if (reducedMotion) return 0.3;
     switch (phase) {
       case 'inhale': return inhaleDuration * baseMultiplier;
       case 'exhale': return exhaleDuration * baseMultiplier;
@@ -62,65 +70,59 @@ const BreathingVisualization = ({
     }
   };
 
-  // Sacred geometry petal count based on sound type
-  const petalCount = organic ? 6 : 8;
-  const petals = Array.from({ length: petalCount }, (_, i) => i);
+  // Reduced petal count: 6->4, 8->4
+  const petalCount = 4;
+  const petals = useMemo(() => Array.from({ length: petalCount }, (_, i) => i), []);
+
+  // Reduced particles: 4->2
+  const particles = useMemo(() => [0, 1], []);
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      {/* Outer ethereal glow */}
+      {/* Outer ethereal glow - simplified, no blur */}
       <motion.div
         animate={{
-          scale: isActive ? [1, 1.1, 1] : 1,
-          opacity: isActive ? [0.15, 0.25, 0.15] : 0.1,
+          scale: isActive && !reducedMotion ? [1, 1.08, 1] : 1,
+          opacity: isActive ? 0.2 : 0.1,
         }}
         transition={{
-          duration: 6 * baseMultiplier,
-          repeat: Infinity,
+          duration: reducedMotion ? 0 : 6 * baseMultiplier,
+          repeat: reducedMotion ? 0 : Infinity,
           ease: 'easeInOut',
         }}
-        className="absolute w-full h-full rounded-full bg-gradient-radial from-primary/20 via-[hsl(45,50%,70%)]/10 to-transparent blur-xl"
+        className="absolute w-full h-full rounded-full bg-gradient-radial from-primary/15 via-primary/5 to-transparent"
+        style={{ willChange: 'transform, opacity' }}
       />
 
-      {/* Sacred geometry petals - rotating slowly */}
-      <motion.div
-        animate={{
-          rotate: isActive ? 360 : 0,
-        }}
-        transition={{
-          duration: 120 * baseMultiplier,
-          repeat: Infinity,
-          ease: 'linear',
-        }}
-        className="absolute inset-2"
+      {/* Sacred geometry petals - CSS rotation, reduced count */}
+      <div 
+        className={`absolute inset-2 ${isActive && !reducedMotion ? 'animate-spin-slow' : ''}`}
+        style={{ animationDuration: `${120 * baseMultiplier}s` }}
       >
         {petals.map((i) => (
           <motion.div
             key={i}
             animate={{
               scale: getScale(),
-              opacity: isActive ? [0.15, 0.3, 0.15] : 0.1,
+              opacity: isActive ? 0.25 : 0.1,
             }}
             transition={{
               scale: { duration: getDuration(), ease: 'easeInOut' },
-              opacity: { duration: 4 * baseMultiplier, repeat: Infinity, ease: 'easeInOut', delay: i * 0.2 },
+              opacity: { duration: 0.3 },
             }}
             className="absolute inset-0 flex items-center justify-center"
             style={{
               transform: `rotate(${i * (360 / petalCount)}deg)`,
+              willChange: 'transform, opacity',
             }}
           >
-            <div 
-              className="w-1/2 h-8 origin-bottom rounded-t-full bg-gradient-to-t from-transparent via-primary/20 to-[hsl(45,50%,70%)]/30"
-              style={{
-                filter: 'blur(2px)',
-              }}
-            />
+            {/* Removed blur filter - using soft gradient instead */}
+            <div className="w-1/2 h-8 origin-bottom rounded-t-full bg-gradient-to-t from-transparent via-primary/15 to-primary/25" />
           </motion.div>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Middle breathing ring */}
+      {/* Middle breathing ring - simplified shadow */}
       <motion.div
         animate={{
           scale: getScale(),
@@ -130,69 +132,46 @@ const BreathingVisualization = ({
           duration: getDuration(),
           ease: organic ? 'easeInOut' : [0.4, 0, 0.6, 1],
         }}
-        className="absolute w-24 h-24 rounded-full bg-gradient-to-br from-primary/30 via-[hsl(45,50%,70%)]/20 to-[hsl(350,40%,75%)]/20 border border-primary/20"
-        style={{
-          boxShadow: isActive 
-            ? '0 0 40px hsl(var(--primary) / 0.3), inset 0 0 20px hsl(45, 50%, 70%, 0.2)' 
-            : '0 0 20px hsl(var(--primary) / 0.1)',
-        }}
+        className="absolute w-24 h-24 rounded-full bg-gradient-to-br from-primary/30 via-primary/15 to-primary/20 border border-primary/20 shadow-lg shadow-primary/20"
+        style={{ willChange: 'transform, opacity' }}
       />
 
-      {/* Inner breathing core */}
+      {/* Inner breathing core - combined with pulse, simplified shadow */}
       <motion.div
         animate={{
-          scale: getScale(),
+          scale: reducedMotion ? getScale() : [getScale(), getScale() * 1.05, getScale()],
         }}
         transition={{
-          duration: getDuration(),
+          duration: reducedMotion ? getDuration() : 3 * baseMultiplier,
+          repeat: reducedMotion ? 0 : Infinity,
           ease: 'easeInOut',
         }}
-        className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary/25 via-primary/15 to-[hsl(45,50%,70%)]/25 flex items-center justify-center"
-        style={{
-          boxShadow: isActive 
-            ? '0 0 30px hsl(var(--primary) / 0.4), 0 0 60px hsl(45, 50%, 70%, 0.2)' 
-            : '0 0 15px hsl(var(--primary) / 0.15)',
-        }}
+        className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary/25 via-primary/15 to-primary/20 flex items-center justify-center shadow-lg shadow-primary/30"
+        style={{ willChange: 'transform' }}
       >
-        {/* Gentle inner pulse */}
-        <motion.div
-          animate={{
-            scale: isActive ? [1, 1.1, 1] : 1,
-            opacity: [0.5, 0.8, 0.5],
-          }}
-          transition={{
-            duration: 3 * baseMultiplier,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          className="absolute inset-0 rounded-full bg-gradient-radial from-[hsl(45,50%,70%)]/20 to-transparent"
-        />
-        
         <Wind className="w-6 h-6 text-primary/60" />
       </motion.div>
 
-      {/* Floating particles - only when active */}
-      {isActive && (
+      {/* Floating particles - reduced to 2, simplified */}
+      {isActive && !reducedMotion && (
         <>
-          {[...Array(4)].map((_, i) => (
+          {particles.map((i) => (
             <motion.div
               key={`particle-${i}`}
               initial={{ opacity: 0, y: 0 }}
               animate={{
-                opacity: [0, 0.6, 0],
-                y: [-20, -50],
-                x: [0, (i % 2 === 0 ? 1 : -1) * (10 + i * 5)],
+                opacity: [0, 0.5, 0],
+                y: [-20, -40],
+                x: [0, (i % 2 === 0 ? 1 : -1) * 15],
               }}
               transition={{
                 duration: 4 * baseMultiplier,
                 repeat: Infinity,
-                delay: i * 1.2,
+                delay: i * 2,
                 ease: 'easeOut',
               }}
-              className="absolute w-1.5 h-1.5 rounded-full bg-[hsl(45,60%,70%)]"
-              style={{
-                boxShadow: '0 0 8px hsl(45, 60%, 70%, 0.8)',
-              }}
+              className="absolute w-1.5 h-1.5 rounded-full bg-primary/60"
+              style={{ willChange: 'transform, opacity' }}
             />
           ))}
         </>

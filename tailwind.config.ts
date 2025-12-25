@@ -201,6 +201,11 @@ export default {
             transform: "scale(1.02)",
           },
         },
+        "spin-slow": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -220,6 +225,7 @@ export default {
         "aurora": "auroraWave 8s ease-in-out infinite",
         "stardust": "stardustFloat 4s ease-out infinite",
         "magic-glow": "softPulseGlow 3s ease-in-out infinite",
+        "spin-slow": "spin-slow 120s linear infinite",
       },
     },
   },
