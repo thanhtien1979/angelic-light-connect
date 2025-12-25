@@ -595,6 +595,13 @@ export type Database = {
             referencedRelation: "generated_images"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "nft_transactions_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "public_generated_images"
+            referencedColumns: ["id"]
+          },
         ]
       }
       private_messages: {
@@ -1025,7 +1032,77 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_generated_images: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          image_url: string | null
+          is_minted: boolean | null
+          is_public: boolean | null
+          likes_count: number | null
+          prompt: string | null
+          token_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_minted?: boolean | null
+          is_public?: boolean | null
+          likes_count?: number | null
+          prompt?: string | null
+          token_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_minted?: boolean | null
+          is_public?: boolean | null
+          likes_count?: number | null
+          prompt?: string | null
+          token_id?: string | null
+        }
+        Relationships: []
+      }
+      public_shared_light_moments: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          light_acknowledgement_id: string | null
+          likes_count: number | null
+          moment_type: string | null
+          spiritual_message: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          light_acknowledgement_id?: string | null
+          likes_count?: number | null
+          moment_type?: string | null
+          spiritual_message?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          light_acknowledgement_id?: string | null
+          likes_count?: number | null
+          moment_type?: string | null
+          spiritual_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_light_moments_light_acknowledgement_id_fkey"
+            columns: ["light_acknowledgement_id"]
+            isOneToOne: false
+            referencedRelation: "light_acknowledgements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_credits: {
