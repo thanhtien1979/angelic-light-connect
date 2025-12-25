@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface StardustParticle {
@@ -8,42 +8,58 @@ interface StardustParticle {
   size: number;
 }
 
+// Optimized: Increased throttle, reduced max particles
 const StardustTrail = () => {
   const [particles, setParticles] = useState<StardustParticle[]>([]);
   const [isEnabled, setIsEnabled] = useState(true);
+  const particleIdRef = useRef(0);
+  const lastTimeRef = useRef(0);
 
   useEffect(() => {
-    // Disable on mobile for performance
-    if (window.innerWidth < 768) {
+    // Disable on mobile and respect reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (window.innerWidth < 1024 || prefersReducedMotion) {
       setIsEnabled(false);
       return;
     }
 
-    let particleId = 0;
-    
     const handleMouseMove = (e: MouseEvent) => {
-      // Only create particle occasionally for performance
-      if (Math.random() > 0.3) return;
+      const now = Date.now();
+      // Increased throttle from 70% to 85% reduction
+      if (now - lastTimeRef.current < 100) return;
+      lastTimeRef.current = now;
+
+      if (Math.random() > 0.5) return;
 
       const newParticle: StardustParticle = {
-        id: particleId++,
+        id: particleIdRef.current++,
         x: e.clientX,
         y: e.clientY,
-        size: 3 + Math.random() * 5,
+        size: 3 + Math.random() * 4,
       };
 
-      setParticles(prev => [...prev.slice(-15), newParticle]);
+      // Reduced max particles from 15 to 8
+      setParticles(prev => [...prev.slice(-7), newParticle]);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
+
+  // Clean up old particles periodically
+  useEffect(() => {
+    if (!isEnabled) return;
+    const interval = setInterval(() => {
+      setParticles(prev => prev.slice(-5));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isEnabled]);
 
   if (!isEnabled) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      <AnimatePresence>
+      <AnimatePresence mode="popLayout">
         {particles.map((particle) => (
           <motion.div
             key={particle.id}
@@ -53,18 +69,17 @@ const StardustTrail = () => {
               top: particle.y - particle.size / 2,
               width: particle.size,
               height: particle.size,
-              background: "radial-gradient(circle, hsla(0, 0%, 100%, 0.9) 0%, hsla(348, 80%, 85%, 0.6) 50%, transparent 100%)",
-              boxShadow: "0 0 6px hsla(348, 80%, 80%, 0.6)",
+              background: "radial-gradient(circle, hsla(0, 0%, 100%, 0.9) 0%, hsla(348, 80%, 85%, 0.5) 50%, transparent 100%)",
+              willChange: "transform, opacity",
             }}
-            initial={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0.8, scale: 1 }}
             animate={{ 
               opacity: 0, 
               scale: 0,
-              y: -20,
-              x: (Math.random() - 0.5) * 30,
+              y: -15,
             }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           />
         ))}
       </AnimatePresence>

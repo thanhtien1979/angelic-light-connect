@@ -1,52 +1,49 @@
-import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useEffect, useState } from "react";
 
-interface Sparkle {
-  id: number;
-  x: number;
-  y: number;
-  size: number;
-  delay: number;
-  duration: number;
-}
+// Optimized: Reduced from 25 sparkles to 10
+// Uses pure CSS animation instead of Framer Motion
 
 const MagicalSparkles = () => {
+  const [isEnabled, setIsEnabled] = useState(true);
+
+  useEffect(() => {
+    // Disable on mobile and respect reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (window.innerWidth < 768 || prefersReducedMotion) {
+      setIsEnabled(false);
+    }
+  }, []);
+
   const sparkles = useMemo(() => 
-    Array.from({ length: 25 }, (_, i) => ({
+    Array.from({ length: 10 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: 4 + Math.random() * 8,
-      delay: Math.random() * 5,
-      duration: 2 + Math.random() * 3,
+      size: 5 + Math.random() * 7,
+      delay: Math.random() * 6,
+      duration: 3 + Math.random() * 3,
     })), []
   );
+
+  if (!isEnabled) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
       {sparkles.map((sparkle) => (
-        <motion.div
+        <div
           key={sparkle.id}
-          className="absolute"
+          className="absolute animate-sparkle-fade"
           style={{
             left: `${sparkle.x}%`,
             top: `${sparkle.y}%`,
             width: sparkle.size,
             height: sparkle.size,
-          }}
-          animate={{
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: sparkle.duration,
-            delay: sparkle.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
+            animationDelay: `${sparkle.delay}s`,
+            animationDuration: `${sparkle.duration}s`,
+            willChange: "transform, opacity",
           }}
         >
-          {/* Four-pointed star sparkle */}
+          {/* Simplified star using CSS */}
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -55,7 +52,6 @@ const MagicalSparkles = () => {
             <path
               d="M12 0L14 10L24 12L14 14L12 24L10 14L0 12L10 10L12 0Z"
               fill="url(#sparkleGradient)"
-              className="drop-shadow-[0_0_4px_hsla(348,80%,80%,0.8)]"
             />
             <defs>
               <linearGradient id="sparkleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -65,7 +61,7 @@ const MagicalSparkles = () => {
               </linearGradient>
             </defs>
           </svg>
-        </motion.div>
+        </div>
       ))}
     </div>
   );
