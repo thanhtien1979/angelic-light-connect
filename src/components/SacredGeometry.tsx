@@ -1,26 +1,38 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const SacredGeometry = () => {
-  const { scrollY } = useScroll();
-  const rotate = useTransform(scrollY, [0, 2000], [0, 30]);
-  const y = useTransform(scrollY, [0, 2000], [0, -100]);
+  const [shouldRender, setShouldRender] = useState(true);
+
+  useEffect(() => {
+    // Don't render on mobile or if user prefers reduced motion
+    const isMobile = window.innerWidth < 768;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    setShouldRender(!isMobile && !prefersReducedMotion);
+
+    const handleResize = () => {
+      setShouldRender(window.innerWidth >= 768 && !prefersReducedMotion);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (!shouldRender) return null;
 
   return (
-    <motion.div 
-      className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-30"
-      style={{ y }}
-    >
-      {/* Rotating sacred geometry pattern */}
-      <motion.div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vmax] h-[150vmax]"
-        style={{ rotate }}
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-20">
+      {/* CSS-only rotating sacred geometry - GPU accelerated */}
+      <div 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vmax] h-[100vmax] animate-rotate-slow"
+        style={{ willChange: 'transform' }}
       >
         <svg
           viewBox="0 0 400 400"
-          className="w-full h-full animate-rotate-slow"
+          className="w-full h-full"
           style={{ opacity: 0.15 }}
         >
-          {/* Flower of Life Pattern */}
+          {/* Simplified Flower of Life Pattern - 6 inner circles */}
           {[0, 60, 120, 180, 240, 300].map((angle, i) => (
             <circle
               key={i}
@@ -32,6 +44,8 @@ const SacredGeometry = () => {
               strokeWidth="0.5"
             />
           ))}
+          
+          {/* Center circle */}
           <circle
             cx="200"
             cy="200"
@@ -40,25 +54,19 @@ const SacredGeometry = () => {
             stroke="url(#goldGradient)"
             strokeWidth="0.5"
           />
+          
+          {/* Outer ring - reduced from 2 to 1 */}
           <circle
             cx="200"
             cy="200"
             r="100"
             fill="none"
             stroke="url(#goldGradient)"
-            strokeWidth="0.5"
+            strokeWidth="0.4"
           />
-          <circle
-            cx="200"
-            cy="200"
-            r="150"
-            fill="none"
-            stroke="url(#goldGradient)"
-            strokeWidth="0.3"
-          />
-          
-          {/* Outer ring circles */}
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, i) => (
+
+          {/* Outer ring circles - reduced from 12 to 6 */}
+          {[0, 60, 120, 180, 240, 300].map((angle, i) => (
             <circle
               key={`outer-${i}`}
               cx={200 + 100 * Math.cos((angle * Math.PI) / 180)}
@@ -77,8 +85,8 @@ const SacredGeometry = () => {
             </linearGradient>
           </defs>
         </svg>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
