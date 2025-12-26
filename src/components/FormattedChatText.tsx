@@ -13,10 +13,12 @@ interface FormattedChatTextProps {
  * - Removes markdown headers (#) and excess asterisks
  */
 const FormattedChatText = ({ text, className = "" }: FormattedChatTextProps) => {
-  // Clean up markdown artifacts
+  // Clean up all markdown artifacts
   const cleanText = text
     .replace(/^#+\s*/gm, '') // Remove # headers
-    .replace(/\*{3,}/g, '') // Remove 3+ asterisks
+    .replace(/\*+/g, '') // Remove all asterisks
+    .replace(/_+/g, ' ') // Remove underscores
+    .replace(/\s{2,}/g, ' ') // Clean up extra spaces
     .trim();
 
   // Parse and render formatted text
