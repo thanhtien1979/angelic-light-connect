@@ -11,6 +11,7 @@ export interface PrivacySettings {
   profile_visibility: VisibilityOption;
   online_status_visibility: VisibilityOption;
   show_last_seen: boolean;
+  notify_profile_views: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -19,6 +20,7 @@ const defaultSettings: Omit<PrivacySettings, "id" | "user_id" | "created_at" | "
   profile_visibility: "friends",
   online_status_visibility: "friends",
   show_last_seen: true,
+  notify_profile_views: true,
 };
 
 export const usePrivacySettings = () => {
@@ -107,6 +109,7 @@ export const usePrivacySettings = () => {
     profile_visibility: defaultSettings.profile_visibility,
     online_status_visibility: defaultSettings.online_status_visibility,
     show_last_seen: defaultSettings.show_last_seen,
+    notify_profile_views: defaultSettings.notify_profile_views,
   };
 
   return {

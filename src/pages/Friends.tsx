@@ -23,6 +23,7 @@ import BlockUserDialog from "@/components/BlockUserDialog";
 import BlockedUsersList from "@/components/BlockedUsersList";
 import ReportUserDialog from "@/components/ReportUserDialog";
 import VideoCallModal from "@/components/VideoCallModal";
+import ProfileViewModal from "@/components/ProfileViewModal";
 
 const Friends = () => {
   const { user } = useAuth();
@@ -37,6 +38,9 @@ const Friends = () => {
   const [userToBlock, setUserToBlock] = useState<{ id: string; name: string } | null>(null);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [userToReport, setUserToReport] = useState<{ id: string; name: string } | null>(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [selectedProfileIsFriend, setSelectedProfileIsFriend] = useState(false);
 
   const { blockUser, isBlocked } = useBlockedUsers();
   const { logProfileView } = useProfileViews();
@@ -112,10 +116,18 @@ const Friends = () => {
     setReportDialogOpen(true);
   };
 
-  const handleViewProfile = (profileId: string) => {
-    if (profileId) {
-      logProfileView(profileId);
+  const handleViewProfile = (profile: Profile | null, isFriend: boolean = false) => {
+    if (profile?.id) {
+      logProfileView(profile.id);
+      setSelectedProfile(profile);
+      setSelectedProfileIsFriend(isFriend);
+      setProfileModalOpen(true);
     }
+  };
+
+  const handleCloseProfileModal = () => {
+    setProfileModalOpen(false);
+    setSelectedProfile(null);
   };
 
   if (!user) {
@@ -291,7 +303,7 @@ const Friends = () => {
                         className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-rose-50/50 to-pink-50/50 dark:from-rose-950/20 dark:to-pink-950/20 border border-rose-200/50 dark:border-rose-800/30 hover:border-rose-300 transition-colors"
                       >
                         <button
-                          onClick={() => handleViewProfile(profile?.id || "")}
+                          onClick={() => handleViewProfile(profile, true)}
                           className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer text-left"
                         >
                           <div className="relative">
@@ -398,7 +410,7 @@ const Friends = () => {
                         className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-50/50 to-yellow-50/50 dark:from-amber-950/20 dark:to-yellow-950/20 border border-amber-200/50 dark:border-amber-800/30"
                       >
                         <button
-                          onClick={() => handleViewProfile(profile?.id || "")}
+                          onClick={() => handleViewProfile(profile, false)}
                           className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer text-left"
                         >
                           <Avatar className="w-12 h-12 ring-2 ring-amber-200">
@@ -459,7 +471,7 @@ const Friends = () => {
                         className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200/50 dark:border-blue-800/30"
                       >
                         <button
-                          onClick={() => handleViewProfile(profile?.id || "")}
+                          onClick={() => handleViewProfile(profile, false)}
                           className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer text-left"
                         >
                           <Avatar className="w-12 h-12 ring-2 ring-blue-200">
@@ -537,7 +549,7 @@ const Friends = () => {
                       className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/20 dark:to-purple-950/20 border border-violet-200/50 dark:border-violet-800/30"
                     >
                       <button
-                        onClick={() => handleViewProfile(profile.id)}
+                        onClick={() => handleViewProfile(profile, false)}
                         className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer text-left"
                       >
                         <Avatar className="w-12 h-12 ring-2 ring-violet-200">
@@ -624,6 +636,42 @@ const Friends = () => {
         onToggleVideo={toggleVideo}
         onToggleAudio={toggleAudio}
         onToggleScreenShare={toggleScreenShare}
+      />
+
+      {/* Profile View Modal */}
+      <ProfileViewModal
+        isOpen={profileModalOpen}
+        onClose={handleCloseProfileModal}
+        profile={selectedProfile}
+        isFriend={selectedProfileIsFriend}
+        onChat={() => {
+          handleCloseProfileModal();
+          handleOpenChat();
+        }}
+        onVideoCall={() => {
+          handleCloseProfileModal();
+          if (selectedProfile) {
+            initiateCall(selectedProfile.id, selectedProfile.display_name || "Người dùng", 'video');
+          }
+        }}
+        onAudioCall={() => {
+          handleCloseProfileModal();
+          if (selectedProfile) {
+            initiateCall(selectedProfile.id, selectedProfile.display_name || "Người dùng", 'audio');
+          }
+        }}
+        onReport={() => {
+          handleCloseProfileModal();
+          if (selectedProfile) {
+            handleReportUser(selectedProfile.id, selectedProfile.display_name || "Người dùng");
+          }
+        }}
+        onBlock={() => {
+          handleCloseProfileModal();
+          if (selectedProfile) {
+            handleBlockUser(selectedProfile.id, selectedProfile.display_name || "Người dùng");
+          }
+        }}
       />
     </div>
   );
