@@ -920,7 +920,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                       ) : (
                         <p className="text-foreground relative z-10 whitespace-pre-wrap">
                           {message.role === "assistant" 
-                            ? message.content.replace(/\*+/g, '') 
+                            ? message.content.replace(/\*+/g, '').replace(/^#+\s*/gm, '') 
                             : message.content}
                         </p>
                       )}
