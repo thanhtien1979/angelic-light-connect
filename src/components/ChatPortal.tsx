@@ -13,6 +13,7 @@ import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import ChatAttachmentPreview from "@/components/ChatAttachmentPreview";
 import MessageAttachments from "@/components/MessageAttachments";
 import TypingText from "@/components/TypingText";
+import FormattedChatText from "@/components/FormattedChatText";
 import EmotionalIndicator, { detectEmotion } from "@/components/EmotionalIndicator";
 import BreathingExercise from "@/components/BreathingExercise";
 import TurnstileVerificationDialog from "@/components/TurnstileVerificationDialog";
@@ -918,11 +919,23 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-foreground relative z-10 whitespace-pre-wrap">
-                          {message.role === "assistant" 
-                            ? message.content.replace(/\*+/g, '').replace(/^#+\s*/gm, '') 
-                            : message.content}
-                        </p>
+                        <div className="text-foreground relative z-10">
+                          {message.role === "assistant" ? (
+                            // Check if this is the latest assistant message and was just added
+                            messages.filter(m => m.role === "assistant").slice(-1)[0]?.id === message.id && 
+                            !localStorage.getItem(`typed_${message.id}`) ? (
+                              <TypingText 
+                                text={message.content.replace(/\*{3,}/g, '').replace(/^#+\s*/gm, '').trim()}
+                                speed={15}
+                                onComplete={() => localStorage.setItem(`typed_${message.id}`, 'true')}
+                              />
+                            ) : (
+                              <FormattedChatText text={message.content} />
+                            )
+                          ) : (
+                            <span className="whitespace-pre-wrap">{message.content}</span>
+                          )}
+                        </div>
                       )}
                     </div>
                   </motion.div>
