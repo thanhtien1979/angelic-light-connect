@@ -608,6 +608,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          notify_profile_views: boolean
           online_status_visibility: string
           profile_visibility: string
           show_last_seen: boolean
@@ -617,6 +618,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          notify_profile_views?: boolean
           online_status_visibility?: string
           profile_visibility?: string
           show_last_seen?: boolean
@@ -626,6 +628,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          notify_profile_views?: boolean
           online_status_visibility?: string
           profile_visibility?: string
           show_last_seen?: boolean
@@ -686,6 +689,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profile_views: {
+        Row: {
+          id: string
+          profile_id: string
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          viewed_at?: string
+          viewer_id: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
