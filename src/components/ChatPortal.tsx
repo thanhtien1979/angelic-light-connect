@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil, User } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil, User, Camera } from "lucide-react";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
@@ -8,6 +8,7 @@ import { useChatAttachments, type Attachment } from "@/hooks/useChatAttachments"
 import { useAnonymousRateLimit } from "@/hooks/useAnonymousRateLimit";
 import { useChatReward } from "@/hooks/useChatReward";
 import { useVoiceRecording } from "@/hooks/useVoiceRecording";
+import { useUserAvatar } from "@/hooks/useUserAvatar";
 import { CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import ChatAttachmentPreview from "@/components/ChatAttachmentPreview";
@@ -113,6 +114,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { needsVerification, incrementCount, setVerified, resetForNewConversation, remainingFreeMessages } = useAnonymousRateLimit();
   const { tryAwardChatReward, lastRewardResult, showNotification: showCoinNotification, dismissNotification: dismissCoinNotification } = useChatReward();
   const { isRecording, isTranscribing, startRecording, stopRecording, cancelRecording } = useVoiceRecording();
+  const { avatarUrl, isUploading: isUploadingAvatar, uploadAvatar } = useUserAvatar();
   const [inputValue, setInputValue] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -136,6 +138,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [editingContent, setEditingContent] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const chatRewardTriedRef = useRef(false);
 
   // Attachment hook
@@ -941,10 +944,35 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     
                     {/* User avatar - after message bubble */}
                     {message.role === "user" && (
-                      <div className="relative ml-3 flex-shrink-0">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/30 flex items-center justify-center shadow-md">
-                          <User className="w-4 h-4 text-primary" />
-                        </div>
+                      <div className="relative ml-3 flex-shrink-0 group/avatar">
+                        {avatarUrl ? (
+                          <img 
+                            src={avatarUrl} 
+                            alt="Avatar" 
+                            className="w-8 h-8 rounded-full object-cover border border-primary/30 shadow-md"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/30 flex items-center justify-center shadow-md">
+                            <User className="w-4 h-4 text-primary" />
+                          </div>
+                        )}
+                        {/* Upload button on hover - only for authenticated users */}
+                        {isAuthenticated && (
+                          <motion.button
+                            onClick={() => avatarInputRef.current?.click()}
+                            className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            title="Thay đổi ảnh đại diện"
+                            disabled={isUploadingAvatar}
+                          >
+                            {isUploadingAvatar ? (
+                              <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
+                            ) : (
+                              <Camera className="w-3.5 h-3.5 text-white" />
+                            )}
+                          </motion.button>
+                        )}
                       </div>
                     )}
                   </motion.div>
@@ -1010,13 +1038,28 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
 
             {/* Input bar - Rose theme */}
             <form onSubmit={handleSubmit} className="p-4 sm:p-5 border-t border-rose-soft/20 bg-white/50">
-              {/* Hidden file input */}
+              {/* Hidden file input for chat attachments */}
               <input
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileSelect}
                 accept="image/jpeg,image/png,image/webp"
                 multiple
+                className="hidden"
+              />
+              
+              {/* Hidden file input for avatar upload */}
+              <input
+                type="file"
+                ref={avatarInputRef}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    uploadAvatar(file);
+                    e.target.value = "";
+                  }
+                }}
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
               />
               
