@@ -604,6 +604,36 @@ export type Database = {
           },
         ]
       }
+      privacy_settings: {
+        Row: {
+          created_at: string
+          id: string
+          online_status_visibility: string
+          profile_visibility: string
+          show_last_seen: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          online_status_visibility?: string
+          profile_visibility?: string
+          show_last_seen?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          online_status_visibility?: string
+          profile_visibility?: string
+          show_last_seen?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       private_messages: {
         Row: {
           content: string
@@ -1127,6 +1157,14 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      can_view_online_status: {
+        Args: { target_user_id: string; viewer_id: string }
+        Returns: boolean
+      }
+      can_view_profile: {
+        Args: { target_user_id: string; viewer_id: string }
+        Returns: boolean
       }
       check_rate_limit: {
         Args: {
