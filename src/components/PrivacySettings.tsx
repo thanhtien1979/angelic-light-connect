@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Globe, Users, Lock, Eye, EyeOff, Clock, Loader2, Check } from "lucide-react";
+import { Globe, Users, Lock, Eye, EyeOff, Clock, Loader2, Check, Bell } from "lucide-react";
 import { usePrivacySettings, VisibilityOption } from "@/hooks/usePrivacySettings";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -65,6 +65,7 @@ export const PrivacySettings = () => {
     profile_visibility?: VisibilityOption;
     online_status_visibility?: VisibilityOption;
     show_last_seen?: boolean;
+    notify_profile_views?: boolean;
   }>({});
 
   const handleProfileVisibilityChange = async (value: VisibilityOption) => {
@@ -94,9 +95,19 @@ export const PrivacySettings = () => {
     });
   };
 
+  const handleNotifyProfileViewsChange = async (checked: boolean) => {
+    setPendingChanges((prev) => ({ ...prev, notify_profile_views: checked }));
+    await updateSettings({ notify_profile_views: checked });
+    setPendingChanges((prev) => {
+      const { notify_profile_views, ...rest } = prev;
+      return rest;
+    });
+  };
+
   const currentProfileVisibility = pendingChanges.profile_visibility ?? settings.profile_visibility;
   const currentOnlineStatusVisibility = pendingChanges.online_status_visibility ?? settings.online_status_visibility;
   const currentShowLastSeen = pendingChanges.show_last_seen ?? settings.show_last_seen;
+  const currentNotifyProfileViews = pendingChanges.notify_profile_views ?? settings.notify_profile_views;
 
   if (isLoading) {
     return (
@@ -211,6 +222,31 @@ export const PrivacySettings = () => {
             <Switch
               checked={currentShowLastSeen}
               onCheckedChange={handleShowLastSeenChange}
+              disabled={isSaving}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Profile View Notifications */}
+      <div className="pt-4 border-t border-border/30">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-card/30 border border-border/50">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-muted/50">
+              <Bell className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-foreground">Thông báo xem hồ sơ</Label>
+              <p className="text-xs text-muted-foreground">Nhận thông báo khi có người xem hồ sơ của bạn</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isSaving && pendingChanges.notify_profile_views !== undefined && (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+            )}
+            <Switch
+              checked={currentNotifyProfileViews}
+              onCheckedChange={handleNotifyProfileViewsChange}
               disabled={isSaving}
             />
           </div>
