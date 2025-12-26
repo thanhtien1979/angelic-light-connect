@@ -919,7 +919,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                           </div>
                         </div>
                       ) : (
-                        <div className="text-foreground relative z-10">
+                        <div className={`relative z-10 ${
+                          message.role === "assistant" 
+                            ? "font-chat text-[15px] leading-relaxed text-foreground/90" 
+                            : "font-sans text-sm text-foreground"
+                        }`}>
                           {message.role === "assistant" ? (
                             // Check if this is the latest assistant message and was just added
                             messages.filter(m => m.role === "assistant").slice(-1)[0]?.id === message.id && 

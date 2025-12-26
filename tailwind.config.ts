@@ -83,6 +83,7 @@ export default {
       fontFamily: {
         serif: ["Cormorant Garamond", "serif"],
         sans: ["Inter", "sans-serif"],
+        chat: ["Lora", "Georgia", "serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
