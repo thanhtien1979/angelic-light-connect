@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind, Wallet, Shield, UserCog } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind, Wallet, Shield, UserCog, Edit } from "lucide-react";
 import GreetingHistory from "@/components/GreetingHistory";
 import SavedGreetings from "@/components/SavedGreetings";
 import GreetingDigest from "@/components/GreetingDigest";
@@ -16,6 +16,8 @@ import MeditationYearWheel from "@/components/MeditationYearWheel";
 import { MeditationReminderSettings } from "@/components/MeditationReminderSettings";
 import BreathingStatistics from "@/components/BreathingStatistics";
 import PrivacySettings from "@/components/PrivacySettings";
+import EditProfileModal from "@/components/EditProfileModal";
+import ProfileViewsNotification from "@/components/ProfileViewsNotification";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
 import { useBreathingCompletionSound } from "@/hooks/useBreathingCompletionSound";
@@ -59,18 +61,34 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReflectionOpen, setIsReflectionOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [coinNotification, setCoinNotification] = useState<{ show: boolean; coins: number; message: string }>({
     show: false,
     coins: 0,
     message: "",
   });
+  const [profileData, setProfileData] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
+
+  // Fetch profile data
+  const fetchProfileData = async () => {
+    if (!user?.id) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("display_name, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (data) {
+      setProfileData(data);
+    }
+  };
 
   // Mark greeting as seen when visiting Profile & check wallet banner status
   useEffect(() => {
     markGreetingSeen();
+    fetchProfileData();
     const dismissed = localStorage.getItem("wallet_banner_dismissed_permanently");
     setWalletBannerDismissed(dismissed === "true");
-  }, [markGreetingSeen]);
+  }, [markGreetingSeen, user?.id]);
 
   const handleReEnableWalletBanner = () => {
     localStorage.removeItem("wallet_banner_dismissed_permanently");
@@ -166,8 +184,8 @@ const Profile = () => {
     });
   };
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Người dùng";
-  const avatarUrl = user?.user_metadata?.avatar_url;
+  const displayName = profileData?.display_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Người dùng";
+  const avatarUrl = profileData?.avatar_url || user?.user_metadata?.avatar_url;
   const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
@@ -214,14 +232,33 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row md:items-center gap-6">
             {/* Avatar & Name */}
             <div className="flex items-center gap-4 flex-1">
-              <Avatar className="w-20 h-20 ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-lg">
-                <AvatarImage src={avatarUrl} alt={displayName} />
-                <AvatarFallback className="bg-primary/20 text-primary font-serif text-xl">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative group">
+                <Avatar className="w-20 h-20 ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-lg">
+                  <AvatarImage src={avatarUrl} alt={displayName} />
+                  <AvatarFallback className="bg-primary/20 text-primary font-serif text-xl">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <button
+                  onClick={() => setIsEditProfileOpen(true)}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Edit className="w-5 h-5 text-white" />
+                </button>
+              </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-2xl font-serif font-semibold text-foreground truncate">{displayName}</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-serif font-semibold text-foreground truncate">{displayName}</h2>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsEditProfileOpen(true)}
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <ProfileViewsNotification />
+                </div>
                 <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
               </div>
             </div>
@@ -717,6 +754,13 @@ const Profile = () => {
         coins={coinNotification.coins}
         message={coinNotification.message}
         onClose={() => setCoinNotification({ ...coinNotification, show: false })}
+      />
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        onSuccess={fetchProfileData}
       />
     </div>
   );

@@ -258,6 +258,16 @@ export const useFriendships = () => {
         if (b.blocked_id === user?.id) blockedIds.add(b.blocker_id);
       });
 
+      // Get users with profile_visibility = 'nobody' (they should not appear in search)
+      const { data: privateProfiles } = await supabase
+        .from('privacy_settings')
+        .select('user_id')
+        .eq('profile_visibility', 'nobody');
+
+      const privateUserIds = new Set(
+        (privateProfiles || []).map(p => p.user_id)
+      );
+
       const { data, error } = await supabase
         .from('profiles')
         .select('id, display_name, avatar_url')
@@ -266,7 +276,7 @@ export const useFriendships = () => {
 
       if (error) throw error;
       
-      // Filter out current user, blocked users, and existing friendships
+      // Filter out current user, blocked users, existing friendships, and private profiles
       const existingFriendIds = new Set([
         ...friends.map(f => f.requester_id === user?.id ? f.addressee_id : f.requester_id),
         ...pendingRequests.map(f => f.requester_id),
@@ -276,7 +286,8 @@ export const useFriendships = () => {
       return (data || []).filter(p => 
         p.id !== user?.id && 
         !blockedIds.has(p.id) &&
-        !existingFriendIds.has(p.id)
+        !existingFriendIds.has(p.id) &&
+        !privateUserIds.has(p.id)
       );
     } catch (error) {
       console.error('Error searching users:', error);
