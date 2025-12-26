@@ -14,6 +14,7 @@ import { useFriendships, Profile } from "@/hooks/useFriendships";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { useAuth } from "@/hooks/useAuth";
 import { useVideoCall } from "@/hooks/useVideoCall";
+import { useProfileViews } from "@/hooks/useProfileViews";
 import NavigationHeader from "@/components/NavigationHeader";
 import SacredGeometryWatermark from "@/components/SacredGeometryWatermark";
 import PrivateChat from "@/components/PrivateChat";
@@ -38,6 +39,7 @@ const Friends = () => {
   const [userToReport, setUserToReport] = useState<{ id: string; name: string } | null>(null);
 
   const { blockUser, isBlocked } = useBlockedUsers();
+  const { logProfileView } = useProfileViews();
 
   const {
     callState,
@@ -108,6 +110,12 @@ const Friends = () => {
   const handleReportUser = (userId: string, userName: string) => {
     setUserToReport({ id: userId, name: userName });
     setReportDialogOpen(true);
+  };
+
+  const handleViewProfile = (profileId: string) => {
+    if (profileId) {
+      logProfileView(profileId);
+    }
   };
 
   if (!user) {
@@ -282,7 +290,10 @@ const Friends = () => {
                         transition={{ delay: index * 0.05 }}
                         className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-rose-50/50 to-pink-50/50 dark:from-rose-950/20 dark:to-pink-950/20 border border-rose-200/50 dark:border-rose-800/30 hover:border-rose-300 transition-colors"
                       >
-                        <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleViewProfile(profile?.id || "")}
+                          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer text-left"
+                        >
                           <div className="relative">
                             <Avatar className="w-12 h-12 ring-2 ring-rose-200">
                               <AvatarImage src={profile?.avatar_url || ""} />
@@ -302,7 +313,7 @@ const Friends = () => {
                               {profile?.is_online ? "🟢 Đang online" : "Bạn bè ánh sáng ✨"}
                             </p>
                           </div>
-                        </div>
+                        </button>
                         <div className="flex gap-1">
                           <Button
                             variant="ghost"
@@ -386,7 +397,10 @@ const Friends = () => {
                         transition={{ delay: index * 0.05 }}
                         className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-50/50 to-yellow-50/50 dark:from-amber-950/20 dark:to-yellow-950/20 border border-amber-200/50 dark:border-amber-800/30"
                       >
-                        <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleViewProfile(profile?.id || "")}
+                          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer text-left"
+                        >
                           <Avatar className="w-12 h-12 ring-2 ring-amber-200">
                             <AvatarImage src={profile?.avatar_url || ""} />
                             <AvatarFallback className="bg-gradient-to-br from-amber-400 to-yellow-500 text-white font-medium">
@@ -399,7 +413,7 @@ const Friends = () => {
                             </p>
                             <p className="text-xs text-amber-600 dark:text-amber-400">Muốn kết bạn với bạn 💫</p>
                           </div>
-                        </div>
+                        </button>
                         <div className="flex gap-2">
                           <Button
                             size="sm"
@@ -444,7 +458,10 @@ const Friends = () => {
                         transition={{ delay: index * 0.05 }}
                         className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200/50 dark:border-blue-800/30"
                       >
-                        <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleViewProfile(profile?.id || "")}
+                          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer text-left"
+                        >
                           <Avatar className="w-12 h-12 ring-2 ring-blue-200">
                             <AvatarImage src={profile?.avatar_url || ""} />
                             <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white font-medium">
@@ -457,7 +474,7 @@ const Friends = () => {
                             </p>
                             <p className="text-xs text-blue-600 dark:text-blue-400">Đang chờ phản hồi...</p>
                           </div>
-                        </div>
+                        </button>
                         <Button
                           size="sm"
                           variant="outline"
@@ -519,7 +536,10 @@ const Friends = () => {
                       transition={{ delay: index * 0.05 }}
                       className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/20 dark:to-purple-950/20 border border-violet-200/50 dark:border-violet-800/30"
                     >
-                      <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleViewProfile(profile.id)}
+                        className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer text-left"
+                      >
                         <Avatar className="w-12 h-12 ring-2 ring-violet-200">
                           <AvatarImage src={profile.avatar_url || ""} />
                           <AvatarFallback className="bg-gradient-to-br from-violet-400 to-purple-500 text-white font-medium">
@@ -529,7 +549,7 @@ const Friends = () => {
                         <p className="font-semibold text-foreground">
                           {profile.display_name || "Người dùng"}
                         </p>
-                      </div>
+                      </button>
                       <Button
                         size="sm"
                         onClick={() => handleSendRequest(profile.id)}
