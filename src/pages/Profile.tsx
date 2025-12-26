@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind, Wallet, Shield } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind, Wallet, Shield, UserCog } from "lucide-react";
 import GreetingHistory from "@/components/GreetingHistory";
 import SavedGreetings from "@/components/SavedGreetings";
 import GreetingDigest from "@/components/GreetingDigest";
@@ -15,6 +15,7 @@ import SacredGeometryWatermark from "@/components/SacredGeometryWatermark";
 import MeditationYearWheel from "@/components/MeditationYearWheel";
 import { MeditationReminderSettings } from "@/components/MeditationReminderSettings";
 import BreathingStatistics from "@/components/BreathingStatistics";
+import PrivacySettings from "@/components/PrivacySettings";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
 import { useBreathingCompletionSound } from "@/hooks/useBreathingCompletionSound";
@@ -574,6 +575,27 @@ const Profile = () => {
                   Đang bật
                 </span>
               )}
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-border/50" />
+
+            {/* Privacy Settings Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-primary/20">
+                  <UserCog className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-foreground">
+                    Quyền riêng tư hồ sơ
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Kiểm soát ai có thể xem thông tin của bạn
+                  </p>
+                </div>
+              </div>
+              <PrivacySettings />
             </div>
           </div>
 
