@@ -847,8 +847,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     <div
                       className={`relative max-w-[80%] px-5 py-3 rounded-2xl ${
                         message.role === "user"
-                          ? "bg-white shadow-lg border border-border/50"
-                          : "bg-gradient-to-br from-rose-light/50 to-rose/20 border border-rose-soft/30 shadow-[0_0_30px_hsla(348,80%,80%,0.2)]"
+                          ? "bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 shadow-md"
+                          : "bg-gradient-to-br from-rose-light/60 to-white/80 border border-rose-soft/40 shadow-[0_0_25px_hsla(348,80%,85%,0.25)]"
                       }`}
                     >
                       {/* Shimmer effect when Angel responds */}
