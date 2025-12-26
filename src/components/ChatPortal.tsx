@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil, User } from "lucide-react";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
@@ -938,6 +938,15 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                         </div>
                       )}
                     </div>
+                    
+                    {/* User avatar - after message bubble */}
+                    {message.role === "user" && (
+                      <div className="relative ml-3 flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/30 flex items-center justify-center shadow-md">
+                          <User className="w-4 h-4 text-primary" />
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 ))}
               </AnimatePresence>
