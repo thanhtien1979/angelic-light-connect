@@ -918,7 +918,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-foreground relative z-10 whitespace-pre-wrap">{message.content}</p>
+                        <p className="text-foreground relative z-10 whitespace-pre-wrap">
+                          {message.role === "assistant" 
+                            ? message.content.replace(/\*+/g, '') 
+                            : message.content}
+                        </p>
                       )}
                     </div>
                   </motion.div>
