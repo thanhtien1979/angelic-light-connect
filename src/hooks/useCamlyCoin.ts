@@ -182,7 +182,8 @@ export const useCamlyCoin = () => {
   const awardReflection = useCallback(async (
     reflectionId: string,
     customMessage: string,
-    isPublic: boolean = false
+    isPublic: boolean = false,
+    publicConsentConfirmed: boolean = false
   ) => {
     if (!user?.id) {
       toast.error("Vui lòng đăng nhập để nhận Camly Coin");
@@ -205,6 +206,7 @@ export const useCamlyCoin = () => {
             sourceId: reflectionId,
             customMessage,
             isPublic,
+            publicConsentConfirmed: isPublic && publicConsentConfirmed,
           }),
         }
       );

@@ -425,6 +425,7 @@ export type Database = {
           created_at: string
           id: string
           is_public: boolean
+          public_consent_confirmed: boolean
           source_id: string | null
           spiritual_message: string
           user_id: string
@@ -435,6 +436,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_public?: boolean
+          public_consent_confirmed?: boolean
           source_id?: string | null
           spiritual_message: string
           user_id: string
@@ -445,6 +447,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_public?: boolean
+          public_consent_confirmed?: boolean
           source_id?: string | null
           spiritual_message?: string
           user_id?: string
@@ -769,6 +772,7 @@ export type Database = {
           created_at: string
           id: string
           is_public: boolean
+          public_consent_confirmed: boolean
           rejection_reason: string | null
           sincerity_score: number | null
           user_id: string
@@ -780,6 +784,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_public?: boolean
+          public_consent_confirmed?: boolean
           rejection_reason?: string | null
           sincerity_score?: number | null
           user_id: string
@@ -791,6 +796,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_public?: boolean
+          public_consent_confirmed?: boolean
           rejection_reason?: string | null
           sincerity_score?: number | null
           user_id?: string
@@ -1199,6 +1205,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_service_role: { Args: never; Returns: boolean }
       record_credit_usage: {
         Args: { p_amount: number; p_description?: string; p_user_id: string }
         Returns: string
