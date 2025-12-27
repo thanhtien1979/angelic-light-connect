@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { 
   ArrowLeft, Sparkles, Heart, BookOpen, Leaf, 
   Calendar, Award, Coins, MessageCircle, TrendingUp,
-  Clock, Star, Sun, UserPlus, UserMinus, Users, Loader2
+  Clock, Star, Sun, UserPlus, UserMinus, Users, Loader2, Trophy
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { FollowListModal } from "@/components/FollowListModal";
+import AchievementBadges from "@/components/AchievementBadges";
 
 interface UserProfileData {
   id: string;
@@ -442,17 +443,25 @@ const UserProfile = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Tabs defaultValue="activity" className="w-full">
-            <TabsList className="w-full grid grid-cols-2 mb-6">
+          <Tabs defaultValue="achievements" className="w-full">
+            <TabsList className="w-full grid grid-cols-3 mb-6">
+              <TabsTrigger value="achievements">
+                <Trophy className="w-4 h-4 mr-2" />
+                Thành tựu
+              </TabsTrigger>
               <TabsTrigger value="activity">
                 <Clock className="w-4 h-4 mr-2" />
-                Hoạt động gần đây
+                Hoạt động
               </TabsTrigger>
               <TabsTrigger value="stats">
                 <TrendingUp className="w-4 h-4 mr-2" />
-                Thống kê chi tiết
+                Thống kê
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="achievements">
+              <AchievementBadges userId={targetUserId} />
+            </TabsContent>
 
             <TabsContent value="activity">
               <Card>
