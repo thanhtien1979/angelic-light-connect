@@ -13,6 +13,7 @@ import PrivateChat from "@/components/PrivateChat";
 import VideoCallModal from "@/components/VideoCallModal";
 import ProfileViewModal from "@/components/ProfileViewModal";
 import MomentComments from "@/components/MomentComments";
+import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -594,6 +595,15 @@ const Community = () => {
       >
         {/* Community Stats */}
         <StatsCard stats={stats} isLoading={isLoading} />
+
+        {/* Community Leaderboard */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10"
+        >
+          <CommunityLeaderboard />
+        </motion.div>
 
         {/* Friendship Manager Section */}
         <motion.div

@@ -4,10 +4,11 @@ import { motion } from "framer-motion";
 import { 
   ArrowLeft, Sparkles, Heart, BookOpen, Leaf, 
   Calendar, Award, Coins, MessageCircle, TrendingUp,
-  Clock, Star, Sun
+  Clock, Star, Sun, UserPlus, UserMinus, Users, Loader2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useFollow } from "@/hooks/useFollow";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
+import { FollowListModal } from "@/components/FollowListModal";
 
 interface UserProfileData {
   id: string;
@@ -51,8 +53,18 @@ const UserProfile = () => {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
 
   const targetUserId = userId || currentUser?.id;
+  
+  const { 
+    isFollowing, 
+    followersCount, 
+    followingCount, 
+    isLoading: isFollowLoading, 
+    toggleFollow 
+  } = useFollow(targetUserId);
 
   useEffect(() => {
     if (targetUserId) {
@@ -320,20 +332,60 @@ const UserProfile = () => {
             {profile.display_name || "Linh hồn ánh sáng"}
           </h2>
           
-          <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mb-4">
             <Calendar className="w-4 h-4" />
             <span>
               Tham gia {formatDistanceToNow(new Date(profile.created_at), { addSuffix: true, locale: vi })}
             </span>
           </div>
 
-          {isOwnProfile && (
-            <Link to="/profile">
-              <Button variant="outline" className="mt-4 border-gold/30 hover:bg-gold/10">
-                Chỉnh sửa hồ sơ
+          {/* Follow Stats */}
+          <div className="flex items-center justify-center gap-6 mb-4">
+            <button 
+              onClick={() => setShowFollowersModal(true)}
+              className="text-center hover:bg-muted/50 px-4 py-2 rounded-lg transition-colors"
+            >
+              <p className="text-lg font-bold text-foreground">{followersCount}</p>
+              <p className="text-xs text-muted-foreground">Người theo dõi</p>
+            </button>
+            <div className="w-px h-8 bg-border" />
+            <button 
+              onClick={() => setShowFollowingModal(true)}
+              className="text-center hover:bg-muted/50 px-4 py-2 rounded-lg transition-colors"
+            >
+              <p className="text-lg font-bold text-foreground">{followingCount}</p>
+              <p className="text-xs text-muted-foreground">Đang theo dõi</p>
+            </button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-center gap-3">
+            {isOwnProfile ? (
+              <Link to="/profile">
+                <Button variant="outline" className="border-gold/30 hover:bg-gold/10">
+                  Chỉnh sửa hồ sơ
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                onClick={toggleFollow}
+                disabled={isFollowLoading}
+                className={isFollowing 
+                  ? "border-gold/30 hover:bg-gold/10 bg-transparent text-foreground border" 
+                  : "bg-gradient-to-r from-gold to-amber-500 text-white hover:from-amber-500 hover:to-gold"
+                }
+              >
+                {isFollowLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : isFollowing ? (
+                  <UserMinus className="w-4 h-4 mr-2" />
+                ) : (
+                  <UserPlus className="w-4 h-4 mr-2" />
+                )}
+                {isFollowing ? "Hủy theo dõi" : "Theo dõi"}
               </Button>
-            </Link>
-          )}
+            )}
+          </div>
         </motion.div>
 
         {/* Stats Grid */}
@@ -544,6 +596,26 @@ const UserProfile = () => {
           </Tabs>
         </motion.div>
       </main>
+
+      {/* Follow Modals */}
+      {targetUserId && (
+        <>
+          <FollowListModal
+            isOpen={showFollowersModal}
+            onClose={() => setShowFollowersModal(false)}
+            userId={targetUserId}
+            type="followers"
+            title="Người theo dõi"
+          />
+          <FollowListModal
+            isOpen={showFollowingModal}
+            onClose={() => setShowFollowingModal(false)}
+            userId={targetUserId}
+            type="following"
+            title="Đang theo dõi"
+          />
+        </>
+      )}
     </div>
   );
 };
