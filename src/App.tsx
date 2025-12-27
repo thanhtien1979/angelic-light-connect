@@ -10,6 +10,7 @@ import Community from "./pages/Community";
 import CreativeStudio from "./pages/CreativeStudio";
 import Credits from "./pages/Credits";
 import Friends from "./pages/Friends";
+import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -37,6 +38,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="/studio" element={<CreativeStudio />} />
             <Route path="/credits" element={<Credits />} />
             <Route path="/friends" element={<Friends />} />
