@@ -1,10 +1,21 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Send, Sparkles, Globe, Lock, Loader2 } from "lucide-react";
+import { X, Heart, Send, Sparkles, Globe, Lock, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
@@ -23,12 +34,42 @@ export const ReflectionModal = ({ isOpen, onClose, onSuccess }: ReflectionModalP
   const [isPublic, setIsPublic] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   const wordCount = content.trim().split(/\s+/).filter(w => w.length > 0).length;
   const isValid = wordCount >= 200;
 
+  const handlePublicToggle = (checked: boolean) => {
+    if (checked) {
+      // Show consent dialog when enabling public sharing
+      setShowConsentDialog(true);
+    } else {
+      setIsPublic(false);
+      setConsentChecked(false);
+    }
+  };
+
+  const handleConsentConfirm = () => {
+    if (consentChecked) {
+      setIsPublic(true);
+      setShowConsentDialog(false);
+    }
+  };
+
+  const handleConsentCancel = () => {
+    setShowConsentDialog(false);
+    setConsentChecked(false);
+  };
+
   const handleSubmit = async () => {
     if (!user?.id || !isValid) return;
+
+    // If public, require consent confirmation
+    if (isPublic && !consentChecked) {
+      setShowConsentDialog(true);
+      return;
+    }
 
     setIsSubmitting(true);
     setValidationMessage(null);
@@ -64,7 +105,7 @@ export const ReflectionModal = ({ isOpen, onClose, onSuccess }: ReflectionModalP
         return;
       }
 
-      // Save reflection to database
+      // Save reflection to database with consent confirmation
       const { data: reflectionData, error: saveError } = await supabase
         .from("reflection_notes")
         .insert({
@@ -74,20 +115,22 @@ export const ReflectionModal = ({ isOpen, onClose, onSuccess }: ReflectionModalP
           sincerity_score: validation.sincerityScore,
           approved: true,
           is_public: isPublic,
+          public_consent_confirmed: isPublic && consentChecked,
         })
         .select("id")
         .single();
 
       if (saveError) throw saveError;
 
-      // Award coins
-      const result = await awardReflection(reflectionData.id, validation.message, isPublic);
+      // Award coins with consent confirmation
+      const result = await awardReflection(reflectionData.id, validation.message, isPublic, consentChecked);
 
       if (result?.success) {
         toast.success("Ánh sáng đã được ghi nhận! ✨");
         onSuccess?.({ coins: 1000, message: result.message });
         setContent("");
         setIsPublic(false);
+        setConsentChecked(false);
         onClose();
       }
     } catch (error) {
@@ -189,9 +232,23 @@ export const ReflectionModal = ({ isOpen, onClose, onSuccess }: ReflectionModalP
                 <Switch
                   id="public-toggle"
                   checked={isPublic}
-                  onCheckedChange={setIsPublic}
+                  onCheckedChange={handlePublicToggle}
                 />
               </div>
+
+              {/* Public sharing warning */}
+              {isPublic && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20"
+                >
+                  <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-amber-700">
+                    Bạn đã xác nhận chia sẻ công khai. Mọi người có thể xem nội dung này.
+                  </p>
+                </motion.div>
+              )}
             </div>
 
             {/* Footer */}
@@ -220,6 +277,50 @@ export const ReflectionModal = ({ isOpen, onClose, onSuccess }: ReflectionModalP
           </motion.div>
         </motion.div>
       )}
+
+      {/* Consent Dialog */}
+      <AlertDialog open={showConsentDialog} onOpenChange={setShowConsentDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-sky" />
+              Xác nhận chia sẻ công khai
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3 text-left">
+              <p>
+                Khi bạn chia sẻ công khai, nội dung suy ngẫm của bạn sẽ:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                <li>Hiển thị cho tất cả người dùng trên nền tảng</li>
+                <li>Có thể được xem bởi bất kỳ ai có quyền truy cập</li>
+                <li>Không thể thu hồi hoàn toàn sau khi đã được xem</li>
+              </ul>
+              <div className="flex items-start gap-2 pt-2">
+                <Checkbox
+                  id="consent-check"
+                  checked={consentChecked}
+                  onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                />
+                <Label htmlFor="consent-check" className="text-sm leading-tight cursor-pointer">
+                  Tôi hiểu và đồng ý chia sẻ nội dung này công khai với cộng đồng
+                </Label>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleConsentCancel}>
+              Hủy
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConsentConfirm}
+              disabled={!consentChecked}
+              className="bg-sky hover:bg-sky/90"
+            >
+              Xác nhận chia sẻ
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AnimatePresence>
   );
 };

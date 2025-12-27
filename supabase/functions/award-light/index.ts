@@ -79,7 +79,7 @@ serve(async (req) => {
       );
     }
 
-    const { type, sourceId, sourceName, customMessage, isPublic = false } = await req.json();
+    const { type, sourceId, sourceName, customMessage, isPublic = false, publicConsentConfirmed = false } = await req.json();
     
     // Validate type
     if (!["meditation_completion", "reflection_note", "chat_message", "daily_login"].includes(type)) {
@@ -161,6 +161,9 @@ serve(async (req) => {
     // Generate spiritual message
     const spiritualMessage = customMessage || getRandomMessage(type as keyof typeof SPIRITUAL_MESSAGES);
 
+    // Only allow public sharing if consent was confirmed
+    const effectiveIsPublic = isPublic && publicConsentConfirmed;
+
     // Award coins using database function
     const { data: acknowledgementId, error: awardError } = await supabase.rpc("award_camly_coins", {
       p_user_id: user.id,
@@ -168,7 +171,7 @@ serve(async (req) => {
       p_type: type,
       p_message: spiritualMessage,
       p_source_id: sourceId || null,
-      p_is_public: isPublic,
+      p_is_public: effectiveIsPublic,
     });
 
     if (awardError) {
