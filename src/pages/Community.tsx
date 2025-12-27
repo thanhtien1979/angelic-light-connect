@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Heart, Sparkles, BookOpen, MessageCircle, Leaf, Sun, Users,
-  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw
+  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw, MessageSquare
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +12,7 @@ import FriendshipManager from "@/components/FriendshipManager";
 import PrivateChat from "@/components/PrivateChat";
 import VideoCallModal from "@/components/VideoCallModal";
 import ProfileViewModal from "@/components/ProfileViewModal";
+import MomentComments from "@/components/MomentComments";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -90,14 +91,19 @@ const MomentCard = ({
   onLike, 
   hasLiked,
   profile,
-  onViewProfile 
+  onViewProfile,
+  onOpenComments,
+  commentsCount = 0,
 }: { 
   moment: SharedMoment; 
   onLike: (id: string) => void;
   hasLiked: boolean;
   profile?: Profile | null;
   onViewProfile: (userId: string) => void;
+  onOpenComments: (momentId: string) => void;
+  commentsCount?: number;
 }) => {
+  const navigate = useNavigate();
   const CategoryIcon = getCategoryIcon(moment.moment_type);
   const categoryLabel = getCategoryLabel(moment.moment_type);
   const categoryColor = getCategoryColor(moment.moment_type);
@@ -126,6 +132,10 @@ const MomentCard = ({
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
+  const handleProfileClick = () => {
+    navigate(`/user/${moment.user_id}`);
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -136,7 +146,7 @@ const MomentCard = ({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => onViewProfile(moment.user_id)}
+            onClick={handleProfileClick}
             className="group relative"
           >
             <Avatar className="w-10 h-10 ring-2 ring-gold/30 group-hover:ring-gold/60 transition-all">
@@ -149,7 +159,7 @@ const MomentCard = ({
           </button>
           <div>
             <button
-              onClick={() => onViewProfile(moment.user_id)}
+              onClick={handleProfileClick}
               className="text-sm font-medium text-foreground hover:text-gold transition-colors"
             >
               {profile?.display_name || moment.display_name || "Linh hồn ẩn danh"}
@@ -169,7 +179,17 @@ const MomentCard = ({
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-end pt-3 border-t border-border/30">
+      <div className="flex items-center justify-between pt-3 border-t border-border/30">
+        <motion.button
+          onClick={() => onOpenComments(moment.id)}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-gold/10 hover:text-gold transition-all"
+        >
+          <MessageSquare className="w-4 h-4" />
+          <span className="text-xs font-medium">{commentsCount}</span>
+        </motion.button>
+        
         <motion.button
           onClick={() => onLike(moment.id)}
           whileHover={{ scale: 1.1 }}
@@ -270,6 +290,8 @@ const Community = () => {
   const [selectedCategory, setSelectedCategory] = useState<MomentCategory>("all");
   const [stats, setStats] = useState<CommunityStats>({ totalMembers: 0, totalMoments: 0, totalLikes: 0 });
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [selectedMomentForComments, setSelectedMomentForComments] = useState<string | null>(null);
+  const [commentsCounts, setCommentsCounts] = useState<Map<string, number>>(new Map());
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -677,6 +699,8 @@ const Community = () => {
                       hasLiked={likedMoments.has(moment.id)}
                       profile={profiles.get(moment.user_id)}
                       onViewProfile={(userId) => handleViewProfile(userId)}
+                      onOpenComments={(momentId) => setSelectedMomentForComments(momentId)}
+                      commentsCount={commentsCounts.get(moment.id) || 0}
                     />
                   </motion.div>
                 ))}
@@ -699,6 +723,13 @@ const Community = () => {
           </>
         )}
       </motion.main>
+
+      {/* Moment Comments */}
+      <MomentComments
+        momentId={selectedMomentForComments || ""}
+        isOpen={!!selectedMomentForComments}
+        onClose={() => setSelectedMomentForComments(null)}
+      />
 
       {/* Profile View Modal */}
       <ProfileViewModal
