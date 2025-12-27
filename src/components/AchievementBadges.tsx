@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Lock, Star, Medal, Crown, Gem } from 'lucide-react';
+import { Trophy, Lock, Star, Medal, Crown, Gem, Share2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { useAchievements, Achievement, ACHIEVEMENTS } from '@/hooks/useAchievements';
 import { cn } from '@/lib/utils';
+import AchievementShareDialog from './AchievementShareDialog';
 
 interface AchievementBadgesProps {
   userId?: string;
@@ -108,6 +110,7 @@ const AchievementCard: React.FC<{
 const AchievementBadges: React.FC<AchievementBadgesProps> = ({ userId, compact = false }) => {
   const { achievements, isUnlocked, getAchievementProgress, unlockedAchievements, isLoading } = useAchievements(userId);
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+  const [shareAchievement, setShareAchievement] = useState<Achievement | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
   const unlockedCount = unlockedAchievements.length;
@@ -288,15 +291,29 @@ const AchievementBadges: React.FC<AchievementBadgesProps> = ({ userId, compact =
                 )}
 
                 {isUnlocked(selectedAchievement.id) && (
-                  <div className="text-center py-4">
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="inline-flex items-center gap-2 text-primary"
+                  <div className="space-y-4">
+                    <div className="text-center py-4">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="inline-flex items-center gap-2 text-primary"
+                      >
+                        <Trophy className="w-5 h-5" />
+                        <span className="font-medium">Đã mở khóa!</span>
+                      </motion.div>
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      className="w-full border-primary/30 hover:bg-primary/10"
+                      onClick={() => {
+                        setSelectedAchievement(null);
+                        setShareAchievement(selectedAchievement);
+                      }}
                     >
-                      <Trophy className="w-5 h-5" />
-                      <span className="font-medium">Đã mở khóa!</span>
-                    </motion.div>
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Chia sẻ thành tựu
+                    </Button>
                   </div>
                 )}
               </div>
@@ -304,6 +321,13 @@ const AchievementBadges: React.FC<AchievementBadgesProps> = ({ userId, compact =
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Share Dialog */}
+      <AchievementShareDialog
+        achievement={shareAchievement}
+        isOpen={!!shareAchievement}
+        onClose={() => setShareAchievement(null)}
+      />
     </>
   );
 };
