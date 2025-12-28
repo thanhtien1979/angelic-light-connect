@@ -11,6 +11,7 @@ import {
   CheckCheck,
   Trash2,
   X,
+  Bookmark,
 } from "lucide-react";
 import { useNotifications, Notification } from "@/hooks/useNotifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,6 +31,10 @@ const getNotificationIcon = (type: string) => {
       return Heart;
     case "comment":
       return MessageCircle;
+    case "message":
+      return MessageCircle;
+    case "save":
+      return Bookmark;
     default:
       return Sparkles;
   }
@@ -43,6 +48,10 @@ const getNotificationColor = (type: string) => {
       return "text-rose-500 bg-rose-500/20";
     case "comment":
       return "text-sky-500 bg-sky-500/20";
+    case "message":
+      return "text-emerald-500 bg-emerald-500/20";
+    case "save":
+      return "text-amber-500 bg-amber-500/20";
     default:
       return "text-violet-500 bg-violet-500/20";
   }
@@ -179,6 +188,10 @@ export const NotificationsDropdown = () => {
     // Navigate based on notification type
     if (notification.type === "follow" && notification.actor_id) {
       navigate(`/user/${notification.actor_id}`);
+    } else if (notification.type === "message" && notification.actor_id) {
+      navigate(`/friends`);
+    } else if ((notification.type === "like" || notification.type === "comment" || notification.type === "save") && notification.reference_id) {
+      navigate(`/community`);
     }
 
     setIsOpen(false);

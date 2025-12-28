@@ -21,6 +21,7 @@ import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
 import { useSavedMoments } from "@/hooks/useSavedMoments";
 import UserSearchDialog from "@/components/UserSearchDialog";
 import MomentLikersDialog from "@/components/MomentLikersDialog";
+import MomentSaversDialog from "@/components/MomentSaversDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -107,6 +108,8 @@ const MomentCard = ({
   onToggleSave,
   isSaved = false,
   onViewLikers,
+  onViewSavers,
+  savesCount = 0,
 }: { 
   moment: SharedMoment; 
   onLike: (id: string) => void;
@@ -119,6 +122,8 @@ const MomentCard = ({
   onToggleSave: (id: string) => void;
   isSaved?: boolean;
   onViewLikers: (momentId: string) => void;
+  onViewSavers: (momentId: string) => void;
+  savesCount?: number;
 }) => {
   const navigate = useNavigate();
   const CategoryIcon = getCategoryIcon(moment.moment_type);
@@ -240,6 +245,14 @@ const MomentCard = ({
           >
             <Bookmark className={`w-4 h-4 ${isSaved ? "fill-amber-500" : ""}`} />
           </motion.button>
+          {savesCount > 0 && (
+            <button
+              onClick={() => onViewSavers(moment.id)}
+              className="text-xs text-muted-foreground hover:text-amber-500 transition-colors"
+            >
+              {savesCount} lưu
+            </button>
+          )}
         </div>
         
         <div className="flex items-center gap-2">
@@ -367,9 +380,11 @@ const Community = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isUserSearchOpen, setIsUserSearchOpen] = useState(false);
   const [likersDialogMomentId, setLikersDialogMomentId] = useState<string | null>(null);
+  const [saversDialogMomentId, setSaversDialogMomentId] = useState<string | null>(null);
   const [selectedFriendForChat, setSelectedFriendForChat] = useState<string | null>(null);
   const { toggleSave, isSaved, savedMoments, fetchSavedMomentsWithDetails } = useSavedMoments();
   const [savedMomentsProfiles, setSavedMomentsProfiles] = useState<Map<string, Profile>>(new Map());
+  const [savesCounts, setSavesCounts] = useState<Map<string, number>>(new Map());
   const ITEMS_PER_PAGE = 20;
 
   const handleStartChatFromSearch = (userId: string) => {
@@ -381,6 +396,12 @@ const Community = () => {
   const handleStartChatFromLikers = (userId: string) => {
     setSelectedFriendForChat(userId);
     setLikersDialogMomentId(null);
+    setIsChatOpen(true);
+  };
+
+  const handleStartChatFromSavers = (userId: string) => {
+    setSelectedFriendForChat(userId);
+    setSaversDialogMomentId(null);
     setIsChatOpen(true);
   };
 
@@ -493,6 +514,8 @@ const Community = () => {
 
       // Fetch profiles for new moments
       const userIds = [...new Set(data?.map(m => m.user_id) || [])];
+      const momentIds = data?.map(m => m.id) || [];
+      
       if (userIds.length > 0) {
         const { data: profilesData } = await supabase
           .from("profiles")
@@ -503,6 +526,26 @@ const Community = () => {
           setProfiles(prev => {
             const newMap = new Map(prev);
             profilesData.forEach(p => newMap.set(p.id, p));
+            return newMap;
+          });
+        }
+      }
+
+      // Fetch saves count for moments
+      if (momentIds.length > 0) {
+        const { data: savesData } = await supabase
+          .from("saved_moments")
+          .select("moment_id")
+          .in("moment_id", momentIds);
+
+        if (savesData) {
+          const countsMap = new Map<string, number>();
+          savesData.forEach(s => {
+            countsMap.set(s.moment_id, (countsMap.get(s.moment_id) || 0) + 1);
+          });
+          setSavesCounts(prev => {
+            const newMap = new Map(prev);
+            countsMap.forEach((count, id) => newMap.set(id, count));
             return newMap;
           });
         }
@@ -864,6 +907,8 @@ const Community = () => {
                       onToggleSave={toggleSave}
                       isSaved={isSaved(moment.id)}
                       onViewLikers={(momentId) => setLikersDialogMomentId(momentId)}
+                      onViewSavers={(momentId) => setSaversDialogMomentId(momentId)}
+                      savesCount={savesCounts.get(moment.id) || 0}
                     />
                   </motion.div>
                 ))}
@@ -953,6 +998,16 @@ const Community = () => {
           onClose={() => setLikersDialogMomentId(null)}
           momentId={likersDialogMomentId}
           onStartChat={handleStartChatFromLikers}
+        />
+      )}
+
+      {/* Moment Savers Dialog */}
+      {saversDialogMomentId && (
+        <MomentSaversDialog
+          isOpen={!!saversDialogMomentId}
+          onClose={() => setSaversDialogMomentId(null)}
+          momentId={saversDialogMomentId}
+          onStartChat={handleStartChatFromSavers}
         />
       )}
     </div>
