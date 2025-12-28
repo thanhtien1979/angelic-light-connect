@@ -48,7 +48,7 @@ interface CommunityStats {
   totalLikes: number;
 }
 
-type MomentCategory = "all" | "meditation_completion" | "reflection_note" | "chat_message" | "daily_login";
+type MomentCategory = "all" | "meditation_completion" | "reflection_note" | "chat_message" | "daily_login" | "saved";
 
 const getCategoryIcon = (type: string) => {
   switch (type) {
@@ -294,27 +294,34 @@ const StatsCard = ({ stats, isLoading }: { stats: CommunityStats; isLoading: boo
 
 const CategoryFilter = ({ 
   selected, 
-  onChange 
+  onChange,
+  isLoggedIn = false,
 }: { 
   selected: MomentCategory; 
   onChange: (cat: MomentCategory) => void;
+  isLoggedIn?: boolean;
 }) => {
-  const categories: { value: MomentCategory; label: string; icon: typeof Sparkles }[] = [
+  const categories: { value: MomentCategory; label: string; icon: typeof Sparkles; requiresAuth?: boolean }[] = [
     { value: "all", label: "Tất cả", icon: Sparkles },
     { value: "meditation_completion", label: "Thiền Định", icon: Leaf },
     { value: "reflection_note", label: "Biết Ơn", icon: BookOpen },
     { value: "chat_message", label: "Angel AI", icon: MessageCircle },
+    { value: "saved", label: "Đã lưu", icon: Bookmark, requiresAuth: true },
   ];
 
   return (
     <div className="flex flex-wrap gap-2 mb-4">
-      {categories.map(({ value, label, icon: Icon }) => (
+      {categories
+        .filter((cat) => !cat.requiresAuth || isLoggedIn)
+        .map(({ value, label, icon: Icon }) => (
         <button
           key={value}
           onClick={() => onChange(value)}
           className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full border transition-all ${
             selected === value
-              ? "bg-gold/20 border-gold/50 text-gold"
+              ? value === "saved" 
+                ? "bg-amber-500/20 border-amber-500/50 text-amber-600"
+                : "bg-gold/20 border-gold/50 text-gold"
               : "bg-muted/30 border-border/50 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
           }`}
         >
@@ -345,7 +352,8 @@ const Community = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [shareMoment, setShareMoment] = useState<SharedMoment | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const { toggleSave, isSaved } = useSavedMoments();
+  const { toggleSave, isSaved, savedMoments, fetchSavedMomentsWithDetails } = useSavedMoments();
+  const [savedMomentsProfiles, setSavedMomentsProfiles] = useState<Map<string, Profile>>(new Map());
   const ITEMS_PER_PAGE = 20;
 
   const handleViewProfile = async (userId: string) => {
@@ -494,7 +502,26 @@ const Community = () => {
 
   // Re-fetch when category changes
   useEffect(() => {
-    fetchMoments(0, true);
+    if (selectedCategory === "saved") {
+      // Fetch saved moments with full details
+      fetchSavedMomentsWithDetails().then(async (moments) => {
+        if (moments.length > 0) {
+          const userIds = [...new Set(moments.map((m) => m.user_id))];
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("id, display_name, avatar_url")
+            .in("id", userIds);
+          
+          if (profilesData) {
+            const map = new Map<string, Profile>();
+            profilesData.forEach((p) => map.set(p.id, p));
+            setSavedMomentsProfiles(map);
+          }
+        }
+      });
+    } else {
+      fetchMoments(0, true);
+    }
   }, [selectedCategory]);
 
   // Real-time subscription
@@ -557,6 +584,11 @@ const Community = () => {
   };
 
   const handleLike = async (momentId: string) => {
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để yêu thích");
+      return;
+    }
+
     const newLiked = new Set(likedMoments);
     const isLiking = !newLiked.has(momentId);
 
@@ -583,21 +615,28 @@ const Community = () => {
       totalLikes: prev.totalLikes + (isLiking ? 1 : -1),
     }));
 
-    // Update in database
+    // Update in database using moment_likes table (triggers handle likes_count)
     try {
-      const moment = moments.find(m => m.id === momentId);
-      if (moment) {
+      if (isLiking) {
+        await supabase.from("moment_likes").insert({
+          user_id: user.id,
+          moment_id: momentId,
+        });
+      } else {
         await supabase
-          .from("shared_light_moments")
-          .update({ likes_count: moment.likes_count + (isLiking ? 1 : -1) })
-          .eq("id", momentId);
+          .from("moment_likes")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("moment_id", momentId);
       }
     } catch (error) {
       console.error("Error updating like:", error);
     }
   };
 
-  const filteredMoments = moments;
+  // Get the moments to display based on selected category
+  const displayMoments = selectedCategory === "saved" ? savedMoments : moments;
+  const displayProfiles = selectedCategory === "saved" ? savedMomentsProfiles : profiles;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
@@ -721,6 +760,7 @@ const Community = () => {
           <CategoryFilter 
             selected={selectedCategory} 
             onChange={setSelectedCategory}
+            isLoggedIn={!!user}
           />
         </div>
 
@@ -731,7 +771,7 @@ const Community = () => {
               <div key={i} className="p-5 rounded-2xl bg-muted/30 animate-pulse h-40" />
             ))}
           </div>
-        ) : filteredMoments.length === 0 ? (
+        ) : displayMoments.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -741,14 +781,18 @@ const Community = () => {
               <Sparkles className="w-8 h-8 text-gold" />
             </div>
             <h3 className="font-serif text-xl text-foreground mb-2">
-              {searchQuery || selectedCategory !== "all" 
-                ? "Không tìm thấy khoảnh khắc nào"
-                : "Chưa có khoảnh khắc nào"}
+              {selectedCategory === "saved"
+                ? "Chưa có khoảnh khắc nào được lưu"
+                : searchQuery || selectedCategory !== "all" 
+                  ? "Không tìm thấy khoảnh khắc nào"
+                  : "Chưa có khoảnh khắc nào"}
             </h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              {searchQuery || selectedCategory !== "all"
-                ? "Thử tìm kiếm với từ khóa khác hoặc chọn danh mục khác."
-                : "Hãy là người đầu tiên chia sẻ ánh sáng của mình. Viết một suy ngẫm hoặc hoàn thành thiền định để bắt đầu."}
+              {selectedCategory === "saved"
+                ? "Hãy lưu lại những khoảnh khắc yêu thích để xem lại sau."
+                : searchQuery || selectedCategory !== "all"
+                  ? "Thử tìm kiếm với từ khóa khác hoặc chọn danh mục khác."
+                  : "Hãy là người đầu tiên chia sẻ ánh sáng của mình. Viết một suy ngẫm hoặc hoàn thành thiền định để bắt đầu."}
             </p>
             {!searchQuery && selectedCategory === "all" && (
               <Link
@@ -764,7 +808,7 @@ const Community = () => {
           <>
             <div className="grid gap-4 md:grid-cols-2">
               <AnimatePresence mode="popLayout">
-                {filteredMoments.map((moment, index) => (
+                {displayMoments.map((moment, index) => (
                   <motion.div
                     key={moment.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -775,7 +819,7 @@ const Community = () => {
                       moment={moment}
                       onLike={handleLike}
                       hasLiked={likedMoments.has(moment.id)}
-                      profile={profiles.get(moment.user_id)}
+                      profile={displayProfiles.get(moment.user_id)}
                       onViewProfile={(userId) => handleViewProfile(userId)}
                       onOpenComments={(momentId) => setSelectedMomentForComments(momentId)}
                       onShare={(m) => setShareMoment(m)}
@@ -788,8 +832,8 @@ const Community = () => {
               </AnimatePresence>
             </div>
 
-            {/* Load More */}
-            {hasMore && (
+            {/* Load More - only show for non-saved category */}
+            {hasMore && selectedCategory !== "saved" && (
               <div className="text-center mt-8">
                 <Button
                   onClick={handleLoadMore}

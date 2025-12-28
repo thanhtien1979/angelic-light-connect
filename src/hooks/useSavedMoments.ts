@@ -3,9 +3,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
+interface SavedMoment {
+  id: string;
+  spiritual_message: string;
+  moment_type: string;
+  display_name: string | null;
+  likes_count: number;
+  created_at: string;
+  user_id: string;
+  image_url?: string | null;
+}
+
 export const useSavedMoments = () => {
   const { user } = useAuth();
   const [savedMomentIds, setSavedMomentIds] = useState<Set<string>>(new Set());
+  const [savedMoments, setSavedMoments] = useState<SavedMoment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchSavedMoments = useCallback(async () => {
@@ -28,6 +40,45 @@ export const useSavedMoments = () => {
     }
   }, [user]);
 
+  const fetchSavedMomentsWithDetails = useCallback(async () => {
+    if (!user) return [];
+
+    setIsLoading(true);
+    try {
+      // Get saved moment IDs
+      const { data: savedData, error: savedError } = await supabase
+        .from("saved_moments")
+        .select("moment_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (savedError) throw savedError;
+
+      if (!savedData || savedData.length === 0) {
+        setSavedMoments([]);
+        return [];
+      }
+
+      const momentIds = savedData.map((s) => s.moment_id);
+
+      // Get full moment details
+      const { data: moments, error: momentsError } = await supabase
+        .from("shared_light_moments")
+        .select("*")
+        .in("id", momentIds);
+
+      if (momentsError) throw momentsError;
+
+      setSavedMoments(moments || []);
+      return moments || [];
+    } catch (error) {
+      console.error("Error fetching saved moments with details:", error);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchSavedMoments();
   }, [fetchSavedMoments]);
@@ -39,10 +90,10 @@ export const useSavedMoments = () => {
         return;
       }
 
-      const isSaved = savedMomentIds.has(momentId);
+      const isSavedNow = savedMomentIds.has(momentId);
 
       try {
-        if (isSaved) {
+        if (isSavedNow) {
           const { error } = await supabase
             .from("saved_moments")
             .delete()
@@ -56,6 +107,7 @@ export const useSavedMoments = () => {
             next.delete(momentId);
             return next;
           });
+          setSavedMoments((prev) => prev.filter((m) => m.id !== momentId));
           toast.success("Đã bỏ lưu khoảnh khắc");
         } else {
           const { error } = await supabase.from("saved_moments").insert({
@@ -83,9 +135,11 @@ export const useSavedMoments = () => {
 
   return {
     savedMomentIds,
+    savedMoments,
     isLoading,
     toggleSave,
     isSaved,
     refetch: fetchSavedMoments,
+    fetchSavedMomentsWithDetails,
   };
 };
