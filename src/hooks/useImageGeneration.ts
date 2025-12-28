@@ -106,6 +106,14 @@ export function useImageGeneration() {
       return null;
     }
 
+    // Check for valid user session before calling edge function
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      toast.error("Vui lòng đăng nhập để sử dụng tính năng này");
+      setError("Chưa đăng nhập");
+      return null;
+    }
+
     setIsGenerating(true);
     setError(null);
     setNeedsCredits(false);
@@ -156,6 +164,14 @@ export function useImageGeneration() {
   ): Promise<GenerationResult | null> => {
     if (!prompt.trim()) {
       toast.error("Vui lòng nhập hướng dẫn chỉnh sửa");
+      return null;
+    }
+
+    // Check for valid user session before calling edge function
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      toast.error("Vui lòng đăng nhập để sử dụng tính năng này");
+      setError("Chưa đăng nhập");
       return null;
     }
 
