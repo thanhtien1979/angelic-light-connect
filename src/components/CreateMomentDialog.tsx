@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -9,6 +9,8 @@ import {
   Sun,
   Send,
   Loader2,
+  ImagePlus,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -70,12 +72,70 @@ const momentSchema = z.object({
   type: z.string().min(1, "Vui lòng chọn loại khoảnh khắc"),
 });
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
 const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogProps) => {
   const { user } = useAuth();
   const [message, setMessage] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ message?: string; type?: string }>({});
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chọn file hình ảnh");
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error("Kích thước ảnh không được vượt quá 5MB");
+      return;
+    }
+
+    setSelectedImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("moment-images")
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from("moment-images")
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  };
 
   const handleSubmit = async () => {
     // Validate input
@@ -99,6 +159,14 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
     setErrors({});
 
     try {
+      // Upload image if selected
+      let imageUrl: string | null = null;
+      if (selectedImage) {
+        setIsUploadingImage(true);
+        imageUrl = await uploadImage(selectedImage);
+        setIsUploadingImage(false);
+      }
+
       // Fetch user profile for display name
       const { data: profile } = await supabase
         .from("profiles")
@@ -112,6 +180,7 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
         moment_type: selectedType,
         display_name: profile?.display_name || null,
         likes_count: 0,
+        image_url: imageUrl,
       });
 
       if (error) throw error;
@@ -119,6 +188,8 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
       toast.success("Đã chia sẻ khoảnh khắc ánh sáng của bạn!");
       setMessage("");
       setSelectedType("");
+      setSelectedImage(null);
+      setImagePreview(null);
       onSuccess?.();
       onClose();
     } catch (error) {
@@ -126,6 +197,7 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
       toast.error("Không thể chia sẻ khoảnh khắc. Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
+      setIsUploadingImage(false);
     }
   };
 
@@ -133,6 +205,8 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
     if (!isSubmitting) {
       setMessage("");
       setSelectedType("");
+      setSelectedImage(null);
+      setImagePreview(null);
       setErrors({});
       onClose();
     }
@@ -229,7 +303,7 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
             </div>
 
             {/* Message Input */}
-            <div className="mb-6">
+            <div className="mb-4">
               <label className="block text-sm font-medium text-foreground mb-2">
                 Nội dung chia sẻ
               </label>
@@ -240,7 +314,7 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
                   setErrors((prev) => ({ ...prev, message: undefined }));
                 }}
                 placeholder="Chia sẻ suy nghĩ, cảm xúc hoặc trải nghiệm tâm linh của bạn..."
-                className="min-h-[120px] resize-none border-gold/20 focus:border-gold/50 bg-muted/30"
+                className="min-h-[100px] resize-none border-gold/20 focus:border-gold/50 bg-muted/30"
                 maxLength={1000}
               />
               <div className="flex justify-between items-center mt-2">
@@ -261,6 +335,50 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
               </div>
             </div>
 
+            {/* Image Upload */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Hình ảnh (tùy chọn)
+              </label>
+              
+              {imagePreview ? (
+                <div className="relative rounded-xl overflow-hidden border border-border/50">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-48 object-cover"
+                  />
+                  <button
+                    onClick={handleRemoveImage}
+                    className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-32 border-2 border-dashed border-gold/30 rounded-xl hover:border-gold/50 hover:bg-gold/5 transition-all flex flex-col items-center justify-center gap-2"
+                >
+                  <ImagePlus className="w-8 h-8 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Nhấn để chọn hình ảnh
+                  </span>
+                  <span className="text-xs text-muted-foreground/60">
+                    Tối đa 5MB
+                  </span>
+                </button>
+              )}
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+            </div>
+
             {/* Submit Button */}
             <Button
               onClick={handleSubmit}
@@ -270,7 +388,7 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Đang chia sẻ...
+                  {isUploadingImage ? "Đang tải ảnh..." : "Đang chia sẻ..."}
                 </>
               ) : (
                 <>

@@ -15,6 +15,8 @@ import ProfileViewModal from "@/components/ProfileViewModal";
 import MomentComments from "@/components/MomentComments";
 import MomentShareDialog from "@/components/MomentShareDialog";
 import CreateMomentDialog from "@/components/CreateMomentDialog";
+import FollowSuggestions from "@/components/FollowSuggestions";
+import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +32,7 @@ interface SharedMoment {
   likes_count: number;
   created_at: string;
   user_id: string;
+  image_url?: string | null;
 }
 
 interface Profile {
@@ -177,6 +180,17 @@ const MomentCard = ({
           {categoryLabel}
         </span>
       </div>
+
+      {/* Image if exists */}
+      {moment.image_url && (
+        <div className="mb-4 rounded-xl overflow-hidden">
+          <img
+            src={moment.image_url}
+            alt="Moment"
+            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+      )}
 
       {/* Content */}
       <p className="text-foreground/90 leading-relaxed mb-4 font-serif text-[15px]">
@@ -593,6 +607,7 @@ const Community = () => {
             </Button>
             {user && (
               <>
+                <NotificationsDropdown />
                 <Button
                   onClick={() => setIsCreateDialogOpen(true)}
                   className="bg-gradient-to-r from-gold/80 to-amber-500/80 hover:from-gold hover:to-amber-500 text-white"
@@ -632,14 +647,21 @@ const Community = () => {
           <CommunityLeaderboard />
         </motion.div>
 
-        {/* Friendship Manager Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-10"
-        >
-          <FriendshipManager />
-        </motion.div>
+        {/* Follow Suggestions & Friendship Manager */}
+        <div className="grid md:grid-cols-2 gap-6 mb-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <FollowSuggestions />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <FriendshipManager />
+          </motion.div>
+        </div>
 
         {/* Page Title */}
         <motion.div

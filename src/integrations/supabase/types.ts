@@ -646,6 +646,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          reference_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          reference_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          reference_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       privacy_settings: {
         Row: {
           created_at: string
@@ -877,6 +913,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          image_url: string | null
           light_acknowledgement_id: string | null
           likes_count: number
           moment_type: string
@@ -887,6 +924,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          image_url?: string | null
           light_acknowledgement_id?: string | null
           likes_count?: number
           moment_type: string
@@ -897,6 +935,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          image_url?: string | null
           light_acknowledgement_id?: string | null
           likes_count?: number
           moment_type?: string
