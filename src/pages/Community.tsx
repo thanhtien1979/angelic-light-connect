@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Heart, Sparkles, BookOpen, MessageCircle, Leaf, Sun, Users,
-  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw, MessageSquare, Share2
+  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw, MessageSquare, Share2, PenLine
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +14,7 @@ import VideoCallModal from "@/components/VideoCallModal";
 import ProfileViewModal from "@/components/ProfileViewModal";
 import MomentComments from "@/components/MomentComments";
 import MomentShareDialog from "@/components/MomentShareDialog";
+import CreateMomentDialog from "@/components/CreateMomentDialog";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -311,6 +312,7 @@ const Community = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [shareMoment, setShareMoment] = useState<SharedMoment | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const ITEMS_PER_PAGE = 20;
 
   const handleViewProfile = async (userId: string) => {
@@ -590,13 +592,23 @@ const Community = () => {
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
             </Button>
             {user && (
-              <Button
-                onClick={() => setIsChatOpen(true)}
-                className="bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white"
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Chat Bạn Bè</span>
-              </Button>
+              <>
+                <Button
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  className="bg-gradient-to-r from-gold/80 to-amber-500/80 hover:from-gold hover:to-amber-500 text-white"
+                >
+                  <PenLine className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Tạo bài viết</span>
+                </Button>
+                <Button
+                  onClick={() => setIsChatOpen(true)}
+                  variant="outline"
+                  className="border-gold/30 hover:bg-gold/10"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Chat</span>
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -790,6 +802,16 @@ const Community = () => {
         onToggleVideo={toggleVideo}
         onToggleAudio={toggleAudio}
         onToggleScreenShare={toggleScreenShare}
+      />
+
+      {/* Create Moment Dialog */}
+      <CreateMomentDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        onSuccess={() => {
+          fetchMoments(0, true);
+          fetchStats();
+        }}
       />
     </div>
   );
