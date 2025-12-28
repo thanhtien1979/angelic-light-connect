@@ -19,6 +19,7 @@ import FollowSuggestions from "@/components/FollowSuggestions";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
 import { useSavedMoments } from "@/hooks/useSavedMoments";
+import UserSearchDialog from "@/components/UserSearchDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -352,6 +353,7 @@ const Community = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [shareMoment, setShareMoment] = useState<SharedMoment | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isUserSearchOpen, setIsUserSearchOpen] = useState(false);
   const { toggleSave, isSaved, savedMoments, fetchSavedMomentsWithDetails } = useSavedMoments();
   const [savedMomentsProfiles, setSavedMomentsProfiles] = useState<Map<string, Profile>>(new Map());
   const ITEMS_PER_PAGE = 20;
@@ -657,6 +659,15 @@ const Community = () => {
             <Button
               variant="ghost"
               size="icon"
+              onClick={() => setIsUserSearchOpen(true)}
+              className="text-muted-foreground hover:text-foreground"
+              title="Tìm kiếm người dùng"
+            >
+              <Users className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={handleRefresh}
               disabled={isRefreshing}
               className="text-muted-foreground hover:text-foreground"
@@ -899,6 +910,12 @@ const Community = () => {
           fetchMoments(0, true);
           fetchStats();
         }}
+      />
+
+      {/* User Search Dialog */}
+      <UserSearchDialog
+        isOpen={isUserSearchOpen}
+        onClose={() => setIsUserSearchOpen(false)}
       />
     </div>
   );
