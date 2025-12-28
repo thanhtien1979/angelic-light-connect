@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Heart, Sparkles, BookOpen, MessageCircle, Leaf, Sun, Users,
-  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw, MessageSquare, Share2, PenLine
+  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw, MessageSquare, Share2, PenLine, Bookmark
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +18,7 @@ import CreateMomentDialog from "@/components/CreateMomentDialog";
 import FollowSuggestions from "@/components/FollowSuggestions";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
+import { useSavedMoments } from "@/hooks/useSavedMoments";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -101,6 +102,8 @@ const MomentCard = ({
   onOpenComments,
   onShare,
   commentsCount = 0,
+  onToggleSave,
+  isSaved = false,
 }: { 
   moment: SharedMoment; 
   onLike: (id: string) => void;
@@ -110,6 +113,8 @@ const MomentCard = ({
   onOpenComments: (momentId: string) => void;
   onShare: (moment: SharedMoment) => void;
   commentsCount?: number;
+  onToggleSave: (id: string) => void;
+  isSaved?: boolean;
 }) => {
   const navigate = useNavigate();
   const CategoryIcon = getCategoryIcon(moment.moment_type);
@@ -217,6 +222,19 @@ const MomentCard = ({
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-sky-500/10 hover:text-sky-500 transition-all"
           >
             <Share2 className="w-4 h-4" />
+          </motion.button>
+          
+          <motion.button
+            onClick={() => onToggleSave(moment.id)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
+              isSaved
+                ? "bg-amber-500/20 text-amber-600"
+                : "bg-muted/50 text-muted-foreground hover:bg-amber-500/10 hover:text-amber-500"
+            }`}
+          >
+            <Bookmark className={`w-4 h-4 ${isSaved ? "fill-amber-500" : ""}`} />
           </motion.button>
         </div>
         
@@ -327,6 +345,7 @@ const Community = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [shareMoment, setShareMoment] = useState<SharedMoment | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { toggleSave, isSaved } = useSavedMoments();
   const ITEMS_PER_PAGE = 20;
 
   const handleViewProfile = async (userId: string) => {
@@ -761,6 +780,8 @@ const Community = () => {
                       onOpenComments={(momentId) => setSelectedMomentForComments(momentId)}
                       onShare={(m) => setShareMoment(m)}
                       commentsCount={commentsCounts.get(moment.id) || 0}
+                      onToggleSave={toggleSave}
+                      isSaved={isSaved(moment.id)}
                     />
                   </motion.div>
                 ))}
