@@ -17,14 +17,25 @@ import DailyLightGreeting from "./components/DailyLightGreeting";
 import ChatButton from "./components/ChatButton";
 import { usePresence } from "./hooks/usePresence";
 import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
+import { useTokenRefresh } from "./hooks/useTokenRefresh";
+import { useSessionExpired } from "./hooks/useSessionExpired";
+import { SessionExpiredDialog } from "./components/SessionExpiredDialog";
 
 const queryClient = new QueryClient();
 
-// Component to initialize presence and notifications
+// Component to initialize presence, notifications, and token refresh
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   usePresence();
   useFriendRequestSound();
-  return <>{children}</>;
+  useTokenRefresh();
+  const { isSessionExpired, hideSessionExpired } = useSessionExpired();
+  
+  return (
+    <>
+      {children}
+      <SessionExpiredDialog isOpen={isSessionExpired} onClose={hideSessionExpired} />
+    </>
+  );
 };
 
 const App = () => (
