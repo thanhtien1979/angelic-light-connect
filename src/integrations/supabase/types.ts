@@ -586,6 +586,42 @@ export type Database = {
           },
         ]
       }
+      moment_likes: {
+        Row: {
+          created_at: string
+          id: string
+          moment_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          moment_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          moment_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moment_likes_moment_id_fkey"
+            columns: ["moment_id"]
+            isOneToOne: false
+            referencedRelation: "public_shared_light_moments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moment_likes_moment_id_fkey"
+            columns: ["moment_id"]
+            isOneToOne: false
+            referencedRelation: "shared_light_moments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nft_transactions: {
         Row: {
           blockchain: string
