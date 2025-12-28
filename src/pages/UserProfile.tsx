@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { 
   ArrowLeft, Sparkles, Heart, BookOpen, Leaf, 
   Calendar, Award, Coins, MessageCircle, TrendingUp,
-  Clock, Star, Sun, UserPlus, UserMinus, Users, Loader2, Trophy
+  Clock, Star, Sun, UserPlus, UserMinus, Users, Loader2, Trophy, Share2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +18,7 @@ import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { FollowListModal } from "@/components/FollowListModal";
 import AchievementBadges from "@/components/AchievementBadges";
+import ProfileShareDialog from "@/components/ProfileShareDialog";
 
 interface UserProfileData {
   id: string;
@@ -56,6 +57,7 @@ const UserProfile = () => {
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   const targetUserId = userId || currentUser?.id;
   
@@ -362,29 +364,48 @@ const UserProfile = () => {
           {/* Action Buttons */}
           <div className="flex items-center justify-center gap-3">
             {isOwnProfile ? (
-              <Link to="/profile">
-                <Button variant="outline" className="border-gold/30 hover:bg-gold/10">
-                  Chỉnh sửa hồ sơ
+              <>
+                <Link to="/profile">
+                  <Button variant="outline" className="border-gold/30 hover:bg-gold/10">
+                    Chỉnh sửa hồ sơ
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  className="border-gold/30 hover:bg-gold/10"
+                  onClick={() => setShowShareDialog(true)}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Chia sẻ
                 </Button>
-              </Link>
+              </>
             ) : (
-              <Button
-                onClick={toggleFollow}
-                disabled={isFollowLoading}
-                className={isFollowing 
-                  ? "border-gold/30 hover:bg-gold/10 bg-transparent text-foreground border" 
-                  : "bg-gradient-to-r from-gold to-amber-500 text-white hover:from-amber-500 hover:to-gold"
-                }
-              >
-                {isFollowLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : isFollowing ? (
-                  <UserMinus className="w-4 h-4 mr-2" />
-                ) : (
-                  <UserPlus className="w-4 h-4 mr-2" />
-                )}
-                {isFollowing ? "Hủy theo dõi" : "Theo dõi"}
-              </Button>
+              <>
+                <Button
+                  onClick={toggleFollow}
+                  disabled={isFollowLoading}
+                  className={isFollowing 
+                    ? "border-gold/30 hover:bg-gold/10 bg-transparent text-foreground border" 
+                    : "bg-gradient-to-r from-gold to-amber-500 text-white hover:from-amber-500 hover:to-gold"
+                  }
+                >
+                  {isFollowLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : isFollowing ? (
+                    <UserMinus className="w-4 h-4 mr-2" />
+                  ) : (
+                    <UserPlus className="w-4 h-4 mr-2" />
+                  )}
+                  {isFollowing ? "Hủy theo dõi" : "Theo dõi"}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-gold/30 hover:bg-gold/10"
+                  onClick={() => setShowShareDialog(true)}
+                >
+                  <Share2 className="w-4 h-4" />
+                </Button>
+              </>
             )}
           </div>
         </motion.div>
@@ -622,6 +643,12 @@ const UserProfile = () => {
             userId={targetUserId}
             type="following"
             title="Đang theo dõi"
+          />
+          <ProfileShareDialog
+            isOpen={showShareDialog}
+            onClose={() => setShowShareDialog(false)}
+            userId={targetUserId}
+            displayName={profile?.display_name || null}
           />
         </>
       )}
