@@ -924,17 +924,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                       ) : (
                         <div className="relative z-10 font-chat text-[15px] leading-relaxed text-foreground/90">
                           {message.role === "assistant" ? (
-                            // Check if this is the latest assistant message and was just added
-                            messages.filter(m => m.role === "assistant").slice(-1)[0]?.id === message.id && 
-                            !localStorage.getItem(`typed_${message.id}`) ? (
-                              <TypingText 
-                                text={message.content.replace(/\*{3,}/g, '').replace(/^#+\s*/gm, '').trim()}
-                                speed={15}
-                                onComplete={() => localStorage.setItem(`typed_${message.id}`, 'true')}
-                              />
-                            ) : (
-                              <FormattedChatText text={message.content} />
-                            )
+                            // Direct display for fast streaming - no typing effect
+                            <FormattedChatText text={message.content} />
                           ) : (
                             <span className="whitespace-pre-wrap">{message.content}</span>
                           )}
