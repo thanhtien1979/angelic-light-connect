@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   ArrowLeft, Sparkles, Heart, BookOpen, Leaf, 
@@ -9,6 +9,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFollow } from "@/hooks/useFollow";
+import { useFriendships } from "@/hooks/useFriendships";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,8 @@ import { vi } from "date-fns/locale";
 import { FollowListModal } from "@/components/FollowListModal";
 import AchievementBadges from "@/components/AchievementBadges";
 import ProfileShareDialog from "@/components/ProfileShareDialog";
+import PrivateChat from "@/components/PrivateChat";
+import { toast } from "sonner";
 
 interface UserProfileData {
   id: string;
@@ -49,6 +52,7 @@ interface ActivityItem {
 
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -58,6 +62,8 @@ const UserProfile = () => {
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [selectedFriendForChat, setSelectedFriendForChat] = useState<string | null>(null);
 
   const targetUserId = userId || currentUser?.id;
   
@@ -68,6 +74,28 @@ const UserProfile = () => {
     isLoading: isFollowLoading, 
     toggleFollow 
   } = useFollow(targetUserId);
+
+  const { friends, sendFriendRequest } = useFriendships();
+
+  const isFriendWithUser = friends.some(f => 
+    (f.requester_id === targetUserId || f.addressee_id === targetUserId) && 
+    f.status === "accepted"
+  );
+
+  const handleStartChat = () => {
+    if (!isFriendWithUser) {
+      toast.error("Bạn cần kết bạn trước khi nhắn tin");
+      return;
+    }
+    setSelectedFriendForChat(targetUserId || null);
+    setShowChat(true);
+  };
+
+  const handleSendFriendRequest = async () => {
+    if (targetUserId) {
+      await sendFriendRequest(targetUserId);
+    }
+  };
 
   useEffect(() => {
     if (targetUserId) {
@@ -381,6 +409,24 @@ const UserProfile = () => {
               </>
             ) : (
               <>
+                {isFriendWithUser ? (
+                  <Button
+                    onClick={handleStartChat}
+                    className="bg-gradient-to-r from-sky-500 to-blue-500 text-white hover:from-blue-500 hover:to-sky-500"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Nhắn tin
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSendFriendRequest}
+                    variant="outline"
+                    className="border-sky-500/30 hover:bg-sky-500/10 text-sky-600"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Kết bạn
+                  </Button>
+                )}
                 <Button
                   onClick={toggleFollow}
                   disabled={isFollowLoading}
@@ -650,6 +696,15 @@ const UserProfile = () => {
             userId={targetUserId}
             displayName={profile?.display_name || null}
           />
+          {showChat && (
+            <PrivateChat
+              isOpen={showChat}
+              onClose={() => {
+                setShowChat(false);
+                setSelectedFriendForChat(null);
+              }}
+            />
+          )}
         </>
       )}
     </div>

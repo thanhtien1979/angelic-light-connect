@@ -20,6 +20,7 @@ import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
 import { useSavedMoments } from "@/hooks/useSavedMoments";
 import UserSearchDialog from "@/components/UserSearchDialog";
+import MomentLikersDialog from "@/components/MomentLikersDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -105,6 +106,7 @@ const MomentCard = ({
   commentsCount = 0,
   onToggleSave,
   isSaved = false,
+  onViewLikers,
 }: { 
   moment: SharedMoment; 
   onLike: (id: string) => void;
@@ -116,6 +118,7 @@ const MomentCard = ({
   commentsCount?: number;
   onToggleSave: (id: string) => void;
   isSaved?: boolean;
+  onViewLikers: (momentId: string) => void;
 }) => {
   const navigate = useNavigate();
   const CategoryIcon = getCategoryIcon(moment.moment_type);
@@ -239,19 +242,28 @@ const MomentCard = ({
           </motion.button>
         </div>
         
-        <motion.button
-          onClick={() => onLike(moment.id)}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
-            hasLiked
-              ? "bg-rose-500/20 text-rose-600"
-              : "bg-muted/50 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500"
-          }`}
-        >
-          <Heart className={`w-4 h-4 ${hasLiked ? "fill-rose-500" : ""}`} />
-          <span className="text-xs font-medium">{moment.likes_count}</span>
-        </motion.button>
+        <div className="flex items-center gap-2">
+          <motion.button
+            onClick={() => onLike(moment.id)}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
+              hasLiked
+                ? "bg-rose-500/20 text-rose-600"
+                : "bg-muted/50 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500"
+            }`}
+          >
+            <Heart className={`w-4 h-4 ${hasLiked ? "fill-rose-500" : ""}`} />
+          </motion.button>
+          {moment.likes_count > 0 && (
+            <button
+              onClick={() => onViewLikers(moment.id)}
+              className="text-xs text-muted-foreground hover:text-rose-500 transition-colors"
+            >
+              {moment.likes_count} lượt thích
+            </button>
+          )}
+        </div>
       </div>
     </motion.article>
   );
@@ -354,9 +366,23 @@ const Community = () => {
   const [shareMoment, setShareMoment] = useState<SharedMoment | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isUserSearchOpen, setIsUserSearchOpen] = useState(false);
+  const [likersDialogMomentId, setLikersDialogMomentId] = useState<string | null>(null);
+  const [selectedFriendForChat, setSelectedFriendForChat] = useState<string | null>(null);
   const { toggleSave, isSaved, savedMoments, fetchSavedMomentsWithDetails } = useSavedMoments();
   const [savedMomentsProfiles, setSavedMomentsProfiles] = useState<Map<string, Profile>>(new Map());
   const ITEMS_PER_PAGE = 20;
+
+  const handleStartChatFromSearch = (userId: string) => {
+    setSelectedFriendForChat(userId);
+    setIsChatOpen(true);
+    setIsUserSearchOpen(false);
+  };
+
+  const handleStartChatFromLikers = (userId: string) => {
+    setSelectedFriendForChat(userId);
+    setLikersDialogMomentId(null);
+    setIsChatOpen(true);
+  };
 
   const handleViewProfile = async (userId: string) => {
     // Try to get from cache first
@@ -837,6 +863,7 @@ const Community = () => {
                       commentsCount={commentsCounts.get(moment.id) || 0}
                       onToggleSave={toggleSave}
                       isSaved={isSaved(moment.id)}
+                      onViewLikers={(momentId) => setLikersDialogMomentId(momentId)}
                     />
                   </motion.div>
                 ))}
@@ -916,7 +943,18 @@ const Community = () => {
       <UserSearchDialog
         isOpen={isUserSearchOpen}
         onClose={() => setIsUserSearchOpen(false)}
+        onStartChat={handleStartChatFromSearch}
       />
+
+      {/* Moment Likers Dialog */}
+      {likersDialogMomentId && (
+        <MomentLikersDialog
+          isOpen={!!likersDialogMomentId}
+          onClose={() => setLikersDialogMomentId(null)}
+          momentId={likersDialogMomentId}
+          onStartChat={handleStartChatFromLikers}
+        />
+      )}
     </div>
   );
 };

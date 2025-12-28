@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Users, UserPlus, Loader2 } from "lucide-react";
+import { Search, X, Users, UserPlus, Loader2, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFollow } from "@/hooks/useFollow";
+import { useFriendships } from "@/hooks/useFriendships";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,16 +21,21 @@ interface UserResult {
 interface UserSearchDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onStartChat?: (userId: string) => void;
 }
 
 const UserResultItem = ({ 
   user, 
   currentUserId,
-  onViewProfile 
+  onViewProfile,
+  onStartChat,
+  isFriend,
 }: { 
   user: UserResult; 
   currentUserId: string | undefined;
   onViewProfile: (userId: string) => void;
+  onStartChat?: (userId: string) => void;
+  isFriend: boolean;
 }) => {
   const { isFollowing, isLoading, toggleFollow } = useFollow(user.id);
   const isOwnProfile = currentUserId === user.id;
@@ -63,42 +69,66 @@ const UserResultItem = ({
       </button>
       
       {!isOwnProfile && currentUserId && (
-        <Button
-          size="sm"
-          variant={isFollowing ? "outline" : "default"}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleFollow();
-          }}
-          disabled={isLoading}
-          className={isFollowing 
-            ? "border-gold/30 hover:bg-gold/10" 
-            : "bg-gradient-to-r from-gold to-amber-500 text-white hover:from-amber-500 hover:to-gold"
-          }
-        >
-          {isLoading ? (
-            <Loader2 className="w-3 h-3 animate-spin" />
-          ) : isFollowing ? (
-            "Đang theo dõi"
-          ) : (
-            <>
-              <UserPlus className="w-3 h-3 mr-1" />
-              Theo dõi
-            </>
+        <div className="flex items-center gap-2">
+          {isFriend && onStartChat && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartChat(user.id);
+              }}
+              className="border-gold/30 hover:bg-gold/10"
+            >
+              <MessageCircle className="w-3 h-3 mr-1" />
+              Nhắn tin
+            </Button>
           )}
-        </Button>
+          <Button
+            size="sm"
+            variant={isFollowing ? "outline" : "default"}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFollow();
+            }}
+            disabled={isLoading}
+            className={isFollowing 
+              ? "border-gold/30 hover:bg-gold/10" 
+              : "bg-gradient-to-r from-gold to-amber-500 text-white hover:from-amber-500 hover:to-gold"
+            }
+          >
+            {isLoading ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : isFollowing ? (
+              "Đang theo dõi"
+            ) : (
+              <>
+                <UserPlus className="w-3 h-3 mr-1" />
+                Theo dõi
+              </>
+            )}
+          </Button>
+        </div>
       )}
     </motion.div>
   );
 };
 
-const UserSearchDialog = ({ isOpen, onClose }: UserSearchDialogProps) => {
+const UserSearchDialog = ({ isOpen, onClose, onStartChat }: UserSearchDialogProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { friends } = useFriendships();
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<UserResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+
+  const isFriend = (userId: string) => {
+    return friends.some(f => 
+      (f.requester_id === userId || f.addressee_id === userId) && 
+      f.status === "accepted"
+    );
+  };
 
   const searchUsers = useCallback(async (query: string) => {
     if (!query.trim() || query.trim().length < 2) {
@@ -198,6 +228,8 @@ const UserSearchDialog = ({ isOpen, onClose }: UserSearchDialogProps) => {
                     user={u}
                     currentUserId={user?.id}
                     onViewProfile={handleViewProfile}
+                    onStartChat={onStartChat}
+                    isFriend={isFriend(u.id)}
                   />
                 ))}
               </AnimatePresence>
