@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Heart, Sparkles, BookOpen, MessageCircle, Leaf, Sun, Users,
-  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw, MessageSquare
+  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw, MessageSquare, Share2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,6 +13,7 @@ import PrivateChat from "@/components/PrivateChat";
 import VideoCallModal from "@/components/VideoCallModal";
 import ProfileViewModal from "@/components/ProfileViewModal";
 import MomentComments from "@/components/MomentComments";
+import MomentShareDialog from "@/components/MomentShareDialog";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,6 +95,7 @@ const MomentCard = ({
   profile,
   onViewProfile,
   onOpenComments,
+  onShare,
   commentsCount = 0,
 }: { 
   moment: SharedMoment; 
@@ -102,6 +104,7 @@ const MomentCard = ({
   profile?: Profile | null;
   onViewProfile: (userId: string) => void;
   onOpenComments: (momentId: string) => void;
+  onShare: (moment: SharedMoment) => void;
   commentsCount?: number;
 }) => {
   const navigate = useNavigate();
@@ -181,15 +184,26 @@ const MomentCard = ({
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-3 border-t border-border/30">
-        <motion.button
-          onClick={() => onOpenComments(moment.id)}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-gold/10 hover:text-gold transition-all"
-        >
-          <MessageSquare className="w-4 h-4" />
-          <span className="text-xs font-medium">{commentsCount}</span>
-        </motion.button>
+        <div className="flex items-center gap-2">
+          <motion.button
+            onClick={() => onOpenComments(moment.id)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-gold/10 hover:text-gold transition-all"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span className="text-xs font-medium">{commentsCount}</span>
+          </motion.button>
+          
+          <motion.button
+            onClick={() => onShare(moment)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-sky-500/10 hover:text-sky-500 transition-all"
+          >
+            <Share2 className="w-4 h-4" />
+          </motion.button>
+        </div>
         
         <motion.button
           onClick={() => onLike(moment.id)}
@@ -296,6 +310,7 @@ const Community = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [shareMoment, setShareMoment] = useState<SharedMoment | null>(null);
   const ITEMS_PER_PAGE = 20;
 
   const handleViewProfile = async (userId: string) => {
@@ -710,6 +725,7 @@ const Community = () => {
                       profile={profiles.get(moment.user_id)}
                       onViewProfile={(userId) => handleViewProfile(userId)}
                       onOpenComments={(momentId) => setSelectedMomentForComments(momentId)}
+                      onShare={(m) => setShareMoment(m)}
                       commentsCount={commentsCounts.get(moment.id) || 0}
                     />
                   </motion.div>
@@ -733,6 +749,13 @@ const Community = () => {
           </>
         )}
       </motion.main>
+
+      {/* Moment Share Dialog */}
+      <MomentShareDialog
+        moment={shareMoment}
+        isOpen={!!shareMoment}
+        onClose={() => setShareMoment(null)}
+      />
 
       {/* Moment Comments */}
       <MomentComments
