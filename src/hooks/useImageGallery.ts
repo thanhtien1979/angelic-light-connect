@@ -15,13 +15,10 @@ interface GeneratedImage {
 }
 
 export function useImageGallery() {
+  // All hooks must be called at the top level, in the same order
   const { user } = useAuth();
-  const [myImages, setMyImages] = useState<GeneratedImage[]>([]);
-  const [publicImages, setPublicImages] = useState<GeneratedImage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Use shared R2 upload hook with compression settings
+  
+  // Use shared R2 upload hook with compression settings (must be before other useState to maintain hook order)
   const { uploadToR2, isUploading, progress } = useR2Upload({
     folder: "generated-images",
     compress: true,
@@ -29,6 +26,11 @@ export function useImageGallery() {
     maxHeight: 1920,
     quality: 0.85,
   });
+
+  const [myImages, setMyImages] = useState<GeneratedImage[]>([]);
+  const [publicImages, setPublicImages] = useState<GeneratedImage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const fetchMyImages = useCallback(async () => {
     if (!user) return;
