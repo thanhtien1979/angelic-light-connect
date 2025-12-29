@@ -9,7 +9,9 @@ import {
   Download,
   X,
   Globe,
-  Lock
+  Lock,
+  ImageOff,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -179,45 +181,76 @@ interface ImageCardProps {
   isOwner: boolean;
 }
 
-const ImageCard = ({ image, onClick, isOwner }: ImageCardProps) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
-    whileHover={{ y: -4 }}
-    className="group cursor-pointer"
-    onClick={onClick}
-  >
-    <Card className="overflow-hidden border-rose-soft/30 bg-white/80 backdrop-blur-sm">
-      <div className="aspect-square relative overflow-hidden">
-        <img
-          src={image.image_url}
-          alt={image.prompt}
-          className="w-full h-full object-cover transition-transform group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="absolute bottom-3 left-3 right-3">
-            <p className="text-white text-xs line-clamp-2">{image.prompt}</p>
+const ImageCard = ({ image, onClick, isOwner }: ImageCardProps) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ y: -4 }}
+      className="group cursor-pointer"
+      onClick={onClick}
+    >
+      <Card className="overflow-hidden border-rose-soft/30 bg-white/80 backdrop-blur-sm">
+        <div className="aspect-square relative overflow-hidden bg-muted">
+          {/* Loading state */}
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+          )}
+          
+          {/* Error state */}
+          {imageError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+              <ImageOff className="w-8 h-8 mb-2" />
+              <span className="text-xs">Không tải được ảnh</span>
+            </div>
+          )}
+          
+          <img
+            src={image.image_url}
+            alt={image.prompt}
+            crossOrigin="anonymous"
+            referrerPolicy="no-referrer"
+            className={`w-full h-full object-cover transition-all group-hover:scale-105 ${
+              imageLoaded && !imageError ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageError(true);
+              setImageLoaded(true);
+            }}
+            loading="lazy"
+          />
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute bottom-3 left-3 right-3">
+              <p className="text-white text-xs line-clamp-2">{image.prompt}</p>
+            </div>
           </div>
+          {image.is_public && (
+            <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-black/50 text-white text-xs">
+              <Heart className="w-3 h-3" />
+              {image.likes_count}
+            </div>
+          )}
+          {isOwner && (
+            <div className="absolute top-2 left-2">
+              {image.is_public ? (
+                <Globe className="w-4 h-4 text-green-400" />
+              ) : (
+                <Lock className="w-4 h-4 text-white/70" />
+              )}
+            </div>
+          )}
         </div>
-        {image.is_public && (
-          <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-black/50 text-white text-xs">
-            <Heart className="w-3 h-3" />
-            {image.likes_count}
-          </div>
-        )}
-        {isOwner && (
-          <div className="absolute top-2 left-2">
-            {image.is_public ? (
-              <Globe className="w-4 h-4 text-green-400" />
-            ) : (
-              <Lock className="w-4 h-4 text-white/70" />
-            )}
-          </div>
-        )}
-      </div>
-    </Card>
-  </motion.div>
-);
+      </Card>
+    </motion.div>
+  );
+};
 
 export default function ImageGallery() {
   const { user } = useAuth();
