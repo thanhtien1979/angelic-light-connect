@@ -11,6 +11,7 @@ import CreativeStudio from "./pages/CreativeStudio";
 import Credits from "./pages/Credits";
 import Friends from "./pages/Friends";
 import UserProfile from "./pages/UserProfile";
+import Testimonials from "./pages/Testimonials";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/studio" element={<CreativeStudio />} />
             <Route path="/credits" element={<Credits />} />
             <Route path="/friends" element={<Friends />} />
+            <Route path="/testimonials" element={<Testimonials />} />
             <Route
               path="/profile"
               element={

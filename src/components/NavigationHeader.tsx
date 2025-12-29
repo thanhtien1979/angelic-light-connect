@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sun, Wallet, Loader2, Check, Unlink, ChevronDown, Coins, Users, UserPlus } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
@@ -37,7 +38,7 @@ const navLinks: NavLink[] = [
   { id: "hero", label: "Trang Chủ" },
   { id: "chat", label: "Chat Portal" },
   { id: "meditation", label: "Thiền Định" },
-  { id: "testimonials", label: "Nhân Chứng" },
+  { id: "testimonials", label: "Nhân Chứng", isPage: true, path: "/testimonials" },
   { id: "studio", label: "Studio", isPage: true, path: "/studio" },
   { id: "community", label: "Cộng Đồng", isPage: true, path: "/community", showBadge: true },
   { id: "friends", label: "Kết Bạn", isPage: true, path: "/friends", showBadge: true },
@@ -430,8 +431,9 @@ const NavigationHeader = () => {
               )}
             </nav>
 
-            {/* Wallet, Notifications, Light Indicator, User Menu & Mobile Menu Button */}
+            {/* Theme Toggle, Wallet, Notifications, Light Indicator, User Menu & Mobile Menu Button */}
             <div className="flex items-center gap-2 sm:gap-3">
+              <ThemeToggle />
               <WalletIndicator />
               <NotificationCenter />
               <LightIndicator />
