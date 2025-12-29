@@ -11,7 +11,8 @@ import {
   Globe,
   Lock,
   ImageOff,
-  Loader2
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -184,6 +185,14 @@ interface ImageCardProps {
 const ImageCard = ({ image, onClick, isOwner }: ImageCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const handleRetry = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImageError(false);
+    setImageLoaded(false);
+    setRetryCount(prev => prev + 1);
+  };
 
   return (
     <motion.div
@@ -202,16 +211,26 @@ const ImageCard = ({ image, onClick, isOwner }: ImageCardProps) => {
             </div>
           )}
           
-          {/* Error state */}
+          {/* Error state with retry button */}
           {imageError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-              <ImageOff className="w-8 h-8 mb-2" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-2">
+              <ImageOff className="w-8 h-8" />
               <span className="text-xs">Không tải được ảnh</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetry}
+                className="mt-1 text-xs h-7 px-2"
+              >
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Thử lại
+              </Button>
             </div>
           )}
           
           <img
-            src={image.image_url}
+            key={retryCount}
+            src={`${image.image_url}${retryCount > 0 ? `?retry=${retryCount}` : ''}`}
             alt={image.prompt}
             crossOrigin="anonymous"
             referrerPolicy="no-referrer"
