@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { compressImage } from "@/lib/imageCompression";
+import { useR2Upload } from "@/hooks/useR2Upload";
 
 interface GeneratedImage {
   id: string;
@@ -19,8 +19,18 @@ export function useImageGallery() {
   const [myImages, setMyImages] = useState<GeneratedImage[]>([]);
   const [publicImages, setPublicImages] = useState<GeneratedImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const fetchMyImages = async () => {
+  // Use shared R2 upload hook with compression settings
+  const { uploadToR2, isUploading, progress } = useR2Upload({
+    folder: "generated-images",
+    compress: true,
+    maxWidth: 1920,
+    maxHeight: 1920,
+    quality: 0.85,
+  });
+
+  const fetchMyImages = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
@@ -38,9 +48,9 @@ export function useImageGallery() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
-  const fetchPublicImages = async () => {
+  const fetchPublicImages = useCallback(async () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -57,7 +67,7 @@ export function useImageGallery() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const saveImage = async (imageBase64: string, prompt: string): Promise<string | null> => {
     if (!user) {
@@ -65,8 +75,9 @@ export function useImageGallery() {
       return null;
     }
 
+    setIsSaving(true);
     try {
-      // Convert base64 to blob
+      // Convert base64 to File object for useR2Upload
       const base64Data = imageBase64.split(",")[1];
       const byteCharacters = atob(base64Data);
       const byteNumbers = new Array(byteCharacters.length);
@@ -75,38 +86,21 @@ export function useImageGallery() {
       }
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: "image/png" });
+      const file = new File([blob], `${Date.now()}.png`, { type: "image/png" });
+
+      // Use shared R2 upload hook (handles compression internally)
+      const uploadResult = await uploadToR2(file);
       
-      // Create File object for compression
-      const originalFile = new File([blob], `${Date.now()}.png`, { type: "image/png" });
-      
-      // Compress the image
-      const compressedFile = await compressImage(originalFile, {
-        maxWidth: 1920,
-        maxHeight: 1920,
-        quality: 0.85,
-        outputFormat: 'image/webp'
-      });
-
-      // Upload to R2 via edge function
-      const formData = new FormData();
-      formData.append("file", compressedFile);
-      formData.append("folder", "generated-images");
-
-      const { data: uploadData, error: uploadError } = await supabase.functions.invoke("upload-r2", {
-        body: formData,
-      });
-
-      if (uploadError) throw uploadError;
-      if (uploadData?.error) throw new Error(uploadData.error);
-
-      const imageUrl = uploadData.url;
+      if (!uploadResult) {
+        throw new Error("Upload failed");
+      }
 
       // Save to database
       const { data: insertedData, error: dbError } = await supabase
         .from("generated_images")
         .insert({
           user_id: user.id,
-          image_url: imageUrl,
+          image_url: uploadResult.url,
           prompt,
           is_public: false,
         })
@@ -122,6 +116,8 @@ export function useImageGallery() {
       console.error("Error saving image:", err);
       toast.error("Lỗi khi lưu ảnh");
       return null;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -146,13 +142,10 @@ export function useImageGallery() {
     }
   };
 
-  const deleteImage = async (imageId: string, imageUrl: string) => {
+  const deleteImage = async (imageId: string, _imageUrl: string) => {
     if (!user) return;
 
     try {
-      // Note: R2 files are not deleted here - old Supabase files still work
-      // For R2 files, we could add a delete-r2 edge function if needed
-      
       const { error } = await supabase
         .from("generated_images")
         .delete()
@@ -171,7 +164,6 @@ export function useImageGallery() {
 
   const likeImage = async (imageId: string) => {
     try {
-      // Simple increment - in production you'd track who liked
       const image = publicImages.find((img) => img.id === imageId);
       if (!image) return;
 
@@ -192,12 +184,15 @@ export function useImageGallery() {
       fetchMyImages();
     }
     fetchPublicImages();
-  }, [user]);
+  }, [user, fetchMyImages, fetchPublicImages]);
 
   return {
     myImages,
     publicImages,
     isLoading,
+    isSaving,
+    isUploading,
+    uploadProgress: progress,
     saveImage,
     togglePublic,
     deleteImage,
