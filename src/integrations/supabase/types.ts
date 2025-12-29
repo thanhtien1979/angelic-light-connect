@@ -1063,30 +1063,100 @@ export type Database = {
           },
         ]
       }
+      testimonial_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          testimonial_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          testimonial_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          testimonial_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "testimonial_comments_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "testimonials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      testimonial_likes: {
+        Row: {
+          created_at: string
+          id: string
+          testimonial_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          testimonial_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          testimonial_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "testimonial_likes_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "testimonials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       testimonials: {
         Row: {
+          comments_count: number
           created_at: string | null
           id: string
+          image_url: string | null
           is_approved: boolean | null
           is_featured: boolean | null
+          likes_count: number
           testimony: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          comments_count?: number
           created_at?: string | null
           id?: string
+          image_url?: string | null
           is_approved?: boolean | null
           is_featured?: boolean | null
+          likes_count?: number
           testimony: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          comments_count?: number
           created_at?: string | null
           id?: string
+          image_url?: string | null
           is_approved?: boolean | null
           is_featured?: boolean | null
+          likes_count?: number
           testimony?: string
           updated_at?: string | null
           user_id?: string
