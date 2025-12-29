@@ -622,6 +622,45 @@ export type Database = {
           },
         ]
       }
+      moment_reactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          moment_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          moment_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          moment_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moment_reactions_moment_id_fkey"
+            columns: ["moment_id"]
+            isOneToOne: false
+            referencedRelation: "public_shared_light_moments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moment_reactions_moment_id_fkey"
+            columns: ["moment_id"]
+            isOneToOne: false
+            referencedRelation: "shared_light_moments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nft_transactions: {
         Row: {
           blockchain: string
@@ -1024,6 +1063,36 @@ export type Database = {
           },
         ]
       }
+      testimonials: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+          is_featured: boolean | null
+          testimony: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          testimony: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          testimony?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       typing_status: {
         Row: {
           chat_partner_id: string
@@ -1147,6 +1216,30 @@ export type Database = {
           follower_id?: string
           following_id?: string
           id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string | null
+          id: string
+          theme: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          theme?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          theme?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

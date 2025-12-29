@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, MessageSquare, Sparkles, Settings } from "lucide-react";
+import { User, LogOut, MessageSquare, Sparkles, Settings, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useDailyGreeting } from "@/hooks/useDailyGreeting";
+import { useTheme } from "next-themes";
 import { Link } from "react-router-dom";
 
 interface UserMenuProps {
