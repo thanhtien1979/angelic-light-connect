@@ -27,6 +27,8 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useVideoCall } from "@/hooks/useVideoCall";
+import ReactionPicker, { ReactionType } from "@/components/ReactionPicker";
+import { useMomentReactions } from "@/hooks/useMomentReactions";
 
 interface SharedMoment {
   id: string;
@@ -96,10 +98,17 @@ const getCategoryColor = (type: string) => {
   }
 };
 
+interface ReactionCount {
+  type: ReactionType;
+  count: number;
+}
+
 const MomentCard = ({ 
   moment, 
-  onLike, 
-  hasLiked,
+  onReact,
+  onRemoveReaction,
+  currentReaction,
+  reactionCounts,
   profile,
   onViewProfile,
   onOpenComments,
@@ -110,10 +119,13 @@ const MomentCard = ({
   onViewLikers,
   onViewSavers,
   savesCount = 0,
+  disabled = false,
 }: { 
   moment: SharedMoment; 
-  onLike: (id: string) => void;
-  hasLiked: boolean;
+  onReact: (momentId: string, reactionType: ReactionType) => void;
+  onRemoveReaction: (momentId: string) => void;
+  currentReaction?: ReactionType | null;
+  reactionCounts: ReactionCount[];
   profile?: Profile | null;
   onViewProfile: (userId: string) => void;
   onOpenComments: (momentId: string) => void;
@@ -124,6 +136,7 @@ const MomentCard = ({
   onViewLikers: (momentId: string) => void;
   onViewSavers: (momentId: string) => void;
   savesCount?: number;
+  disabled?: boolean;
 }) => {
   const navigate = useNavigate();
   const CategoryIcon = getCategoryIcon(moment.moment_type);
@@ -255,28 +268,14 @@ const MomentCard = ({
           )}
         </div>
         
-        <div className="flex items-center gap-2">
-          <motion.button
-            onClick={() => onLike(moment.id)}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
-              hasLiked
-                ? "bg-rose-500/20 text-rose-600"
-                : "bg-muted/50 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500"
-            }`}
-          >
-            <Heart className={`w-4 h-4 ${hasLiked ? "fill-rose-500" : ""}`} />
-          </motion.button>
-          {moment.likes_count > 0 && (
-            <button
-              onClick={() => onViewLikers(moment.id)}
-              className="text-xs text-muted-foreground hover:text-rose-500 transition-colors"
-            >
-              {moment.likes_count} lượt thích
-            </button>
-          )}
-        </div>
+        <ReactionPicker
+          momentId={moment.id}
+          currentReaction={currentReaction}
+          reactionCounts={reactionCounts}
+          onReact={onReact}
+          onRemoveReaction={onRemoveReaction}
+          disabled={disabled}
+        />
       </div>
     </motion.article>
   );
@@ -365,7 +364,6 @@ const Community = () => {
   const [moments, setMoments] = useState<SharedMoment[]>([]);
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
-  const [likedMoments, setLikedMoments] = useState<Set<string>>(new Set());
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<MomentCategory>("all");
@@ -386,6 +384,24 @@ const Community = () => {
   const [savedMomentsProfiles, setSavedMomentsProfiles] = useState<Map<string, Profile>>(new Map());
   const [savesCounts, setSavesCounts] = useState<Map<string, number>>(new Map());
   const ITEMS_PER_PAGE = 20;
+
+  // Use moment reactions hook
+  const momentIds = moments.map(m => m.id);
+  const { 
+    reactionsState, 
+    addReaction, 
+    removeReaction, 
+    isLoading: reactionsLoading 
+  } = useMomentReactions(momentIds);
+
+  // Helper to get reaction data for a moment
+  const getMomentReactionData = (momentId: string) => {
+    const data = reactionsState[momentId];
+    return {
+      currentReaction: data?.userReaction || null,
+      reactionCounts: data?.counts || [],
+    };
+  };
 
   const handleStartChatFromSearch = (userId: string) => {
     setSelectedFriendForChat(userId);
@@ -563,12 +579,6 @@ const Community = () => {
   useEffect(() => {
     fetchMoments(0, true);
     fetchStats();
-
-    // Load liked moments from localStorage
-    const stored = localStorage.getItem("likedMoments");
-    if (stored) {
-      setLikedMoments(new Set(JSON.parse(stored)));
-    }
   }, []);
 
   // Re-fetch when category changes
@@ -652,57 +662,6 @@ const Community = () => {
     const nextPage = page + 1;
     setPage(nextPage);
     fetchMoments(nextPage);
-  };
-
-  const handleLike = async (momentId: string) => {
-    if (!user) {
-      toast.error("Vui lòng đăng nhập để yêu thích");
-      return;
-    }
-
-    const newLiked = new Set(likedMoments);
-    const isLiking = !newLiked.has(momentId);
-
-    if (isLiking) {
-      newLiked.add(momentId);
-    } else {
-      newLiked.delete(momentId);
-    }
-
-    setLikedMoments(newLiked);
-    localStorage.setItem("likedMoments", JSON.stringify([...newLiked]));
-
-    // Update UI optimistically
-    setMoments(prev =>
-      prev.map(m =>
-        m.id === momentId
-          ? { ...m, likes_count: m.likes_count + (isLiking ? 1 : -1) }
-          : m
-      )
-    );
-
-    setStats(prev => ({
-      ...prev,
-      totalLikes: prev.totalLikes + (isLiking ? 1 : -1),
-    }));
-
-    // Update in database using moment_likes table (triggers handle likes_count)
-    try {
-      if (isLiking) {
-        await supabase.from("moment_likes").insert({
-          user_id: user.id,
-          moment_id: momentId,
-        });
-      } else {
-        await supabase
-          .from("moment_likes")
-          .delete()
-          .eq("user_id", user.id)
-          .eq("moment_id", momentId);
-      }
-    } catch (error) {
-      console.error("Error updating like:", error);
-    }
   };
 
   // Get the moments to display based on selected category
@@ -897,8 +856,10 @@ const Community = () => {
                   >
                     <MomentCard
                       moment={moment}
-                      onLike={handleLike}
-                      hasLiked={likedMoments.has(moment.id)}
+                      onReact={addReaction}
+                      onRemoveReaction={removeReaction}
+                      currentReaction={getMomentReactionData(moment.id).currentReaction}
+                      reactionCounts={getMomentReactionData(moment.id).reactionCounts}
                       profile={displayProfiles.get(moment.user_id)}
                       onViewProfile={(userId) => handleViewProfile(userId)}
                       onOpenComments={(momentId) => setSelectedMomentForComments(momentId)}
@@ -909,6 +870,7 @@ const Community = () => {
                       onViewLikers={(momentId) => setLikersDialogMomentId(momentId)}
                       onViewSavers={(momentId) => setSaversDialogMomentId(momentId)}
                       savesCount={savesCounts.get(moment.id) || 0}
+                      disabled={reactionsLoading}
                     />
                   </motion.div>
                 ))}
