@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { S3Client, PutObjectCommand } from "https://esm.sh/@aws-sdk/client-s3@3.600.0";
+import { AwsClient } from "https://esm.sh/aws4fetch@1.0.18";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -148,16 +148,6 @@ serve(async (req) => {
       );
     }
 
-    // Initialize S3 client for R2
-    const s3Client = new S3Client({
-      region: "auto",
-      endpoint: endpoint,
-      credentials: {
-        accessKeyId: accessKeyId,
-        secretAccessKey: secretAccessKey,
-      },
-    });
-
     // Generate unique filename with user_id for access control
     const timestamp = Date.now();
     const randomId = crypto.randomUUID().slice(0, 8);
@@ -168,15 +158,35 @@ serve(async (req) => {
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // Upload to R2
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: fileName,
-      Body: uint8Array,
-      ContentType: file.type,
+    // Upload to R2 using fetch-based SigV4 signing (Deno-compatible)
+    const aws = new AwsClient({
+      accessKeyId,
+      secretAccessKey,
+      service: "s3",
+      region: "auto",
     });
 
-    await s3Client.send(command);
+    const endpointUrl = new URL(endpoint);
+    // Use path-style: /<bucket>/<key>
+    endpointUrl.pathname = `/${bucketName}/${fileName}`;
+
+    const uploadRes = await aws.fetch(endpointUrl.toString(), {
+      method: "PUT",
+      headers: {
+        "Content-Type": file.type,
+      },
+      body: uint8Array,
+    });
+
+    if (!uploadRes.ok) {
+      const errText = await uploadRes.text().catch(() => "");
+      console.error("R2 upload failed:", uploadRes.status, errText);
+      return new Response(
+        JSON.stringify({ error: "Không thể tải file lên lưu trữ. Vui lòng thử lại." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.log("File uploaded successfully:", fileName);
 
     // Construct public URL
