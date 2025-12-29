@@ -3,7 +3,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind, Wallet, Shield, UserCog, Edit } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, MessageCircle, Calendar, ChevronRight, Sparkles, BookOpen, PenLine, Star, Sun, Volume2, Sunrise, Heart, Bell, Flower2, Leaf, Wind, Wallet, Shield, UserCog, Edit, Award, Lock } from "lucide-react";
+import { useTestimonialBadges, BADGE_INFO, BadgeType } from "@/hooks/useTestimonialBadges";
+import TestimonialBadges from "@/components/TestimonialBadges";
 import GreetingHistory from "@/components/GreetingHistory";
 import SavedGreetings from "@/components/SavedGreetings";
 import GreetingDigest from "@/components/GreetingDigest";
@@ -54,6 +56,7 @@ const Profile = () => {
   const { isEnabled: soundEnabled, toggleSound } = useBlessingSound();
   const { isEnabled: breathingSoundEnabled, toggleSound: toggleBreathingSound } = useBreathingCompletionSound();
   const { greetingEnabled, toggleGreetingEnabled, markGreetingSeen, digestNotificationsEnabled, toggleDigestNotifications } = useDailyGreeting();
+  const { badges, isLoading: badgesLoading } = useTestimonialBadges();
   const prefersReducedMotion = useReducedMotion();
   const [walletBannerDismissed, setWalletBannerDismissed] = useState(false);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
@@ -293,6 +296,89 @@ const Profile = () => {
               <p className="text-xs text-muted-foreground/70 mt-1">Happy Camly Coin</p>
             </motion.div>
           </div>
+        </motion.section>
+
+        {/* Story Badges Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 shadow-lg"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-full bg-gradient-to-br from-amber-500/20 to-rose-500/20">
+                <Award className="w-5 h-5 text-amber-500" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl text-foreground">Huy Hiệu Câu Chuyện</h3>
+                <p className="text-xs text-muted-foreground">Thành tựu từ việc chia sẻ ánh sáng</p>
+              </div>
+            </div>
+            <Link 
+              to="/testimonials" 
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              Chia sẻ <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {badgesLoading ? (
+            <div className="grid grid-cols-5 gap-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-20 bg-muted/30 rounded-xl animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+              {(Object.keys(BADGE_INFO) as BadgeType[]).map((badgeType) => {
+                const info = BADGE_INFO[badgeType];
+                const isUnlocked = badges.some(b => b.badge_type === badgeType);
+                
+                return (
+                  <motion.div
+                    key={badgeType}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    className={`relative p-4 rounded-xl text-center transition-all ${
+                      isUnlocked 
+                        ? `bg-gradient-to-br ${info.color} shadow-lg` 
+                        : 'bg-muted/30 opacity-50'
+                    }`}
+                  >
+                    {!isUnlocked && (
+                      <div className="absolute top-2 right-2">
+                        <Lock className="w-3 h-3 text-muted-foreground" />
+                      </div>
+                    )}
+                    <span className="text-3xl">{info.icon}</span>
+                    <p className={`text-xs mt-2 font-medium ${isUnlocked ? 'text-white' : 'text-muted-foreground'}`}>
+                      {info.name}
+                    </p>
+                    <p className={`text-[10px] mt-1 ${isUnlocked ? 'text-white/80' : 'text-muted-foreground/70'}`}>
+                      {isUnlocked ? '✓ Đã mở' : info.description}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+
+          {badges.length === 0 && !badgesLoading && (
+            <div className="mt-4 p-4 rounded-lg bg-muted/20 text-center">
+              <p className="text-sm text-muted-foreground">
+                Chia sẻ câu chuyện tâm linh của bạn để mở khóa các huy hiệu!
+              </p>
+              <Link 
+                to="/testimonials" 
+                className="mt-2 inline-flex items-center gap-2 text-primary hover:underline text-sm"
+              >
+                <Sparkles className="w-4 h-4" />
+                Chia sẻ ngay
+              </Link>
+            </div>
+          )}
         </motion.section>
 
         {/* Light Journal Section */}
