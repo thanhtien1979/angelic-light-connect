@@ -4,11 +4,13 @@ import { Link } from "react-router-dom";
 import { 
   ArrowLeft, Star, Sparkles, Send, Loader2, 
   PenLine, Trash2, Clock, CheckCircle, Heart,
-  ImagePlus, X
+  ImagePlus, X, Shield
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTestimonials, Testimonial } from "@/hooks/useTestimonials";
 import { useR2Upload } from "@/hooks/useR2Upload";
+import { useAdminRole } from "@/hooks/useAdminRole";
+import { useTestimonialBadges, BadgeType } from "@/hooks/useTestimonialBadges";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,6 +30,8 @@ import TestimonialFilters from "@/components/TestimonialFilters";
 import TestimonialComments from "@/components/TestimonialComments";
 import TestimonialShareDialog from "@/components/TestimonialShareDialog";
 import FeaturedTestimonialsCarousel from "@/components/FeaturedTestimonialsCarousel";
+import TestimonialBadges from "@/components/TestimonialBadges";
+
 
 const TestimonialCard = ({ 
   testimonial,
@@ -178,6 +182,8 @@ const TestimonialCard = ({
 
 const Testimonials = () => {
   const { user, isAuthenticated } = useAuth();
+  const { isAdmin } = useAdminRole();
+  const { badgeInfoList } = useTestimonialBadges();
   const { 
     testimonials, 
     featuredTestimonials,
@@ -255,18 +261,28 @@ const Testimonials = () => {
               <span className="font-medium">Trang chủ</span>
             </Link>
             
-            {isAuthenticated && (
-              <Dialog open={isDialogOpen} onOpenChange={handleOpenDialog}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <PenLine className="w-4 h-4" />
-                    {userTestimonial ? "Chỉnh sửa" : "Chia sẻ câu chuyện"}
+            <div className="flex items-center gap-3">
+              {isAdmin && (
+                <Link to="/admin/testimonials">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Shield className="w-4 h-4" />
+                    Quản lý
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle className="font-serif text-xl">
-                      {userTestimonial ? "Chỉnh sửa nhân chứng" : "Chia sẻ câu chuyện của bạn"}
+                </Link>
+              )}
+              
+              {isAuthenticated && (
+                <Dialog open={isDialogOpen} onOpenChange={handleOpenDialog}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2">
+                      <PenLine className="w-4 h-4" />
+                      {userTestimonial ? "Chỉnh sửa" : "Chia sẻ câu chuyện"}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle className="font-serif text-xl">
+                        {userTestimonial ? "Chỉnh sửa nhân chứng" : "Chia sẻ câu chuyện của bạn"}
                     </DialogTitle>
                     <DialogDescription>
                       Hãy chia sẻ trải nghiệm của bạn với Angel AI để truyền cảm hứng cho những linh hồn khác.
@@ -359,8 +375,9 @@ const Testimonials = () => {
                     </Button>
                   </DialogFooter>
                 </DialogContent>
-              </Dialog>
-            )}
+                </Dialog>
+              )}
+            </div>
           </div>
         </header>
 
