@@ -49,6 +49,7 @@ import StickerPack from "@/components/studio/StickerPack";
 import ImageFilters from "@/components/studio/ImageFilters";
 import Templates from "@/components/studio/Templates";
 import BackgroundRemover from "@/components/studio/BackgroundRemover";
+import SaveProgressOverlay from "@/components/SaveProgressOverlay";
 import { toast } from "sonner";
 
 const promptSuggestions = [
@@ -75,11 +76,11 @@ export default function CreativeStudio() {
   
   const { user } = useAuth();
   const { isGenerating, generatedImage, error: generationError, needsCredits, generateImage, editImage, clearImage } = useImageGeneration();
-  const { saveImage, refetch } = useImageGallery();
+  const { saveImage, refetch, isSaving: isGallerySaving, saveStep, uploadProgress: gallerySaveProgress } = useImageGallery();
   const { walletAddress, isConnecting: isConnectingWallet, connectWallet, disconnectWallet } = useWallet();
   const { isMinting, mintNFT } = useNFT();
   const { balance, formatCoins, isLoading: isLoadingCoins } = useCamlyCoin();
-  const { uploadToR2, isUploading: isUploadingR2, progress: uploadProgress } = useR2Upload({ 
+  const { uploadToR2, isUploading: isUploadingR2, progress: r2UploadProgress } = useR2Upload({ 
     folder: 'studio-uploads',
     onSuccess: () => toast.success("Đã tải lên thành công!"),
     onError: (error) => toast.error("Lỗi upload: " + error)
@@ -178,6 +179,13 @@ export default function CreativeStudio() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-rose-light/5 to-background">
+      {/* Save Progress Overlay */}
+      <SaveProgressOverlay 
+        isVisible={isGallerySaving || saveStep !== "idle"}
+        currentStep={saveStep}
+        uploadProgress={gallerySaveProgress}
+      />
+      
       <NavigationHeader />
       
       <main className="container mx-auto px-4 py-8 pt-24">
@@ -461,9 +469,9 @@ export default function CreativeStudio() {
                                 <Loader2 className="w-10 h-10 mx-auto text-primary animate-spin" />
                                 <div className="space-y-2">
                                   <p className="text-sm text-muted-foreground">
-                                    Đang nén và tải lên... {uploadProgress}%
+                                    Đang nén và tải lên... {r2UploadProgress}%
                                   </p>
-                                  <Progress value={uploadProgress} className="h-2 max-w-xs mx-auto" />
+                                  <Progress value={r2UploadProgress} className="h-2 max-w-xs mx-auto" />
                                 </div>
                               </div>
                             ) : uploadedImage ? (
