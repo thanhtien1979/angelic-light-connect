@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useR2Upload } from "@/hooks/useR2Upload";
 
+export type SaveStep = "idle" | "compressing" | "uploading" | "saving" | "complete";
+
 interface GeneratedImage {
   id: string;
   user_id: string;
@@ -31,6 +33,7 @@ export function useImageGallery() {
   const [publicImages, setPublicImages] = useState<GeneratedImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveStep, setSaveStep] = useState<SaveStep>("idle");
 
   const fetchMyImages = useCallback(async () => {
     if (!user) return;
@@ -78,6 +81,8 @@ export function useImageGallery() {
     }
 
     setIsSaving(true);
+    setSaveStep("compressing");
+    
     try {
       // Convert base64 to File object for useR2Upload
       const base64Data = imageBase64.split(",")[1];
@@ -90,12 +95,18 @@ export function useImageGallery() {
       const blob = new Blob([byteArray], { type: "image/png" });
       const file = new File([blob], `${Date.now()}.png`, { type: "image/png" });
 
+      // Update step to uploading (compression happens inside useR2Upload)
+      setSaveStep("uploading");
+      
       // Use shared R2 upload hook (handles compression internally)
       const uploadResult = await uploadToR2(file);
       
       if (!uploadResult) {
         throw new Error("Upload failed");
       }
+
+      // Update step to saving to database
+      setSaveStep("saving");
 
       // Save to database
       const { data: insertedData, error: dbError } = await supabase
@@ -111,12 +122,21 @@ export function useImageGallery() {
 
       if (dbError) throw dbError;
 
+      // Show complete state briefly
+      setSaveStep("complete");
       toast.success("Đã lưu ảnh vào gallery!");
       fetchMyImages();
+      
+      // Reset after showing complete
+      setTimeout(() => {
+        setSaveStep("idle");
+      }, 1500);
+      
       return insertedData?.id || null;
     } catch (err) {
       console.error("Error saving image:", err);
       toast.error("Lỗi khi lưu ảnh");
+      setSaveStep("idle");
       return null;
     } finally {
       setIsSaving(false);
@@ -195,6 +215,7 @@ export function useImageGallery() {
     isSaving,
     isUploading,
     uploadProgress: progress,
+    saveStep,
     saveImage,
     togglePublic,
     deleteImage,
