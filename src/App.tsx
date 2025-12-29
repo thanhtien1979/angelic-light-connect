@@ -12,6 +12,7 @@ import Credits from "./pages/Credits";
 import Friends from "./pages/Friends";
 import UserProfile from "./pages/UserProfile";
 import Testimonials from "./pages/Testimonials";
+import AdminTestimonials from "./pages/AdminTestimonials";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/credits" element={<Credits />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/admin/testimonials" element={<AdminTestimonials />} />
             <Route
               path="/profile"
               element={
