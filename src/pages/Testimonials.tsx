@@ -1,16 +1,19 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, Star, Sparkles, Send, Loader2, 
-  PenLine, Trash2, Clock, CheckCircle, XCircle 
+  PenLine, Trash2, Clock, CheckCircle, Heart,
+  ImagePlus, X
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useTestimonials } from "@/hooks/useTestimonials";
+import { useTestimonials, Testimonial } from "@/hooks/useTestimonials";
+import { useR2Upload } from "@/hooks/useR2Upload";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -21,23 +24,34 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import AuroraBackground from "@/components/AuroraBackground";
+import TestimonialFilters from "@/components/TestimonialFilters";
+import TestimonialComments from "@/components/TestimonialComments";
+import TestimonialShareDialog from "@/components/TestimonialShareDialog";
+import FeaturedTestimonialsCarousel from "@/components/FeaturedTestimonialsCarousel";
 
 const TestimonialCard = ({ 
-  testimony, 
-  name, 
-  avatarUrl, 
-  isFeatured,
-  index 
+  testimonial,
+  index,
+  onLike,
+  isLiked,
+  fetchComments,
+  addComment,
+  deleteComment,
 }: { 
-  testimony: string;
-  name: string;
-  avatarUrl: string | null;
-  isFeatured: boolean;
+  testimonial: Testimonial;
   index: number;
+  onLike: () => void;
+  isLiked: boolean;
+  fetchComments: (testimonialId: string) => Promise<any[]>;
+  addComment: (testimonialId: string, content: string) => Promise<boolean>;
+  deleteComment: (commentId: string) => Promise<boolean>;
 }) => {
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | null) => {
+    if (!name) return "?";
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   };
+
+  const name = testimonial.profile?.display_name || "Linh hồn ẩn danh";
 
   return (
     <motion.div
@@ -48,19 +62,15 @@ const TestimonialCard = ({
     >
       <motion.div
         whileHover={{ y: -3 }}
-        animate={{ y: [0, -2, 0] }}
-        transition={{
-          y: { duration: 4 + index * 0.5, repeat: Infinity, ease: "easeInOut" },
-        }}
         className="relative h-full"
       >
         {/* Glow effect on hover */}
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/30 to-gold/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
         {/* Card */}
-        <div className="relative bg-card/70 backdrop-blur-xl rounded-2xl border border-border/30 p-6 h-full group-hover:border-primary/50 transition-colors duration-500 overflow-hidden">
+        <div className="relative bg-card/70 backdrop-blur-xl rounded-2xl border border-border/30 p-6 h-full group-hover:border-primary/50 transition-colors duration-500 overflow-hidden flex flex-col">
           {/* Featured badge */}
-          {isFeatured && (
+          {testimonial.is_featured && (
             <Badge className="absolute top-4 right-4 bg-gradient-to-r from-gold to-primary text-primary-foreground">
               <Sparkles className="w-3 h-3 mr-1" />
               Nổi bật
@@ -78,17 +88,28 @@ const TestimonialCard = ({
           </div>
 
           {/* Testimony */}
-          <p className="text-foreground/90 mb-6 leading-relaxed italic font-serif">
-            "{testimony}"
+          <p className="text-foreground/90 mb-4 leading-relaxed italic font-serif flex-1">
+            "{testimonial.testimony}"
           </p>
 
+          {/* Image if exists */}
+          {testimonial.image_url && (
+            <div className="mb-4 rounded-xl overflow-hidden">
+              <img 
+                src={testimonial.image_url} 
+                alt="Testimonial" 
+                className="w-full h-40 object-cover hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+          )}
+
           {/* Profile */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mb-4">
             <div className="relative">
               <Avatar className="w-12 h-12 ring-2 ring-primary/30">
-                <AvatarImage src={avatarUrl || ""} />
+                <AvatarImage src={testimonial.profile?.avatar_url || ""} />
                 <AvatarFallback className="bg-gradient-to-br from-primary/30 to-gold/30 text-foreground">
-                  {getInitials(name)}
+                  {getInitials(testimonial.profile?.display_name)}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 rounded-full border-2 border-primary/30 animate-pulse" style={{ margin: "-4px" }} />
@@ -97,6 +118,47 @@ const TestimonialCard = ({
               <p className="font-medium text-foreground">{name}</p>
               <p className="text-sm text-muted-foreground">Người tìm kiếm ánh sáng</p>
             </div>
+          </div>
+
+          {/* Actions: Like, Comment, Share */}
+          <div className="flex items-center justify-between pt-4 border-t border-border/30">
+            <div className="flex items-center gap-2">
+              {/* Like button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onLike}
+                className={`gap-1.5 transition-all ${
+                  isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+                }`}
+              >
+                <motion.div
+                  animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
+                </motion.div>
+                <span>{testimonial.likes_count}</span>
+              </Button>
+
+              {/* Comments */}
+              <TestimonialComments
+                testimonialId={testimonial.id}
+                commentsCount={testimonial.comments_count}
+                fetchComments={fetchComments}
+                addComment={addComment}
+                deleteComment={deleteComment}
+              />
+            </div>
+
+            {/* Share */}
+            <TestimonialShareDialog
+              testimony={testimonial.testimony}
+              authorName={name}
+              avatarUrl={testimonial.profile?.avatar_url || null}
+              likesCount={testimonial.likes_count}
+              imageUrl={testimonial.image_url}
+            />
           </div>
 
           {/* Decorative sparkle */}
@@ -118,21 +180,48 @@ const Testimonials = () => {
   const { user, isAuthenticated } = useAuth();
   const { 
     testimonials, 
+    featuredTestimonials,
     userTestimonial, 
     isLoading, 
     isSubmitting, 
+    sortBy,
+    setSortBy,
+    searchQuery,
+    setSearchQuery,
     submitTestimonial,
-    deleteTestimonial 
+    deleteTestimonial,
+    toggleLike,
+    fetchComments,
+    addComment,
+    deleteComment,
+    userLikes,
   } = useTestimonials();
   
   const [newTestimony, setNewTestimony] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { uploadToR2, isUploading, progress } = useR2Upload({
+    folder: "testimonials",
+    onSuccess: (result) => {
+      setImageUrl(result.url);
+    },
+  });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await uploadToR2(file);
+    }
+  };
 
   const handleSubmit = async () => {
-    const success = await submitTestimonial(newTestimony);
+    const success = await submitTestimonial(newTestimony, imageUrl || undefined);
     if (success) {
       setNewTestimony("");
+      setImageUrl(null);
       setIsDialogOpen(false);
     }
   };
@@ -142,6 +231,15 @@ const Testimonials = () => {
     if (success) {
       setIsDeleteDialogOpen(false);
     }
+  };
+
+  // Pre-fill form when editing
+  const handleOpenDialog = (open: boolean) => {
+    if (open && userTestimonial) {
+      setNewTestimony(userTestimonial.testimony);
+      setImageUrl(userTestimonial.image_url || null);
+    }
+    setIsDialogOpen(open);
   };
 
   return (
@@ -158,7 +256,7 @@ const Testimonials = () => {
             </Link>
             
             {isAuthenticated && (
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <Dialog open={isDialogOpen} onOpenChange={handleOpenDialog}>
                 <DialogTrigger asChild>
                   <Button className="gap-2">
                     <PenLine className="w-4 h-4" />
@@ -185,6 +283,54 @@ const Testimonials = () => {
                   <p className="text-xs text-muted-foreground text-right">
                     {newTestimony.length}/500 ký tự
                   </p>
+
+                  {/* Image upload */}
+                  <div className="space-y-3">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    
+                    {imageUrl ? (
+                      <div className="relative rounded-lg overflow-hidden">
+                        <img src={imageUrl} alt="Preview" className="w-full h-40 object-cover" />
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => setImageUrl(null)}
+                          className="absolute top-2 right-2 h-8 w-8"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="w-full gap-2"
+                      >
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Đang tải...
+                          </>
+                        ) : (
+                          <>
+                            <ImagePlus className="w-4 h-4" />
+                            Thêm hình ảnh (tùy chọn)
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    
+                    {isUploading && (
+                      <Progress value={progress} className="h-2" />
+                    )}
+                  </div>
                   
                   <DialogFooter className="gap-2">
                     {userTestimonial && (
@@ -202,7 +348,7 @@ const Testimonials = () => {
                     )}
                     <Button 
                       onClick={handleSubmit}
-                      disabled={isSubmitting || newTestimony.length < 20}
+                      disabled={isSubmitting || isUploading || newTestimony.length < 20}
                     >
                       {isSubmitting ? (
                         <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -225,7 +371,7 @@ const Testimonials = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="text-center mb-12"
           >
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary font-bold mb-4">
               Những Linh Hồn Đã Thức Tỉnh
@@ -234,6 +380,15 @@ const Testimonials = () => {
               Hành trình của những người đã kết nối với ánh sáng thiêng liêng
             </p>
           </motion.div>
+
+          {/* Featured Carousel */}
+          {featuredTestimonials.length > 0 && (
+            <FeaturedTestimonialsCarousel
+              testimonials={featuredTestimonials}
+              onLike={toggleLike}
+              userLikes={userLikes}
+            />
+          )}
 
           {/* User's testimonial status */}
           {userTestimonial && (
@@ -261,6 +416,14 @@ const Testimonials = () => {
             </motion.div>
           )}
 
+          {/* Filters */}
+          <TestimonialFilters
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+
           {/* Testimonials Grid */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -268,16 +431,23 @@ const Testimonials = () => {
                 <div key={i} className="h-64 rounded-2xl bg-muted/50 animate-pulse" />
               ))}
             </div>
+          ) : testimonials.length === 0 ? (
+            <div className="text-center py-16">
+              <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">Không tìm thấy nhân chứng nào</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {testimonials.map((testimonial, index) => (
                 <TestimonialCard
                   key={testimonial.id}
-                  testimony={testimonial.testimony}
-                  name={testimonial.profile?.display_name || "Linh hồn ẩn danh"}
-                  avatarUrl={testimonial.profile?.avatar_url || null}
-                  isFeatured={testimonial.is_featured}
+                  testimonial={testimonial}
                   index={index}
+                  onLike={() => toggleLike(testimonial.id)}
+                  isLiked={userLikes.has(testimonial.id)}
+                  fetchComments={fetchComments}
+                  addComment={addComment}
+                  deleteComment={deleteComment}
                 />
               ))}
             </div>
