@@ -132,9 +132,22 @@ serve(async (req) => {
     const message = data.choices?.[0]?.message;
     const imageUrl = message?.images?.[0]?.image_url?.url;
     const textContent = message?.content || "";
+    const finishReason = data.choices?.[0]?.native_finish_reason || data.choices?.[0]?.finish_reason;
 
     if (!imageUrl) {
       console.error("No image in response:", JSON.stringify(data));
+      
+      // Check for content safety rejection
+      if (finishReason === "IMAGE_SAFETY" || finishReason === "SAFETY") {
+        return new Response(
+          JSON.stringify({ 
+            error: "Prompt không được chấp nhận bởi hệ thống an toàn. Vui lòng thử với nội dung khác.",
+            error_code: "CONTENT_SAFETY"
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: "Không thể tạo hình ảnh. Vui lòng thử lại với prompt khác." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
