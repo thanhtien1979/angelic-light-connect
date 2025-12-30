@@ -6,6 +6,7 @@ import {
   Building, Gamepad2, BookOpen, Radio, ExternalLink
 } from "lucide-react";
 import angelEcosystemImg from "@/assets/angel-ecosystem.png";
+import funMoneyAvatar from "@/assets/fun-money-avatar.png";
 
 interface Platform {
   name: string;
@@ -106,7 +107,7 @@ const platforms: Platform[] = [
     name: "FUN Money",
     subtitle: "Tiền Ánh Sáng",
     description: "Đồng tiền vận hành toàn hệ - Energy-as-Money",
-    icon: <Coins className="w-8 h-8" />,
+    icon: <img src={funMoneyAvatar} alt="FUN Money" className="w-12 h-12 object-cover rounded-full ring-2 ring-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.6)]" />,
     color: "from-amber-300 to-yellow-400",
     glowColor: "shadow-amber-300/50"
   },
