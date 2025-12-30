@@ -375,11 +375,24 @@ const FunEcosystemPlatforms = () => {
                     <div className="relative z-10">
                       {/* Icon */}
                       <motion.div
-                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${platform.color} flex items-center justify-center text-white mb-4 shadow-lg ${platform.glowColor} shadow-lg`}
-                        whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                        transition={{ duration: 0.5 }}
+                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${platform.color} flex items-center justify-center text-white mb-4 shadow-lg ${platform.glowColor} shadow-lg overflow-hidden`}
+                        whileHover={{ 
+                          rotate: [0, -5, 5, -5, 0], 
+                          scale: 1.1,
+                          boxShadow: "0 0 25px rgba(236,72,153,0.5)"
+                        }}
+                        transition={{ duration: 0.6, ease: "easeInOut" }}
                       >
-                        {platform.icon}
+                        <motion.div
+                          className="w-full h-full flex items-center justify-center"
+                          whileHover={{ 
+                            rotate: 360,
+                            scale: 1.1
+                          }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                        >
+                          {platform.icon}
+                        </motion.div>
                       </motion.div>
 
                       {/* Name */}
