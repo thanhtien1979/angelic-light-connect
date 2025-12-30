@@ -334,12 +334,60 @@ export const CommunityLeaderboard = () => {
                         {getRankIcon(index + 1)}
                       </div>
 
-                      <Avatar className={`h-10 w-10 ${index < 3 ? 'ring-2 ring-pink-400/60 shadow-[0_0_10px_rgba(244,114,182,0.4)]' : 'ring-1 ring-pink-500/30'}`}>
-                        <AvatarImage src={user.avatar_url || undefined} />
-                        <AvatarFallback className="bg-gradient-to-br from-pink-500/30 to-rose-500/30 text-pink-200">
-                          <User className="h-5 w-5" />
-                        </AvatarFallback>
-                      </Avatar>
+                      <div className="relative">
+                        {/* Crown for #1 */}
+                        {index === 0 && (
+                          <motion.div
+                            className="absolute -top-4 left-1/2 -translate-x-1/2 z-10"
+                            animate={{ 
+                              y: [0, -2, 0],
+                              rotate: [-5, 5, -5]
+                            }}
+                            transition={{ 
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          >
+                            <Crown className="h-5 w-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.9)]" />
+                          </motion.div>
+                        )}
+                        
+                        {/* Halo effect for top 3 */}
+                        {index < 3 && (
+                          <motion.div
+                            className={`absolute inset-0 rounded-full ${
+                              index === 0 
+                                ? 'bg-gradient-to-r from-yellow-400/40 via-pink-400/40 to-yellow-400/40' 
+                                : index === 1 
+                                  ? 'bg-gradient-to-r from-pink-400/30 via-rose-300/30 to-pink-400/30'
+                                  : 'bg-gradient-to-r from-rose-400/25 via-pink-300/25 to-rose-400/25'
+                            }`}
+                            animate={{ 
+                              scale: [1, 1.3, 1],
+                              opacity: [0.6, 0.2, 0.6]
+                            }}
+                            transition={{ 
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          />
+                        )}
+                        
+                        <Avatar className={`h-10 w-10 relative z-[1] ${
+                          index === 0 
+                            ? 'ring-2 ring-yellow-400/80 shadow-[0_0_15px_rgba(250,204,21,0.6)]' 
+                            : index < 3 
+                              ? 'ring-2 ring-pink-400/60 shadow-[0_0_10px_rgba(244,114,182,0.4)]' 
+                              : 'ring-1 ring-pink-500/30'
+                        }`}>
+                          <AvatarImage src={user.avatar_url || undefined} />
+                          <AvatarFallback className="bg-gradient-to-br from-pink-500/30 to-rose-500/30 text-pink-200">
+                            <User className="h-5 w-5" />
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
 
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate text-pink-100">
