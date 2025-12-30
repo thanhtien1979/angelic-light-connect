@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { useVideoCall } from "@/hooks/useVideoCall";
 import ReactionPicker, { ReactionType } from "@/components/ReactionPicker";
 import { useMomentReactions } from "@/hooks/useMomentReactions";
+import MomentImageGallery from "@/components/MomentImageGallery";
 
 interface SharedMoment {
   id: string;
@@ -103,7 +104,23 @@ interface ReactionCount {
   count: number;
 }
 
-const MomentCard = ({ 
+// Helper to parse multiple image URLs from moment
+const parseImageUrls = (message: string, mainImageUrl: string | null): string[] => {
+  if (!mainImageUrl) return [];
+  
+  // Check for [IMAGES:...] metadata in message
+  const imagesMatch = message.match(/\[IMAGES:(\[.*?\])\]/);
+  if (imagesMatch) {
+    try {
+      return JSON.parse(imagesMatch[1]);
+    } catch {
+      return [mainImageUrl];
+    }
+  }
+  return [mainImageUrl];
+};
+
+const MomentCard = ({
   moment, 
   onReact,
   onRemoveReaction,
@@ -208,15 +225,12 @@ const MomentCard = ({
         </span>
       </div>
 
-      {/* Image if exists */}
+      {/* Images Gallery */}
       {moment.image_url && (
-        <div className="mb-4 rounded-xl overflow-hidden">
-          <img
-            src={moment.image_url}
-            alt="Moment"
-            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
-          />
-        </div>
+        <MomentImageGallery
+          images={parseImageUrls(moment.spiritual_message, moment.image_url)}
+          className="mb-4"
+        />
       )}
 
       {/* Content */}
