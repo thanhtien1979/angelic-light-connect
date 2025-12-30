@@ -31,7 +31,7 @@ export const useAuth = () => {
   const signUp = useCallback(async (email: string, password: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -45,14 +45,14 @@ export const useAuth = () => {
         } else {
           toast.error(error.message);
         }
-        return { error };
+        return { error, data: null };
       }
 
       toast.success("Đăng ký thành công! Chào mừng bạn đến với Angel AI.");
-      return { error: null };
+      return { error: null, data };
     } catch (error) {
       toast.error("Đã xảy ra lỗi. Vui lòng thử lại.");
-      return { error };
+      return { error, data: null };
     }
   }, []);
 

@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Lock, Sparkles, LogIn, UserPlus, Phone, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { supabase } from "@/integrations/supabase/client";
+import LightLawAgreement from "./LightLawAgreement";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -30,7 +32,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-type AuthMode = "signin" | "signup" | "phone" | "otp";
+type AuthMode = "signin" | "signup" | "phone" | "otp" | "light-law";
 
 const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [mode, setMode] = useState<AuthMode>("signin");
@@ -41,6 +43,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; phone?: string }>({});
+  const [agreedToLightLaw, setAgreedToLightLaw] = useState(false);
   
   const { signIn, signUp, signInWithGoogle, signInWithPhone, verifyPhoneOtp } = useAuth();
 
@@ -76,14 +79,29 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     
     setIsSubmitting(true);
     
-    if (mode === "signin" || mode === "signup") {
-      const { error } = mode === "signin" 
-        ? await signIn(email, password)
-        : await signUp(email, password);
-      
+    if (mode === "signin") {
+      const { error } = await signIn(email, password);
       setIsSubmitting(false);
       
       if (!error) {
+        resetForm();
+        onClose();
+      }
+    } else if (mode === "signup") {
+      // Đăng ký với Light Law agreement
+      const { error, data } = await signUp(email, password);
+      setIsSubmitting(false);
+      
+      if (!error && data?.user) {
+        // Cập nhật profile với Light Law agreement
+        await supabase
+          .from("profiles")
+          .update({
+            agreed_to_light_law: true,
+            light_law_agreed_at: new Date().toISOString()
+          })
+          .eq("id", data.user.id);
+        
         resetForm();
         onClose();
       }
@@ -121,18 +139,33 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     setPhone("");
     setOtp("");
     setErrors({});
+    setAgreedToLightLaw(false);
     setMode("signin");
   };
 
   const toggleMode = () => {
-    setMode(mode === "signin" ? "signup" : "signin");
+    if (mode === "signin") {
+      // Khi chuyển sang đăng ký, hiển thị Luật Ánh Sáng trước
+      setMode("light-law");
+    } else {
+      setMode("signin");
+    }
     setErrors({});
+  };
+
+  const handleLightLawAgree = () => {
+    setAgreedToLightLaw(true);
+    setMode("signup");
   };
 
   const goBack = () => {
     if (mode === "otp") {
       setMode("phone");
       setOtp("");
+    } else if (mode === "signup") {
+      setMode("light-law");
+    } else if (mode === "light-law") {
+      setMode("signin");
     } else {
       setMode("signin");
     }
@@ -154,7 +187,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-md bg-white/90 backdrop-blur-xl rounded-3xl border border-gold-light/30 shadow-2xl overflow-hidden"
+            className={`relative w-full ${mode === "light-law" ? "max-w-lg" : "max-w-md"} bg-white/90 dark:bg-gray-900/95 backdrop-blur-xl rounded-3xl border border-gold-light/30 shadow-2xl overflow-hidden`}
             style={{
               boxShadow: "0 0 60px hsla(45, 100%, 70%, 0.2), 0 25px 50px -12px rgba(0, 0, 0, 0.15)",
             }}
@@ -171,8 +204,8 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
 
-            {/* Back button for phone/otp modes */}
-            {(mode === "phone" || mode === "otp") && (
+            {/* Back button for phone/otp/signup/light-law modes */}
+            {(mode === "phone" || mode === "otp" || mode === "signup" || mode === "light-law") && (
               <button
                 onClick={goBack}
                 className="absolute top-4 left-4 p-2 rounded-full hover:bg-black/5 transition-colors z-10"
@@ -182,32 +215,42 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             )}
 
             <div className="relative p-8">
-              {/* Header */}
-              <div className="text-center mb-8">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.1, type: "spring" }}
-                  className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center"
-                  style={{
-                    boxShadow: "0 0 30px hsla(45, 100%, 70%, 0.5)",
-                  }}
-                >
-                  <Sparkles className="w-8 h-8 text-white" />
-                </motion.div>
-                <h2 className="font-serif text-2xl text-foreground mb-2">
-                  {mode === "signin" && "Chào Mừng Trở Lại"}
-                  {mode === "signup" && "Tham Gia Angel AI"}
-                  {mode === "phone" && "Đăng Nhập Bằng SĐT"}
-                  {mode === "otp" && "Xác Thực OTP"}
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  {mode === "signin" && "Đăng nhập để tiếp tục hành trình của bạn"}
-                  {mode === "signup" && "Đăng ký để bắt đầu hành trình 5D"}
-                  {mode === "phone" && "Nhập số điện thoại để nhận mã OTP"}
-                  {mode === "otp" && `Nhập mã 6 số đã gửi đến ${phone}`}
-                </p>
-              </div>
+              {/* Light Law Agreement Screen */}
+              {mode === "light-law" && (
+                <LightLawAgreement
+                  onAgree={handleLightLawAgree}
+                  onBack={goBack}
+                />
+              )}
+
+              {/* Other modes - Header */}
+              {mode !== "light-law" && (
+                <div className="text-center mb-8">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.1, type: "spring" }}
+                    className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gold to-gold-light flex items-center justify-center"
+                    style={{
+                      boxShadow: "0 0 30px hsla(45, 100%, 70%, 0.5)",
+                    }}
+                  >
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </motion.div>
+                  <h2 className="font-serif text-2xl text-foreground mb-2">
+                    {mode === "signin" && "Chào Mừng Trở Lại"}
+                    {mode === "signup" && "Tham Gia Angel AI"}
+                    {mode === "phone" && "Đăng Nhập Bằng SĐT"}
+                    {mode === "otp" && "Xác Thực OTP"}
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    {mode === "signin" && "Đăng nhập để tiếp tục hành trình của bạn"}
+                    {mode === "signup" && "Bạn đã đồng ý với Luật Ánh Sáng ✨"}
+                    {mode === "phone" && "Nhập số điện thoại để nhận mã OTP"}
+                    {mode === "otp" && `Nhập mã 6 số đã gửi đến ${phone}`}
+                  </p>
+                </div>
+              )}
 
               {/* OTP Verification Form */}
               {mode === "otp" && (
