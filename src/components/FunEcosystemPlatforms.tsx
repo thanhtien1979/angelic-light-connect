@@ -9,6 +9,7 @@ import angelEcosystemImg from "@/assets/angel-ecosystem.png";
 import funMoneyAvatar from "@/assets/fun-money-avatar.png";
 import camlyCoinAvatar from "@/assets/camly-coin-avatar.png";
 import funFarmAvatar from "@/assets/fun-farm-avatar.png";
+import funEcosystemLogo from "@/assets/fun-ecosystem-logo.png";
 
 interface Platform {
   name: string;
@@ -268,26 +269,35 @@ const FunEcosystemPlatforms = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
+          {/* Fun Ecosystem Logo */}
           <motion.div
-            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-red-500/10 via-yellow-500/10 to-violet-500/10 border border-white/30 mb-8"
-            animate={{ boxShadow: ["0 0 20px rgba(255,100,100,0.2)", "0 0 40px rgba(100,255,100,0.3)", "0 0 20px rgba(100,100,255,0.2)"] }}
-            transition={{ duration: 3, repeat: Infinity }}
+            className="relative inline-block mb-8"
+            animate={{
+              y: [0, -10, 0],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           >
-            <Sparkles className="w-8 h-8 text-amber-500" />
-            <span 
-              className="text-4xl md:text-5xl lg:text-6xl font-bold"
-              style={{
-                background: "linear-gradient(90deg, #FF0000 0%, #FF7F00 14%, #FFFF00 28%, #00FF00 42%, #0000FF 57%, #4B0082 71%, #9400D3 85%, #FF0000 100%)",
-                backgroundSize: "200% 100%",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                animation: "rainbowShift 4s linear infinite",
-                filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.2))",
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-cyan-500/30 blur-3xl rounded-full"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 0.8, 0.5],
               }}
-            >
-              FUN Ecosystem
-            </span>
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            <img 
+              src={funEcosystemLogo} 
+              alt="FUN Ecosystem Web3" 
+              className="relative w-64 md:w-80 lg:w-96 h-auto drop-shadow-[0_0_30px_rgba(139,92,246,0.5)]"
+            />
           </motion.div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
