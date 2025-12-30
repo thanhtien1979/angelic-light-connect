@@ -893,24 +893,30 @@ export type Database = {
       }
       profiles: {
         Row: {
+          agreed_to_light_law: boolean | null
           avatar_url: string | null
           created_at: string
           display_name: string | null
           id: string
+          light_law_agreed_at: string | null
           updated_at: string
         }
         Insert: {
+          agreed_to_light_law?: boolean | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           id: string
+          light_law_agreed_at?: string | null
           updated_at?: string
         }
         Update: {
+          agreed_to_light_law?: boolean | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
+          light_law_agreed_at?: string | null
           updated_at?: string
         }
         Relationships: []
