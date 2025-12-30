@@ -116,25 +116,43 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
-    if (!user) return null;
-
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("moment-images")
-      .upload(fileName, file);
-
-    if (uploadError) {
-      console.error("Upload error:", uploadError);
-      throw uploadError;
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để tải ảnh lên");
+      return null;
     }
 
-    const { data } = supabase.storage
-      .from("moment-images")
-      .getPublicUrl(fileName);
+    try {
+      const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${fileExt}`;
 
-    return data.publicUrl;
+      console.log("Uploading image to:", fileName);
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("moment-images")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        toast.error(`Lỗi tải ảnh: ${uploadError.message}`);
+        return null;
+      }
+
+      console.log("Upload success:", uploadData);
+
+      const { data } = supabase.storage
+        .from("moment-images")
+        .getPublicUrl(fileName);
+
+      console.log("Public URL:", data.publicUrl);
+      return data.publicUrl;
+    } catch (error) {
+      console.error("Unexpected upload error:", error);
+      toast.error("Có lỗi xảy ra khi tải ảnh lên");
+      return null;
+    }
   };
 
   const handleSubmit = async () => {
@@ -163,7 +181,20 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
       let imageUrl: string | null = null;
       if (selectedImage) {
         setIsUploadingImage(true);
-        imageUrl = await uploadImage(selectedImage);
+        try {
+          imageUrl = await uploadImage(selectedImage);
+          if (!imageUrl) {
+            setIsUploadingImage(false);
+            setIsSubmitting(false);
+            return; // Stop if upload failed
+          }
+        } catch (uploadErr) {
+          console.error("Image upload failed:", uploadErr);
+          toast.error("Không thể tải ảnh lên. Vui lòng thử lại.");
+          setIsUploadingImage(false);
+          setIsSubmitting(false);
+          return;
+        }
         setIsUploadingImage(false);
       }
 
