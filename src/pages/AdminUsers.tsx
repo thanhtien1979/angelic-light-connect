@@ -51,9 +51,12 @@ interface UserProfile {
   roles: string[];
   coins: number;
   email?: string;
+  isBanned?: boolean;
+  banReason?: string | null;
+  bannedAt?: string | null;
 }
 
-type FilterRole = "all" | "admin" | "moderator" | "user";
+type FilterRole = "all" | "admin" | "moderator" | "user" | "banned";
 
 const AdminUsers = () => {
   const { isAuthenticated } = useAuth();
@@ -64,13 +67,15 @@ const AdminUsers = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
+  const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
+  const [banReason, setBanReason] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     admins: 0,
     moderators: 0,
-    activeToday: 0
+    bannedUsers: 0
   });
 
   const fetchUsers = useCallback(async () => {
@@ -100,10 +105,18 @@ const AdminUsers = () => {
 
       if (coinsError) throw coinsError;
 
+      // Fetch banned users
+      const { data: bannedUsers, error: bannedError } = await supabase
+        .from("banned_users")
+        .select("user_id, reason, banned_at");
+
+      if (bannedError) throw bannedError;
+
       // Combine data
       const usersWithDetails: UserProfile[] = (profiles || []).map(profile => {
         const userRoles = roles?.filter(r => r.user_id === profile.id).map(r => r.role) || [];
         const userCoins = coins?.find(c => c.user_id === profile.id)?.total_coins || 0;
+        const banInfo = bannedUsers?.find(b => b.user_id === profile.id);
         
         return {
           id: profile.id,
@@ -111,7 +124,10 @@ const AdminUsers = () => {
           avatar_url: profile.avatar_url,
           created_at: profile.created_at,
           roles: userRoles.length > 0 ? userRoles : ["user"],
-          coins: userCoins
+          coins: userCoins,
+          isBanned: !!banInfo,
+          banReason: banInfo?.reason,
+          bannedAt: banInfo?.banned_at
         };
       });
 
@@ -122,7 +138,7 @@ const AdminUsers = () => {
         totalUsers: usersWithDetails.length,
         admins: usersWithDetails.filter(u => u.roles.includes("admin")).length,
         moderators: usersWithDetails.filter(u => u.roles.includes("moderator")).length,
-        activeToday: 0 // Could be calculated from presence data
+        bannedUsers: usersWithDetails.filter(u => u.isBanned).length
       });
 
     } catch (error) {
@@ -144,7 +160,12 @@ const AdminUsers = () => {
       (user.display_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
       user.id.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesRole = filterRole === "all" || user.roles.includes(filterRole);
+    let matchesRole = filterRole === "all";
+    if (filterRole === "banned") {
+      matchesRole = user.isBanned === true;
+    } else if (filterRole !== "all") {
+      matchesRole = user.roles.includes(filterRole);
+    }
     
     return matchesSearch && matchesRole;
   });
@@ -208,6 +229,52 @@ const AdminUsers = () => {
     } catch (error) {
       console.error("Error removing role:", error);
       toast.error("Không thể xóa quyền");
+    }
+  };
+
+  const handleBanUser = async () => {
+    if (!selectedUser) return;
+
+    setIsProcessing(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from("banned_users")
+        .insert({
+          user_id: selectedUser.id,
+          banned_by: user.id,
+          reason: banReason || null
+        });
+
+      if (error) throw error;
+      toast.success("Đã cấm người dùng này");
+      setIsBanDialogOpen(false);
+      setSelectedUser(null);
+      setBanReason("");
+      fetchUsers();
+    } catch (error) {
+      console.error("Error banning user:", error);
+      toast.error("Không thể cấm người dùng");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUnbanUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from("banned_users")
+        .delete()
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      toast.success("Đã bỏ cấm người dùng");
+      fetchUsers();
+    } catch (error) {
+      console.error("Error unbanning user:", error);
+      toast.error("Không thể bỏ cấm người dùng");
     }
   };
 
@@ -342,14 +409,12 @@ const AdminUsers = () => {
           
           <Card className="bg-background/60 backdrop-blur-xl border-pink-500/20">
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center">
-                <Coins className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center">
+                <Ban className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
-                  {users.reduce((sum, u) => sum + u.coins, 0).toLocaleString()}
-                </p>
-                <p className="text-xs text-muted-foreground">Tổng Camly Coins</p>
+                <p className="text-2xl font-bold">{stats.bannedUsers}</p>
+                <p className="text-xs text-muted-foreground">Bị cấm</p>
               </div>
             </CardContent>
           </Card>
@@ -378,6 +443,7 @@ const AdminUsers = () => {
               <TabsTrigger value="admin">Admin</TabsTrigger>
               <TabsTrigger value="moderator">Mod</TabsTrigger>
               <TabsTrigger value="user">User</TabsTrigger>
+              <TabsTrigger value="banned" className="text-destructive">Bị cấm</TabsTrigger>
             </TabsList>
           </Tabs>
         </motion.div>
@@ -430,6 +496,12 @@ const AdminUsers = () => {
                               <p className="font-semibold text-foreground truncate">
                                 {user.display_name || "Thiên Thần ẩn danh"}
                               </p>
+                              {user.isBanned && (
+                                <Badge className="bg-gradient-to-r from-red-600 to-red-800 text-white gap-1">
+                                  <Ban className="w-3 h-3" />
+                                  Bị cấm
+                                </Badge>
+                              )}
                               {user.roles.map(role => (
                                 <span key={role}>{getRoleBadge(role)}</span>
                               ))}
@@ -489,6 +561,27 @@ const AdminUsers = () => {
                                 >
                                   <XCircle className="w-4 h-4" />
                                   Xóa quyền Moderator
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              {user.isBanned ? (
+                                <DropdownMenuItem
+                                  onClick={() => handleUnbanUser(user.id)}
+                                  className="flex items-center gap-2 text-green-500"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                  Bỏ cấm người dùng
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    setIsBanDialogOpen(true);
+                                  }}
+                                  className="flex items-center gap-2 text-destructive"
+                                >
+                                  <Ban className="w-4 h-4" />
+                                  Cấm người dùng
                                 </DropdownMenuItem>
                               )}
                             </DropdownMenuContent>
@@ -594,6 +687,71 @@ const AdminUsers = () => {
                 <CheckCircle className="w-4 h-4 mr-2" />
               )}
               Xác nhận
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ban User Dialog */}
+      <Dialog open={isBanDialogOpen} onOpenChange={setIsBanDialogOpen}>
+        <DialogContent className="bg-background/95 backdrop-blur-xl border-red-500/30">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Ban className="w-5 h-5" />
+              Cấm người dùng
+            </DialogTitle>
+            <DialogDescription>
+              Người dùng bị cấm sẽ không thể đăng nhập và sử dụng ứng dụng.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+              <Avatar>
+                <AvatarImage src={selectedUser?.avatar_url || undefined} />
+                <AvatarFallback>
+                  <User className="w-4 h-4" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{selectedUser?.display_name || "Thiên Thần ẩn danh"}</p>
+                <p className="text-xs text-muted-foreground">ID: {selectedUser?.id}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Lý do cấm (tùy chọn)</label>
+              <Input
+                placeholder="Nhập lý do cấm người dùng..."
+                value={banReason}
+                onChange={(e) => setBanReason(e.target.value)}
+                className="border-destructive/30"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsBanDialogOpen(false);
+                setBanReason("");
+              }}
+              disabled={isProcessing}
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleBanUser}
+              disabled={isProcessing}
+              variant="destructive"
+            >
+              {isProcessing ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <Ban className="w-4 h-4 mr-2" />
+              )}
+              Cấm người dùng
             </Button>
           </DialogFooter>
         </DialogContent>
