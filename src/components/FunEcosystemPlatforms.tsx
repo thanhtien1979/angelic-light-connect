@@ -10,6 +10,7 @@ import funMoneyAvatar from "@/assets/fun-money-avatar.png";
 import camlyCoinAvatar from "@/assets/camly-coin-avatar.png";
 import funFarmAvatar from "@/assets/fun-farm-avatar.png";
 import funEcosystemLogo from "@/assets/fun-ecosystem-logo.png";
+import funPlayAvatar from "@/assets/fun-play-avatar.png";
 
 interface Platform {
   name: string;
@@ -52,7 +53,7 @@ const platforms: Platform[] = [
     name: "FUN Play",
     subtitle: "Sáng Tạo & Giải Trí",
     description: "Vortex nội dung - Play & Earn, nơi niềm vui tạo ra giá trị",
-    icon: <Play className="w-8 h-8" />,
+    icon: <img src={funPlayAvatar} alt="FUN Play" className="w-12 h-12 object-cover rounded-full ring-2 ring-rose-400 shadow-[0_0_15px_rgba(251,113,133,0.6)]" />,
     color: "from-rose-400 to-pink-500",
     glowColor: "shadow-rose-400/50",
     link: "https://play.fun.rich/"
