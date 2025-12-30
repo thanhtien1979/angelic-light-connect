@@ -481,6 +481,69 @@ export type Database = {
         }
         Relationships: []
       }
+      light_behaviors: {
+        Row: {
+          analyzed_at: string
+          behavior_type: string
+          context: Json | null
+          energy_type: string
+          id: string
+          sentiment_score: number
+          user_id: string
+        }
+        Insert: {
+          analyzed_at?: string
+          behavior_type: string
+          context?: Json | null
+          energy_type?: string
+          id?: string
+          sentiment_score?: number
+          user_id: string
+        }
+        Update: {
+          analyzed_at?: string
+          behavior_type?: string
+          context?: Json | null
+          energy_type?: string
+          id?: string
+          sentiment_score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      light_interventions: {
+        Row: {
+          acknowledged: boolean
+          angel_message: string | null
+          created_at: string
+          id: string
+          intervention_type: string
+          level: number
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged?: boolean
+          angel_message?: string | null
+          created_at?: string
+          id?: string
+          intervention_type: string
+          level?: number
+          reason: string
+          user_id: string
+        }
+        Update: {
+          acknowledged?: boolean
+          angel_message?: string | null
+          created_at?: string
+          id?: string
+          intervention_type?: string
+          level?: number
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       meditation_completions: {
         Row: {
           completed_at: string
@@ -1319,6 +1382,45 @@ export type Database = {
           follower_id?: string
           following_id?: string
           id?: string
+        }
+        Relationships: []
+      }
+      user_light_profile: {
+        Row: {
+          created_at: string
+          energy_direction: string
+          id: string
+          last_light_check: string | null
+          light_score: number
+          onboarding_answers: Json | null
+          onboarding_completed: boolean
+          updated_at: string
+          user_id: string
+          warning_level: number
+        }
+        Insert: {
+          created_at?: string
+          energy_direction?: string
+          id?: string
+          last_light_check?: string | null
+          light_score?: number
+          onboarding_answers?: Json | null
+          onboarding_completed?: boolean
+          updated_at?: string
+          user_id: string
+          warning_level?: number
+        }
+        Update: {
+          created_at?: string
+          energy_direction?: string
+          id?: string
+          last_light_check?: string | null
+          light_score?: number
+          onboarding_answers?: Json | null
+          onboarding_completed?: boolean
+          updated_at?: string
+          user_id?: string
+          warning_level?: number
         }
         Relationships: []
       }
