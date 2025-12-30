@@ -183,39 +183,39 @@ export const CommunityLeaderboard = () => {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="h-6 w-6 text-yellow-500" />;
+        return <Crown className="h-6 w-6 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]" />;
       case 2:
-        return <Medal className="h-5 w-5 text-gray-400" />;
+        return <Medal className="h-5 w-5 text-pink-300 drop-shadow-[0_0_6px_rgba(244,114,182,0.6)]" />;
       case 3:
-        return <Award className="h-5 w-5 text-amber-600" />;
+        return <Award className="h-5 w-5 text-rose-400 drop-shadow-[0_0_6px_rgba(251,113,133,0.6)]" />;
       default:
-        return <span className="text-muted-foreground font-bold w-6 text-center">{rank}</span>;
+        return <span className="text-pink-300/80 font-bold w-6 text-center text-sm">{rank}</span>;
     }
   };
 
   const getRankStyle = (rank: number) => {
     switch (rank) {
       case 1:
-        return 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-500/50';
+        return 'bg-gradient-to-r from-yellow-500/30 via-pink-500/20 to-rose-500/30 border-yellow-400/60 shadow-[0_0_20px_rgba(250,204,21,0.3)]';
       case 2:
-        return 'bg-gradient-to-r from-gray-400/20 to-gray-500/20 border-gray-400/50';
+        return 'bg-gradient-to-r from-pink-400/25 to-rose-400/25 border-pink-400/50 shadow-[0_0_15px_rgba(244,114,182,0.2)]';
       case 3:
-        return 'bg-gradient-to-r from-amber-600/20 to-orange-600/20 border-amber-600/50';
+        return 'bg-gradient-to-r from-rose-400/20 to-pink-400/20 border-rose-400/40 shadow-[0_0_12px_rgba(251,113,133,0.2)]';
       default:
-        return 'bg-muted/30 border-border/50';
+        return 'bg-gradient-to-r from-pink-950/40 to-rose-950/40 border-pink-500/20 hover:border-pink-400/40';
     }
   };
 
   const getCategoryIcon = () => {
     switch (category) {
       case 'coins':
-        return <Coins className="h-4 w-4" />;
+        return <Coins className="h-4 w-4 text-pink-400" />;
       case 'meditation':
-        return <Wind className="h-4 w-4" />;
+        return <Wind className="h-4 w-4 text-pink-400" />;
       case 'moments':
-        return <Sparkles className="h-4 w-4" />;
+        return <Sparkles className="h-4 w-4 text-pink-400" />;
       case 'likes':
-        return <Heart className="h-4 w-4" />;
+        return <Heart className="h-4 w-4 text-pink-400" />;
     }
   };
 
@@ -233,32 +233,75 @@ export const CommunityLeaderboard = () => {
   };
 
   return (
-    <Card className="bg-background/60 backdrop-blur-xl border-primary/20 overflow-hidden">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <Trophy className="h-6 w-6 text-yellow-500" />
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Bảng Xếp Hạng
+    <Card className="relative overflow-hidden bg-gradient-to-br from-pink-950/80 via-rose-950/70 to-fuchsia-950/80 backdrop-blur-xl border-pink-500/30 shadow-[0_0_40px_rgba(236,72,153,0.15)]">
+      {/* Decorative glow effects */}
+      <div className="absolute top-0 left-1/4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-40 h-40 bg-rose-500/15 rounded-full blur-3xl" />
+      <div className="absolute top-1/2 right-0 w-24 h-24 bg-fuchsia-500/20 rounded-full blur-2xl" />
+      
+      <CardHeader className="pb-4 relative z-10">
+        <CardTitle className="flex items-center justify-center gap-3">
+          <motion.div
+            animate={{ 
+              rotate: [0, -10, 10, -10, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 3
+            }}
+          >
+            <Trophy className="h-8 w-8 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" />
+          </motion.div>
+          <span className="text-2xl font-bold bg-gradient-to-r from-pink-300 via-rose-300 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(244,114,182,0.5)]">
+            HONOR BOARD
           </span>
+          <motion.div
+            animate={{ 
+              rotate: [0, 10, -10, 10, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 3
+            }}
+          >
+            <Trophy className="h-8 w-8 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" />
+          </motion.div>
         </CardTitle>
+        <p className="text-center text-pink-300/70 text-sm mt-1">Vinh danh những Thiên Thần xuất sắc</p>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 relative z-10">
         <Tabs value={category} onValueChange={(v) => setCategory(v as LeaderboardCategory)}>
-          <TabsList className="grid grid-cols-4 w-full">
-            <TabsTrigger value="coins" className="gap-1 text-xs">
+          <TabsList className="grid grid-cols-4 w-full bg-pink-950/50 border border-pink-500/20">
+            <TabsTrigger 
+              value="coins" 
+              className="gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/40 data-[state=active]:to-rose-500/40 data-[state=active]:text-pink-100 data-[state=active]:border-pink-400/50 text-pink-300/70 hover:text-pink-200"
+            >
               <Coins className="h-3 w-3" />
               <span className="hidden sm:inline">Camly</span>
             </TabsTrigger>
-            <TabsTrigger value="meditation" className="gap-1 text-xs">
+            <TabsTrigger 
+              value="meditation" 
+              className="gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/40 data-[state=active]:to-rose-500/40 data-[state=active]:text-pink-100 data-[state=active]:border-pink-400/50 text-pink-300/70 hover:text-pink-200"
+            >
               <Wind className="h-3 w-3" />
               <span className="hidden sm:inline">Thiền</span>
             </TabsTrigger>
-            <TabsTrigger value="moments" className="gap-1 text-xs">
+            <TabsTrigger 
+              value="moments" 
+              className="gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/40 data-[state=active]:to-rose-500/40 data-[state=active]:text-pink-100 data-[state=active]:border-pink-400/50 text-pink-300/70 hover:text-pink-200"
+            >
               <Sparkles className="h-3 w-3" />
               <span className="hidden sm:inline">Chia sẻ</span>
             </TabsTrigger>
-            <TabsTrigger value="likes" className="gap-1 text-xs">
+            <TabsTrigger 
+              value="likes" 
+              className="gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/40 data-[state=active]:to-rose-500/40 data-[state=active]:text-pink-100 data-[state=active]:border-pink-400/50 text-pink-300/70 hover:text-pink-200"
+            >
               <Heart className="h-3 w-3" />
               <span className="hidden sm:inline">Yêu thích</span>
             </TabsTrigger>
@@ -268,11 +311,11 @@ export const CommunityLeaderboard = () => {
             <ScrollArea className="h-[400px] pr-4">
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <Loader2 className="h-8 w-8 animate-spin text-pink-400" />
                 </div>
               ) : users.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Star className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <div className="text-center py-12 text-pink-300/60">
+                  <Star className="h-12 w-12 mx-auto mb-2 opacity-50 text-pink-400" />
                   <p>Chưa có dữ liệu</p>
                 </div>
               ) : (
@@ -283,30 +326,34 @@ export const CommunityLeaderboard = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer hover:scale-[1.02] transition-all ${getRankStyle(index + 1)}`}
+                      whileHover={{ scale: 1.02, x: 5 }}
+                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-300 ${getRankStyle(index + 1)}`}
                       onClick={() => navigate(`/user/${user.id}`)}
                     >
                       <div className="flex items-center justify-center w-8">
                         {getRankIcon(index + 1)}
                       </div>
 
-                      <Avatar className={`h-10 w-10 ${index < 3 ? 'ring-2 ring-primary/50' : ''}`}>
+                      <Avatar className={`h-10 w-10 ${index < 3 ? 'ring-2 ring-pink-400/60 shadow-[0_0_10px_rgba(244,114,182,0.4)]' : 'ring-1 ring-pink-500/30'}`}>
                         <AvatarImage src={user.avatar_url || undefined} />
-                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20">
-                          <User className="h-5 w-5 text-primary" />
+                        <AvatarFallback className="bg-gradient-to-br from-pink-500/30 to-rose-500/30 text-pink-200">
+                          <User className="h-5 w-5" />
                         </AvatarFallback>
                       </Avatar>
 
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">
-                          {user.display_name || 'Linh hồn ẩn danh'}
+                        <p className="font-medium truncate text-pink-100">
+                          {user.display_name || 'Thiên Thần ẩn danh'}
                         </p>
                       </div>
 
-                      <Badge variant="secondary" className="gap-1 shrink-0">
+                      <Badge 
+                        variant="secondary" 
+                        className="gap-1 shrink-0 bg-gradient-to-r from-pink-500/30 to-rose-500/30 border-pink-400/40 text-pink-100"
+                      >
                         {getCategoryIcon()}
                         <span className="font-bold">{user.score.toLocaleString()}</span>
-                        <span className="text-xs text-muted-foreground hidden sm:inline">
+                        <span className="text-xs text-pink-300/70 hidden sm:inline">
                           {getCategoryUnit()}
                         </span>
                       </Badge>
