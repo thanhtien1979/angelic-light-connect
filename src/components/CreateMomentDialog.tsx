@@ -14,6 +14,8 @@ import {
   Edit3,
   Plus,
   Check,
+  Palette,
+  Smile,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,6 +25,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { compressImage } from "@/lib/imageCompression";
 import ImageCropEditor from "@/components/ImageCropEditor";
+import ImageFilterEditor from "@/components/ImageFilterEditor";
+import StickerTextEditor from "@/components/StickerTextEditor";
 import { Progress } from "@/components/ui/progress";
 
 interface CreateMomentDialogProps {
@@ -101,6 +105,8 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
   const [compressionProgress, setCompressionProgress] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [editingImageId, setEditingImageId] = useState<string | null>(null);
+  const [filteringImageId, setFilteringImageId] = useState<string | null>(null);
+  const [stickerImageId, setStickerImageId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const generateId = () => `img-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -216,7 +222,8 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
   }, []);
 
   const handleSaveEditedImage = useCallback(async (editedUrl: string) => {
-    if (!editingImageId) return;
+    const targetId = editingImageId || filteringImageId || stickerImageId;
+    if (!targetId) return;
 
     try {
       // Convert blob URL to File
@@ -226,7 +233,7 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
 
       setImages((prev) =>
         prev.map((img) =>
-          img.id === editingImageId
+          img.id === targetId
             ? {
                 ...img,
                 file,
@@ -238,12 +245,14 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
       );
 
       setEditingImageId(null);
+      setFilteringImageId(null);
+      setStickerImageId(null);
       toast.success("Đã lưu chỉnh sửa ảnh");
     } catch (error) {
       console.error("Error saving edited image:", error);
       toast.error("Không thể lưu ảnh đã chỉnh sửa");
     }
-  }, [editingImageId]);
+  }, [editingImageId, filteringImageId, stickerImageId]);
 
   const uploadImage = async (file: File): Promise<string | null> => {
     if (!user) return null;
@@ -532,12 +541,28 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
                           <button
                             onClick={() => handleEditImage(img.id)}
                             className="p-1.5 rounded-full bg-white/90 hover:bg-white text-gray-700"
+                            title="Cắt & xoay"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
+                            onClick={() => setFilteringImageId(img.id)}
+                            className="p-1.5 rounded-full bg-purple-500/90 hover:bg-purple-500 text-white"
+                            title="Bộ lọc màu"
+                          >
+                            <Palette className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setStickerImageId(img.id)}
+                            className="p-1.5 rounded-full bg-amber-500/90 hover:bg-amber-500 text-white"
+                            title="Sticker & Text"
+                          >
+                            <Smile className="w-3.5 h-3.5" />
+                          </button>
+                          <button
                             onClick={() => handleRemoveImage(img.id)}
                             className="p-1.5 rounded-full bg-red-500/90 hover:bg-red-500 text-white"
+                            title="Xóa"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -634,13 +659,39 @@ const CreateMomentDialog = ({ isOpen, onClose, onSuccess }: CreateMomentDialogPr
         )}
       </AnimatePresence>
 
-      {/* Image Editor Modal */}
+      {/* Image Editor Modals */}
       <AnimatePresence>
         {editingImage && (
           <ImageCropEditor
             imageUrl={editingImage.previewUrl}
             onSave={handleSaveEditedImage}
             onCancel={() => setEditingImageId(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {filteringImageId && images.find(img => img.id === filteringImageId) && (
+          <ImageFilterEditor
+            imageUrl={images.find(img => img.id === filteringImageId)!.previewUrl}
+            onSave={(url) => {
+              handleSaveEditedImage(url);
+              setFilteringImageId(null);
+            }}
+            onCancel={() => setFilteringImageId(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {stickerImageId && images.find(img => img.id === stickerImageId) && (
+          <StickerTextEditor
+            imageUrl={images.find(img => img.id === stickerImageId)!.previewUrl}
+            onSave={(url) => {
+              handleSaveEditedImage(url);
+              setStickerImageId(null);
+            }}
+            onCancel={() => setStickerImageId(null)}
           />
         )}
       </AnimatePresence>
