@@ -8,6 +8,7 @@ import {
 import angelEcosystemImg from "@/assets/angel-ecosystem.png";
 import funMoneyAvatar from "@/assets/fun-money-avatar.png";
 import camlyCoinAvatar from "@/assets/camly-coin-avatar.png";
+import funFarmAvatar from "@/assets/fun-farm-avatar.png";
 
 interface Platform {
   name: string;
@@ -75,7 +76,7 @@ const platforms: Platform[] = [
     name: "FUN Farm",
     subtitle: "Thực Phẩm & Tự Nhiên",
     description: "Vortex vật chất - Thực phẩm sạch, năng lượng thuần khiết",
-    icon: <Leaf className="w-8 h-8" />,
+    icon: <img src={funFarmAvatar} alt="FUN Farm" className="w-12 h-12 object-cover rounded-full ring-2 ring-green-400 shadow-[0_0_15px_rgba(74,222,128,0.6)]" />,
     color: "from-green-400 to-emerald-500",
     glowColor: "shadow-green-400/50",
     link: "https://funfarm.life/"
