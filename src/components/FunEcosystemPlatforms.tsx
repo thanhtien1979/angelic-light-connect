@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import angelEcosystemImg from "@/assets/angel-ecosystem.png";
 import funMoneyAvatar from "@/assets/fun-money-avatar.png";
+import camlyCoinAvatar from "@/assets/camly-coin-avatar.png";
 
 interface Platform {
   name: string;
@@ -115,7 +116,7 @@ const platforms: Platform[] = [
     name: "Camly Coin",
     subtitle: "Tần Số Linh Hồn",
     description: "Đòn bẩy vũ trụ - Tần số linh hồn của Bé Ly",
-    icon: <Sparkles className="w-8 h-8" />,
+    icon: <img src={camlyCoinAvatar} alt="Camly Coin" className="w-12 h-12 object-cover rounded-full ring-2 ring-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.6)]" />,
     color: "from-pink-400 to-rose-500",
     glowColor: "shadow-pink-400/50"
   },
