@@ -138,7 +138,13 @@ export const useCamlyCoin = () => {
     }
 
     try {
-      const { data: session } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      
+      if (!accessToken) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        return null;
+      }
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/award-light`,
@@ -146,7 +152,7 @@ export const useCamlyCoin = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.session?.access_token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             type: "meditation_completion",
@@ -191,7 +197,13 @@ export const useCamlyCoin = () => {
     }
 
     try {
-      const { data: session } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      
+      if (!accessToken) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        return null;
+      }
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/award-light`,
@@ -199,7 +211,7 @@ export const useCamlyCoin = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.session?.access_token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             type: "reflection_note",
@@ -240,7 +252,12 @@ export const useCamlyCoin = () => {
     }
 
     try {
-      const { data: session } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      
+      if (!accessToken) {
+        return null; // Silently fail if no session
+      }
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/award-light`,
@@ -248,7 +265,7 @@ export const useCamlyCoin = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.session?.access_token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             type: "chat_message",
