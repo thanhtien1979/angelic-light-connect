@@ -136,11 +136,20 @@ const UserMenu = ({ onOpenAuth }: UserMenuProps) => {
                   onClick={handleProfileClick}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors"
                 >
-                  <Settings className="w-5 h-5 text-gold" />
+                  <User className="w-5 h-5 text-gold" />
                   <span className="text-foreground">Hồ sơ của tôi</span>
                   {hasNewGreeting && (
                     <span className="ml-auto w-2 h-2 rounded-full bg-gradient-to-br from-gold to-rose-300" />
                   )}
+                </Link>
+
+                <Link
+                  to="/settings"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors"
+                >
+                  <Settings className="w-5 h-5 text-gold" />
+                  <span className="text-foreground">Cài đặt</span>
                 </Link>
 
                 <button

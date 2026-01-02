@@ -15,6 +15,7 @@ import Testimonials from "./pages/Testimonials";
 import AdminTestimonials from "./pages/AdminTestimonials";
 import AdminUsers from "./pages/AdminUsers";
 import LightLaw from "./pages/LightLaw";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/credits" element={<Credits />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/admin/testimonials" element={<AdminTestimonials />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/luat-anh-sang" element={<LightLaw />} />
