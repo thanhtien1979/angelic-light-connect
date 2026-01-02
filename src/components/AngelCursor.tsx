@@ -7,8 +7,13 @@ import flyingAngel3 from "@/assets/flying-angel-3.png";
 import flyingAngel4 from "@/assets/flying-angel-4.png";
 import { AngelCursorColor, AngelCursorSize, AngelCursorStyle } from "@/hooks/useAngelCursorPreference";
 
-// Angel frames for animation
-const angelFrames = [flyingAngel1, flyingAngel2, flyingAngel3, flyingAngel4];
+// Angel images by style - each style uses ONE specific image
+export const angelStyleImages: Record<AngelCursorStyle, string> = {
+  classic: flyingAngel1,
+  cherub: flyingAngel2,
+  seraph: flyingAngel3,
+  guardian: flyingAngel4,
+};
 
 interface AngelCursorProps {
   color?: AngelCursorColor;
@@ -17,13 +22,6 @@ interface AngelCursorProps {
   trailEnabled?: boolean;
   isEnabled?: boolean;
   customVideoUrl?: string | null;
-}
-
-interface Feather {
-  id: number;
-  x: number;
-  y: number;
-  rotation: number;
 }
 
 interface Sparkle {
@@ -78,44 +76,6 @@ const sizeConfigs: Record<AngelCursorSize, { className: string; offset: { x: num
   large: { className: "w-20 h-20", offset: { x: 28, y: 35 } }
 };
 
-// Style configurations - different angel appearances
-const styleConfigs: Record<AngelCursorStyle, { 
-  name: string;
-  wingAnimation: { rotate: number[]; scale: number[] };
-  floatSpeed: number;
-  extraGlow: boolean;
-  haloEnabled: boolean;
-}> = {
-  classic: {
-    name: "Thiên Thần Cổ Điển",
-    wingAnimation: { rotate: [0, 5, 0], scale: [1, 1, 1] },
-    floatSpeed: 1.5,
-    extraGlow: false,
-    haloEnabled: false
-  },
-  cherub: {
-    name: "Thiên Thần Bé",
-    wingAnimation: { rotate: [-3, 8, -3], scale: [1, 1.05, 1] },
-    floatSpeed: 1.2,
-    extraGlow: true,
-    haloEnabled: false
-  },
-  seraph: {
-    name: "Thiên Thần Sáng",
-    wingAnimation: { rotate: [0, 3, 0], scale: [1, 1.02, 1] },
-    floatSpeed: 2,
-    extraGlow: true,
-    haloEnabled: true
-  },
-  guardian: {
-    name: "Thiên Thần Hộ Mệnh",
-    wingAnimation: { rotate: [-5, 5, -5], scale: [0.98, 1.02, 0.98] },
-    floatSpeed: 1.8,
-    extraGlow: false,
-    haloEnabled: true
-  }
-};
-
 const AngelCursor = memo(({ 
   color = 'pink', 
   size = 'medium', 
@@ -125,19 +85,19 @@ const AngelCursor = memo(({
   customVideoUrl = null 
 }: AngelCursorProps) => {
   const [position, setPosition] = useState({ x: -100, y: -100 });
-  const [feathers, setFeathers] = useState<Feather[]>([]);
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [trail, setTrail] = useState<TrailPoint[]>([]);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const [lastX, setLastX] = useState(0);
-  const [currentFrame, setCurrentFrame] = useState(0);
   const trailIdRef = useRef(0);
   const isMobile = useIsMobile();
   const prefersReducedMotion = useReducedMotion();
 
   const config = colorConfigs[color];
   const sizeConfig = sizeConfigs[size];
-  const styleConfig = styleConfigs[style];
+  
+  // Get the single angel image based on style
+  const angelImage = angelStyleImages[style];
 
   // Handle mouse move
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -157,28 +117,14 @@ const AngelCursor = memo(({
       trailIdRef.current += 1;
       setTrail(prev => {
         const newTrail = [...prev, { id: trailIdRef.current, x: newX, y: newY }];
-        // Keep only last 15 points
         return newTrail.slice(-15);
       });
     }
 
-    // Spawn feathers occasionally (1 in 15 chance)
-    if (Math.random() < 0.07 && !prefersReducedMotion) {
-      setFeathers(prev => {
-        if (prev.length >= 5) return prev;
-        return [...prev, {
-          id: Date.now(),
-          x: newX + (Math.random() - 0.5) * 20,
-          y: newY + 10,
-          rotation: Math.random() * 360
-        }];
-      });
-    }
-
-    // Spawn sparkles more frequently (1 in 8 chance)
-    if (Math.random() < 0.12 && !prefersReducedMotion) {
+    // Spawn sparkles occasionally
+    if (Math.random() < 0.1 && !prefersReducedMotion) {
       setSparkles(prev => {
-        if (prev.length >= 8) return prev;
+        if (prev.length >= 6) return prev;
         return [...prev, {
           id: Date.now() + Math.random(),
           x: newX + (Math.random() - 0.5) * 40,
@@ -200,7 +146,7 @@ const AngelCursor = memo(({
       throttleTimer = setTimeout(() => {
         handleMouseMove(e);
         throttleTimer = null;
-      }, 16); // ~60fps
+      }, 16);
     };
 
     window.addEventListener('mousemove', throttledHandler);
@@ -210,24 +156,13 @@ const AngelCursor = memo(({
     };
   }, [isMobile, prefersReducedMotion, isEnabled, handleMouseMove]);
 
-  // Clean up feathers
-  useEffect(() => {
-    if (feathers.length === 0) return;
-    
-    const cleanup = setInterval(() => {
-      setFeathers(prev => prev.slice(1));
-    }, 800);
-
-    return () => clearInterval(cleanup);
-  }, [feathers.length]);
-
   // Clean up sparkles
   useEffect(() => {
     if (sparkles.length === 0) return;
     
     const cleanup = setInterval(() => {
       setSparkles(prev => prev.slice(1));
-    }, 500);
+    }, 400);
 
     return () => clearInterval(cleanup);
   }, [sparkles.length]);
@@ -242,17 +177,6 @@ const AngelCursor = memo(({
 
     return () => clearInterval(cleanup);
   }, [trail.length, trailEnabled]);
-
-  // Animate through angel frames
-  useEffect(() => {
-    if (!isEnabled || isMobile || prefersReducedMotion || customVideoUrl) return;
-    
-    const frameInterval = setInterval(() => {
-      setCurrentFrame(prev => (prev + 1) % angelFrames.length);
-    }, 150); // Change frame every 150ms for smooth animation
-
-    return () => clearInterval(frameInterval);
-  }, [isEnabled, isMobile, prefersReducedMotion, customVideoUrl]);
 
   // Don't render if disabled, on mobile, or if reduced motion preferred
   if (!isEnabled || isMobile || prefersReducedMotion) return null;
@@ -315,7 +239,7 @@ const AngelCursor = memo(({
         ))}
       </AnimatePresence>
 
-      {/* Main Angel */}
+      {/* Main Angel - ONLY ONE */}
       <motion.div
         className="absolute"
         style={{
@@ -325,60 +249,23 @@ const AngelCursor = memo(({
         }}
         animate={{
           y: [0, -6, 0],
-          rotate: direction === 'left' 
-            ? styleConfig.wingAnimation.rotate.map(r => -r) 
-            : styleConfig.wingAnimation.rotate,
-          scale: styleConfig.wingAnimation.scale,
+          rotate: direction === 'left' ? [0, -5, 0] : [0, 5, 0],
         }}
         transition={{
-          y: { duration: styleConfig.floatSpeed, repeat: Infinity, ease: "easeInOut" },
-          rotate: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-          scale: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+          y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+          rotate: { duration: 2, repeat: Infinity, ease: "easeInOut" }
         }}
       >
-        {/* Halo for certain styles */}
-        {styleConfig.haloEnabled && (
-          <motion.div
-            className="absolute -top-3 left-1/2 -translate-x-1/2"
-            animate={{ 
-              opacity: [0.6, 1, 0.6],
-              scale: [0.95, 1.05, 0.95]
-            }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <div 
-              className="w-8 h-3 rounded-full"
-              style={{
-                background: `radial-gradient(ellipse, ${config.sparkleColor} 0%, transparent 70%)`,
-                boxShadow: `0 0 10px ${config.sparkleColor}, 0 0 20px ${config.sparkleColor}`,
-              }}
-            />
-          </motion.div>
-        )}
-
         {/* Glow effect */}
         <div 
           className="absolute inset-0 rounded-full blur-md opacity-60"
           style={{
             background: `radial-gradient(circle, ${config.featherColor} 0%, transparent 70%)`,
-            transform: styleConfig.extraGlow ? 'scale(2)' : 'scale(1.5)',
+            transform: 'scale(1.5)',
           }}
         />
-
-        {/* Extra glow layer for certain styles */}
-        {styleConfig.extraGlow && (
-          <motion.div 
-            className="absolute inset-0 rounded-full blur-xl"
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            style={{
-              background: `radial-gradient(circle, ${config.sparkleColor} 0%, transparent 60%)`,
-              transform: 'scale(2.5)',
-            }}
-          />
-        )}
         
-        {/* Angel image/video - with transparent background */}
+        {/* Single Angel image or custom video */}
         {customVideoUrl ? (
           <video
             src={customVideoUrl}
@@ -394,17 +281,14 @@ const AngelCursor = memo(({
             }}
           />
         ) : (
-          <motion.img
-            src={angelFrames[currentFrame]}
+          <img
+            src={angelImage}
             alt=""
             className={`${sizeConfig.className} object-contain pointer-events-none`}
             style={{
               filter: config.filter,
               transform: direction === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
             }}
-            initial={{ opacity: 0.9 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.1 }}
           />
         )}
       </motion.div>
@@ -438,31 +322,6 @@ const AngelCursor = memo(({
               />
             </svg>
           </motion.div>
-        ))}
-      </AnimatePresence>
-
-      {/* Feathers */}
-      <AnimatePresence>
-        {feathers.map((feather) => (
-          <motion.div
-            key={feather.id}
-            className="absolute w-2 h-3 rounded-full"
-            style={{
-              left: feather.x,
-              top: feather.y,
-              background: `linear-gradient(180deg, ${config.featherColor} 0%, transparent 100%)`,
-              boxShadow: `0 0 6px ${config.featherColor}`,
-            }}
-            initial={{ opacity: 0.8, scale: 1, rotate: feather.rotation }}
-            animate={{ 
-              opacity: 0, 
-              y: 40, 
-              rotate: feather.rotation + 180,
-              scale: 0.5 
-            }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-          />
         ))}
       </AnimatePresence>
     </div>
