@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -11,11 +12,24 @@ import { useAngelPresence } from "@/hooks/useAngelPresence";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import NavigationHeader from "@/components/NavigationHeader";
+import { PrivacySettings } from "@/components/PrivacySettings";
+import { useThemePreference } from "@/hooks/useThemePreference";
+import { cn } from "@/lib/utils";
 
 type SettingsSection = "angel" | "appearance" | "notifications" | "privacy";
+type ThemeOption = "light" | "dark" | "system";
+
+interface NotificationSettings {
+  enabled: boolean;
+  aiResponses: boolean;
+  systemUpdates: boolean;
+}
 
 const Settings = () => {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const { syncTheme } = useThemePreference();
+  const [mounted, setMounted] = useState(false);
   const [activeSection, setActiveSection] = useState<SettingsSection>("angel");
   const {
     isEnabled: angelEnabled,
@@ -27,6 +41,48 @@ const Settings = () => {
     setSparklesEnabled,
     setTrailEnabled,
   } = useAngelPresence();
+
+  // Notification settings state
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(() => {
+    const saved = localStorage.getItem("angel-notification-settings");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return { enabled: true, aiResponses: true, systemUpdates: true };
+      }
+    }
+    return { enabled: true, aiResponses: true, systemUpdates: true };
+  });
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Save notification settings
+  useEffect(() => {
+    localStorage.setItem("angel-notification-settings", JSON.stringify(notificationSettings));
+  }, [notificationSettings]);
+
+  const handleThemeChange = async (newTheme: ThemeOption) => {
+    setTheme(newTheme);
+    await syncTheme(newTheme);
+  };
+
+  const handleNotificationChange = (key: keyof NotificationSettings) => (checked: boolean) => {
+    setNotificationSettings(prev => {
+      // If disabling master toggle, disable all
+      if (key === "enabled" && !checked) {
+        return { enabled: false, aiResponses: false, systemUpdates: false };
+      }
+      // If enabling a sub-setting, ensure master is enabled
+      if (key !== "enabled" && checked) {
+        return { ...prev, [key]: checked, enabled: true };
+      }
+      return { ...prev, [key]: checked };
+    });
+  };
 
   const sections = [
     {
@@ -52,6 +108,27 @@ const Settings = () => {
       label: "Privacy",
       icon: Shield,
       description: "Privacy and security settings",
+    },
+  ];
+
+  const themeOptions: { value: ThemeOption; label: string; icon: React.ReactNode; description: string }[] = [
+    {
+      value: "light",
+      label: "Light",
+      icon: <Sun className="w-5 h-5" />,
+      description: "Bright and clear appearance",
+    },
+    {
+      value: "dark",
+      label: "Dark",
+      icon: <Moon className="w-5 h-5" />,
+      description: "Easy on the eyes in low light",
+    },
+    {
+      value: "system",
+      label: "System",
+      icon: <Monitor className="w-5 h-5" />,
+      description: "Match your device settings",
     },
   ];
 
@@ -190,9 +267,60 @@ const Settings = () => {
                       Customize the visual experience of Angel AI
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-center py-12 text-muted-foreground">
-                      <p>Theme settings coming soon...</p>
+                  <CardContent className="space-y-6">
+                    {/* Theme Selection */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm font-medium">Theme</Label>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {mounted && themeOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => handleThemeChange(option.value)}
+                            className={cn(
+                              "p-4 rounded-xl border text-left transition-all duration-200 group",
+                              theme === option.value
+                                ? "border-primary bg-primary/10 shadow-sm"
+                                : "border-border/50 bg-card/30 hover:border-primary/30 hover:bg-card/50"
+                            )}
+                          >
+                            <div className="flex flex-col items-center text-center gap-3">
+                              <div
+                                className={cn(
+                                  "p-3 rounded-full transition-colors",
+                                  theme === option.value
+                                    ? "bg-primary/20 text-primary"
+                                    : "bg-muted/50 text-muted-foreground group-hover:text-foreground"
+                                )}
+                              >
+                                {option.icon}
+                              </div>
+                              <div>
+                                <p className={cn(
+                                  "font-medium text-sm",
+                                  theme === option.value ? "text-primary" : "text-foreground"
+                                )}>
+                                  {option.label}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {option.description}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Info Note */}
+                    <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
+                      <p className="text-xs text-muted-foreground flex items-start gap-2">
+                        <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <span>
+                          <span className="font-medium text-primary">Note:</span> Theme changes are applied instantly and saved to your profile.
+                        </span>
+                      </p>
                     </div>
                   </CardContent>
                 </>
@@ -209,9 +337,73 @@ const Settings = () => {
                       Manage how you receive updates and reminders
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-center py-12 text-muted-foreground">
-                      <p>Notification settings coming soon...</p>
+                  <CardContent className="space-y-6">
+                    {/* Master Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-primary/10">
+                          <BellRing className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="notifications-toggle" className="text-base font-medium">
+                            Enable Notifications
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Receive updates and important messages
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="notifications-toggle"
+                        checked={notificationSettings.enabled}
+                        onCheckedChange={handleNotificationChange("enabled")}
+                      />
+                    </div>
+
+                    {/* AI Response Notifications */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-card/30 border border-border/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-muted/50">
+                          <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-foreground">AI Responses</Label>
+                          <p className="text-xs text-muted-foreground">Get notified when Angel responds to you</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notificationSettings.aiResponses}
+                        onCheckedChange={handleNotificationChange("aiResponses")}
+                        disabled={!notificationSettings.enabled}
+                      />
+                    </div>
+
+                    {/* System Updates */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-card/30 border border-border/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-muted/50">
+                          <Info className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-foreground">System Updates</Label>
+                          <p className="text-xs text-muted-foreground">Important updates and announcements</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notificationSettings.systemUpdates}
+                        onCheckedChange={handleNotificationChange("systemUpdates")}
+                        disabled={!notificationSettings.enabled}
+                      />
+                    </div>
+
+                    {/* Info Note */}
+                    <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
+                      <p className="text-xs text-muted-foreground flex items-start gap-2">
+                        <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <span>
+                          <span className="font-medium text-primary">Note:</span> Notification preferences are saved locally and applied immediately.
+                        </span>
+                      </p>
                     </div>
                   </CardContent>
                 </>
@@ -230,9 +422,7 @@ const Settings = () => {
                   </CardHeader>
                   <CardContent>
                     {user ? (
-                      <div className="flex items-center justify-center py-12 text-muted-foreground">
-                        <p>Privacy settings coming soon...</p>
-                      </div>
+                      <PrivacySettings />
                     ) : (
                       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-4">
                         <User className="h-12 w-12 opacity-50" />
