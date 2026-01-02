@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSoundSettingsContext } from "@/contexts/SoundSettingsContext";
 
 const BLESSING_SOUND_KEY = "camly_blessing_sound_enabled";
 
@@ -9,21 +10,39 @@ export const useBlessingSound = () => {
   });
   
   const audioContextRef = useRef<AudioContext | null>(null);
+  
+  // Get global sound settings
+  let globalSoundAllowed = true;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { isSoundAllowed } = useSoundSettingsContext();
+    globalSoundAllowed = isSoundAllowed("notificationSounds");
+  } catch {
+    // Context not available, allow sound by default
+    globalSoundAllowed = true;
+  }
 
   useEffect(() => {
     localStorage.setItem(BLESSING_SOUND_KEY, String(isEnabled));
   }, [isEnabled]);
 
   const playBlessingChime = useCallback(() => {
-    if (!isEnabled) return;
+    // Check both local and global settings
+    if (!isEnabled || !globalSoundAllowed) return;
 
     try {
       // Create or reuse AudioContext
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioContextRef.current = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       }
       
       const ctx = audioContextRef.current;
+      
+      // Resume if suspended
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      
       const now = ctx.currentTime;
 
       // Create a gentle, bell-like chime
@@ -54,7 +73,7 @@ export const useBlessingSound = () => {
     } catch (error) {
       console.log("Could not play blessing sound:", error);
     }
-  }, [isEnabled]);
+  }, [isEnabled, globalSoundAllowed]);
 
   const toggleSound = useCallback(() => {
     setIsEnabled(prev => !prev);

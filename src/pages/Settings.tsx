@@ -151,6 +151,10 @@ const Settings = () => {
   const languageOptions: { value: Language; label: string; flag: string }[] = [
     { value: "vi", label: t("settings.language.vietnamese"), flag: "🇻🇳" },
     { value: "en", label: t("settings.language.english"), flag: "🇺🇸" },
+    { value: "zh", label: t("settings.language.chinese"), flag: "🇨🇳" },
+    { value: "ja", label: t("settings.language.japanese"), flag: "🇯🇵" },
+    { value: "ko", label: t("settings.language.korean"), flag: "🇰🇷" },
+    { value: "fr", label: t("settings.language.french"), flag: "🇫🇷" },
   ];
 
   return (
@@ -563,7 +567,7 @@ const Settings = () => {
                         <Globe className="w-4 h-4 text-muted-foreground" />
                         <Label className="text-sm font-medium">{t("settings.language.select")}</Label>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {languageOptions.map((option) => (
                           <button
                             key={option.value}
