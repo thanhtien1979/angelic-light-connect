@@ -25,6 +25,7 @@ import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
 import { useTokenRefresh } from "./hooks/useTokenRefresh";
 import { useSessionExpired } from "./hooks/useSessionExpired";
 import { SessionExpiredDialog } from "./components/SessionExpiredDialog";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 const queryClient = new QueryClient();
 
@@ -45,47 +46,49 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AppInitializer>
-          <DailyLightGreeting />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/user/:userId" element={<UserProfile />} />
-            <Route path="/studio" element={<CreativeStudio />} />
-            <Route path="/credits" element={<Credits />} />
-            <Route path="/friends" element={<Friends />} />
-            <Route path="/testimonials" element={<Testimonials />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/admin/testimonials" element={<AdminTestimonials />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/luat-anh-sang" element={<LightLaw />} />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/privacy"
-              element={
-                <ProtectedRoute>
-                  <Privacy />
-                </ProtectedRoute>
-              }
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <ChatButton />
-        </AppInitializer>
-      </BrowserRouter>
-    </TooltipProvider>
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppInitializer>
+            <DailyLightGreeting />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/community" element={<Community />} />
+              <Route path="/user/:userId" element={<UserProfile />} />
+              <Route path="/studio" element={<CreativeStudio />} />
+              <Route path="/credits" element={<Credits />} />
+              <Route path="/friends" element={<Friends />} />
+              <Route path="/testimonials" element={<Testimonials />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/luat-anh-sang" element={<LightLaw />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/privacy"
+                element={
+                  <ProtectedRoute>
+                    <Privacy />
+                  </ProtectedRoute>
+                }
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <ChatButton />
+          </AppInitializer>
+        </BrowserRouter>
+      </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 
