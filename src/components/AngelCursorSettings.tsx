@@ -1,10 +1,11 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { Check, Sparkles, Maximize, Minimize, Upload, Trash2, Wand2, Zap } from "lucide-react";
+import { Check, Sparkles, Maximize, Minimize, Upload, Trash2, Zap } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useAngelCursorPreference, AngelCursorColor, AngelCursorSize, AngelCursorStyle } from "@/hooks/useAngelCursorPreference";
+import { angelStyleImages } from "@/components/AngelCursor";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -41,11 +42,11 @@ const sizeOptions: { value: AngelCursorSize; label: string; icon: typeof Minimiz
   { value: 'large', label: 'Lớn', icon: Maximize },
 ];
 
-const styleOptions: { value: AngelCursorStyle; label: string; description: string; emoji: string }[] = [
-  { value: 'classic', label: 'Cổ Điển', description: 'Thiên thần bay nhẹ nhàng', emoji: '👼' },
-  { value: 'cherub', label: 'Bé Nhỏ', description: 'Thiên thần bé với ánh sáng', emoji: '✨' },
-  { value: 'seraph', label: 'Rực Sáng', description: 'Tỏa sáng với vầng hào quang', emoji: '☀️' },
-  { value: 'guardian', label: 'Hộ Mệnh', description: 'Bảo vệ với hào quang thiêng', emoji: '🛡️' },
+const styleOptions: { value: AngelCursorStyle; label: string }[] = [
+  { value: 'classic', label: 'Thiên Thần 1' },
+  { value: 'cherub', label: 'Thiên Thần 2' },
+  { value: 'seraph', label: 'Thiên Thần 3' },
+  { value: 'guardian', label: 'Thiên Thần 4' },
 ];
 
 const AngelCursorSettings = () => {
@@ -74,7 +75,6 @@ const AngelCursorSettings = () => {
     if (file) {
       uploadCustomVideo(file);
     }
-    // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -118,7 +118,7 @@ const AngelCursorSettings = () => {
               Vệt Sáng Theo Sau
             </Label>
             <p className="text-xs text-muted-foreground">
-              Hiệu ứng ánh sáng lung linh khi di chuyển
+              Hiệu ứng ánh sáng khi di chuyển
             </p>
           </div>
         </div>
@@ -129,52 +129,56 @@ const AngelCursorSettings = () => {
         />
       </div>
 
-      {/* Style Selection */}
+      {/* Angel Style Gallery */}
       <div className={cn(
         "space-y-3 transition-opacity duration-300",
         !isEnabled && "opacity-50 pointer-events-none"
       )}>
-        <div className="flex items-center gap-2 pl-11">
-          <Wand2 className="w-3 h-3 text-muted-foreground" />
-          <Label className="text-xs text-muted-foreground">Kiểu thiên thần</Label>
-        </div>
-        <div className="grid grid-cols-2 gap-2 pl-11">
+        <Label className="text-xs text-muted-foreground pl-11">Chọn mẫu thiên thần</Label>
+        <div className="grid grid-cols-4 gap-2 pl-11">
           {styleOptions.map((option) => (
             <motion.button
               key={option.value}
               onClick={() => setCursorStyle(option.value)}
               disabled={isLoading || !isEnabled}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className={cn(
-                "relative flex flex-col items-start gap-1 p-3 rounded-xl transition-all text-left",
+                "relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all",
                 "border-2",
                 cursorStyle === option.value 
-                  ? "border-primary bg-primary/10" 
-                  : "border-transparent bg-card/50 hover:border-border/50 hover:bg-card"
+                  ? "border-primary bg-primary/10 shadow-lg shadow-primary/20" 
+                  : "border-border/50 bg-card/50 hover:border-primary/50 hover:bg-card"
               )}
             >
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{option.emoji}</span>
-                <span className={cn(
-                  "text-xs font-medium",
-                  cursorStyle === option.value ? "text-foreground" : "text-muted-foreground"
-                )}>
-                  {option.label}
-                </span>
+              {/* Angel Image Preview */}
+              <div className="relative w-12 h-12 flex items-center justify-center">
+                <img
+                  src={angelStyleImages[option.value]}
+                  alt={option.label}
+                  className="w-10 h-10 object-contain"
+                  style={{
+                    filter: cursorStyle === option.value 
+                      ? 'drop-shadow(0 0 8px rgba(255,182,193,0.8))' 
+                      : 'none'
+                  }}
+                />
                 {cursorStyle === option.value && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="ml-auto"
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center"
                   >
-                    <Check className="w-3 h-3 text-primary" />
+                    <Check className="w-2.5 h-2.5 text-primary-foreground" />
                   </motion.div>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground/80 line-clamp-1">
-                {option.description}
-              </p>
+              <span className={cn(
+                "text-[10px] font-medium transition-colors",
+                cursorStyle === option.value ? "text-foreground" : "text-muted-foreground"
+              )}>
+                {option.label}
+              </span>
             </motion.button>
           ))}
         </div>
@@ -186,7 +190,7 @@ const AngelCursorSettings = () => {
           "space-y-3 transition-opacity duration-300",
           !isEnabled && "opacity-50 pointer-events-none"
         )}>
-          <Label className="text-xs text-muted-foreground pl-11">Video thiên thần tùy chỉnh</Label>
+          <Label className="text-xs text-muted-foreground pl-11">Hoặc tải video tùy chỉnh</Label>
           <div className="pl-11 space-y-2">
             {customVideoUrl ? (
               <div className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50">
@@ -237,10 +241,10 @@ const AngelCursorSettings = () => {
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-medium text-foreground">
-                    {isUploading ? "Đang tải lên..." : "Tải lên video thiên thần"}
+                    {isUploading ? "Đang tải lên..." : "Tải lên video"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Video MP4, WebM (tối đa 10MB)
+                    MP4, WebM (tối đa 10MB)
                   </p>
                 </div>
               </motion.button>
