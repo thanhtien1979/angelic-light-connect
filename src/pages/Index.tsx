@@ -23,7 +23,12 @@ import { useAngelPresence } from "@/hooks/useAngelPresence";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const { isEnabled: angelPresenceEnabled } = useAngelPresence();
+  const { 
+    isEnabled: angelPresenceEnabled, 
+    style: angelStyle,
+    sparklesEnabled,
+    trailEnabled,
+  } = useAngelPresence();
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
@@ -40,7 +45,12 @@ const Index = () => {
       <StardustTrail />
       
       {/* Angel Presence - Gentle angelic companion */}
-      <AngelPresence enabled={angelPresenceEnabled} />
+      <AngelPresence 
+        enabled={angelPresenceEnabled} 
+        style={angelStyle}
+        sparklesEnabled={sparklesEnabled}
+        trailEnabled={trailEnabled}
+      />
       
       {/* Gentle Meditation Reminder */}
       <GentleMeditationReminder />
