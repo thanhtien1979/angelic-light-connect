@@ -186,21 +186,34 @@ const AngelCursor = memo(({ color = 'pink', size = 'medium', isEnabled = true, c
           }}
         />
         
-        {/* Angel video - with background removal using blend mode */}
-        <video
-          src={customVideoUrl || defaultAngelVideo}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className={`${sizeConfig.className} object-contain drop-shadow-lg pointer-events-none`}
+        {/* Angel video container - with background removal */}
+        <div 
+          className={`${sizeConfig.className} relative`}
           style={{
-            filter: `${config.filter} contrast(1.1)`,
+            isolation: 'isolate',
             transform: direction === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
-            mixBlendMode: 'multiply',
-            background: 'transparent',
           }}
-        />
+        >
+          {/* Background layer for blend mode to work */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 100%)',
+            }}
+          />
+          <video
+            src={customVideoUrl || defaultAngelVideo}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-contain pointer-events-none"
+            style={{
+              filter: `${config.filter} contrast(1.3) saturate(1.2) brightness(0.95)`,
+              mixBlendMode: 'multiply',
+            }}
+          />
+        </div>
       </motion.div>
 
       {/* Sparkles */}
