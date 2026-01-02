@@ -1426,6 +1426,7 @@ export type Database = {
       }
       user_preferences: {
         Row: {
+          angel_cursor_color: string | null
           created_at: string | null
           id: string
           theme: string
@@ -1433,6 +1434,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          angel_cursor_color?: string | null
           created_at?: string | null
           id?: string
           theme?: string
@@ -1440,6 +1442,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          angel_cursor_color?: string | null
           created_at?: string | null
           id?: string
           theme?: string

@@ -20,6 +20,7 @@ import BreathingStatistics from "@/components/BreathingStatistics";
 import PrivacySettings from "@/components/PrivacySettings";
 import EditProfileModal from "@/components/EditProfileModal";
 import ProfileViewsNotification from "@/components/ProfileViewsNotification";
+import AngelCursorSettings from "@/components/AngelCursorSettings";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
 import { useBreathingCompletionSound } from "@/hooks/useBreathingCompletionSound";
@@ -656,6 +657,12 @@ const Profile = () => {
                 className="data-[state=checked]:bg-gold"
               />
             </div>
+
+            {/* Divider */}
+            <div className="h-px bg-border/50" />
+
+            {/* Angel Cursor Color Settings */}
+            <AngelCursorSettings />
 
             {/* Divider */}
             <div className="h-px bg-border/50" />
