@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback, memo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import angelVideo from "@/assets/angel-cursor-video.mp4";
+import defaultAngelVideo from "@/assets/angel-cursor-video.mp4";
 import { AngelCursorColor, AngelCursorSize } from "@/hooks/useAngelCursorPreference";
 
 interface AngelCursorProps {
   color?: AngelCursorColor;
   size?: AngelCursorSize;
   isEnabled?: boolean;
+  customVideoUrl?: string | null;
 }
 
 interface Feather {
@@ -59,7 +60,7 @@ const sizeConfigs: Record<AngelCursorSize, { className: string; offset: { x: num
   large: { className: "w-20 h-20", offset: { x: 28, y: 35 } }
 };
 
-const AngelCursor = memo(({ color = 'pink', size = 'medium', isEnabled = true }: AngelCursorProps) => {
+const AngelCursor = memo(({ color = 'pink', size = 'medium', isEnabled = true, customVideoUrl = null }: AngelCursorProps) => {
   const [position, setPosition] = useState({ x: -100, y: -100 });
   const [feathers, setFeathers] = useState<Feather[]>([]);
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
@@ -187,7 +188,7 @@ const AngelCursor = memo(({ color = 'pink', size = 'medium', isEnabled = true }:
         
         {/* Angel video - with background removal using blend mode */}
         <video
-          src={angelVideo}
+          src={customVideoUrl || defaultAngelVideo}
           autoPlay
           loop
           muted
