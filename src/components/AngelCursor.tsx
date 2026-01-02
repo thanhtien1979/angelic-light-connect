@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, memo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import flyingAngel from "@/assets/flying-angel.png";
+import angelVideo from "@/assets/angel-cursor-video.mp4";
 import { AngelCursorColor } from "@/hooks/useAngelCursorPreference";
 
 interface AngelCursorProps {
@@ -139,15 +139,17 @@ const AngelCursor = memo(({ color = 'pink' }: AngelCursorProps) => {
           }}
         />
         
-        {/* Angel image */}
-        <img
-          src={flyingAngel}
-          alt=""
-          className="w-10 h-10 object-contain drop-shadow-lg"
+        {/* Angel video */}
+        <video
+          src={angelVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-14 h-14 object-contain drop-shadow-lg pointer-events-none"
           style={{
             filter: config.filter,
             transform: direction === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
-            boxShadow: config.glow,
           }}
         />
       </motion.div>
