@@ -5,11 +5,14 @@ import { toast } from "sonner";
 
 export type AngelCursorColor = 'pink' | 'gold' | 'white' | 'purple';
 export type AngelCursorSize = 'small' | 'medium' | 'large';
+export type AngelCursorStyle = 'classic' | 'cherub' | 'seraph' | 'guardian';
 
 export const useAngelCursorPreference = () => {
   const { user } = useAuth();
   const [cursorColor, setCursorColor] = useState<AngelCursorColor>('pink');
   const [cursorSize, setCursorSize] = useState<AngelCursorSize>('medium');
+  const [cursorStyle, setCursorStyle] = useState<AngelCursorStyle>('classic');
+  const [trailEnabled, setTrailEnabled] = useState(true);
   const [isEnabled, setIsEnabled] = useState(true);
   const [customVideoUrl, setCustomVideoUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +60,15 @@ export const useAngelCursorPreference = () => {
         }
         if (data?.angel_cursor_video_url) {
           setCustomVideoUrl(data.angel_cursor_video_url);
+        }
+        // Load style and trail from localStorage (not stored in DB yet)
+        const storedStyle = localStorage.getItem('angel_cursor_style') as AngelCursorStyle | null;
+        const storedTrail = localStorage.getItem('angel_cursor_trail');
+        if (storedStyle && ['classic', 'cherub', 'seraph', 'guardian'].includes(storedStyle)) {
+          setCursorStyle(storedStyle);
+        }
+        if (storedTrail !== null) {
+          setTrailEnabled(storedTrail === 'true');
         }
       } catch (error) {
         console.error('Error loading angel cursor preference:', error);
@@ -242,11 +254,27 @@ export const useAngelCursorPreference = () => {
     }
   };
 
+  // Sync style preference
+  const syncCursorStyle = (style: AngelCursorStyle) => {
+    setCursorStyle(style);
+    localStorage.setItem('angel_cursor_style', style);
+  };
+
+  // Sync trail preference
+  const syncTrailEnabled = (enabled: boolean) => {
+    setTrailEnabled(enabled);
+    localStorage.setItem('angel_cursor_trail', String(enabled));
+  };
+
   return { 
     cursorColor, 
     setCursorColor: syncCursorColor, 
     cursorSize,
     setCursorSize: syncCursorSize,
+    cursorStyle,
+    setCursorStyle: syncCursorStyle,
+    trailEnabled,
+    setTrailEnabled: syncTrailEnabled,
     isEnabled,
     setIsEnabled: syncIsEnabled,
     customVideoUrl,

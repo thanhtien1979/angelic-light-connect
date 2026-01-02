@@ -1,10 +1,10 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { Check, Sparkles, Maximize, Minimize, Upload, Trash2, Video } from "lucide-react";
+import { Check, Sparkles, Maximize, Minimize, Upload, Trash2, Wand2, Zap } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { useAngelCursorPreference, AngelCursorColor, AngelCursorSize } from "@/hooks/useAngelCursorPreference";
+import { useAngelCursorPreference, AngelCursorColor, AngelCursorSize, AngelCursorStyle } from "@/hooks/useAngelCursorPreference";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -41,6 +41,13 @@ const sizeOptions: { value: AngelCursorSize; label: string; icon: typeof Minimiz
   { value: 'large', label: 'Lớn', icon: Maximize },
 ];
 
+const styleOptions: { value: AngelCursorStyle; label: string; description: string; emoji: string }[] = [
+  { value: 'classic', label: 'Cổ Điển', description: 'Thiên thần bay nhẹ nhàng', emoji: '👼' },
+  { value: 'cherub', label: 'Bé Nhỏ', description: 'Thiên thần bé với ánh sáng', emoji: '✨' },
+  { value: 'seraph', label: 'Rực Sáng', description: 'Tỏa sáng với vầng hào quang', emoji: '☀️' },
+  { value: 'guardian', label: 'Hộ Mệnh', description: 'Bảo vệ với hào quang thiêng', emoji: '🛡️' },
+];
+
 const AngelCursorSettings = () => {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +55,11 @@ const AngelCursorSettings = () => {
     cursorColor, 
     setCursorColor, 
     cursorSize, 
-    setCursorSize, 
+    setCursorSize,
+    cursorStyle,
+    setCursorStyle,
+    trailEnabled,
+    setTrailEnabled,
     isEnabled, 
     setIsEnabled,
     customVideoUrl,
@@ -91,6 +102,82 @@ const AngelCursorSettings = () => {
           onCheckedChange={setIsEnabled}
           disabled={isLoading}
         />
+      </div>
+
+      {/* Trail Toggle */}
+      <div className={cn(
+        "flex items-center justify-between transition-opacity duration-300",
+        !isEnabled && "opacity-50 pointer-events-none"
+      )}>
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-full bg-yellow-500/20">
+            <Zap className="w-4 h-4 text-yellow-400" />
+          </div>
+          <div>
+            <Label className="text-sm font-medium text-foreground">
+              Vệt Sáng Theo Sau
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Hiệu ứng ánh sáng lung linh khi di chuyển
+            </p>
+          </div>
+        </div>
+        <Switch
+          checked={trailEnabled}
+          onCheckedChange={setTrailEnabled}
+          disabled={isLoading || !isEnabled}
+        />
+      </div>
+
+      {/* Style Selection */}
+      <div className={cn(
+        "space-y-3 transition-opacity duration-300",
+        !isEnabled && "opacity-50 pointer-events-none"
+      )}>
+        <div className="flex items-center gap-2 pl-11">
+          <Wand2 className="w-3 h-3 text-muted-foreground" />
+          <Label className="text-xs text-muted-foreground">Kiểu thiên thần</Label>
+        </div>
+        <div className="grid grid-cols-2 gap-2 pl-11">
+          {styleOptions.map((option) => (
+            <motion.button
+              key={option.value}
+              onClick={() => setCursorStyle(option.value)}
+              disabled={isLoading || !isEnabled}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                "relative flex flex-col items-start gap-1 p-3 rounded-xl transition-all text-left",
+                "border-2",
+                cursorStyle === option.value 
+                  ? "border-primary bg-primary/10" 
+                  : "border-transparent bg-card/50 hover:border-border/50 hover:bg-card"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg">{option.emoji}</span>
+                <span className={cn(
+                  "text-xs font-medium",
+                  cursorStyle === option.value ? "text-foreground" : "text-muted-foreground"
+                )}>
+                  {option.label}
+                </span>
+                {cursorStyle === option.value && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="ml-auto"
+                  >
+                    <Check className="w-3 h-3 text-primary" />
+                  </motion.div>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground/80 line-clamp-1">
+                {option.description}
+              </p>
+            </motion.button>
+          ))}
+        </div>
       </div>
 
       {/* Custom Video Upload */}
