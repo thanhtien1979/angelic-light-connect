@@ -18,12 +18,12 @@ import WalletLinkBanner from "@/components/WalletLinkBanner";
 import MagicalSparkles from "@/components/MagicalSparkles";
 import AuroraBackground from "@/components/AuroraBackground";
 import StardustTrail from "@/components/StardustTrail";
-import AngelCursor from "@/components/AngelCursor";
-import { useAngelCursorPreference } from "@/hooks/useAngelCursorPreference";
+import AngelPresence from "@/components/AngelPresence";
+import { useAngelPresence } from "@/hooks/useAngelPresence";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const { cursorColor, cursorSize, cursorStyle, trailEnabled, isEnabled, customVideoUrl } = useAngelCursorPreference();
+  const { isEnabled: angelPresenceEnabled } = useAngelPresence();
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
@@ -39,8 +39,8 @@ const Index = () => {
       {/* Stardust Trail - Follow cursor */}
       <StardustTrail />
       
-      {/* Angel Cursor - Flying angel following mouse */}
-      <AngelCursor color={cursorColor} size={cursorSize} style={cursorStyle} trailEnabled={trailEnabled} isEnabled={isEnabled} customVideoUrl={customVideoUrl} />
+      {/* Angel Presence - Gentle angelic companion */}
+      <AngelPresence enabled={angelPresenceEnabled} />
       
       {/* Gentle Meditation Reminder */}
       <GentleMeditationReminder />
