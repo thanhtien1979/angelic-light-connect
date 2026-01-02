@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSoundSettingsContext } from '@/contexts/SoundSettingsContext';
 
 // Get or create audio context
 let audioContext: AudioContext | null = null;
@@ -85,6 +86,17 @@ export const useBreathingCompletionSound = () => {
 
   const hasPlayedRef = useRef(false);
 
+  // Get global sound settings
+  let globalSoundAllowed = true;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { isSoundAllowed } = useSoundSettingsContext();
+    globalSoundAllowed = isSoundAllowed("meditationAudio");
+  } catch {
+    // Context not available, allow sound by default
+    globalSoundAllowed = true;
+  }
+
   useEffect(() => {
     localStorage.setItem('breathing_completion_sound_enabled', String(isEnabled));
   }, [isEnabled]);
@@ -94,7 +106,8 @@ export const useBreathingCompletionSound = () => {
   }, []);
 
   const playCompletionSound = useCallback(() => {
-    if (isEnabled && !hasPlayedRef.current) {
+    // Check both local and global settings
+    if (isEnabled && globalSoundAllowed && !hasPlayedRef.current) {
       hasPlayedRef.current = true;
       playCompletionChime(0.12); // Very soft volume
       // Reset after a short delay to allow playing again
@@ -102,7 +115,7 @@ export const useBreathingCompletionSound = () => {
         hasPlayedRef.current = false;
       }, 1000);
     }
-  }, [isEnabled]);
+  }, [isEnabled, globalSoundAllowed]);
 
   // Enable audio context on user interaction
   const enableAudioContext = useCallback(() => {
