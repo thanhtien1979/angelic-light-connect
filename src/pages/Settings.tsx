@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,11 @@ import { Label } from "@/components/ui/label";
 import NavigationHeader from "@/components/NavigationHeader";
 import { PrivacySettings } from "@/components/PrivacySettings";
 import { useThemePreference } from "@/hooks/useThemePreference";
+import { useSoundSettings } from "@/hooks/useSoundSettings";
+import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
-type SettingsSection = "angel" | "appearance" | "notifications" | "privacy";
+type SettingsSection = "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
 type ThemeOption = "light" | "dark" | "system";
 
 interface NotificationSettings {
@@ -29,6 +31,8 @@ const Settings = () => {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const { syncTheme } = useThemePreference();
+  const { settings: soundSettings, updateSetting: updateSoundSetting, prefersReducedMotion } = useSoundSettings();
+  const { language, setLanguage, t } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [activeSection, setActiveSection] = useState<SettingsSection>("angel");
   const {
@@ -87,49 +91,66 @@ const Settings = () => {
   const sections = [
     {
       id: "angel" as const,
-      label: "Angel Presence",
+      label: t("settings.angel.title"),
       icon: Sparkles,
-      description: "Customize your angelic companion",
+      description: t("settings.angel.description"),
     },
     {
       id: "appearance" as const,
-      label: "Appearance",
+      label: t("settings.appearance.title"),
       icon: Palette,
-      description: "Theme and display preferences",
+      description: t("settings.appearance.description"),
     },
     {
       id: "notifications" as const,
-      label: "Notifications",
+      label: t("settings.notifications.title"),
       icon: Bell,
-      description: "Manage your notifications",
+      description: t("settings.notifications.description"),
     },
     {
       id: "privacy" as const,
-      label: "Privacy",
+      label: t("settings.privacy.title"),
       icon: Shield,
-      description: "Privacy and security settings",
+      description: t("settings.privacy.description"),
+    },
+    {
+      id: "sound" as const,
+      label: t("settings.sound.title"),
+      icon: Volume2,
+      description: t("settings.sound.description"),
+    },
+    {
+      id: "language" as const,
+      label: t("settings.language.title"),
+      icon: Languages,
+      description: t("settings.language.description"),
     },
   ];
 
   const themeOptions: { value: ThemeOption; label: string; icon: React.ReactNode; description: string }[] = [
     {
       value: "light",
-      label: "Light",
+      label: t("settings.appearance.light"),
       icon: <Sun className="w-5 h-5" />,
-      description: "Bright and clear appearance",
+      description: t("settings.appearance.lightDesc"),
     },
     {
       value: "dark",
-      label: "Dark",
+      label: t("settings.appearance.dark"),
       icon: <Moon className="w-5 h-5" />,
-      description: "Easy on the eyes in low light",
+      description: t("settings.appearance.darkDesc"),
     },
     {
       value: "system",
-      label: "System",
+      label: t("settings.appearance.system"),
       icon: <Monitor className="w-5 h-5" />,
-      description: "Match your device settings",
+      description: t("settings.appearance.systemDesc"),
     },
+  ];
+
+  const languageOptions: { value: Language; label: string; flag: string }[] = [
+    { value: "vi", label: t("settings.language.vietnamese"), flag: "🇻🇳" },
+    { value: "en", label: t("settings.language.english"), flag: "🇺🇸" },
   ];
 
   return (
@@ -150,8 +171,8 @@ const Settings = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-light text-foreground">Settings</h1>
-              <p className="text-muted-foreground">Personalize your sacred experience</p>
+              <h1 className="text-3xl font-light text-foreground">{t("settings.title")}</h1>
+              <p className="text-muted-foreground">{t("settings.subtitle")}</p>
             </div>
           </div>
         </motion.div>
@@ -414,10 +435,10 @@ const Settings = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Shield className="h-5 w-5 text-primary" />
-                      Privacy
+                      {t("settings.privacy.title")}
                     </CardTitle>
                     <CardDescription>
-                      Control your privacy and security preferences
+                      {t("settings.privacy.description")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -426,9 +447,157 @@ const Settings = () => {
                     ) : (
                       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-4">
                         <User className="h-12 w-12 opacity-50" />
-                        <p>Sign in to manage privacy settings</p>
+                        <p>{t("settings.privacy.signIn")}</p>
                       </div>
                     )}
+                  </CardContent>
+                </>
+              )}
+
+              {activeSection === "sound" && (
+                <>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Volume2 className="h-5 w-5 text-primary" />
+                      {t("settings.sound.title")}
+                    </CardTitle>
+                    <CardDescription>
+                      {t("settings.sound.description")}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Reduced Motion Warning */}
+                    {prefersReducedMotion && (
+                      <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                        <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-2">
+                          <Info className="w-4 h-4 shrink-0 mt-0.5" />
+                          <span>{t("settings.sound.reducedMotion")}</span>
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Ambient Sounds */}
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-primary/10">
+                          <Music className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-base font-medium">
+                            {t("settings.sound.ambient")}
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            {t("settings.sound.ambientDesc")}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={soundSettings.ambientSounds}
+                        onCheckedChange={(checked) => updateSoundSetting("ambientSounds", checked)}
+                        disabled={prefersReducedMotion}
+                      />
+                    </div>
+
+                    {/* Notification Sounds */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-card/30 border border-border/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-muted/50">
+                          <BellDot className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-foreground">
+                            {t("settings.sound.notification")}
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {t("settings.sound.notificationDesc")}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={soundSettings.notificationSounds}
+                        onCheckedChange={(checked) => updateSoundSetting("notificationSounds", checked)}
+                        disabled={prefersReducedMotion}
+                      />
+                    </div>
+
+                    {/* Meditation Audio */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-card/30 border border-border/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-muted/50">
+                          <VolumeX className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-foreground">
+                            {t("settings.sound.meditation")}
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {t("settings.sound.meditationDesc")}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={soundSettings.meditationAudio}
+                        onCheckedChange={(checked) => updateSoundSetting("meditationAudio", checked)}
+                        disabled={prefersReducedMotion}
+                      />
+                    </div>
+                  </CardContent>
+                </>
+              )}
+
+              {activeSection === "language" && (
+                <>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Languages className="h-5 w-5 text-primary" />
+                      {t("settings.language.title")}
+                    </CardTitle>
+                    <CardDescription>
+                      {t("settings.language.description")}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Language Selection */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-muted-foreground" />
+                        <Label className="text-sm font-medium">{t("settings.language.select")}</Label>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {languageOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => setLanguage(option.value)}
+                            className={cn(
+                              "p-4 rounded-xl border text-left transition-all duration-200 group",
+                              language === option.value
+                                ? "border-primary bg-primary/10 shadow-sm"
+                                : "border-border/50 bg-card/30 hover:border-primary/30 hover:bg-card/50"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{option.flag}</span>
+                              <span className={cn(
+                                "font-medium",
+                                language === option.value ? "text-primary" : "text-foreground"
+                              )}>
+                                {option.label}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Info Note */}
+                    <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
+                      <p className="text-xs text-muted-foreground flex items-start gap-2">
+                        <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <span>
+                          <span className="font-medium text-primary">{t("common.note")}</span> {t("settings.language.note")}
+                        </span>
+                      </p>
+                    </div>
                   </CardContent>
                 </>
               )}
