@@ -1,104 +1,150 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import type { AngelStyle, AngelPresenceSettings } from '@/components/AngelPresence/types';
 
 /**
- * Hook to manage Angel Presence state
- * 
- * Features:
- * - Enabled by default for desktop users
- * - Persists preference in localStorage (guests) or database (authenticated)
- * - Easy to toggle on/off
+ * Hook to manage Angel Presence state and settings
  */
 
-const STORAGE_KEY = 'angel-presence-enabled';
+const STORAGE_KEY = 'angel-presence-settings';
+
+const defaultSettings: AngelPresenceSettings = {
+  enabled: true,
+  style: 'classic',
+  sparklesEnabled: true,
+  trailEnabled: true,
+};
 
 export function useAngelPresence() {
   const { user } = useAuth();
-  const [isEnabled, setIsEnabled] = useState(true); // Enabled by default
+  const [settings, setSettings] = useState<AngelPresenceSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load preference on mount
+  // Load settings on mount
   useEffect(() => {
-    const loadPreference = async () => {
+    const loadSettings = async () => {
       try {
         if (user) {
-          // Try to load from database for authenticated users
           const { data } = await supabase
             .from('user_preferences')
-            .select('angel_cursor_enabled')
+            .select('angel_cursor_enabled, angel_cursor_color')
             .eq('user_id', user.id)
             .maybeSingle();
 
-          if (data?.angel_cursor_enabled !== null && data?.angel_cursor_enabled !== undefined) {
-            setIsEnabled(data.angel_cursor_enabled);
+          if (data) {
+            // Parse stored settings from angel_cursor_color field (used for JSON storage)
+            let storedSettings: Partial<AngelPresenceSettings> = {};
+            if (data.angel_cursor_color) {
+              try {
+                storedSettings = JSON.parse(data.angel_cursor_color);
+              } catch {
+                // If not valid JSON, ignore
+              }
+            }
+            
+            setSettings({
+              enabled: data.angel_cursor_enabled ?? defaultSettings.enabled,
+              style: (storedSettings.style as AngelStyle) || defaultSettings.style,
+              sparklesEnabled: storedSettings.sparklesEnabled ?? defaultSettings.sparklesEnabled,
+              trailEnabled: storedSettings.trailEnabled ?? defaultSettings.trailEnabled,
+            });
           }
         } else {
-          // Load from localStorage for guests
           const stored = localStorage.getItem(STORAGE_KEY);
-          if (stored !== null) {
-            setIsEnabled(stored === 'true');
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              setSettings({ ...defaultSettings, ...parsed });
+            } catch {
+              // Invalid JSON, use defaults
+            }
           }
         }
       } catch (error) {
-        console.error('Failed to load angel presence preference:', error);
+        console.error('Failed to load angel presence settings:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadPreference();
+    loadSettings();
   }, [user]);
 
-  // Toggle function
-  const toggle = useCallback(async () => {
-    const newValue = !isEnabled;
-    setIsEnabled(newValue);
-
+  // Save settings helper
+  const saveSettings = useCallback(async (newSettings: AngelPresenceSettings) => {
     try {
       if (user) {
-        // Save to database for authenticated users
+        const settingsJson = JSON.stringify({
+          style: newSettings.style,
+          sparklesEnabled: newSettings.sparklesEnabled,
+          trailEnabled: newSettings.trailEnabled,
+        });
+        
         await supabase
           .from('user_preferences')
           .upsert({
             user_id: user.id,
-            angel_cursor_enabled: newValue,
+            angel_cursor_enabled: newSettings.enabled,
+            angel_cursor_color: settingsJson,
             updated_at: new Date().toISOString(),
           }, { onConflict: 'user_id' });
       } else {
-        // Save to localStorage for guests
-        localStorage.setItem(STORAGE_KEY, String(newValue));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
       }
     } catch (error) {
-      console.error('Failed to save angel presence preference:', error);
+      console.error('Failed to save angel presence settings:', error);
     }
-  }, [isEnabled, user]);
+  }, [user]);
+
+  // Toggle enabled
+  const toggle = useCallback(async () => {
+    const newSettings = { ...settings, enabled: !settings.enabled };
+    setSettings(newSettings);
+    await saveSettings(newSettings);
+  }, [settings, saveSettings]);
 
   // Set enabled directly
   const setEnabled = useCallback(async (value: boolean) => {
-    setIsEnabled(value);
+    const newSettings = { ...settings, enabled: value };
+    setSettings(newSettings);
+    await saveSettings(newSettings);
+  }, [settings, saveSettings]);
 
-    try {
-      if (user) {
-        await supabase
-          .from('user_preferences')
-          .upsert({
-            user_id: user.id,
-            angel_cursor_enabled: value,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' });
-      } else {
-        localStorage.setItem(STORAGE_KEY, String(value));
-      }
-    } catch (error) {
-      console.error('Failed to save angel presence preference:', error);
-    }
-  }, [user]);
+  // Set style
+  const setStyle = useCallback(async (style: AngelStyle) => {
+    const newSettings = { ...settings, style };
+    setSettings(newSettings);
+    await saveSettings(newSettings);
+  }, [settings, saveSettings]);
+
+  // Set sparkles enabled
+  const setSparklesEnabled = useCallback(async (value: boolean) => {
+    const newSettings = { ...settings, sparklesEnabled: value };
+    setSettings(newSettings);
+    await saveSettings(newSettings);
+  }, [settings, saveSettings]);
+
+  // Set trail enabled
+  const setTrailEnabled = useCallback(async (value: boolean) => {
+    const newSettings = { ...settings, trailEnabled: value };
+    setSettings(newSettings);
+    await saveSettings(newSettings);
+  }, [settings, saveSettings]);
 
   return {
-    isEnabled,
+    // Settings
+    isEnabled: settings.enabled,
+    style: settings.style,
+    sparklesEnabled: settings.sparklesEnabled,
+    trailEnabled: settings.trailEnabled,
     isLoading,
+    
+    // Actions
     toggle,
     setEnabled,
+    setStyle,
+    setSparklesEnabled,
+    setTrailEnabled,
   };
 }
