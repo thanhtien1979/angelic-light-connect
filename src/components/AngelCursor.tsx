@@ -1,8 +1,14 @@
 import { useState, useEffect, useCallback, memo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import defaultAngelVideo from "@/assets/angel-cursor-video.mp4";
+import flyingAngel1 from "@/assets/flying-angel.png";
+import flyingAngel2 from "@/assets/flying-angel-2.png";
+import flyingAngel3 from "@/assets/flying-angel-3.png";
+import flyingAngel4 from "@/assets/flying-angel-4.png";
 import { AngelCursorColor, AngelCursorSize } from "@/hooks/useAngelCursorPreference";
+
+// Angel frames for animation
+const angelFrames = [flyingAngel1, flyingAngel2, flyingAngel3, flyingAngel4];
 
 interface AngelCursorProps {
   color?: AngelCursorColor;
@@ -66,6 +72,7 @@ const AngelCursor = memo(({ color = 'pink', size = 'medium', isEnabled = true, c
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const [lastX, setLastX] = useState(0);
+  const [currentFrame, setCurrentFrame] = useState(0);
   const isMobile = useIsMobile();
   const prefersReducedMotion = useReducedMotion();
 
@@ -155,6 +162,17 @@ const AngelCursor = memo(({ color = 'pink', size = 'medium', isEnabled = true, c
     return () => clearInterval(cleanup);
   }, [sparkles.length]);
 
+  // Animate through angel frames
+  useEffect(() => {
+    if (!isEnabled || isMobile || prefersReducedMotion || customVideoUrl) return;
+    
+    const frameInterval = setInterval(() => {
+      setCurrentFrame(prev => (prev + 1) % angelFrames.length);
+    }, 150); // Change frame every 150ms for smooth animation
+
+    return () => clearInterval(frameInterval);
+  }, [isEnabled, isMobile, prefersReducedMotion, customVideoUrl]);
+
   // Don't render if disabled, on mobile, or if reduced motion preferred
   if (!isEnabled || isMobile || prefersReducedMotion) return null;
 
@@ -186,34 +204,35 @@ const AngelCursor = memo(({ color = 'pink', size = 'medium', isEnabled = true, c
           }}
         />
         
-        {/* Angel video container - with background removal */}
-        <div 
-          className={`${sizeConfig.className} relative`}
-          style={{
-            isolation: 'isolate',
-            transform: direction === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
-          }}
-        >
-          {/* Background layer for blend mode to work */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 100%)',
-            }}
-          />
+        {/* Angel image/video - with transparent background */}
+        {customVideoUrl ? (
           <video
-            src={customVideoUrl || defaultAngelVideo}
+            src={customVideoUrl}
             autoPlay
             loop
             muted
             playsInline
-            className="w-full h-full object-contain pointer-events-none"
+            className={`${sizeConfig.className} object-contain pointer-events-none`}
             style={{
               filter: `${config.filter} contrast(1.3) saturate(1.2) brightness(0.95)`,
+              transform: direction === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
               mixBlendMode: 'multiply',
             }}
           />
-        </div>
+        ) : (
+          <motion.img
+            src={angelFrames[currentFrame]}
+            alt=""
+            className={`${sizeConfig.className} object-contain pointer-events-none`}
+            style={{
+              filter: config.filter,
+              transform: direction === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
+            }}
+            initial={{ opacity: 0.9 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.1 }}
+          />
+        )}
       </motion.div>
 
       {/* Sparkles */}
