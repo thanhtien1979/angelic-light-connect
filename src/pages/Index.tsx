@@ -23,7 +23,7 @@ import { useAngelCursorPreference } from "@/hooks/useAngelCursorPreference";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const { cursorColor, cursorSize, isEnabled } = useAngelCursorPreference();
+  const { cursorColor, cursorSize, isEnabled, customVideoUrl } = useAngelCursorPreference();
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
@@ -40,7 +40,7 @@ const Index = () => {
       <StardustTrail />
       
       {/* Angel Cursor - Flying angel following mouse */}
-      <AngelCursor color={cursorColor} size={cursorSize} isEnabled={isEnabled} />
+      <AngelCursor color={cursorColor} size={cursorSize} isEnabled={isEnabled} customVideoUrl={customVideoUrl} />
       
       {/* Gentle Meditation Reminder */}
       <GentleMeditationReminder />

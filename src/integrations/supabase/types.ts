@@ -1429,6 +1429,7 @@ export type Database = {
           angel_cursor_color: string | null
           angel_cursor_enabled: boolean | null
           angel_cursor_size: string | null
+          angel_cursor_video_url: string | null
           created_at: string | null
           id: string
           theme: string
@@ -1439,6 +1440,7 @@ export type Database = {
           angel_cursor_color?: string | null
           angel_cursor_enabled?: boolean | null
           angel_cursor_size?: string | null
+          angel_cursor_video_url?: string | null
           created_at?: string | null
           id?: string
           theme?: string
@@ -1449,6 +1451,7 @@ export type Database = {
           angel_cursor_color?: string | null
           angel_cursor_enabled?: boolean | null
           angel_cursor_size?: string | null
+          angel_cursor_video_url?: string | null
           created_at?: string | null
           id?: string
           theme?: string
