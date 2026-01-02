@@ -185,7 +185,7 @@ const AngelCursor = memo(({ color = 'pink', size = 'medium', isEnabled = true }:
           }}
         />
         
-        {/* Angel video */}
+        {/* Angel video - with background removal using blend mode */}
         <video
           src={angelVideo}
           autoPlay
@@ -194,8 +194,10 @@ const AngelCursor = memo(({ color = 'pink', size = 'medium', isEnabled = true }:
           playsInline
           className={`${sizeConfig.className} object-contain drop-shadow-lg pointer-events-none`}
           style={{
-            filter: config.filter,
+            filter: `${config.filter} contrast(1.1)`,
             transform: direction === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
+            mixBlendMode: 'multiply',
+            background: 'transparent',
           }}
         />
       </motion.div>
