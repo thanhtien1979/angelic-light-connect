@@ -5,6 +5,7 @@ import fairyBlueImage from '@/assets/fairy-blue.png';
 import fairyRedImage from '@/assets/fairy-red.png';
 import fairyPinkImage from '@/assets/fairy-pink.png';
 import fairyMintImage from '@/assets/fairy-mint.png';
+import fairyVideoSrc from '@/assets/angel-cursor-video.mp4';
 
 /**
  * Angel SVG Components - Each represents a different angel style
@@ -227,6 +228,26 @@ export const FairyRedSVG = createFairyComponent(fairyRedImage, 'FairyRedSVG');
 export const FairyPinkSVG = createFairyComponent(fairyPinkImage, 'FairyPinkSVG');
 export const FairyMintSVG = createFairyComponent(fairyMintImage, 'FairyMintSVG');
 
+// Video-based fairy component
+export const FairyVideoSVG = memo(() => (
+  <div className="relative motion-safe:animate-fairy-float">
+    <video 
+      src={fairyVideoSrc}
+      autoPlay
+      loop
+      muted
+      playsInline
+      className="w-16 h-16 object-contain"
+      style={{ 
+        pointerEvents: 'none',
+        userSelect: 'none',
+        background: 'transparent',
+      }}
+    />
+  </div>
+));
+FairyVideoSVG.displayName = 'FairyVideoSVG';
+
 // Map styles to SVG components
 export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   classic: ClassicAngelSVG,
@@ -241,4 +262,5 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'fairy-red': FairyRedSVG,
   'fairy-pink': FairyPinkSVG,
   'fairy-mint': FairyMintSVG,
+  'fairy-video': FairyVideoSVG,
 };

@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-video';
 
 export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
 
@@ -295,6 +295,23 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
       followEasing: 0.11,
       sparkleIntensity: 1.1,
       trailIntensity: 1.0,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-video',
+    name: 'Animated Fairy',
+    description: 'Magical animated fairy video',
+    glowIntensity: 0.75,
+    glowColor: 'rgba(255,220,255,0.7)',
+    scale: 1.1,
+    animation: {
+      floatDuration: 3,
+      floatAmplitude: 4,
+      flapDuration: 2.5,
+      followEasing: 0.12,
+      sparkleIntensity: 1.4,
+      trailIntensity: 1.3,
       bouncy: true,
     },
   },
