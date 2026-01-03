@@ -105,10 +105,104 @@ export const GuardianAngelSVG = memo(() => (
 ));
 GuardianAngelSVG.displayName = 'GuardianAngelSVG';
 
+export const JoyAngelSVG = memo(() => (
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Radiant halo with subtle glow */}
+    <ellipse cx="24" cy="9" rx="7" ry="2.5" stroke="rgba(255,250,240,0.9)" strokeWidth="1.5" fill="none" />
+    <ellipse cx="24" cy="9" rx="5" ry="1.5" fill="rgba(255,255,255,0.3)" />
+    {/* Joyful face */}
+    <circle cx="24" cy="17" r="6" fill="rgba(255,248,240,0.95)" />
+    {/* Smile */}
+    <path d="M21 19 Q24 22 27 19" stroke="rgba(200,180,160,0.4)" strokeWidth="1" fill="none" strokeLinecap="round" />
+    {/* Body - slightly dynamic pose */}
+    <path d="M18 23 L22 42 L24 38 L26 42 L30 23 Q24 27 18 23Z" fill="rgba(255,255,255,0.88)" />
+    {/* Uplifted wings - Left */}
+    <path d="M18 20 Q6 12 4 20 Q8 18 12 22 Q8 24 6 30 Q12 26 16 30 Q14 26 18 22Z" 
+          fill="rgba(255,255,255,0.85)"
+          stroke="rgba(255,255,255,0.4)"
+          strokeWidth="0.5" />
+    {/* Uplifted wings - Right */}
+    <path d="M30 20 Q42 12 44 20 Q40 18 36 22 Q40 24 42 30 Q36 26 32 30 Q34 26 30 22Z" 
+          fill="rgba(255,255,255,0.85)"
+          stroke="rgba(255,255,255,0.4)"
+          strokeWidth="0.5" />
+    {/* Joy sparkle accents */}
+    <circle cx="10" cy="14" r="1.5" fill="rgba(255,255,255,0.6)" />
+    <circle cx="38" cy="14" r="1.5" fill="rgba(255,255,255,0.6)" />
+    <circle cx="24" cy="5" r="1" fill="rgba(255,255,255,0.5)" />
+  </svg>
+));
+JoyAngelSVG.displayName = 'JoyAngelSVG';
+
+export const PeaceAngelSVG = memo(() => (
+  <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Calm halo - double ring */}
+    <ellipse cx="25" cy="10" rx="8" ry="3" stroke="rgba(245,250,255,0.7)" strokeWidth="1" fill="none" />
+    <ellipse cx="25" cy="10" rx="10" ry="4" stroke="rgba(245,250,255,0.4)" strokeWidth="0.5" fill="none" />
+    {/* Serene face */}
+    <circle cx="25" cy="18" r="5.5" fill="rgba(250,252,255,0.95)" />
+    {/* Closed peaceful eyes */}
+    <path d="M22 17 Q23 18 24 17" stroke="rgba(180,190,200,0.4)" strokeWidth="0.8" fill="none" strokeLinecap="round" />
+    <path d="M26 17 Q27 18 28 17" stroke="rgba(180,190,200,0.4)" strokeWidth="0.8" fill="none" strokeLinecap="round" />
+    {/* Flowing robe */}
+    <path d="M19 23 L25 46 L31 23 Q25 28 19 23Z" fill="rgba(250,252,255,0.9)" />
+    {/* Gentle extended wings - Left */}
+    <path d="M19 21 Q5 18 3 26 Q9 23 15 27 Q7 30 5 38 Q13 32 19 36 Q15 30 19 24Z" 
+          fill="rgba(245,250,255,0.8)"
+          stroke="rgba(255,255,255,0.3)"
+          strokeWidth="0.5" />
+    {/* Gentle extended wings - Right */}
+    <path d="M31 21 Q45 18 47 26 Q41 23 35 27 Q43 30 45 38 Q37 32 31 36 Q35 30 31 24Z" 
+          fill="rgba(245,250,255,0.8)"
+          stroke="rgba(255,255,255,0.3)"
+          strokeWidth="0.5" />
+    {/* Soft inner wing detail */}
+    <path d="M20 24 Q12 22 10 28 Q14 26 18 29Z" fill="rgba(255,255,255,0.35)" />
+    <path d="M30 24 Q38 22 40 28 Q36 26 32 29Z" fill="rgba(255,255,255,0.35)" />
+  </svg>
+));
+PeaceAngelSVG.displayName = 'PeaceAngelSVG';
+
+export const HealingAngelSVG = memo(() => (
+  <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Gentle healing halo */}
+    <ellipse cx="26" cy="10" rx="9" ry="3.5" stroke="rgba(250,255,250,0.85)" strokeWidth="1.5" fill="none" />
+    {/* Soft glow center */}
+    <ellipse cx="26" cy="10" rx="5" ry="2" fill="rgba(255,255,255,0.25)" />
+    {/* Compassionate face */}
+    <circle cx="26" cy="18" r="6" fill="rgba(252,255,250,0.95)" />
+    {/* Gentle expression */}
+    <ellipse cx="24" cy="17" rx="1" ry="0.5" fill="rgba(180,200,180,0.3)" />
+    <ellipse cx="28" cy="17" rx="1" ry="0.5" fill="rgba(180,200,180,0.3)" />
+    {/* Flowing healing robe */}
+    <path d="M19 24 L26 48 L33 24 Q26 29 19 24Z" fill="rgba(250,255,250,0.88)" />
+    {/* Hands reaching out */}
+    <ellipse cx="16" cy="32" rx="2" ry="3" fill="rgba(252,255,250,0.7)" transform="rotate(-20 16 32)" />
+    <ellipse cx="36" cy="32" rx="2" ry="3" fill="rgba(252,255,250,0.7)" transform="rotate(20 36 32)" />
+    {/* Nurturing wings - Left */}
+    <path d="M19 21 Q4 16 2 26 Q8 22 14 27 Q6 30 4 40 Q14 33 19 38 Q15 31 19 24Z" 
+          fill="rgba(250,255,250,0.8)"
+          stroke="rgba(255,255,255,0.35)"
+          strokeWidth="0.5" />
+    {/* Nurturing wings - Right */}
+    <path d="M33 21 Q48 16 50 26 Q44 22 38 27 Q46 30 48 40 Q38 33 33 38 Q37 31 33 24Z" 
+          fill="rgba(250,255,250,0.8)"
+          stroke="rgba(255,255,255,0.35)"
+          strokeWidth="0.5" />
+    {/* Healing energy center */}
+    <circle cx="26" cy="30" r="3" fill="rgba(255,255,255,0.3)" />
+    <circle cx="26" cy="30" r="1.5" fill="rgba(255,255,255,0.5)" />
+  </svg>
+));
+HealingAngelSVG.displayName = 'HealingAngelSVG';
+
 // Map styles to SVG components
 export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   classic: ClassicAngelSVG,
   cherub: CherubSVG,
   seraph: SeraphSVG,
   guardian: GuardianAngelSVG,
+  joy: JoyAngelSVG,
+  peace: PeaceAngelSVG,
+  healing: HealingAngelSVG,
 };

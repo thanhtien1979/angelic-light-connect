@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing';
 
 export interface AngelStyleConfig {
   id: AngelStyle;
@@ -69,5 +69,29 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.55,
     glowColor: 'rgba(240,248,255,0.6)',
     scale: 1.2,
+  },
+  {
+    id: 'joy',
+    name: 'Joy Angel',
+    description: 'Uplifting, playful spirit',
+    glowIntensity: 0.65,
+    glowColor: 'rgba(255,250,240,0.65)',
+    scale: 1,
+  },
+  {
+    id: 'peace',
+    name: 'Peace Angel',
+    description: 'Serene, calming presence',
+    glowIntensity: 0.5,
+    glowColor: 'rgba(245,250,255,0.6)',
+    scale: 1.05,
+  },
+  {
+    id: 'healing',
+    name: 'Healing Angel',
+    description: 'Gentle, restorative energy',
+    glowIntensity: 0.6,
+    glowColor: 'rgba(250,255,250,0.6)',
+    scale: 1.1,
   },
 ];
