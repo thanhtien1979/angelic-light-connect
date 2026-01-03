@@ -32,6 +32,13 @@ import fairyOceanImage from '@/assets/fairy-ocean.png';
 import fairySakuraImage from '@/assets/fairy-sakura.png';
 import fairyCherryBlossomImage from '@/assets/fairy-cherry-blossom.png';
 import fairyDollImage from '@/assets/fairy-doll.png';
+// New fairy images batch 3
+import fairyRainbowImage from '@/assets/fairy-rainbow.webp';
+import fairyColorfulImage from '@/assets/fairy-colorful.webp';
+import fairyPencilImage from '@/assets/fairy-pencil.png';
+import fairyTealImage from '@/assets/fairy-teal.png';
+import fairyVioletImage from '@/assets/fairy-violet.png';
+import fairyStrawberryImage from '@/assets/fairy-strawberry.png';
 // MP4 video sources (fallback)
 import fairyVideoMp4 from '@/assets/angel-cursor-video.mp4';
 import celestialVideoMp4 from '@/assets/celestial-video.mp4';
@@ -458,6 +465,13 @@ export const FairyOceanSVG = createFairyComponent(fairyOceanImage, 'FairyOceanSV
 export const FairySakuraSVG = createFairyComponent(fairySakuraImage, 'FairySakuraSVG');
 export const FairyCherryBlossomSVG = createFairyComponent(fairyCherryBlossomImage, 'FairyCherryBlossomSVG');
 export const FairyDollSVG = createFairyComponent(fairyDollImage, 'FairyDollSVG');
+// New fairy components batch 3
+export const FairyRainbowSVG = createFairyComponent(fairyRainbowImage, 'FairyRainbowSVG');
+export const FairyColorfulSVG = createFairyComponent(fairyColorfulImage, 'FairyColorfulSVG');
+export const FairyPencilSVG = createFairyComponent(fairyPencilImage, 'FairyPencilSVG');
+export const FairyTealSVG = createFairyComponent(fairyTealImage, 'FairyTealSVG');
+export const FairyVioletSVG = createFairyComponent(fairyVioletImage, 'FairyVioletSVG');
+export const FairyStrawberrySVG = createFairyComponent(fairyStrawberryImage, 'FairyStrawberrySVG');
 
 // Video-based angel components using WebM alpha with MP4 fallback
 export const FairyVideoSVG = memo(() => (
@@ -537,6 +551,12 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'fairy-sakura': FairySakuraSVG,
   'fairy-cherry-blossom': FairyCherryBlossomSVG,
   'fairy-doll': FairyDollSVG,
+  'fairy-rainbow': FairyRainbowSVG,
+  'fairy-colorful': FairyColorfulSVG,
+  'fairy-pencil': FairyPencilSVG,
+  'fairy-teal': FairyTealSVG,
+  'fairy-violet': FairyVioletSVG,
+  'fairy-strawberry': FairyStrawberrySVG,
   'fairy-video': FairyVideoSVG,
   'celestial-video': CelestialVideoSVG,
   'starlight-seraph': StarlightSeraphSVG,
