@@ -6,6 +6,7 @@ import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { useMeditationReward } from "@/hooks/useMeditationReward";
 import CoinRewardAnimation from "@/components/CoinRewardAnimation";
 import CelebrationEffect from "@/components/CelebrationEffect";
+import MeditationAmbientSelector from "@/components/MeditationAmbientSelector";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 
@@ -534,6 +535,17 @@ const MeditationPortal = () => {
           <p className="mt-8 text-muted-foreground text-center max-w-md">
             Hãy đồng bộ hơi thở của bạn với vòng tròn ánh sáng. Để năng lượng chữa lành lan tỏa.
           </p>
+          
+          {/* Ambient Sound Selector */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="mt-8"
+          >
+            <MeditationAmbientSelector compact />
+          </motion.div>
         </motion.div>
 
         {/* Meditation Cards */}
