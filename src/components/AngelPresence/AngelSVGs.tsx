@@ -50,6 +50,10 @@ import fairyRainbowWingsImage from '@/assets/fairy-rainbow-wings.png';
 import fairyGalaxyImage from '@/assets/fairy-galaxy.png';
 import fairyPurpleFlowerImage from '@/assets/fairy-purple-flower.png';
 import fairyVioletBloomImage from '@/assets/fairy-violet-bloom.png';
+// New fairy images batch 5
+import fairyEasterImage from '@/assets/fairy-easter.png';
+import fairyPrayerImage from '@/assets/fairy-prayer.png';
+import fairyTinkerbellImage from '@/assets/fairy-tinkerbell.webp';
 // MP4 video sources (fallback)
 import fairyVideoMp4 from '@/assets/angel-cursor-video.mp4';
 import celestialVideoMp4 from '@/assets/celestial-video.mp4';
@@ -494,8 +498,11 @@ export const FairyRainbowWingsSVG = createFairyComponent(fairyRainbowWingsImage,
 export const FairyGalaxySVG = createFairyComponent(fairyGalaxyImage, 'FairyGalaxySVG');
 export const FairyPurpleFlowerSVG = createFairyComponent(fairyPurpleFlowerImage, 'FairyPurpleFlowerSVG');
 export const FairyVioletBloomSVG = createFairyComponent(fairyVioletBloomImage, 'FairyVioletBloomSVG');
+// New fairy images batch 5
+export const FairyEasterSVG = createFairyComponent(fairyEasterImage, 'FairyEasterSVG');
+export const FairyPrayerSVG = createFairyComponent(fairyPrayerImage, 'FairyPrayerSVG');
+export const FairyTinkerbellSVG = createFairyComponent(fairyTinkerbellImage, 'FairyTinkerbellSVG');
 
-// Video-based angel components using WebM alpha with MP4 fallback
 export const FairyVideoSVG = memo(() => (
   <VideoAngelComponent styleId="fairy-video" size={64} className="motion-safe:animate-fairy-float" />
 ));
@@ -589,6 +596,9 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'fairy-galaxy': FairyGalaxySVG,
   'fairy-purple-flower': FairyPurpleFlowerSVG,
   'fairy-violet-bloom': FairyVioletBloomSVG,
+  'fairy-easter': FairyEasterSVG,
+  'fairy-prayer': FairyPrayerSVG,
+  'fairy-tinkerbell': FairyTinkerbellSVG,
   'fairy-video': FairyVideoSVG,
   'celestial-video': CelestialVideoSVG,
   'starlight-seraph': StarlightSeraphSVG,
