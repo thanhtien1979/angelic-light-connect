@@ -11,6 +11,9 @@ import celestialVideoMp4 from '@/assets/celestial-video.mp4';
 import starlightSeraphMp4 from '@/assets/starlight-seraph-video.mp4';
 import auroraGuardianMp4 from '@/assets/aurora-guardian-video.mp4';
 import nebulaMessengerMp4 from '@/assets/nebula-messenger-video.mp4';
+import grokAngel1Mp4 from '@/assets/grok-angel-1.mp4';
+import grokAngel2Mp4 from '@/assets/grok-angel-2.mp4';
+import grokAngel3Mp4 from '@/assets/grok-angel-3.mp4';
 // Poster images for video angels
 import fairyVideoPoster from '@/assets/posters/fairy-video-poster.png';
 import celestialVideoPoster from '@/assets/posters/celestial-video-poster.png';
@@ -48,6 +51,18 @@ export const VIDEO_SOURCES: Record<string, VideoSources> = {
     mp4HighSrc: nebulaMessengerMp4,
     mp4PerfSrc: nebulaMessengerMp4,
     posterSrc: nebulaMessengerPoster,
+  },
+  'grok-angel-1': {
+    mp4HighSrc: grokAngel1Mp4,
+    mp4PerfSrc: grokAngel1Mp4,
+  },
+  'grok-angel-2': {
+    mp4HighSrc: grokAngel2Mp4,
+    mp4PerfSrc: grokAngel2Mp4,
+  },
+  'grok-angel-3': {
+    mp4HighSrc: grokAngel3Mp4,
+    mp4PerfSrc: grokAngel3Mp4,
   },
 };
 
@@ -385,6 +400,21 @@ export const NebulaMessengerSVG = memo(() => (
 ));
 NebulaMessengerSVG.displayName = 'NebulaMessengerSVG';
 
+export const GrokAngel1SVG = memo(() => (
+  <VideoAngelComponent styleId="grok-angel-1" size={68} />
+));
+GrokAngel1SVG.displayName = 'GrokAngel1SVG';
+
+export const GrokAngel2SVG = memo(() => (
+  <VideoAngelComponent styleId="grok-angel-2" size={70} />
+));
+GrokAngel2SVG.displayName = 'GrokAngel2SVG';
+
+export const GrokAngel3SVG = memo(() => (
+  <VideoAngelComponent styleId="grok-angel-3" size={68} />
+));
+GrokAngel3SVG.displayName = 'GrokAngel3SVG';
+
 // Map styles to SVG components
 export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   classic: ClassicAngelSVG,
@@ -404,4 +434,7 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'starlight-seraph': StarlightSeraphSVG,
   'aurora-guardian': AuroraGuardianSVG,
   'nebula-messenger': NebulaMessengerSVG,
+  'grok-angel-1': GrokAngel1SVG,
+  'grok-angel-2': GrokAngel2SVG,
+  'grok-angel-3': GrokAngel3SVG,
 };
