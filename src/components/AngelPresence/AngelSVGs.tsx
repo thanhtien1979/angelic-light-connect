@@ -1,6 +1,10 @@
 import { memo } from 'react';
 import type { AngelStyle } from './types';
 import fairyAngelImage from '@/assets/fairy-angel-cursor.png';
+import fairyBlueImage from '@/assets/fairy-blue.png';
+import fairyRedImage from '@/assets/fairy-red.png';
+import fairyPinkImage from '@/assets/fairy-pink.png';
+import fairyMintImage from '@/assets/fairy-mint.png';
 
 /**
  * Angel SVG Components - Each represents a different angel style
@@ -197,22 +201,31 @@ export const HealingAngelSVG = memo(() => (
 ));
 HealingAngelSVG.displayName = 'HealingAngelSVG';
 
-export const FairyAngelSVG = memo(() => (
-  <div className="relative motion-safe:animate-fairy-float">
-    <img 
-      src={fairyAngelImage} 
-      alt="" 
-      className="w-16 h-16 object-contain motion-safe:animate-fairy-wings"
-      style={{ 
-        pointerEvents: 'none',
-        userSelect: 'none',
-        background: 'transparent',
-      }}
-      draggable={false}
-    />
-  </div>
-));
-FairyAngelSVG.displayName = 'FairyAngelSVG';
+const createFairyComponent = (imageSrc: string, displayName: string) => {
+  const Component = memo(() => (
+    <div className="relative motion-safe:animate-fairy-float">
+      <img 
+        src={imageSrc} 
+        alt="" 
+        className="w-16 h-16 object-contain motion-safe:animate-fairy-wings"
+        style={{ 
+          pointerEvents: 'none',
+          userSelect: 'none',
+          background: 'transparent',
+        }}
+        draggable={false}
+      />
+    </div>
+  ));
+  Component.displayName = displayName;
+  return Component;
+};
+
+export const FairyAngelSVG = createFairyComponent(fairyAngelImage, 'FairyAngelSVG');
+export const FairyBlueSVG = createFairyComponent(fairyBlueImage, 'FairyBlueSVG');
+export const FairyRedSVG = createFairyComponent(fairyRedImage, 'FairyRedSVG');
+export const FairyPinkSVG = createFairyComponent(fairyPinkImage, 'FairyPinkSVG');
+export const FairyMintSVG = createFairyComponent(fairyMintImage, 'FairyMintSVG');
 
 // Map styles to SVG components
 export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
@@ -224,4 +237,8 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   peace: PeaceAngelSVG,
   healing: HealingAngelSVG,
   fairy: FairyAngelSVG,
+  'fairy-blue': FairyBlueSVG,
+  'fairy-red': FairyRedSVG,
+  'fairy-pink': FairyPinkSVG,
+  'fairy-mint': FairyMintSVG,
 };
