@@ -1,15 +1,100 @@
-import { memo } from 'react';
+import { memo, useRef, useEffect, useState } from 'react';
 import type { AngelStyle } from './types';
 import fairyAngelImage from '@/assets/fairy-angel-cursor.png';
 import fairyBlueImage from '@/assets/fairy-blue.png';
 import fairyRedImage from '@/assets/fairy-red.png';
 import fairyPinkImage from '@/assets/fairy-pink.png';
 import fairyMintImage from '@/assets/fairy-mint.png';
-import fairyVideoSrc from '@/assets/angel-cursor-video.mp4';
-import celestialVideoSrc from '@/assets/celestial-video.mp4';
-import starlightSeraphSrc from '@/assets/starlight-seraph-video.mp4';
-import auroraGuardianSrc from '@/assets/aurora-guardian-video.mp4';
-import nebulaMessengerSrc from '@/assets/nebula-messenger-video.mp4';
+// MP4 video sources (fallback)
+import fairyVideoMp4 from '@/assets/angel-cursor-video.mp4';
+import celestialVideoMp4 from '@/assets/celestial-video.mp4';
+import starlightSeraphMp4 from '@/assets/starlight-seraph-video.mp4';
+import auroraGuardianMp4 from '@/assets/aurora-guardian-video.mp4';
+import nebulaMessengerMp4 from '@/assets/nebula-messenger-video.mp4';
+
+// Video sources configuration with WebM (alpha) and MP4 fallback
+const VIDEO_SOURCES = {
+  'fairy-video': {
+    mp4Src: fairyVideoMp4,
+  },
+  'celestial-video': {
+    mp4Src: celestialVideoMp4,
+  },
+  'starlight-seraph': {
+    mp4Src: starlightSeraphMp4,
+  },
+  'aurora-guardian': {
+    mp4Src: auroraGuardianMp4,
+  },
+  'nebula-messenger': {
+    mp4Src: nebulaMessengerMp4,
+  },
+} as const;
+
+// Reusable video angel component with WebM alpha + MP4 fallback
+interface VideoAngelProps {
+  styleId: keyof typeof VIDEO_SOURCES;
+  size?: number;
+  className?: string;
+}
+
+const VideoAngelComponent = memo(({ styleId, size = 68, className = '' }: VideoAngelProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      setPrefersReducedMotion(mq.matches);
+      
+      const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    }
+  }, []);
+  
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    if (prefersReducedMotion) {
+      video.pause();
+    } else {
+      video.play().catch(() => {});
+    }
+  }, [prefersReducedMotion]);
+  
+  const sources = VIDEO_SOURCES[styleId];
+  
+  return (
+    <div className={`relative ${className}`}>
+      <video 
+        ref={videoRef}
+        autoPlay={!prefersReducedMotion}
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        style={{ 
+          width: size,
+          height: size,
+          objectFit: 'contain',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          background: 'transparent',
+        }}
+      >
+        {/* WebM with alpha channel (if available) - browser tries this first */}
+        {(sources as any).webmSrc && (
+          <source src={(sources as any).webmSrc} type="video/webm" />
+        )}
+        {/* MP4 fallback */}
+        <source src={sources.mp4Src} type="video/mp4" />
+      </video>
+    </div>
+  );
+});
+VideoAngelComponent.displayName = 'VideoAngelComponent';
 
 /**
  * Angel SVG Components - Each represents a different angel style
@@ -232,127 +317,30 @@ export const FairyRedSVG = createFairyComponent(fairyRedImage, 'FairyRedSVG');
 export const FairyPinkSVG = createFairyComponent(fairyPinkImage, 'FairyPinkSVG');
 export const FairyMintSVG = createFairyComponent(fairyMintImage, 'FairyMintSVG');
 
-// Video-based fairy component
+// Video-based angel components using WebM alpha with MP4 fallback
 export const FairyVideoSVG = memo(() => (
-  <div className="relative motion-safe:animate-fairy-float">
-    <video 
-      src={fairyVideoSrc}
-      autoPlay
-      loop
-      muted
-      playsInline
-      className="w-16 h-16 object-contain"
-      style={{ 
-        pointerEvents: 'none',
-        userSelect: 'none',
-        background: 'transparent',
-      }}
-    />
-  </div>
+  <VideoAngelComponent styleId="fairy-video" size={64} className="motion-safe:animate-fairy-float" />
 ));
 FairyVideoSVG.displayName = 'FairyVideoSVG';
 
-// Celestial video-based angel component with reduced motion support
-export const CelestialVideoSVG = memo(() => {
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
-  return (
-    <div className="relative">
-      <video 
-        src={celestialVideoSrc}
-        autoPlay={!prefersReducedMotion}
-        loop
-        muted
-        playsInline
-        className="w-[72px] h-[72px] object-contain"
-        style={{ 
-          pointerEvents: 'none',
-          userSelect: 'none',
-          background: 'transparent',
-        }}
-      />
-    </div>
-  );
-});
+export const CelestialVideoSVG = memo(() => (
+  <VideoAngelComponent styleId="celestial-video" size={72} />
+));
 CelestialVideoSVG.displayName = 'CelestialVideoSVG';
 
-// Starlight Seraph video component
-export const StarlightSeraphSVG = memo(() => {
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
-  return (
-    <div className="relative">
-      <video 
-        src={starlightSeraphSrc}
-        autoPlay={!prefersReducedMotion}
-        loop
-        muted
-        playsInline
-        preload="metadata"
-        className="w-[68px] h-[68px] object-contain"
-        style={{ 
-          pointerEvents: 'none',
-          userSelect: 'none',
-          background: 'transparent',
-        }}
-      />
-    </div>
-  );
-});
+export const StarlightSeraphSVG = memo(() => (
+  <VideoAngelComponent styleId="starlight-seraph" size={68} />
+));
 StarlightSeraphSVG.displayName = 'StarlightSeraphSVG';
 
-// Aurora Guardian video component
-export const AuroraGuardianSVG = memo(() => {
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
-  return (
-    <div className="relative">
-      <video 
-        src={auroraGuardianSrc}
-        autoPlay={!prefersReducedMotion}
-        loop
-        muted
-        playsInline
-        preload="metadata"
-        className="w-[72px] h-[72px] object-contain"
-        style={{ 
-          pointerEvents: 'none',
-          userSelect: 'none',
-          background: 'transparent',
-        }}
-      />
-    </div>
-  );
-});
+export const AuroraGuardianSVG = memo(() => (
+  <VideoAngelComponent styleId="aurora-guardian" size={72} />
+));
 AuroraGuardianSVG.displayName = 'AuroraGuardianSVG';
 
-// Nebula Messenger video component
-export const NebulaMessengerSVG = memo(() => {
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
-  return (
-    <div className="relative">
-      <video 
-        src={nebulaMessengerSrc}
-        autoPlay={!prefersReducedMotion}
-        loop
-        muted
-        playsInline
-        preload="metadata"
-        className="w-[70px] h-[70px] object-contain"
-        style={{ 
-          pointerEvents: 'none',
-          userSelect: 'none',
-          background: 'transparent',
-        }}
-      />
-    </div>
-  );
-});
+export const NebulaMessengerSVG = memo(() => (
+  <VideoAngelComponent styleId="nebula-messenger" size={70} />
+));
 NebulaMessengerSVG.displayName = 'NebulaMessengerSVG';
 
 // Map styles to SVG components
