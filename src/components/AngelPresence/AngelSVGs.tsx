@@ -20,6 +20,12 @@ import fairySpringImage from '@/assets/fairy-spring.webp';
 import fairyHeartImage from '@/assets/fairy-heart.png';
 import fairyLoveImage from '@/assets/fairy-love.png';
 import fairyLavenderImage from '@/assets/fairy-lavender.png';
+// Additional fairy images
+import fairyRosemaryImage from '@/assets/fairy-rosemary.png';
+import fairyButterflyGoldImage from '@/assets/fairy-butterfly-gold.png';
+import fairySunflowerImage from '@/assets/fairy-sunflower.png';
+import fairyPeachImage from '@/assets/fairy-peach.png';
+import fairyLimeImage from '@/assets/fairy-lime.png';
 // MP4 video sources (fallback)
 import fairyVideoMp4 from '@/assets/angel-cursor-video.mp4';
 import celestialVideoMp4 from '@/assets/celestial-video.mp4';
@@ -434,6 +440,12 @@ export const FairySpringSVG = createFairyComponent(fairySpringImage, 'FairySprin
 export const FairyHeartSVG = createFairyComponent(fairyHeartImage, 'FairyHeartSVG');
 export const FairyLoveSVG = createFairyComponent(fairyLoveImage, 'FairyLoveSVG');
 export const FairyLavenderSVG = createFairyComponent(fairyLavenderImage, 'FairyLavenderSVG');
+// Additional fairy components
+export const FairyRosemarySVG = createFairyComponent(fairyRosemaryImage, 'FairyRosemarySVG');
+export const FairyButterflyGoldSVG = createFairyComponent(fairyButterflyGoldImage, 'FairyButterflyGoldSVG');
+export const FairySunflowerSVG = createFairyComponent(fairySunflowerImage, 'FairySunflowerSVG');
+export const FairyPeachSVG = createFairyComponent(fairyPeachImage, 'FairyPeachSVG');
+export const FairyLimeSVG = createFairyComponent(fairyLimeImage, 'FairyLimeSVG');
 
 // Video-based angel components using WebM alpha with MP4 fallback
 export const FairyVideoSVG = memo(() => (
@@ -503,6 +515,11 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'fairy-heart': FairyHeartSVG,
   'fairy-love': FairyLoveSVG,
   'fairy-lavender': FairyLavenderSVG,
+  'fairy-rosemary': FairyRosemarySVG,
+  'fairy-butterfly-gold': FairyButterflyGoldSVG,
+  'fairy-sunflower': FairySunflowerSVG,
+  'fairy-peach': FairyPeachSVG,
+  'fairy-lime': FairyLimeSVG,
   'fairy-video': FairyVideoSVG,
   'celestial-video': CelestialVideoSVG,
   'starlight-seraph': StarlightSeraphSVG,
