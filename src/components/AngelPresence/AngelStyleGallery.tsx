@@ -1,4 +1,4 @@
-import { memo, useRef, useMemo } from 'react';
+import { memo, useRef, useMemo, useState, useEffect, useCallback } from 'react';
 import { Check, Eye, Upload, Trash2, ImageIcon, Play } from 'lucide-react';
 import { ANGEL_STYLES, ANGEL_COLORS, type AngelStyle, type AngelColor } from './types';
 import { AngelSVGMap, VIDEO_SOURCES, type VideoAngelStyleId } from './AngelSVGs';
@@ -45,6 +45,22 @@ const AngelStyleGallery = memo(({
   isLoggedIn = false,
 }: AngelStyleGalleryProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const hoverVideoRef = useRef<HTMLVideoElement>(null);
+  const [hoveredVideoStyle, setHoveredVideoStyle] = useState<string | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Check for reduced motion preference
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      setPrefersReducedMotion(mq.matches);
+      
+      const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    }
+  }, []);
   
   // Get current color config for glow preview
   const currentColorConfig = ANGEL_COLORS.find(c => c.id === currentColor) || ANGEL_COLORS[0];
@@ -54,6 +70,50 @@ const AngelStyleGallery = memo(({
     const staticStyles = ANGEL_STYLES.filter(s => !s.isVideo);
     const videoStyles = ANGEL_STYLES.filter(s => s.isVideo);
     return { staticStyles, videoStyles };
+  }, []);
+  
+  // Throttled hover handlers to prevent flicker
+  const handleVideoHover = useCallback((styleId: string) => {
+    if (prefersReducedMotion) return;
+    
+    // Clear any pending timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    
+    // Small delay to prevent rapid start/stop
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredVideoStyle(styleId);
+    }, 100);
+  }, [prefersReducedMotion]);
+  
+  const handleVideoLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setHoveredVideoStyle(null);
+    
+    // Stop and reset the video
+    if (hoverVideoRef.current) {
+      hoverVideoRef.current.pause();
+      hoverVideoRef.current.currentTime = 0;
+    }
+  }, []);
+  
+  // Play hover video when hoveredVideoStyle changes
+  useEffect(() => {
+    if (hoveredVideoStyle && hoverVideoRef.current) {
+      hoverVideoRef.current.play().catch(() => {});
+    }
+  }, [hoveredVideoStyle]);
+  
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
   }, []);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,12 +237,16 @@ const AngelStyleGallery = memo(({
         <div className="flex items-center gap-2 mb-3">
           <Play className="w-4 h-4 text-muted-foreground" />
           <h4 className="text-sm font-medium text-foreground/80">Video Angels</h4>
+          {!prefersReducedMotion && (
+            <span className="text-[10px] text-muted-foreground">(hover to preview)</span>
+          )}
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {videoStyles.map((style) => {
             const isSelected = currentStyle === style.id && !customImageUrl;
             const videoSources = VIDEO_SOURCES[style.id as VideoAngelStyleId];
             const posterSrc = videoSources?.posterSrc;
+            const isHovered = hoveredVideoStyle === style.id;
             
             return (
               <button
@@ -193,6 +257,10 @@ const AngelStyleGallery = memo(({
                     onCustomImageRemove();
                   }
                 }}
+                onMouseEnter={() => handleVideoHover(style.id)}
+                onMouseLeave={handleVideoLeave}
+                onFocus={() => handleVideoHover(style.id)}
+                onBlur={handleVideoLeave}
                 className={cn(
                   "relative flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-200",
                   isSelected 
@@ -212,18 +280,37 @@ const AngelStyleGallery = memo(({
                   VIDEO
                 </div>
                 
-                {/* Poster thumbnail with glow */}
+                {/* Poster thumbnail with hover video preview */}
                 <div 
                   className="w-14 h-14 flex items-center justify-center mb-2 rounded-full overflow-hidden transition-all duration-300"
                   style={{
                     background: `radial-gradient(circle, ${currentColorConfig.glowColor} 0%, transparent 70%)`,
                   }}
                 >
-                  {posterSrc ? (
+                  {isHovered && videoSources && !prefersReducedMotion ? (
+                    <video
+                      ref={isHovered ? hoverVideoRef : null}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className="w-12 h-12 object-cover rounded-full transition-opacity duration-200"
+                      style={{ 
+                        opacity: isHovered ? 1 : 0,
+                        background: 'transparent',
+                      }}
+                    >
+                      {videoSources.webmSrc && (
+                        <source src={videoSources.webmSrc} type="video/webm" />
+                      )}
+                      <source src={videoSources.mp4Src} type="video/mp4" />
+                    </video>
+                  ) : posterSrc ? (
                     <img 
                       src={posterSrc} 
                       alt={style.name}
-                      className="w-12 h-12 object-cover rounded-full"
+                      className="w-12 h-12 object-cover rounded-full transition-opacity duration-200"
                       loading="lazy"
                     />
                   ) : (
