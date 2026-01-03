@@ -124,7 +124,28 @@ const VideoAngelComponent = memo(({ styleId, size = 68, className = '' }: VideoA
   const qualitySources = getVideoSourcesForQuality(styleId, 'high');
   
   return (
-    <div className={`relative ${className}`}>
+    <div 
+      className={`relative ${className}`}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        overflow: 'hidden',
+        // Viền vàng ánh kim subtle
+        boxShadow: '0 0 0 2px rgba(218, 165, 32, 0.5), 0 0 15px rgba(255, 215, 0, 0.4), inset 0 0 10px rgba(255, 223, 140, 0.3)',
+      }}
+    >
+      {/* Nền vàng ánh kim gradient */}
+      <div 
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,223,140,0.95) 0%, rgba(218,165,32,0.9) 40%, rgba(184,134,11,0.85) 100%)',
+        }}
+      />
+      
+      {/* Video với blend mode để hòa trộn */}
       <video 
         ref={videoRef}
         autoPlay={!prefersReducedMotion}
@@ -135,10 +156,14 @@ const VideoAngelComponent = memo(({ styleId, size = 68, className = '' }: VideoA
         style={{ 
           width: size,
           height: size,
-          objectFit: 'contain',
+          objectFit: 'cover',
+          borderRadius: '50%',
           pointerEvents: 'none',
           userSelect: 'none',
-          background: 'transparent',
+          position: 'relative',
+          zIndex: 1,
+          // Multiply blend để nền trắng biến mất, Screen cho nền đen
+          mixBlendMode: 'multiply',
         }}
       >
         {/* WebM with alpha channel (if available) - browser tries this first */}

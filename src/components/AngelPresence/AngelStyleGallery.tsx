@@ -326,11 +326,12 @@ const AngelStyleGallery = memo(({
                   VIDEO
                 </div>
                 
-                {/* Poster thumbnail with hover video preview */}
+                {/* Poster thumbnail with hover video preview - khung tròn + nền vàng ánh kim */}
                 <div 
-                  className="w-14 h-14 flex items-center justify-center mb-2 rounded-full overflow-hidden transition-all duration-300"
+                  className="w-12 h-12 flex items-center justify-center mb-2 rounded-full overflow-hidden transition-all duration-300"
                   style={{
-                    background: `radial-gradient(circle, ${currentColorConfig.glowColor} 0%, transparent 70%)`,
+                    background: 'radial-gradient(circle, rgba(255,223,140,0.95) 0%, rgba(218,165,32,0.9) 40%, rgba(184,134,11,0.85) 100%)',
+                    boxShadow: '0 0 0 2px rgba(218,165,32,0.5), 0 0 10px rgba(255,215,0,0.3)',
                   }}
                 >
                   {isHovered && videoSources && !prefersReducedMotion ? (
@@ -344,7 +345,7 @@ const AngelStyleGallery = memo(({
                       className="w-12 h-12 object-cover rounded-full transition-opacity duration-200"
                       style={{ 
                         opacity: isHovered ? 1 : 0,
-                        background: 'transparent',
+                        mixBlendMode: 'multiply',
                       }}
                     >
                       {videoSources.webmHighSrc && (
@@ -357,11 +358,12 @@ const AngelStyleGallery = memo(({
                       src={posterSrc} 
                       alt={style.name}
                       className="w-12 h-12 object-cover rounded-full transition-opacity duration-200"
+                      style={{ mixBlendMode: 'multiply' }}
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center">
-                      <Play className="w-5 h-5 text-muted-foreground" />
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center">
+                      <Play className="w-5 h-5 text-amber-800/60" />
                     </div>
                   )}
                 </div>
