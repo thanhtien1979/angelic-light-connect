@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -19,6 +19,7 @@ import { useSoundSettings } from "@/hooks/useSoundSettings";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { SyncIndicator } from "@/components/AngelPresence/SyncIndicator";
+import { useLightBurst, LIGHT_BURST_COLORS, LightBurstSettings } from "@/contexts/LightBurstContext";
 import { ResetConfirmDialog } from "@/components/AngelPresence/ResetConfirmDialog";
 
 type SettingsSection = "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
@@ -35,6 +36,7 @@ const Settings = () => {
   const { theme, setTheme } = useTheme();
   const { syncTheme } = useThemePreference();
   const { settings: soundSettings, updateSetting: updateSoundSetting, prefersReducedMotion } = useSoundSettings();
+  const { settings: lightBurstSettings, updateSetting: updateLightBurstSetting } = useLightBurst();
   const { language, setLanguage, t } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [activeSection, setActiveSection] = useState<SettingsSection>("angel");
@@ -598,6 +600,98 @@ const Settings = () => {
                         </div>
                       </motion.div>
                     )}
+
+                    <Separator className="my-4" />
+
+                    {/* Light Burst Settings */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-primary" />
+                        <Label className="text-sm font-medium">Hiệu Ứng Bùng Nổ Ánh Sáng</Label>
+                      </div>
+
+                      {/* Light Burst Toggle */}
+                      <div className="flex items-center justify-between p-3 rounded-xl bg-card/30 border border-border/50">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-muted/50">
+                            <Sparkles className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-foreground">
+                              Bật Hiệu Ứng
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Hiển thị ánh sáng bùng nổ khi nhấp chuột
+                            </p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={lightBurstSettings.enabled}
+                          onCheckedChange={(checked) => updateLightBurstSetting("enabled", checked)}
+                        />
+                      </div>
+
+                      {/* Light Burst Sound */}
+                      <div className="flex items-center justify-between p-3 rounded-xl bg-card/30 border border-border/50">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-muted/50">
+                            <Volume2 className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-foreground">
+                              Âm Thanh
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Phát âm thanh nhẹ nhàng khi bùng nổ
+                            </p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={lightBurstSettings.soundEnabled}
+                          onCheckedChange={(checked) => updateLightBurstSetting("soundEnabled", checked)}
+                          disabled={!lightBurstSettings.enabled}
+                        />
+                      </div>
+
+                      {/* Color Selection */}
+                      {lightBurstSettings.enabled && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="space-y-3"
+                        >
+                          <Label className="text-sm font-medium">Màu Sắc Ánh Sáng</Label>
+                          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                            {(Object.keys(LIGHT_BURST_COLORS) as Array<keyof typeof LIGHT_BURST_COLORS>).map((colorKey) => {
+                              const colorInfo = LIGHT_BURST_COLORS[colorKey];
+                              const isSelected = lightBurstSettings.color === colorKey;
+                              const bgStyle = colorKey === 'rainbow' 
+                                ? 'linear-gradient(135deg, hsl(0, 100%, 70%), hsl(60, 100%, 70%), hsl(120, 100%, 70%), hsl(180, 100%, 70%), hsl(240, 100%, 70%), hsl(300, 100%, 70%))'
+                                : `hsl(${colorInfo.hue}, 100%, 75%)`;
+                              
+                              return (
+                                <button
+                                  key={colorKey}
+                                  onClick={() => updateLightBurstSetting("color", colorKey)}
+                                  className={cn(
+                                    "p-3 rounded-xl border text-center transition-all duration-200",
+                                    isSelected
+                                      ? "border-primary shadow-md scale-105"
+                                      : "border-border/50 hover:border-primary/30"
+                                  )}
+                                >
+                                  <div
+                                    className="w-8 h-8 rounded-full mx-auto mb-2 shadow-lg"
+                                    style={{ background: bgStyle }}
+                                  />
+                                  <span className="text-xs font-medium">{colorInfo.name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
                   </CardContent>
                 </>
               )}
