@@ -24,6 +24,12 @@ export interface AngelAnimationConfig {
   pulseGlow?: boolean;        // adds breathing glow effect
 }
 
+export interface VideoSources {
+  webmSrc?: string;    // WebM with alpha (preferred)
+  mp4Src: string;      // MP4 fallback (required)
+  posterSrc?: string;  // Thumbnail for selector
+}
+
 export interface AngelStyleConfig {
   id: AngelStyle;
   name: string;
@@ -32,6 +38,8 @@ export interface AngelStyleConfig {
   glowColor: string;
   scale: number;
   animation: AngelAnimationConfig;
+  isVideo?: boolean;
+  videoSources?: VideoSources;
 }
 
 export interface SparkleParticle {
@@ -305,6 +313,7 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.75,
     glowColor: 'rgba(255,220,255,0.7)',
     scale: 1.1,
+    isVideo: true,
     animation: {
       floatDuration: 3,
       floatAmplitude: 4,
@@ -322,6 +331,7 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.7,
     glowColor: 'rgba(200,220,255,0.65)',
     scale: 1.15,
+    isVideo: true,
     animation: {
       floatDuration: 3.5,
       floatAmplitude: 3.5,
@@ -339,6 +349,7 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.75,
     glowColor: 'rgba(255,250,220,0.7)',
     scale: 1.1,
+    isVideo: true,
     animation: {
       floatDuration: 3.2,
       floatAmplitude: 3,
@@ -356,6 +367,7 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.72,
     glowColor: 'rgba(100,220,180,0.65)',
     scale: 1.2,
+    isVideo: true,
     animation: {
       floatDuration: 3.8,
       floatAmplitude: 2.5,
@@ -373,6 +385,7 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.78,
     glowColor: 'rgba(200,150,255,0.7)',
     scale: 1.15,
+    isVideo: true,
     animation: {
       floatDuration: 3.5,
       floatAmplitude: 3.5,
