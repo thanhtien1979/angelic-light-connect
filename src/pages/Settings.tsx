@@ -18,6 +18,8 @@ import { useThemePreference } from "@/hooks/useThemePreference";
 import { useSoundSettings } from "@/hooks/useSoundSettings";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { SyncIndicator } from "@/components/AngelPresence/SyncIndicator";
+import { ResetConfirmDialog } from "@/components/AngelPresence/ResetConfirmDialog";
 
 type SettingsSection = "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
 type ThemeOption = "light" | "dark" | "system";
@@ -44,6 +46,8 @@ const Settings = () => {
     trailEnabled,
     customImageUrl,
     isUploading: angelUploading,
+    isLoading: angelLoading,
+    syncStatus,
     toggle: toggleAngel,
     setStyle,
     setColor,
@@ -51,6 +55,7 @@ const Settings = () => {
     setTrailEnabled,
     uploadCustomImage,
     removeCustomImage,
+    resetToDefaults,
   } = useAngelPresence();
 
   // Notification settings state
@@ -240,13 +245,19 @@ const Settings = () => {
               {activeSection === "angel" && (
                 <>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-primary" />
-                      Angel Presence
-                    </CardTitle>
-                    <CardDescription>
-                      Customize your gentle angelic companion that follows you across the site
-                    </CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-primary" />
+                          Angel Presence
+                          <SyncIndicator status={syncStatus} className="ml-2" />
+                        </CardTitle>
+                        <CardDescription>
+                          Customize your gentle angelic companion that follows you across the site
+                        </CardDescription>
+                      </div>
+                      <ResetConfirmDialog onConfirm={resetToDefaults} isLoading={angelLoading} />
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {/* Master Toggle */}
