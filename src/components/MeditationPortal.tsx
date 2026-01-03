@@ -9,6 +9,7 @@ import { useSoundSettingsContext } from "@/contexts/SoundSettingsContext";
 import CoinRewardAnimation from "@/components/CoinRewardAnimation";
 import CelebrationEffect from "@/components/CelebrationEffect";
 import MeditationAmbientSelector from "@/components/MeditationAmbientSelector";
+import ContinueAmbientPrompt from "@/components/ContinueAmbientPrompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 
@@ -216,27 +217,38 @@ const MeditationPortal = () => {
   } = useAmbientSound();
   const { settings: soundSettings, prefersReducedMotion } = useSoundSettingsContext();
   
-  // Track if meditation is ending via timer (for gentle fade)
-  const isMeditationEndingRef = useRef(false);
+  // Track if meditation is ending (for showing continue ambient prompt)
+  const [showContinueAmbientPrompt, setShowContinueAmbientPrompt] = useState(false);
+  const wasAmbientPlayingRef = useRef(false);
 
-  // Sleep timer - now triggers gentle ambient fade out
+  // Sleep timer - now shows continue ambient prompt instead of auto-fading
   const handleTimerEnd = useCallback(() => {
-    isMeditationEndingRef.current = true;
     pause();
     
-    // Gentle fade out ambient sound when meditation ends via timer
-    // Only fade if ambient is playing and user hasn't disabled sounds globally
+    // Show continue prompt if ambient was playing and sounds are enabled globally
     if (isAmbientPlaying && soundSettings.ambientSounds) {
-      // Use longer fade for reduced motion users or standard 2 seconds
+      wasAmbientPlayingRef.current = true;
+      setShowContinueAmbientPrompt(true);
+    }
+  }, [pause, isAmbientPlaying, soundSettings.ambientSounds]);
+
+  // Handle user choosing to continue ambient sound
+  const handleContinueAmbient = useCallback(() => {
+    setShowContinueAmbientPrompt(false);
+    // Ambient keeps playing, nothing to do
+  }, []);
+
+  // Handle user choosing to stop ambient sound
+  const handleStopAmbient = useCallback(() => {
+    setShowContinueAmbientPrompt(false);
+    
+    // Gentle fade out
+    if (wasAmbientPlayingRef.current && soundSettings.ambientSounds) {
       const fadeDuration = prefersReducedMotion ? 1000 : 2000;
       ambientGentleFadeOut(fadeDuration);
     }
-    
-    // Reset the flag after a short delay
-    setTimeout(() => {
-      isMeditationEndingRef.current = false;
-    }, 100);
-  }, [pause, isAmbientPlaying, soundSettings.ambientSounds, prefersReducedMotion, ambientGentleFadeOut]);
+    wasAmbientPlayingRef.current = false;
+  }, [soundSettings.ambientSounds, prefersReducedMotion, ambientGentleFadeOut]);
   
   const { isActive: isSleepTimerActive, remainingSeconds, startTimer, cancelTimer, formatRemainingTime } = useSleepTimer(handleTimerEnd);
   
@@ -430,6 +442,13 @@ const MeditationPortal = () => {
         message={lastRewardResult?.message || "Ánh sáng đang lan tỏa qua con!"}
         onClose={dismissNotification}
         variant="meditation"
+      />
+      
+      {/* Continue ambient sound prompt */}
+      <ContinueAmbientPrompt
+        isVisible={showContinueAmbientPrompt}
+        onContinue={handleContinueAmbient}
+        onStop={handleStopAmbient}
       />
       
     <section id="meditation" className="relative min-h-screen py-24 px-4 overflow-hidden">

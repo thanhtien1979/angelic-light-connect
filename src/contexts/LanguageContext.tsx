@@ -155,6 +155,14 @@ const translations: Record<Language, Record<string, string>> = {
     "meditation.complete": "Hoàn thành",
     "meditation.duration": "Thời gian",
     "meditation.minutes": "phút",
+    "meditation.continueAmbient": "Tiếp tục âm thanh nền?",
+    "meditation.continueAmbientHint": "Âm thanh sẽ tiếp tục phát trong nền",
+    "meditation.continue": "Tiếp tục",
+    "meditation.autoDismiss": "Tự động dừng sau",
+    
+    // Common extras
+    "common.recent": "Gần đây",
+    "common.off": "đã tắt",
     
     // Profile
     "profile.title": "Hồ sơ",
@@ -303,6 +311,14 @@ const translations: Record<Language, Record<string, string>> = {
     "meditation.complete": "Complete",
     "meditation.duration": "Duration",
     "meditation.minutes": "minutes",
+    "meditation.continueAmbient": "Continue ambient sound?",
+    "meditation.continueAmbientHint": "Sound will continue playing in the background",
+    "meditation.continue": "Continue",
+    "meditation.autoDismiss": "Auto-stop in",
+    
+    // Common extras
+    "common.recent": "Recent",
+    "common.off": "is off",
     
     // Profile
     "profile.title": "Profile",
@@ -451,6 +467,14 @@ const translations: Record<Language, Record<string, string>> = {
     "meditation.complete": "完成",
     "meditation.duration": "时长",
     "meditation.minutes": "分钟",
+    "meditation.continueAmbient": "继续播放环境音?",
+    "meditation.continueAmbientHint": "音乐将在后台继续播放",
+    "meditation.continue": "继续",
+    "meditation.autoDismiss": "自动停止于",
+    
+    // Common extras
+    "common.recent": "最近",
+    "common.off": "已关闭",
     
     // Profile
     "profile.title": "个人资料",
@@ -599,6 +623,14 @@ const translations: Record<Language, Record<string, string>> = {
     "meditation.complete": "完了",
     "meditation.duration": "時間",
     "meditation.minutes": "分",
+    "meditation.continueAmbient": "環境音を続けますか？",
+    "meditation.continueAmbientHint": "音楽はバックグラウンドで再生され続けます",
+    "meditation.continue": "続ける",
+    "meditation.autoDismiss": "自動停止まで",
+    
+    // Common extras
+    "common.recent": "最近",
+    "common.off": "オフ",
     
     // Profile
     "profile.title": "プロフィール",
@@ -747,6 +779,14 @@ const translations: Record<Language, Record<string, string>> = {
     "meditation.complete": "완료",
     "meditation.duration": "시간",
     "meditation.minutes": "분",
+    "meditation.continueAmbient": "환경 소리를 계속 재생할까요?",
+    "meditation.continueAmbientHint": "소리가 백그라운드에서 계속 재생됩니다",
+    "meditation.continue": "계속",
+    "meditation.autoDismiss": "자동 중지까지",
+    
+    // Common extras
+    "common.recent": "최근",
+    "common.off": "꺼짐",
     
     // Profile
     "profile.title": "프로필",
@@ -895,6 +935,14 @@ const translations: Record<Language, Record<string, string>> = {
     "meditation.complete": "Terminé",
     "meditation.duration": "Durée",
     "meditation.minutes": "minutes",
+    "meditation.continueAmbient": "Continuer le son ambiant ?",
+    "meditation.continueAmbientHint": "Le son continuera en arrière-plan",
+    "meditation.continue": "Continuer",
+    "meditation.autoDismiss": "Arrêt auto dans",
+    
+    // Common extras
+    "common.recent": "Récent",
+    "common.off": "est désactivé",
     
     // Profile
     "profile.title": "Profil",
