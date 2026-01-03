@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-gold' | 'fairy-yellow' | 'fairy-green' | 'fairy-tinker' | 'fairy-cute' | 'fairy-star' | 'fairy-leaf' | 'fairy-sunny' | 'fairy-butterfly' | 'fairy-spring' | 'fairy-heart' | 'fairy-love' | 'fairy-lavender' | 'fairy-rosemary' | 'fairy-butterfly-gold' | 'fairy-sunflower' | 'fairy-peach' | 'fairy-lime' | 'fairy-ruby' | 'fairy-ocean' | 'fairy-sakura' | 'fairy-cherry-blossom' | 'fairy-doll' | 'fairy-rainbow' | 'fairy-colorful' | 'fairy-pencil' | 'fairy-teal' | 'fairy-violet' | 'fairy-strawberry' | 'fairy-mint-star' | 'fairy-pink-star' | 'fairy-rose-dress' | 'fairy-golden-sit' | 'fairy-nature-wings' | 'fairy-butterfly-colorful' | 'fairy-rainbow-wings' | 'fairy-galaxy' | 'fairy-purple-flower' | 'fairy-violet-bloom' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger' | 'grok-angel-1' | 'grok-angel-2' | 'grok-angel-3';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-gold' | 'fairy-yellow' | 'fairy-green' | 'fairy-tinker' | 'fairy-cute' | 'fairy-star' | 'fairy-leaf' | 'fairy-sunny' | 'fairy-butterfly' | 'fairy-spring' | 'fairy-heart' | 'fairy-love' | 'fairy-lavender' | 'fairy-rosemary' | 'fairy-butterfly-gold' | 'fairy-sunflower' | 'fairy-peach' | 'fairy-lime' | 'fairy-ruby' | 'fairy-ocean' | 'fairy-sakura' | 'fairy-cherry-blossom' | 'fairy-doll' | 'fairy-rainbow' | 'fairy-colorful' | 'fairy-pencil' | 'fairy-teal' | 'fairy-violet' | 'fairy-strawberry' | 'fairy-mint-star' | 'fairy-pink-star' | 'fairy-rose-dress' | 'fairy-golden-sit' | 'fairy-nature-wings' | 'fairy-butterfly-colorful' | 'fairy-rainbow-wings' | 'fairy-galaxy' | 'fairy-purple-flower' | 'fairy-violet-bloom' | 'fairy-easter' | 'fairy-prayer' | 'fairy-tinkerbell' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger' | 'grok-angel-1' | 'grok-angel-2' | 'grok-angel-3';
 
 export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
 
@@ -1117,6 +1117,57 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
       sparkleIntensity: 1.2,
       trailIntensity: 1.0,
       pulseGlow: true,
+    },
+  },
+  {
+    id: 'fairy-easter',
+    name: 'Tiên Nữ Phục Sinh',
+    description: 'Tiên nữ xinh xắn với giỏ trứng Phục Sinh đầy màu sắc',
+    glowIntensity: 0.68,
+    glowColor: 'rgba(255,200,220,0.65)',
+    scale: 1,
+    animation: {
+      floatDuration: 2.8,
+      floatAmplitude: 4.5,
+      flapDuration: 2.4,
+      followEasing: 0.13,
+      sparkleIntensity: 1.3,
+      trailIntensity: 1.2,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-prayer',
+    name: 'Thiên Thần Cầu Nguyện',
+    description: 'Thiên thần tóc vàng với đôi cánh cầu vồng đang cầu nguyện',
+    glowIntensity: 0.72,
+    glowColor: 'rgba(200,220,255,0.7)',
+    scale: 1.05,
+    animation: {
+      floatDuration: 3.5,
+      floatAmplitude: 3,
+      flapDuration: 3,
+      followEasing: 0.09,
+      sparkleIntensity: 1.0,
+      trailIntensity: 0.95,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'fairy-tinkerbell',
+    name: 'Tiên Nữ Tinkerbell',
+    description: 'Tiên nữ xanh lá quyến rũ với đôi cánh lấp lánh',
+    glowIntensity: 0.7,
+    glowColor: 'rgba(150,255,150,0.65)',
+    scale: 1.1,
+    animation: {
+      floatDuration: 2.4,
+      floatAmplitude: 5.5,
+      flapDuration: 2,
+      followEasing: 0.15,
+      sparkleIntensity: 1.45,
+      trailIntensity: 1.35,
+      bouncy: true,
     },
   },
 ];
