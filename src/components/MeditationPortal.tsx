@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sun, Sparkles, Play, Pause, Volume2, VolumeX, Music, ChevronDown, Check, SkipBack, SkipForward, Clock, Disc, Rewind, FastForward, Timer, Moon, X, Keyboard, HelpCircle, Repeat, Shuffle } from "lucide-react";
 import { useMeditationAudio, MeditationPlaylist } from "@/hooks/useMeditationAudio";
 import { useSleepTimer, SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { useMeditationReward } from "@/hooks/useMeditationReward";
+import { useAmbientSound } from "@/hooks/useAmbientSound";
+import { useSoundSettingsContext } from "@/contexts/SoundSettingsContext";
 import CoinRewardAnimation from "@/components/CoinRewardAnimation";
 import CelebrationEffect from "@/components/CelebrationEffect";
 import MeditationAmbientSelector from "@/components/MeditationAmbientSelector";
@@ -206,10 +208,35 @@ const MeditationPortal = () => {
     pause,
   } = useMeditationAudio();
 
-  // Sleep timer
+  // Ambient sound controls
+  const { 
+    isPlaying: isAmbientPlaying, 
+    gentleFadeOut: ambientGentleFadeOut,
+    stopImmediately: ambientStopImmediately 
+  } = useAmbientSound();
+  const { settings: soundSettings, prefersReducedMotion } = useSoundSettingsContext();
+  
+  // Track if meditation is ending via timer (for gentle fade)
+  const isMeditationEndingRef = useRef(false);
+
+  // Sleep timer - now triggers gentle ambient fade out
   const handleTimerEnd = useCallback(() => {
+    isMeditationEndingRef.current = true;
     pause();
-  }, [pause]);
+    
+    // Gentle fade out ambient sound when meditation ends via timer
+    // Only fade if ambient is playing and user hasn't disabled sounds globally
+    if (isAmbientPlaying && soundSettings.ambientSounds) {
+      // Use longer fade for reduced motion users or standard 2 seconds
+      const fadeDuration = prefersReducedMotion ? 1000 : 2000;
+      ambientGentleFadeOut(fadeDuration);
+    }
+    
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      isMeditationEndingRef.current = false;
+    }, 100);
+  }, [pause, isAmbientPlaying, soundSettings.ambientSounds, prefersReducedMotion, ambientGentleFadeOut]);
   
   const { isActive: isSleepTimerActive, remainingSeconds, startTimer, cancelTimer, formatRemainingTime } = useSleepTimer(handleTimerEnd);
   
@@ -544,7 +571,7 @@ const MeditationPortal = () => {
             viewport={{ once: true }}
             className="mt-8"
           >
-            <MeditationAmbientSelector compact />
+            <MeditationAmbientSelector compact journeyId={currentPlaylist.id} />
           </motion.div>
         </motion.div>
 

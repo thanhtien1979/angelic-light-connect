@@ -137,10 +137,35 @@ export const SOUND_CATEGORIES: { id: AmbientSoundCategory; name: string; icon: s
 
 const STORAGE_KEY = "meditation-ambient-sound";
 const VOLUME_KEY = "meditation-ambient-volume";
+const JOURNEY_SOUNDS_KEY = "meditation-journey-ambient-sounds";
+
+// Helper to get journey-specific saved sounds
+const getJourneySounds = (): Record<string, AmbientSoundType> => {
+  try {
+    const stored = localStorage.getItem(JOURNEY_SOUNDS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+};
+
+// Helper to save journey-specific sound
+const saveJourneySound = (journeyId: string, soundId: AmbientSoundType) => {
+  const existing = getJourneySounds();
+  existing[journeyId] = soundId;
+  localStorage.setItem(JOURNEY_SOUNDS_KEY, JSON.stringify(existing));
+};
+
+// Get saved sound for a specific journey (exported for use in components)
+export const getJourneyAmbientSound = (journeyId: string): AmbientSoundType | null => {
+  const journeySounds = getJourneySounds();
+  return journeySounds[journeyId] || null;
+};
 
 export const useAmbientSound = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const currentJourneyRef = useRef<string | null>(null);
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -214,6 +239,7 @@ export const useAmbientSound = () => {
     });
   }, [clearFadeInterval]);
 
+  // Immediate stop - used for user-driven stop actions
   const stopSound = useCallback(async () => {
     clearFadeInterval();
     
@@ -230,7 +256,43 @@ export const useAmbientSound = () => {
     setIsPlaying(false);
   }, [clearFadeInterval, fadeOut]);
 
-  const playSound = useCallback(async (soundType: AmbientSoundType) => {
+  // Gentle fade out - used when meditation ends (longer duration)
+  const gentleFadeOut = useCallback(async (durationMs: number = 2000): Promise<void> => {
+    if (!audioRef.current) {
+      setIsPlaying(false);
+      return;
+    }
+    
+    clearFadeInterval();
+    
+    try {
+      await fadeOut(audioRef.current, durationMs);
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    } catch (e) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    }
+    
+    setIsPlaying(false);
+  }, [clearFadeInterval, fadeOut]);
+
+  // Stop immediately without any fade (for when ambient sounds are disabled globally)
+  const stopImmediately = useCallback(() => {
+    clearFadeInterval();
+    
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    
+    setIsPlaying(false);
+  }, [clearFadeInterval]);
+
+  const playSound = useCallback(async (soundType: AmbientSoundType, journeyId?: string) => {
     await stopSound();
     
     if (soundType === "silence") {
@@ -241,6 +303,12 @@ export const useAmbientSound = () => {
     if (!soundOption?.audioUrl) {
       console.warn("No audio URL for sound:", soundType);
       return;
+    }
+
+    // Save journey-specific sound preference if journeyId is provided
+    if (journeyId) {
+      currentJourneyRef.current = journeyId;
+      saveJourneySound(journeyId, soundType);
     }
 
     setIsLoading(true);
@@ -284,6 +352,15 @@ export const useAmbientSound = () => {
     }
   }, [volume, stopSound, fadeIn]);
 
+  // Set current journey and optionally preselect saved sound (without playing)
+  const setCurrentJourney = useCallback((journeyId: string) => {
+    currentJourneyRef.current = journeyId;
+    const savedSound = getJourneyAmbientSound(journeyId);
+    if (savedSound) {
+      setSelectedSound(savedSound);
+    }
+  }, []);
+
   const toggleSound = useCallback(() => {
     if (isPlaying) {
       stopSound();
@@ -312,7 +389,11 @@ export const useAmbientSound = () => {
     setVolume,
     playSound,
     stopSound,
+    stopImmediately,
+    gentleFadeOut,
     toggleSound,
+    setCurrentJourney,
+    currentJourneyId: currentJourneyRef.current,
     ambientSounds: AMBIENT_SOUNDS,
   };
 };

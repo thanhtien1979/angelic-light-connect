@@ -1,8 +1,9 @@
+import { useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Waves, TreePine, CloudRain, Volume2, VolumeX, Info } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { useAmbientSound, AmbientSoundType } from "@/hooks/useAmbientSound";
+import { useAmbientSound, AmbientSoundType, getJourneyAmbientSound } from "@/hooks/useAmbientSound";
 import { useSoundSettingsContext } from "@/contexts/SoundSettingsContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,8 @@ import { cn } from "@/lib/utils";
 interface MeditationAmbientSelectorProps {
   className?: string;
   compact?: boolean;
+  journeyId?: string; // The meditation journey/playlist ID for per-journey persistence
+  onMeditationEnd?: () => void; // Optional callback when meditation ends to trigger gentle fade
 }
 
 // Simplified sounds for meditation context
@@ -34,13 +37,18 @@ const MEDITATION_AMBIENT_SOUNDS = [
   },
 ];
 
-const MeditationAmbientSelector = ({ className, compact = false }: MeditationAmbientSelectorProps) => {
+const MeditationAmbientSelector = ({ 
+  className, 
+  compact = false, 
+  journeyId 
+}: MeditationAmbientSelectorProps) => {
   const { t } = useLanguage();
   const { settings, isSoundAllowed, prefersReducedMotion } = useSoundSettingsContext();
   const {
     isPlaying,
     isLoading,
     selectedSound,
+    setSelectedSound,
     volume,
     setVolume,
     playSound,
@@ -49,17 +57,27 @@ const MeditationAmbientSelector = ({ className, compact = false }: MeditationAmb
 
   const isAmbientAllowed = isSoundAllowed("ambientSounds");
 
-  const handleSoundSelect = (soundId: AmbientSoundType) => {
+  // When journeyId changes, preselect the saved sound for that journey (without playing)
+  useEffect(() => {
+    if (journeyId && isAmbientAllowed) {
+      const savedSound = getJourneyAmbientSound(journeyId);
+      if (savedSound) {
+        setSelectedSound(savedSound);
+      }
+    }
+  }, [journeyId, isAmbientAllowed, setSelectedSound]);
+
+  const handleSoundSelect = useCallback((soundId: AmbientSoundType) => {
     if (!isAmbientAllowed) return;
 
     if (selectedSound === soundId && isPlaying) {
       // Toggle off if clicking the same sound
       stopSound();
     } else {
-      // Play the new sound
-      playSound(soundId);
+      // Play the new sound, passing journeyId to save the preference
+      playSound(soundId, journeyId);
     }
-  };
+  }, [isAmbientAllowed, selectedSound, isPlaying, stopSound, playSound, journeyId]);
 
   // Disabled state message
   if (!settings.ambientSounds) {

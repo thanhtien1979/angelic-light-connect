@@ -45,6 +45,7 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
     setVolume,
     playSound,
     stopSound,
+    gentleFadeOut,
   } = useAmbientSound();
 
   // Select meditation theme based on greeting
@@ -63,7 +64,7 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
     setSelectedTheme(MEDITATION_THEMES[randomIndex]);
   }, [greetingTheme]);
 
-  // Timer effect
+  // Timer effect - with gentle fade out when meditation ends naturally
   useEffect(() => {
     if (isActive && timeRemaining > 0) {
       intervalRef.current = setInterval(() => {
@@ -71,7 +72,8 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
           if (prev <= 1) {
             setIsActive(false);
             setHasCompleted(true);
-            stopSound();
+            // Use gentle fade out when meditation ends naturally (timer completion)
+            gentleFadeOut(2000);
             saveMeditationSession();
             return 0;
           }
@@ -85,7 +87,7 @@ const GreetingMeditationInvite = ({ greetingTheme, onClose }: GreetingMeditation
         clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, timeRemaining]);
+  }, [isActive, timeRemaining, gentleFadeOut]);
 
   // Save meditation session to database
   const saveMeditationSession = async () => {
