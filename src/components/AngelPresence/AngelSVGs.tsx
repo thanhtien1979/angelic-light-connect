@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import type { AngelStyle } from './types';
+import fairyAngelImage from '@/assets/fairy-angel-cursor.png';
 
 /**
  * Angel SVG Components - Each represents a different angel style
@@ -196,6 +197,20 @@ export const HealingAngelSVG = memo(() => (
 ));
 HealingAngelSVG.displayName = 'HealingAngelSVG';
 
+export const FairyAngelSVG = memo(() => (
+  <img 
+    src={fairyAngelImage} 
+    alt="" 
+    className="w-12 h-12 object-contain"
+    style={{ 
+      pointerEvents: 'none',
+      userSelect: 'none',
+    }}
+    draggable={false}
+  />
+));
+FairyAngelSVG.displayName = 'FairyAngelSVG';
+
 // Map styles to SVG components
 export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   classic: ClassicAngelSVG,
@@ -205,4 +220,5 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   joy: JoyAngelSVG,
   peace: PeaceAngelSVG,
   healing: HealingAngelSVG,
+  fairy: FairyAngelSVG,
 };
