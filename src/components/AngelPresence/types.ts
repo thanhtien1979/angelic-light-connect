@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger' | 'grok-angel-1' | 'grok-angel-2' | 'grok-angel-3';
 
 export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
 
@@ -397,6 +397,60 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
       flapDuration: 3,
       followEasing: 0.1,
       sparkleIntensity: 0.9,
+      trailIntensity: 1.0,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'grok-angel-1',
+    name: 'Grok Angel I',
+    description: 'Thiên thần thần thánh lung linh',
+    glowIntensity: 0.72,
+    glowColor: 'rgba(255,240,200,0.7)',
+    scale: 1.1,
+    isVideo: true,
+    animation: {
+      floatDuration: 3.2,
+      floatAmplitude: 3.5,
+      flapDuration: 2.8,
+      followEasing: 0.1,
+      sparkleIntensity: 1.1,
+      trailIntensity: 1.0,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'grok-angel-2',
+    name: 'Grok Angel II',
+    description: 'Thiên thần ánh sáng huyền bí',
+    glowIntensity: 0.75,
+    glowColor: 'rgba(220,200,255,0.7)',
+    scale: 1.15,
+    isVideo: true,
+    animation: {
+      floatDuration: 3.5,
+      floatAmplitude: 3,
+      flapDuration: 3,
+      followEasing: 0.09,
+      sparkleIntensity: 1.0,
+      trailIntensity: 1.1,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'grok-angel-3',
+    name: 'Grok Angel III',
+    description: 'Thiên thần vũ trụ thiêng liêng',
+    glowIntensity: 0.78,
+    glowColor: 'rgba(180,220,255,0.7)',
+    scale: 1.12,
+    isVideo: true,
+    animation: {
+      floatDuration: 3.4,
+      floatAmplitude: 3.2,
+      flapDuration: 2.9,
+      followEasing: 0.1,
+      sparkleIntensity: 1.2,
       trailIntensity: 1.0,
       pulseGlow: true,
     },
