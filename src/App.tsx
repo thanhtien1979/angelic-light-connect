@@ -22,6 +22,7 @@ import DailyLightGreeting from "./components/DailyLightGreeting";
 import ChatButton from "./components/ChatButton";
 import FloatingAmbientPlayer from "./components/FloatingAmbientPlayer";
 import AngelPresence from "./components/AngelPresence";
+import ClickLightBurst from "./components/ClickLightBurst";
 import { usePresence } from "./hooks/usePresence";
 import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
 import { useTokenRefresh } from "./hooks/useTokenRefresh";
@@ -52,6 +53,7 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {children}
+      <ClickLightBurst />
       <AngelPresence 
         enabled={angelEnabled} 
         style={angelStyle}
