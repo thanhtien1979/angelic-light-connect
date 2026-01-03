@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-video';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-video' | 'celestial-video';
 
 export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
 
@@ -313,6 +313,23 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
       sparkleIntensity: 1.4,
       trailIntensity: 1.3,
       bouncy: true,
+    },
+  },
+  {
+    id: 'celestial-video',
+    name: 'Celestial Video',
+    description: 'Mesmerizing celestial video angel',
+    glowIntensity: 0.7,
+    glowColor: 'rgba(200,220,255,0.65)',
+    scale: 1.15,
+    animation: {
+      floatDuration: 3.5,
+      floatAmplitude: 3.5,
+      flapDuration: 3,
+      followEasing: 0.1,
+      sparkleIntensity: 0.8,
+      trailIntensity: 0.9,
+      pulseGlow: true,
     },
   },
 ];
