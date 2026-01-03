@@ -5,10 +5,12 @@ import { AngelSVGMap } from './AngelSVGs';
 import { cn } from '@/lib/utils';
 import AngelPresence from './index';
 import { Button } from '@/components/ui/button';
+import PresetThemeSelector from './PresetThemeSelector';
+import type { AngelPreset } from './presets';
 
 /**
  * AngelStyleGallery - Allows users to choose between angel designs and colors
- * Includes live preview that reflects current settings
+ * Includes live preview that reflects current settings and preset themes
  */
 
 interface AngelStyleGalleryProps {
@@ -57,19 +59,32 @@ const AngelStyleGallery = memo(({
       fileInputRef.current.value = '';
     }
   };
+
+  // Apply a preset theme - updates all settings at once
+  const handleApplyPreset = (preset: AngelPreset) => {
+    // Clear custom image when applying preset
+    if (customImageUrl && onCustomImageRemove) {
+      onCustomImageRemove();
+    }
+    // Apply all preset settings
+    onStyleChange(preset.style);
+    onColorChange(preset.color);
+    onSparklesChange(preset.sparklesEnabled);
+    onTrailChange(preset.trailEnabled);
+  };
   
   return (
     <div className="space-y-6">
-      {/* Live Preview Section */}
+      {/* Live Preview Section - Larger, more prominent */}
       <div className="flex flex-col items-center">
         <div className="flex items-center gap-2 mb-3">
           <Eye className="w-4 h-4 text-muted-foreground" />
           <h4 className="text-sm font-medium text-foreground/80">Live Preview</h4>
         </div>
         <div 
-          className="rounded-2xl border border-border/30 bg-gradient-to-b from-background/50 to-muted/20 p-2"
+          className="rounded-2xl border border-border/30 bg-gradient-to-b from-background/50 to-muted/20 p-3"
           style={{
-            boxShadow: `0 0 30px ${currentColorConfig.glowColor.replace('0.6', '0.15')}`,
+            boxShadow: `0 0 40px ${currentColorConfig.glowColor.replace('0.6', '0.12')}`,
           }}
         >
           <AngelPresence
@@ -80,12 +95,23 @@ const AngelStyleGallery = memo(({
             trailEnabled={trailEnabled}
             imageUrl={customImageUrl}
             previewMode={true}
-            previewSize={140}
+            previewSize={160}
           />
         </div>
         <p className="text-xs text-muted-foreground mt-2 text-center">
-          Your angel companion as it appears on site
+          Watch your angel companion move along a gentle path
         </p>
+      </div>
+
+      {/* Preset Themes Section */}
+      <div className="pt-4 border-t border-border/30">
+        <PresetThemeSelector
+          currentStyle={currentStyle}
+          currentColor={currentColor}
+          sparklesEnabled={sparklesEnabled}
+          trailEnabled={trailEnabled}
+          onApplyPreset={handleApplyPreset}
+        />
       </div>
 
       {/* Style selection */}
@@ -224,7 +250,7 @@ const AngelStyleGallery = memo(({
       )}
 
       {/* Color selection */}
-      <div className="pt-2 border-t border-border/50">
+      <div className="pt-4 border-t border-border/30">
         <h4 className="text-sm font-medium text-foreground/80 mb-3">Angel Glow Color</h4>
         <div className="flex flex-wrap gap-3">
           {ANGEL_COLORS.map((color) => {
@@ -277,7 +303,7 @@ const AngelStyleGallery = memo(({
       </div>
 
       {/* Effect toggles */}
-      <div className="space-y-3 pt-2 border-t border-border/50">
+      <div className="space-y-3 pt-4 border-t border-border/30">
         <h4 className="text-sm font-medium text-foreground/80">Effects</h4>
         
         {/* Sparkles toggle */}
