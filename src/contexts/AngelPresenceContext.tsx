@@ -7,8 +7,12 @@ import { toast } from 'sonner';
 const STORAGE_KEY = 'angel-presence-settings';
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_DIMENSIONS = 512;
+const DEBOUNCE_DELAY = 600; // ms
+const SUCCESS_DISPLAY_DURATION = 1500; // ms
 
-const defaultSettings: AngelPresenceSettings = {
+export type SyncStatus = 'idle' | 'saving' | 'success' | 'error';
+
+export const defaultSettings: AngelPresenceSettings = {
   enabled: true,
   style: 'classic',
   color: 'white',
@@ -92,16 +96,18 @@ interface AngelPresenceContextValue {
   isLoading: boolean;
   isUploading: boolean;
   isHydrated: boolean;
+  syncStatus: SyncStatus;
   
   // Actions
-  toggle: () => Promise<void>;
-  setEnabled: (value: boolean) => Promise<void>;
-  setStyle: (style: AngelStyle) => Promise<void>;
-  setColor: (color: AngelColor) => Promise<void>;
-  setSparklesEnabled: (value: boolean) => Promise<void>;
-  setTrailEnabled: (value: boolean) => Promise<void>;
+  toggle: () => void;
+  setEnabled: (value: boolean) => void;
+  setStyle: (style: AngelStyle) => void;
+  setColor: (color: AngelColor) => void;
+  setSparklesEnabled: (value: boolean) => void;
+  setTrailEnabled: (value: boolean) => void;
   uploadCustomImage: (file: File) => Promise<void>;
-  removeCustomImage: () => Promise<void>;
+  removeCustomImage: () => void;
+  resetToDefaults: () => Promise<void>;
 }
 
 const AngelPresenceContext = createContext<AngelPresenceContextValue | null>(null);
@@ -113,7 +119,43 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
+  
   const hasLoadedFromDB = useRef(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSettingsRef = useRef<AngelPresenceSettings | null>(null);
+  const isOnlineRef = useRef(navigator.onLine);
+
+  // Track online status
+  useEffect(() => {
+    const handleOnline = () => {
+      isOnlineRef.current = true;
+      // Retry pending save when coming back online
+      if (pendingSettingsRef.current && user) {
+        debouncedSaveToDatabase(user.id, pendingSettingsRef.current);
+      }
+    };
+    const handleOffline = () => {
+      isOnlineRef.current = false;
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [user]);
+
+  // Cleanup timers
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      if (successTimerRef.current) clearTimeout(successTimerRef.current);
+    };
+  }, []);
 
   // Load settings on mount or user change
   useEffect(() => {
@@ -176,8 +218,8 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     loadSettings();
   }, [user?.id]);
 
-  // Save to database helper
-  const saveToDatabase = async (userId: string, newSettings: AngelPresenceSettings) => {
+  // Save to database helper (immediate)
+  const saveToDatabase = async (userId: string, newSettings: AngelPresenceSettings): Promise<boolean> => {
     try {
       const settingsJson = {
         style: newSettings.style,
@@ -198,57 +240,97 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
         
       if (error) {
         console.error('Failed to save to database:', error);
+        return false;
       }
+      return true;
     } catch (error) {
       console.error('Failed to save angel presence settings to database:', error);
+      return false;
     }
   };
 
-  // Save settings helper
-  const saveSettings = useCallback(async (newSettings: AngelPresenceSettings) => {
+  // Debounced save to database
+  const debouncedSaveToDatabase = useCallback((userId: string, newSettings: AngelPresenceSettings) => {
+    // Clear any existing debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // Clear success timer to prevent stale state
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+    }
+
+    // Store pending settings for retry
+    pendingSettingsRef.current = newSettings;
+    
+    // Set saving status
+    setSyncStatus('saving');
+
+    debounceTimerRef.current = setTimeout(async () => {
+      if (!isOnlineRef.current) {
+        setSyncStatus('error');
+        return;
+      }
+
+      const success = await saveToDatabase(userId, newSettings);
+      
+      if (success) {
+        pendingSettingsRef.current = null;
+        setSyncStatus('success');
+        
+        // Auto-clear success after delay
+        successTimerRef.current = setTimeout(() => {
+          setSyncStatus('idle');
+        }, SUCCESS_DISPLAY_DURATION);
+      } else {
+        setSyncStatus('error');
+      }
+    }, DEBOUNCE_DELAY);
+  }, []);
+
+  // Save settings helper with optimistic update
+  const saveSettings = useCallback((newSettings: AngelPresenceSettings) => {
+    // Optimistic update: immediately update local state
+    setSettings(newSettings);
+    
     // Always save to localStorage as backup/fallback
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
     
-    // Save to database if logged in
+    // Debounced save to database if logged in
     if (user) {
-      await saveToDatabase(user.id, newSettings);
+      debouncedSaveToDatabase(user.id, newSettings);
     }
-  }, [user]);
+  }, [user, debouncedSaveToDatabase]);
 
-  const toggle = useCallback(async () => {
+  const toggle = useCallback(() => {
     const newSettings = { ...settings, enabled: !settings.enabled };
-    setSettings(newSettings);
-    await saveSettings(newSettings);
+    saveSettings(newSettings);
   }, [settings, saveSettings]);
 
-  const setEnabled = useCallback(async (value: boolean) => {
+  const setEnabled = useCallback((value: boolean) => {
     const newSettings = { ...settings, enabled: value };
-    setSettings(newSettings);
-    await saveSettings(newSettings);
+    saveSettings(newSettings);
   }, [settings, saveSettings]);
 
-  const setStyle = useCallback(async (style: AngelStyle) => {
+  const setStyle = useCallback((style: AngelStyle) => {
     const newSettings = { ...settings, style };
-    setSettings(newSettings);
-    await saveSettings(newSettings);
+    saveSettings(newSettings);
   }, [settings, saveSettings]);
 
-  const setColor = useCallback(async (color: AngelColor) => {
+  const setColor = useCallback((color: AngelColor) => {
     const newSettings = { ...settings, color };
-    setSettings(newSettings);
-    await saveSettings(newSettings);
+    saveSettings(newSettings);
   }, [settings, saveSettings]);
 
-  const setSparklesEnabled = useCallback(async (value: boolean) => {
+  const setSparklesEnabled = useCallback((value: boolean) => {
     const newSettings = { ...settings, sparklesEnabled: value };
-    setSettings(newSettings);
-    await saveSettings(newSettings);
+    saveSettings(newSettings);
   }, [settings, saveSettings]);
 
-  const setTrailEnabled = useCallback(async (value: boolean) => {
+  const setTrailEnabled = useCallback((value: boolean) => {
     const newSettings = { ...settings, trailEnabled: value };
-    setSettings(newSettings);
-    await saveSettings(newSettings);
+    saveSettings(newSettings);
   }, [settings, saveSettings]);
 
   const uploadCustomImage = useCallback(async (file: File) => {
@@ -261,8 +343,7 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     try {
       const dataUrl = await processCustomImage(file);
       const newSettings = { ...settings, customImageUrl: dataUrl };
-      setSettings(newSettings);
-      await saveSettings(newSettings);
+      saveSettings(newSettings);
       toast.success('Custom angel image uploaded!');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to upload image';
@@ -272,12 +353,37 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     }
   }, [user, settings, saveSettings]);
 
-  const removeCustomImage = useCallback(async () => {
+  const removeCustomImage = useCallback(() => {
     const newSettings = { ...settings, customImageUrl: undefined };
-    setSettings(newSettings);
-    await saveSettings(newSettings);
+    saveSettings(newSettings);
     toast.success('Custom angel image removed');
   }, [settings, saveSettings]);
+
+  const resetToDefaults = useCallback(async () => {
+    // Preserve custom image URL - don't delete user uploads
+    const resetSettings: AngelPresenceSettings = {
+      ...defaultSettings,
+      // Keep customImageUrl but switch away from custom style if it was selected
+    };
+    
+    // Optimistic update
+    setSettings(resetSettings);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(resetSettings));
+    
+    // Save to database if logged in
+    if (user) {
+      setSyncStatus('saving');
+      const success = await saveToDatabase(user.id, resetSettings);
+      if (success) {
+        setSyncStatus('success');
+        successTimerRef.current = setTimeout(() => {
+          setSyncStatus('idle');
+        }, SUCCESS_DISPLAY_DURATION);
+      } else {
+        setSyncStatus('error');
+      }
+    }
+  }, [user]);
 
   const value = useMemo<AngelPresenceContextValue>(() => ({
     isEnabled: settings.enabled,
@@ -289,6 +395,7 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     isLoading,
     isUploading,
     isHydrated,
+    syncStatus,
     toggle,
     setEnabled,
     setStyle,
@@ -297,7 +404,8 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     setTrailEnabled,
     uploadCustomImage,
     removeCustomImage,
-  }), [settings, isLoading, isUploading, isHydrated, toggle, setEnabled, setStyle, setColor, setSparklesEnabled, setTrailEnabled, uploadCustomImage, removeCustomImage]);
+    resetToDefaults,
+  }), [settings, isLoading, isUploading, isHydrated, syncStatus, toggle, setEnabled, setStyle, setColor, setSparklesEnabled, setTrailEnabled, uploadCustomImage, removeCustomImage, resetToDefaults]);
 
   return (
     <AngelPresenceContext.Provider value={value}>
