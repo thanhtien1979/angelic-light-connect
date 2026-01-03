@@ -13,6 +13,9 @@ import type { AngelPreset } from './presets';
  * Includes live preview that reflects current settings and preset themes
  */
 
+// Default styles that cannot be deleted
+const DEFAULT_STYLES: AngelStyle[] = ['classic', 'cherub', 'seraph', 'guardian', 'joy', 'peace', 'healing', 'fairy'];
+
 interface AngelStyleGalleryProps {
   currentStyle: AngelStyle;
   onStyleChange: (style: AngelStyle) => void;
@@ -29,6 +32,8 @@ interface AngelStyleGalleryProps {
   onCustomImageRemove?: () => void;
   isUploading?: boolean;
   isLoggedIn?: boolean;
+  hiddenStyles?: AngelStyle[];
+  onDeleteStyle?: (styleId: AngelStyle) => void;
 }
 
 const AngelStyleGallery = memo(({
@@ -47,6 +52,8 @@ const AngelStyleGallery = memo(({
   onCustomImageRemove,
   isUploading = false,
   isLoggedIn = false,
+  hiddenStyles = [],
+  onDeleteStyle,
 }: AngelStyleGalleryProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hoverVideoRef = useRef<HTMLVideoElement>(null);
@@ -69,12 +76,25 @@ const AngelStyleGallery = memo(({
   // Get current color config for glow preview
   const currentColorConfig = ANGEL_COLORS.find(c => c.id === currentColor) || ANGEL_COLORS[0];
   
-  // Separate static and video angel styles
+  // Separate static and video angel styles, filtering out hidden ones
   const { staticStyles, videoStyles } = useMemo(() => {
-    const staticStyles = ANGEL_STYLES.filter(s => !s.isVideo);
-    const videoStyles = ANGEL_STYLES.filter(s => s.isVideo);
+    const staticStyles = ANGEL_STYLES.filter(s => !s.isVideo && !hiddenStyles.includes(s.id));
+    const videoStyles = ANGEL_STYLES.filter(s => s.isVideo && !hiddenStyles.includes(s.id));
     return { staticStyles, videoStyles };
+  }, [hiddenStyles]);
+  
+  // Check if a style can be deleted (not a default style)
+  const canDeleteStyle = useCallback((styleId: AngelStyle) => {
+    return !DEFAULT_STYLES.includes(styleId);
   }, []);
+  
+  // Handle delete click with confirmation
+  const handleDeleteStyle = useCallback((e: React.MouseEvent, styleId: AngelStyle) => {
+    e.stopPropagation(); // Prevent selecting the style
+    if (onDeleteStyle && canDeleteStyle(styleId)) {
+      onDeleteStyle(styleId);
+    }
+  }, [onDeleteStyle, canDeleteStyle]);
   
   // Throttled hover handlers to prevent flicker
   const handleVideoHover = useCallback((styleId: string) => {
@@ -203,7 +223,7 @@ const AngelStyleGallery = memo(({
                   }
                 }}
                 className={cn(
-                  "relative flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-200",
+                  "relative flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-200 group/card",
                   isSelected 
                     ? "border-primary bg-primary/10 shadow-lg" 
                     : "border-border/50 hover:border-primary/50 hover:bg-accent/50"
@@ -213,6 +233,17 @@ const AngelStyleGallery = memo(({
                   <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                     <Check className="w-3 h-3 text-primary-foreground" />
                   </div>
+                )}
+                
+                {/* Delete button - only for non-default styles */}
+                {canDeleteStyle(style.id) && onDeleteStyle && (
+                  <button
+                    onClick={(e) => handleDeleteStyle(e, style.id)}
+                    className="absolute top-2 left-2 w-6 h-6 bg-destructive/80 hover:bg-destructive rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 z-10"
+                    title="Xóa thiên thần này"
+                  >
+                    <Trash2 className="w-3 h-3 text-destructive-foreground" />
+                  </button>
                 )}
                 
                 <div 
@@ -308,7 +339,7 @@ const AngelStyleGallery = memo(({
                 onFocus={() => handleVideoHover(style.id)}
                 onBlur={handleVideoLeave}
                 className={cn(
-                  "relative flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-200",
+                  "relative flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-200 group/card",
                   isSelected 
                     ? "border-primary bg-primary/10 shadow-lg" 
                     : "border-border/50 hover:border-primary/50 hover:bg-accent/50"
@@ -318,6 +349,17 @@ const AngelStyleGallery = memo(({
                   <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                     <Check className="w-3 h-3 text-primary-foreground" />
                   </div>
+                )}
+                
+                {/* Delete button - only for non-default styles */}
+                {canDeleteStyle(style.id) && onDeleteStyle && (
+                  <button
+                    onClick={(e) => handleDeleteStyle(e, style.id)}
+                    className="absolute top-2 right-8 w-6 h-6 bg-destructive/80 hover:bg-destructive rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 z-10"
+                    title="Xóa thiên thần này"
+                  >
+                    <Trash2 className="w-3 h-3 text-destructive-foreground" />
+                  </button>
                 )}
                 
                 {/* Video badge */}

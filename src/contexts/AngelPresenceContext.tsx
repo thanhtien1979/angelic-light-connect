@@ -5,6 +5,7 @@ import type { AngelStyle, AngelColor, AngelPresenceSettings, VideoQuality } from
 import { toast } from 'sonner';
 
 const STORAGE_KEY = 'angel-presence-settings';
+const HIDDEN_STYLES_KEY = 'angel-hidden-styles';
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_DIMENSIONS = 512;
 const DEBOUNCE_DELAY = 600; // ms
@@ -21,6 +22,19 @@ export const defaultSettings: AngelPresenceSettings = {
   customImageUrl: undefined,
   videoQuality: 'high',
 };
+
+// Get hidden styles from localStorage
+function getHiddenStyles(): AngelStyle[] {
+  try {
+    const stored = localStorage.getItem(HIDDEN_STYLES_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Invalid JSON
+  }
+  return [];
+}
 
 // Validate and resize image
 async function processCustomImage(file: File): Promise<string> {
@@ -95,6 +109,7 @@ interface AngelPresenceContextValue {
   trailEnabled: boolean;
   customImageUrl?: string;
   videoQuality: VideoQuality;
+  hiddenStyles: AngelStyle[];
   isLoading: boolean;
   isUploading: boolean;
   isHydrated: boolean;
@@ -111,6 +126,8 @@ interface AngelPresenceContextValue {
   uploadCustomImage: (file: File) => Promise<void>;
   removeCustomImage: () => void;
   resetToDefaults: () => Promise<void>;
+  deleteStyle: (styleId: AngelStyle) => void;
+  restoreStyle: (styleId: AngelStyle) => void;
 }
 
 const AngelPresenceContext = createContext<AngelPresenceContextValue | null>(null);
@@ -119,6 +136,7 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
   const { user } = useAuth();
   // Initialize with localStorage to prevent flicker
   const [settings, setSettings] = useState<AngelPresenceSettings>(() => getLocalStorageSettings());
+  const [hiddenStyles, setHiddenStyles] = useState<AngelStyle[]>(() => getHiddenStyles());
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -369,6 +387,27 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     toast.success('Custom angel image removed');
   }, [settings, saveSettings]);
 
+  const deleteStyle = useCallback((styleId: AngelStyle) => {
+    const newHiddenStyles = [...hiddenStyles, styleId];
+    setHiddenStyles(newHiddenStyles);
+    localStorage.setItem(HIDDEN_STYLES_KEY, JSON.stringify(newHiddenStyles));
+    
+    // If current style is being deleted, switch to classic
+    if (settings.style === styleId) {
+      const newSettings = { ...settings, style: 'classic' as AngelStyle };
+      saveSettings(newSettings);
+    }
+    
+    toast.success('Đã xóa thiên thần khỏi danh sách');
+  }, [hiddenStyles, settings, saveSettings]);
+
+  const restoreStyle = useCallback((styleId: AngelStyle) => {
+    const newHiddenStyles = hiddenStyles.filter(id => id !== styleId);
+    setHiddenStyles(newHiddenStyles);
+    localStorage.setItem(HIDDEN_STYLES_KEY, JSON.stringify(newHiddenStyles));
+    toast.success('Đã khôi phục thiên thần');
+  }, [hiddenStyles]);
+
   const resetToDefaults = useCallback(async () => {
     // Preserve custom image URL - don't delete user uploads
     const resetSettings: AngelPresenceSettings = {
@@ -403,6 +442,7 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     trailEnabled: settings.trailEnabled,
     customImageUrl: settings.customImageUrl,
     videoQuality: settings.videoQuality,
+    hiddenStyles,
     isLoading,
     isUploading,
     isHydrated,
@@ -417,7 +457,9 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     uploadCustomImage,
     removeCustomImage,
     resetToDefaults,
-  }), [settings, isLoading, isUploading, isHydrated, syncStatus, toggle, setEnabled, setStyle, setColor, setSparklesEnabled, setTrailEnabled, setVideoQuality, uploadCustomImage, removeCustomImage, resetToDefaults]);
+    deleteStyle,
+    restoreStyle,
+  }), [settings, hiddenStyles, isLoading, isUploading, isHydrated, syncStatus, toggle, setEnabled, setStyle, setColor, setSparklesEnabled, setTrailEnabled, setVideoQuality, uploadCustomImage, removeCustomImage, resetToDefaults, deleteStyle, restoreStyle]);
 
   return (
     <AngelPresenceContext.Provider value={value}>
