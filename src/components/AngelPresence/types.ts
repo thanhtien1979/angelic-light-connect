@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-gold' | 'fairy-yellow' | 'fairy-green' | 'fairy-tinker' | 'fairy-cute' | 'fairy-star' | 'fairy-leaf' | 'fairy-sunny' | 'fairy-butterfly' | 'fairy-spring' | 'fairy-heart' | 'fairy-love' | 'fairy-lavender' | 'fairy-rosemary' | 'fairy-butterfly-gold' | 'fairy-sunflower' | 'fairy-peach' | 'fairy-lime' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger' | 'grok-angel-1' | 'grok-angel-2' | 'grok-angel-3';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-gold' | 'fairy-yellow' | 'fairy-green' | 'fairy-tinker' | 'fairy-cute' | 'fairy-star' | 'fairy-leaf' | 'fairy-sunny' | 'fairy-butterfly' | 'fairy-spring' | 'fairy-heart' | 'fairy-love' | 'fairy-lavender' | 'fairy-rosemary' | 'fairy-butterfly-gold' | 'fairy-sunflower' | 'fairy-peach' | 'fairy-lime' | 'fairy-ruby' | 'fairy-ocean' | 'fairy-sakura' | 'fairy-cherry-blossom' | 'fairy-doll' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger' | 'grok-angel-1' | 'grok-angel-2' | 'grok-angel-3';
 
 export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
 
@@ -614,6 +614,91 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
       followEasing: 0.12,
       sparkleIntensity: 1.2,
       trailIntensity: 1.1,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-ruby',
+    name: 'Tiên Nữ Hồng Ngọc',
+    description: 'Tiên nữ đỏ rực với mũ và cánh bướm bạc',
+    glowIntensity: 0.72,
+    glowColor: 'rgba(220,50,50,0.65)',
+    scale: 1.05,
+    animation: {
+      floatDuration: 2.8,
+      floatAmplitude: 4.5,
+      flapDuration: 2.4,
+      followEasing: 0.13,
+      sparkleIntensity: 1.3,
+      trailIntensity: 1.2,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-ocean',
+    name: 'Tiên Nữ Đại Dương',
+    description: 'Tiên nữ váy xanh biển bay bổng nhẹ nhàng',
+    glowIntensity: 0.68,
+    glowColor: 'rgba(100,200,220,0.6)',
+    scale: 1,
+    animation: {
+      floatDuration: 3.2,
+      floatAmplitude: 4,
+      flapDuration: 2.6,
+      followEasing: 0.11,
+      sparkleIntensity: 1.15,
+      trailIntensity: 1.05,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-sakura',
+    name: 'Tiên Nữ Anh Đào',
+    description: 'Tiên nữ hồng nhạt dịu dàng như hoa anh đào',
+    glowIntensity: 0.65,
+    glowColor: 'rgba(255,182,193,0.6)',
+    scale: 0.95,
+    animation: {
+      floatDuration: 3,
+      floatAmplitude: 4,
+      flapDuration: 2.5,
+      followEasing: 0.12,
+      sparkleIntensity: 1.2,
+      trailIntensity: 1.1,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-cherry-blossom',
+    name: 'Tiên Nữ Hoa Đào',
+    description: 'Tiên nữ xinh đẹp giữa những cánh hoa đào',
+    glowIntensity: 0.7,
+    glowColor: 'rgba(255,150,180,0.65)',
+    scale: 1.1,
+    animation: {
+      floatDuration: 2.6,
+      floatAmplitude: 5,
+      flapDuration: 2.3,
+      followEasing: 0.14,
+      sparkleIntensity: 1.35,
+      trailIntensity: 1.25,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-doll',
+    name: 'Tiên Nữ Búp Bê',
+    description: 'Tiên nữ nhỏ nhắn dễ thương như búp bê',
+    glowIntensity: 0.62,
+    glowColor: 'rgba(255,192,203,0.6)',
+    scale: 0.85,
+    animation: {
+      floatDuration: 3.5,
+      floatAmplitude: 3.5,
+      flapDuration: 3,
+      followEasing: 0.1,
+      sparkleIntensity: 1.0,
+      trailIntensity: 0.95,
       bouncy: true,
     },
   },
