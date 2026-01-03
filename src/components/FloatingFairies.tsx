@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Import fairy images
 import fairyGreen from "@/assets/floating-fairy-green.png";
@@ -10,44 +10,118 @@ import fairyPurple from "@/assets/floating-fairy-purple.png";
 import fairyYellow from "@/assets/floating-fairy-yellow.png";
 
 const fairyImages = [
-  fairyGreen,
-  fairyGold,
-  fairyBrown,
-  fairyPink,
-  fairyPurple,
-  fairyYellow,
+  { image: fairyGreen, sparkleColor: "hsl(120, 70%, 70%)" },
+  { image: fairyGold, sparkleColor: "hsl(45, 90%, 70%)" },
+  { image: fairyBrown, sparkleColor: "hsl(35, 80%, 65%)" },
+  { image: fairyPink, sparkleColor: "hsl(340, 80%, 75%)" },
+  { image: fairyPurple, sparkleColor: "hsl(280, 70%, 75%)" },
+  { image: fairyYellow, sparkleColor: "hsl(50, 90%, 75%)" },
 ];
+
+interface Sparkle {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+}
 
 interface FloatingFairiesProps {
   isReducedMotion?: boolean;
 }
 
 const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
-  const fairies = useMemo(() =>
-    fairyImages.map((image, i) => {
-      // Distribute fairies around the image in a circular pattern
-      const baseAngle = (i * 60) + Math.random() * 30; // 6 fairies, 60 degrees apart
-      const distance = 280 + Math.random() * 80; // Distance from center
+  const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+
+  const fairies = useMemo(() => 
+    fairyImages.map((fairy, i) => {
+      const baseAngle = (i * 60) + Math.random() * 30;
+      const distance = 320 + Math.random() * 60; // Increased distance - outside the circle
       
       return {
         id: i,
-        image,
-        size: 50 + Math.random() * 30, // 50-80px
+        image: fairy.image,
+        sparkleColor: fairy.sparkleColor,
+        size: 55 + Math.random() * 25,
         startAngle: baseAngle,
         distance,
-        duration: 15 + Math.random() * 10, // 15-25s for full orbit
-        floatDuration: 3 + Math.random() * 2, // 3-5s for float animation
+        duration: 18 + Math.random() * 8,
+        floatDuration: 3 + Math.random() * 2,
         delay: i * 0.5,
-        direction: i % 2 === 0 ? 1 : -1, // Alternate directions
-        floatAmplitude: 15 + Math.random() * 15, // Vertical float range
+        direction: i % 2 === 0 ? 1 : -1,
+        floatAmplitude: 12 + Math.random() * 12,
       };
     }), []
   );
+
+  // Generate sparkles periodically
+  useEffect(() => {
+    if (isReducedMotion) return;
+
+    const interval = setInterval(() => {
+      const newSparkles: Sparkle[] = fairies.map((fairy) => {
+        const currentTime = Date.now() / 1000;
+        const elapsedTime = currentTime - fairy.delay;
+        const currentAngle = fairy.startAngle + (elapsedTime / fairy.duration) * 360 * fairy.direction;
+        const angleRad = (currentAngle * Math.PI) / 180;
+        
+        const x = Math.cos(angleRad) * fairy.distance;
+        const y = Math.sin(angleRad) * fairy.distance;
+        
+        return {
+          id: Date.now() + fairy.id + Math.random(),
+          x: x + (Math.random() - 0.5) * 30,
+          y: y + (Math.random() - 0.5) * 30,
+          size: 4 + Math.random() * 6,
+          color: fairy.sparkleColor,
+        };
+      });
+
+      setSparkles(prev => [...prev.slice(-30), ...newSparkles]);
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [fairies, isReducedMotion]);
+
+  // Clean up old sparkles
+  useEffect(() => {
+    const cleanup = setInterval(() => {
+      setSparkles(prev => prev.slice(-24));
+    }, 1000);
+    return () => clearInterval(cleanup);
+  }, []);
 
   if (isReducedMotion) return null;
 
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 5 }}>
+      {/* Sparkle particles */}
+      <div className="absolute left-1/2 top-1/2">
+        <AnimatePresence>
+          {sparkles.map((sparkle) => (
+            <motion.div
+              key={sparkle.id}
+              className="absolute"
+              style={{
+                left: sparkle.x,
+                top: sparkle.y,
+                width: sparkle.size,
+                height: sparkle.size,
+              }}
+              initial={{ opacity: 1, scale: 1 }}
+              animate={{ opacity: 0, scale: 0, y: 20 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+            >
+              <svg viewBox="0 0 24 24" fill={sparkle.color} className="w-full h-full">
+                <path d="M12 0L14 10L24 12L14 14L12 24L10 14L0 12L10 10L12 0Z" />
+              </svg>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Fairies */}
       {fairies.map((fairy) => (
         <motion.div
           key={fairy.id}
@@ -58,12 +132,8 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
             marginLeft: -fairy.size / 2,
             marginTop: -fairy.size / 2,
           }}
-          initial={{
-            rotate: fairy.startAngle,
-          }}
-          animate={{
-            rotate: fairy.startAngle + (360 * fairy.direction),
-          }}
+          initial={{ rotate: fairy.startAngle }}
+          animate={{ rotate: fairy.startAngle + (360 * fairy.direction) }}
           transition={{
             duration: fairy.duration,
             repeat: Infinity,
@@ -88,7 +158,18 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
               ease: "easeInOut",
             }}
           >
-            {/* Counter-rotate to keep fairy upright and add wing flutter */}
+            {/* Glow effect behind fairy */}
+            <motion.div
+              className="absolute inset-0 rounded-full blur-md"
+              style={{
+                background: `radial-gradient(circle, ${fairy.sparkleColor}40 0%, transparent 70%)`,
+                transform: "scale(1.5)",
+              }}
+              animate={{ opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            
+            {/* Counter-rotate and flutter */}
             <motion.div
               animate={{
                 rotate: [0, -5, 0, 5, 0],
@@ -103,9 +184,9 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
               <motion.img
                 src={fairy.image}
                 alt="Floating fairy"
-                className="w-full h-full object-contain drop-shadow-lg"
+                className="w-full h-full object-contain"
                 style={{
-                  filter: "drop-shadow(0 0 10px rgba(255,255,255,0.5))",
+                  filter: `drop-shadow(0 0 8px ${fairy.sparkleColor})`,
                 }}
                 animate={{
                   rotate: fairy.direction === 1 
