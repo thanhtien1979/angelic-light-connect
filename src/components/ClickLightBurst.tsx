@@ -1,12 +1,13 @@
 import { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLightBurst, LIGHT_BURST_COLORS } from '@/contexts/LightBurstContext';
+import { useLightBurst, LIGHT_BURST_COLORS, LIGHT_BURST_SIZES } from '@/contexts/LightBurstContext';
 
 interface BurstParticle {
   id: string;
   x: number;
   y: number;
   hue: number;
+  scale: number;
 }
 
 const ClickLightBurst = memo(() => {
@@ -73,11 +74,13 @@ const ClickLightBurst = memo(() => {
     if (!settings.enabled) return;
     
     const id = `burst-${Date.now()}-${Math.random()}`;
+    const sizeScale = LIGHT_BURST_SIZES[settings.size].scale;
     const newBurst: BurstParticle = {
       id,
       x: e.clientX,
       y: e.clientY,
       hue: getHue(),
+      scale: sizeScale,
     };
     
     setBursts(prev => [...prev, newBurst]);
@@ -87,7 +90,7 @@ const ClickLightBurst = memo(() => {
     setTimeout(() => {
       setBursts(prev => prev.filter(b => b.id !== id));
     }, 800);
-  }, [settings.enabled, getHue, playSound]);
+  }, [settings.enabled, settings.size, getHue, playSound]);
 
   useEffect(() => {
     document.addEventListener('click', handleClick);
@@ -100,7 +103,14 @@ const ClickLightBurst = memo(() => {
     <div className="fixed inset-0 pointer-events-none z-[9999]">
       <AnimatePresence>
         {bursts.map((burst) => (
-          <LightBurstEffect key={burst.id} x={burst.x} y={burst.y} hue={burst.hue} isRainbow={settings.color === 'rainbow'} />
+          <LightBurstEffect 
+            key={burst.id} 
+            x={burst.x} 
+            y={burst.y} 
+            hue={burst.hue} 
+            scale={burst.scale}
+            isRainbow={settings.color === 'rainbow'} 
+          />
         ))}
       </AnimatePresence>
     </div>
@@ -113,10 +123,11 @@ interface LightBurstEffectProps {
   x: number;
   y: number;
   hue: number;
+  scale: number;
   isRainbow: boolean;
 }
 
-const LightBurstEffect = memo(({ x, y, hue, isRainbow }: LightBurstEffectProps) => {
+const LightBurstEffect = memo(({ x, y, hue, scale, isRainbow }: LightBurstEffectProps) => {
   const particleCount = 8;
   const rayCount = 6;
 
@@ -136,10 +147,10 @@ const LightBurstEffect = memo(({ x, y, hue, isRainbow }: LightBurstEffectProps) 
       <motion.div
         className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
-          width: 20,
-          height: 20,
+          width: 20 * scale,
+          height: 20 * scale,
           background: `radial-gradient(circle, ${getColor(100, 95)} 0%, ${getColor(100, 80, 0.8)} 40%, transparent 70%)`,
-          boxShadow: `0 0 20px ${getColor(100, 85, 0.8)}, 0 0 40px ${getColor(100, 75, 0.5)}`,
+          boxShadow: `0 0 ${20 * scale}px ${getColor(100, 85, 0.8)}, 0 0 ${40 * scale}px ${getColor(100, 75, 0.5)}`,
         }}
         initial={{ scale: 0, opacity: 0 }}
         animate={{
@@ -157,8 +168,8 @@ const LightBurstEffect = memo(({ x, y, hue, isRainbow }: LightBurstEffectProps) 
             key={`ray-${i}`}
             className="absolute -translate-x-1/2 -translate-y-1/2 origin-center"
             style={{
-              width: 60,
-              height: 2,
+              width: 60 * scale,
+              height: 2 * scale,
               background: `linear-gradient(90deg, hsla(${rayHue}, 100%, 90%, 0.9) 0%, hsla(${rayHue}, 100%, 80%, 0.4) 50%, transparent 100%)`,
               rotate: `${(i * 360) / rayCount}deg`,
               borderRadius: 4,
@@ -180,8 +191,8 @@ const LightBurstEffect = memo(({ x, y, hue, isRainbow }: LightBurstEffectProps) 
       {/* Sparkle particles */}
       {[...Array(particleCount)].map((_, i) => {
         const angle = (i / particleCount) * Math.PI * 2;
-        const distance = 30 + Math.random() * 25;
-        const size = 3 + Math.random() * 3;
+        const distance = (30 + Math.random() * 25) * scale;
+        const size = (3 + Math.random() * 3) * scale;
         const particleHue = isRainbow ? (hue + i * 45) % 360 : hue;
         
         return (
@@ -194,7 +205,7 @@ const LightBurstEffect = memo(({ x, y, hue, isRainbow }: LightBurstEffectProps) 
               background: i % 2 === 0 
                 ? `hsla(${particleHue}, 100%, 90%, 1)` 
                 : `hsla(${particleHue}, 100%, 85%, 1)`,
-              boxShadow: `0 0 8px hsla(${particleHue}, 100%, 85%, 0.8)`,
+              boxShadow: `0 0 ${8 * scale}px hsla(${particleHue}, 100%, 85%, 0.8)`,
             }}
             initial={{ x: 0, y: 0, scale: 0, opacity: 0 }}
             animate={{
@@ -216,10 +227,10 @@ const LightBurstEffect = memo(({ x, y, hue, isRainbow }: LightBurstEffectProps) 
       <motion.div
         className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
         style={{
-          width: 40,
-          height: 40,
+          width: 40 * scale,
+          height: 40 * scale,
           borderColor: getColor(100, 85, 0.6),
-          boxShadow: `0 0 15px ${getColor(100, 80, 0.4)}`,
+          boxShadow: `0 0 ${15 * scale}px ${getColor(100, 80, 0.4)}`,
         }}
         initial={{ scale: 0, opacity: 0 }}
         animate={{

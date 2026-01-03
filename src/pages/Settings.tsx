@@ -19,7 +19,7 @@ import { useSoundSettings } from "@/hooks/useSoundSettings";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { SyncIndicator } from "@/components/AngelPresence/SyncIndicator";
-import { useLightBurst, LIGHT_BURST_COLORS, LightBurstSettings } from "@/contexts/LightBurstContext";
+import { useLightBurst, LIGHT_BURST_COLORS, LIGHT_BURST_SIZES, LightBurstSettings, LightBurstSize } from "@/contexts/LightBurstContext";
 import { ResetConfirmDialog } from "@/components/AngelPresence/ResetConfirmDialog";
 
 type SettingsSection = "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
@@ -688,6 +688,39 @@ const Settings = () => {
                                 </button>
                               );
                             })}
+                          </div>
+
+                          {/* Size Selection */}
+                          <div className="mt-4">
+                            <Label className="text-sm font-medium mb-3 block">Kích Thước Hiệu Ứng</Label>
+                            <div className="flex gap-2">
+                              {(Object.keys(LIGHT_BURST_SIZES) as Array<LightBurstSize>).map((sizeKey) => {
+                                const sizeInfo = LIGHT_BURST_SIZES[sizeKey];
+                                const isSelected = lightBurstSettings.size === sizeKey;
+                                
+                                return (
+                                  <button
+                                    key={sizeKey}
+                                    onClick={() => updateLightBurstSetting("size", sizeKey)}
+                                    className={cn(
+                                      "flex-1 p-3 rounded-xl border text-center transition-all duration-200",
+                                      isSelected
+                                        ? "border-primary bg-primary/10 shadow-md"
+                                        : "border-border/50 hover:border-primary/30 bg-card/30"
+                                    )}
+                                  >
+                                    <div className={cn(
+                                      "w-6 h-6 rounded-full mx-auto mb-2 bg-primary/20 flex items-center justify-center transition-transform",
+                                      sizeKey === 'small' && "scale-75",
+                                      sizeKey === 'large' && "scale-125"
+                                    )}>
+                                      <span className="text-xs font-bold text-primary">{sizeInfo.icon}</span>
+                                    </div>
+                                    <span className="text-xs font-medium">{sizeInfo.name}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
                         </motion.div>
                       )}
