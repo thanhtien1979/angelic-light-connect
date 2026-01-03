@@ -11,29 +11,42 @@ import celestialVideoMp4 from '@/assets/celestial-video.mp4';
 import starlightSeraphMp4 from '@/assets/starlight-seraph-video.mp4';
 import auroraGuardianMp4 from '@/assets/aurora-guardian-video.mp4';
 import nebulaMessengerMp4 from '@/assets/nebula-messenger-video.mp4';
+// Poster images for video angels
+import fairyVideoPoster from '@/assets/posters/fairy-video-poster.png';
+import celestialVideoPoster from '@/assets/posters/celestial-video-poster.png';
+import starlightSeraphPoster from '@/assets/posters/starlight-seraph-poster.png';
+import auroraGuardianPoster from '@/assets/posters/aurora-guardian-poster.png';
+import nebulaMessengerPoster from '@/assets/posters/nebula-messenger-poster.png';
 
 // Video sources configuration with WebM (alpha) and MP4 fallback
-const VIDEO_SOURCES = {
+export const VIDEO_SOURCES = {
   'fairy-video': {
     mp4Src: fairyVideoMp4,
+    posterSrc: fairyVideoPoster,
   },
   'celestial-video': {
     mp4Src: celestialVideoMp4,
+    posterSrc: celestialVideoPoster,
   },
   'starlight-seraph': {
     mp4Src: starlightSeraphMp4,
+    posterSrc: starlightSeraphPoster,
   },
   'aurora-guardian': {
     mp4Src: auroraGuardianMp4,
+    posterSrc: auroraGuardianPoster,
   },
   'nebula-messenger': {
     mp4Src: nebulaMessengerMp4,
+    posterSrc: nebulaMessengerPoster,
   },
 } as const;
 
+export type VideoAngelStyleId = keyof typeof VIDEO_SOURCES;
+
 // Reusable video angel component with WebM alpha + MP4 fallback
 interface VideoAngelProps {
-  styleId: keyof typeof VIDEO_SOURCES;
+  styleId: VideoAngelStyleId;
   size?: number;
   className?: string;
 }
