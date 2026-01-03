@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger' | 'grok-angel-1' | 'grok-angel-2' | 'grok-angel-3';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-gold' | 'fairy-yellow' | 'fairy-green' | 'fairy-tinker' | 'fairy-cute' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger' | 'grok-angel-1' | 'grok-angel-2' | 'grok-angel-3';
 
 export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
 
@@ -308,6 +308,91 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
       followEasing: 0.11,
       sparkleIntensity: 1.1,
       trailIntensity: 1.0,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-gold',
+    name: 'Tiên Nữ Vàng Kim',
+    description: 'Tiên nữ xinh đẹp với đôi cánh vàng kim lấp lánh',
+    glowIntensity: 0.72,
+    glowColor: 'rgba(218,165,32,0.65)',
+    scale: 1.05,
+    animation: {
+      floatDuration: 2.8,
+      floatAmplitude: 4.5,
+      flapDuration: 2.4,
+      followEasing: 0.13,
+      sparkleIntensity: 1.3,
+      trailIntensity: 1.2,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-yellow',
+    name: 'Tiên Nữ Ánh Dương',
+    description: 'Tiên nữ vàng rực rỡ bay giữa những cánh bướm',
+    glowIntensity: 0.7,
+    glowColor: 'rgba(255,215,0,0.65)',
+    scale: 1,
+    animation: {
+      floatDuration: 2.5,
+      floatAmplitude: 5,
+      flapDuration: 2.2,
+      followEasing: 0.14,
+      sparkleIntensity: 1.35,
+      trailIntensity: 1.25,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-green',
+    name: 'Tiên Nữ Rừng Xanh',
+    description: 'Tiên nữ thiên nhiên với đôi cánh xanh mướt',
+    glowIntensity: 0.65,
+    glowColor: 'rgba(144,238,144,0.6)',
+    scale: 1.1,
+    animation: {
+      floatDuration: 3.5,
+      floatAmplitude: 3.5,
+      flapDuration: 2.8,
+      followEasing: 0.1,
+      sparkleIntensity: 1.0,
+      trailIntensity: 0.95,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-tinker',
+    name: 'Tiên Nữ Tinker',
+    description: 'Tiên nữ nhỏ nhắn vui tươi rắc bụi sao',
+    glowIntensity: 0.68,
+    glowColor: 'rgba(180,255,180,0.6)',
+    scale: 0.95,
+    animation: {
+      floatDuration: 2.2,
+      floatAmplitude: 5.5,
+      flapDuration: 1.8,
+      followEasing: 0.16,
+      sparkleIntensity: 1.5,
+      trailIntensity: 1.4,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-cute',
+    name: 'Tiên Nữ Dễ Thương',
+    description: 'Tiên nữ đáng yêu ngồi thư giãn trên đám mây',
+    glowIntensity: 0.62,
+    glowColor: 'rgba(255,182,193,0.6)',
+    scale: 0.9,
+    animation: {
+      floatDuration: 3.5,
+      floatAmplitude: 3,
+      flapDuration: 3,
+      followEasing: 0.09,
+      sparkleIntensity: 0.9,
+      trailIntensity: 0.85,
       bouncy: true,
     },
   },
