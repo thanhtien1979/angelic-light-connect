@@ -7,6 +7,9 @@ import fairyPinkImage from '@/assets/fairy-pink.png';
 import fairyMintImage from '@/assets/fairy-mint.png';
 import fairyVideoSrc from '@/assets/angel-cursor-video.mp4';
 import celestialVideoSrc from '@/assets/celestial-video.mp4';
+import starlightSeraphSrc from '@/assets/starlight-seraph-video.mp4';
+import auroraGuardianSrc from '@/assets/aurora-guardian-video.mp4';
+import nebulaMessengerSrc from '@/assets/nebula-messenger-video.mp4';
 
 /**
  * Angel SVG Components - Each represents a different angel style
@@ -274,6 +277,84 @@ export const CelestialVideoSVG = memo(() => {
 });
 CelestialVideoSVG.displayName = 'CelestialVideoSVG';
 
+// Starlight Seraph video component
+export const StarlightSeraphSVG = memo(() => {
+  const prefersReducedMotion = typeof window !== 'undefined' 
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  return (
+    <div className="relative">
+      <video 
+        src={starlightSeraphSrc}
+        autoPlay={!prefersReducedMotion}
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        className="w-[68px] h-[68px] object-contain"
+        style={{ 
+          pointerEvents: 'none',
+          userSelect: 'none',
+          background: 'transparent',
+        }}
+      />
+    </div>
+  );
+});
+StarlightSeraphSVG.displayName = 'StarlightSeraphSVG';
+
+// Aurora Guardian video component
+export const AuroraGuardianSVG = memo(() => {
+  const prefersReducedMotion = typeof window !== 'undefined' 
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  return (
+    <div className="relative">
+      <video 
+        src={auroraGuardianSrc}
+        autoPlay={!prefersReducedMotion}
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        className="w-[72px] h-[72px] object-contain"
+        style={{ 
+          pointerEvents: 'none',
+          userSelect: 'none',
+          background: 'transparent',
+        }}
+      />
+    </div>
+  );
+});
+AuroraGuardianSVG.displayName = 'AuroraGuardianSVG';
+
+// Nebula Messenger video component
+export const NebulaMessengerSVG = memo(() => {
+  const prefersReducedMotion = typeof window !== 'undefined' 
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  return (
+    <div className="relative">
+      <video 
+        src={nebulaMessengerSrc}
+        autoPlay={!prefersReducedMotion}
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        className="w-[70px] h-[70px] object-contain"
+        style={{ 
+          pointerEvents: 'none',
+          userSelect: 'none',
+          background: 'transparent',
+        }}
+      />
+    </div>
+  );
+});
+NebulaMessengerSVG.displayName = 'NebulaMessengerSVG';
+
 // Map styles to SVG components
 export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   classic: ClassicAngelSVG,
@@ -290,4 +371,7 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'fairy-mint': FairyMintSVG,
   'fairy-video': FairyVideoSVG,
   'celestial-video': CelestialVideoSVG,
+  'starlight-seraph': StarlightSeraphSVG,
+  'aurora-guardian': AuroraGuardianSVG,
+  'nebula-messenger': NebulaMessengerSVG,
 };

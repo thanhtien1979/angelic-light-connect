@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-video' | 'celestial-video';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger';
 
 export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
 
@@ -329,6 +329,57 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
       followEasing: 0.1,
       sparkleIntensity: 0.8,
       trailIntensity: 0.9,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'starlight-seraph',
+    name: 'Starlight Seraph',
+    description: 'Shimmering starlight and stardust angel',
+    glowIntensity: 0.75,
+    glowColor: 'rgba(255,250,220,0.7)',
+    scale: 1.1,
+    animation: {
+      floatDuration: 3.2,
+      floatAmplitude: 3,
+      flapDuration: 2.8,
+      followEasing: 0.09,
+      sparkleIntensity: 1.2,
+      trailIntensity: 1.0,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'aurora-guardian',
+    name: 'Aurora Guardian',
+    description: 'Divine guardian of northern lights',
+    glowIntensity: 0.72,
+    glowColor: 'rgba(100,220,180,0.65)',
+    scale: 1.2,
+    animation: {
+      floatDuration: 3.8,
+      floatAmplitude: 2.5,
+      flapDuration: 3.2,
+      followEasing: 0.08,
+      sparkleIntensity: 0.7,
+      trailIntensity: 1.1,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'nebula-messenger',
+    name: 'Nebula Messenger',
+    description: 'Cosmic messenger from the nebulae',
+    glowIntensity: 0.78,
+    glowColor: 'rgba(200,150,255,0.7)',
+    scale: 1.15,
+    animation: {
+      floatDuration: 3.5,
+      floatAmplitude: 3.5,
+      flapDuration: 3,
+      followEasing: 0.1,
+      sparkleIntensity: 0.9,
+      trailIntensity: 1.0,
       pulseGlow: true,
     },
   },
