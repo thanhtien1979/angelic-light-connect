@@ -39,10 +39,12 @@ const Settings = () => {
   const {
     isEnabled: angelEnabled,
     style: angelStyle,
+    color: angelColor,
     sparklesEnabled,
     trailEnabled,
     toggle: toggleAngel,
     setStyle,
+    setColor,
     setSparklesEnabled,
     setTrailEnabled,
   } = useAngelPresence();
@@ -271,6 +273,8 @@ const Settings = () => {
                         <AngelStyleGallery
                           currentStyle={angelStyle}
                           onStyleChange={setStyle}
+                          currentColor={angelColor}
+                          onColorChange={setColor}
                           sparklesEnabled={sparklesEnabled}
                           trailEnabled={trailEnabled}
                           onSparklesChange={setSparklesEnabled}

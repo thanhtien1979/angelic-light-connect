@@ -4,6 +4,15 @@
 
 export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing';
 
+export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
+
+export interface AngelColorConfig {
+  id: AngelColor;
+  name: string;
+  hsl: string;
+  glowColor: string;
+}
+
 export interface AngelStyleConfig {
   id: AngelStyle;
   name: string;
@@ -33,9 +42,49 @@ export interface TrailPoint {
 export interface AngelPresenceSettings {
   enabled: boolean;
   style: AngelStyle;
+  color: AngelColor;
   sparklesEnabled: boolean;
   trailEnabled: boolean;
 }
+
+export const ANGEL_COLORS: AngelColorConfig[] = [
+  {
+    id: 'white',
+    name: 'Pure Light',
+    hsl: '0 0% 100%',
+    glowColor: 'rgba(255, 255, 255, 0.6)',
+  },
+  {
+    id: 'gold',
+    name: 'Divine Gold',
+    hsl: '45 100% 70%',
+    glowColor: 'rgba(255, 215, 100, 0.6)',
+  },
+  {
+    id: 'blue',
+    name: 'Celestial Blue',
+    hsl: '210 80% 75%',
+    glowColor: 'rgba(150, 200, 255, 0.6)',
+  },
+  {
+    id: 'pink',
+    name: 'Rose Grace',
+    hsl: '330 70% 80%',
+    glowColor: 'rgba(255, 180, 200, 0.6)',
+  },
+  {
+    id: 'green',
+    name: 'Healing Light',
+    hsl: '140 50% 70%',
+    glowColor: 'rgba(150, 220, 170, 0.6)',
+  },
+  {
+    id: 'purple',
+    name: 'Sacred Violet',
+    hsl: '270 60% 75%',
+    glowColor: 'rgba(200, 160, 255, 0.6)',
+  },
+];
 
 export const ANGEL_STYLES: AngelStyleConfig[] = [
   {

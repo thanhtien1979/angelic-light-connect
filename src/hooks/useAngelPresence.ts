@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import type { AngelStyle, AngelPresenceSettings } from '@/components/AngelPresence/types';
+import type { AngelStyle, AngelColor, AngelPresenceSettings } from '@/components/AngelPresence/types';
 
 /**
  * Hook to manage Angel Presence state and settings
@@ -12,6 +12,7 @@ const STORAGE_KEY = 'angel-presence-settings';
 const defaultSettings: AngelPresenceSettings = {
   enabled: true,
   style: 'classic',
+  color: 'white',
   sparklesEnabled: true,
   trailEnabled: true,
 };
@@ -46,6 +47,7 @@ export function useAngelPresence() {
             setSettings({
               enabled: data.angel_cursor_enabled ?? defaultSettings.enabled,
               style: (storedSettings.style as AngelStyle) || defaultSettings.style,
+              color: (storedSettings.color as AngelColor) || defaultSettings.color,
               sparklesEnabled: storedSettings.sparklesEnabled ?? defaultSettings.sparklesEnabled,
               trailEnabled: storedSettings.trailEnabled ?? defaultSettings.trailEnabled,
             });
@@ -77,6 +79,7 @@ export function useAngelPresence() {
       if (user) {
         const settingsJson = JSON.stringify({
           style: newSettings.style,
+          color: newSettings.color,
           sparklesEnabled: newSettings.sparklesEnabled,
           trailEnabled: newSettings.trailEnabled,
         });
@@ -118,6 +121,13 @@ export function useAngelPresence() {
     await saveSettings(newSettings);
   }, [settings, saveSettings]);
 
+  // Set color
+  const setColor = useCallback(async (color: AngelColor) => {
+    const newSettings = { ...settings, color };
+    setSettings(newSettings);
+    await saveSettings(newSettings);
+  }, [settings, saveSettings]);
+
   // Set sparkles enabled
   const setSparklesEnabled = useCallback(async (value: boolean) => {
     const newSettings = { ...settings, sparklesEnabled: value };
@@ -136,6 +146,7 @@ export function useAngelPresence() {
     // Settings
     isEnabled: settings.enabled,
     style: settings.style,
+    color: settings.color,
     sparklesEnabled: settings.sparklesEnabled,
     trailEnabled: settings.trailEnabled,
     isLoading,
@@ -144,6 +155,7 @@ export function useAngelPresence() {
     toggle,
     setEnabled,
     setStyle,
+    setColor,
     setSparklesEnabled,
     setTrailEnabled,
   };
