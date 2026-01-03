@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { AngelStyle, AngelColor, AngelPresenceSettings } from '@/components/AngelPresence/types';
@@ -67,6 +67,20 @@ async function processCustomImage(file: File): Promise<string> {
   });
 }
 
+// Load settings from localStorage (sync for initial state)
+function getLocalStorageSettings(): AngelPresenceSettings {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return { ...defaultSettings, ...parsed };
+    }
+  } catch {
+    // Invalid JSON, use defaults
+  }
+  return defaultSettings;
+}
+
 interface AngelPresenceContextValue {
   // Settings
   isEnabled: boolean;
@@ -77,6 +91,7 @@ interface AngelPresenceContextValue {
   customImageUrl?: string;
   isLoading: boolean;
   isUploading: boolean;
+  isHydrated: boolean;
   
   // Actions
   toggle: () => Promise<void>;
@@ -93,86 +108,110 @@ const AngelPresenceContext = createContext<AngelPresenceContextValue | null>(nul
 
 export function AngelPresenceProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [settings, setSettings] = useState<AngelPresenceSettings>(defaultSettings);
+  // Initialize with localStorage to prevent flicker
+  const [settings, setSettings] = useState<AngelPresenceSettings>(() => getLocalStorageSettings());
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+  const hasLoadedFromDB = useRef(false);
 
   // Load settings on mount or user change
   useEffect(() => {
     const loadSettings = async () => {
+      setIsLoading(true);
+      
       try {
         if (user) {
-          const { data } = await supabase
+          // Load from database for authenticated users
+          const { data, error } = await supabase
             .from('user_preferences')
-            .select('angel_cursor_enabled, angel_cursor_color')
+            .select('angel_cursor_enabled, angel_presence_settings')
             .eq('user_id', user.id)
             .maybeSingle();
 
+          if (error) {
+            console.error('Failed to load angel presence settings:', error);
+          }
+
           if (data) {
-            let storedSettings: Partial<AngelPresenceSettings> = {};
-            if (data.angel_cursor_color) {
-              try {
-                storedSettings = JSON.parse(data.angel_cursor_color);
-              } catch {
-                // If not valid JSON, ignore
-              }
-            }
+            const dbSettings = data.angel_presence_settings as Partial<AngelPresenceSettings> | null;
             
-            setSettings({
+            const loadedSettings: AngelPresenceSettings = {
               enabled: data.angel_cursor_enabled ?? defaultSettings.enabled,
-              style: (storedSettings.style as AngelStyle) || defaultSettings.style,
-              color: (storedSettings.color as AngelColor) || defaultSettings.color,
-              sparklesEnabled: storedSettings.sparklesEnabled ?? defaultSettings.sparklesEnabled,
-              trailEnabled: storedSettings.trailEnabled ?? defaultSettings.trailEnabled,
-              customImageUrl: storedSettings.customImageUrl,
-            });
+              style: (dbSettings?.style as AngelStyle) || defaultSettings.style,
+              color: (dbSettings?.color as AngelColor) || defaultSettings.color,
+              sparklesEnabled: dbSettings?.sparklesEnabled ?? defaultSettings.sparklesEnabled,
+              trailEnabled: dbSettings?.trailEnabled ?? defaultSettings.trailEnabled,
+              customImageUrl: dbSettings?.customImageUrl,
+            };
+            
+            setSettings(loadedSettings);
+            // Also update localStorage as backup
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedSettings));
+            hasLoadedFromDB.current = true;
+          } else {
+            // No DB record yet, use localStorage and save to DB
+            const localSettings = getLocalStorageSettings();
+            setSettings(localSettings);
+            // Save to DB for future sessions
+            await saveToDatabase(user.id, localSettings);
+            hasLoadedFromDB.current = true;
           }
         } else {
-          const stored = localStorage.getItem(STORAGE_KEY);
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored);
-              setSettings({ ...defaultSettings, ...parsed });
-            } catch {
-              // Invalid JSON, use defaults
-            }
-          }
+          // Not logged in, use localStorage
+          const localSettings = getLocalStorageSettings();
+          setSettings(localSettings);
+          hasLoadedFromDB.current = false;
         }
       } catch (error) {
         console.error('Failed to load angel presence settings:', error);
+        // Fallback to localStorage
+        setSettings(getLocalStorageSettings());
       } finally {
         setIsLoading(false);
+        setIsHydrated(true);
       }
     };
 
     loadSettings();
-  }, [user]);
+  }, [user?.id]);
+
+  // Save to database helper
+  const saveToDatabase = async (userId: string, newSettings: AngelPresenceSettings) => {
+    try {
+      const settingsJson = {
+        style: newSettings.style,
+        color: newSettings.color,
+        sparklesEnabled: newSettings.sparklesEnabled,
+        trailEnabled: newSettings.trailEnabled,
+        customImageUrl: newSettings.customImageUrl,
+      };
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: userId,
+          angel_cursor_enabled: newSettings.enabled,
+          angel_presence_settings: settingsJson,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+        
+      if (error) {
+        console.error('Failed to save to database:', error);
+      }
+    } catch (error) {
+      console.error('Failed to save angel presence settings to database:', error);
+    }
+  };
 
   // Save settings helper
   const saveSettings = useCallback(async (newSettings: AngelPresenceSettings) => {
-    try {
-      if (user) {
-        const settingsJson = JSON.stringify({
-          style: newSettings.style,
-          color: newSettings.color,
-          sparklesEnabled: newSettings.sparklesEnabled,
-          trailEnabled: newSettings.trailEnabled,
-          customImageUrl: newSettings.customImageUrl,
-        });
-        
-        await supabase
-          .from('user_preferences')
-          .upsert({
-            user_id: user.id,
-            angel_cursor_enabled: newSettings.enabled,
-            angel_cursor_color: settingsJson,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' });
-      } else {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
-      }
-    } catch (error) {
-      console.error('Failed to save angel presence settings:', error);
+    // Always save to localStorage as backup/fallback
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+    
+    // Save to database if logged in
+    if (user) {
+      await saveToDatabase(user.id, newSettings);
     }
   }, [user]);
 
@@ -249,6 +288,7 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     customImageUrl: settings.customImageUrl,
     isLoading,
     isUploading,
+    isHydrated,
     toggle,
     setEnabled,
     setStyle,
@@ -257,7 +297,7 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     setTrailEnabled,
     uploadCustomImage,
     removeCustomImage,
-  }), [settings, isLoading, isUploading, toggle, setEnabled, setStyle, setColor, setSparklesEnabled, setTrailEnabled, uploadCustomImage, removeCustomImage]);
+  }), [settings, isLoading, isUploading, isHydrated, toggle, setEnabled, setStyle, setColor, setSparklesEnabled, setTrailEnabled, uploadCustomImage, removeCustomImage]);
 
   return (
     <AngelPresenceContext.Provider value={value}>

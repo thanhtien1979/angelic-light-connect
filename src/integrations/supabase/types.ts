@@ -1430,6 +1430,7 @@ export type Database = {
           angel_cursor_enabled: boolean | null
           angel_cursor_size: string | null
           angel_cursor_video_url: string | null
+          angel_presence_settings: Json | null
           created_at: string | null
           id: string
           theme: string
@@ -1441,6 +1442,7 @@ export type Database = {
           angel_cursor_enabled?: boolean | null
           angel_cursor_size?: string | null
           angel_cursor_video_url?: string | null
+          angel_presence_settings?: Json | null
           created_at?: string | null
           id?: string
           theme?: string
@@ -1452,6 +1454,7 @@ export type Database = {
           angel_cursor_enabled?: boolean | null
           angel_cursor_size?: string | null
           angel_cursor_video_url?: string | null
+          angel_presence_settings?: Json | null
           created_at?: string | null
           id?: string
           theme?: string
