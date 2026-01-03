@@ -79,7 +79,7 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
   const fairies = useMemo(() => 
     fairyImages.map((fairy, i) => {
       const baseAngle = (i * 60) + Math.random() * 30;
-      const distance = 320 + Math.random() * 60;
+      const distance = 350 + Math.random() * 70; // 350-420px - further outside the cover circle
       
       return {
         id: i,
