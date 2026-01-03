@@ -24,10 +24,14 @@ export interface AngelAnimationConfig {
   pulseGlow?: boolean;        // adds breathing glow effect
 }
 
+export type VideoQuality = 'high' | 'performance';
+
 export interface VideoSources {
-  webmSrc?: string;    // WebM with alpha (preferred)
-  mp4Src: string;      // MP4 fallback (required)
-  posterSrc?: string;  // Thumbnail for selector
+  webmHighSrc?: string;    // WebM with alpha - high quality
+  webmPerfSrc?: string;    // WebM with alpha - performance optimized
+  mp4HighSrc: string;      // MP4 fallback - high quality (required)
+  mp4PerfSrc?: string;     // MP4 fallback - performance optimized
+  posterSrc?: string;      // Thumbnail for selector
 }
 
 export interface AngelStyleConfig {
@@ -66,6 +70,7 @@ export interface AngelPresenceSettings {
   sparklesEnabled: boolean;
   trailEnabled: boolean;
   customImageUrl?: string;
+  videoQuality: VideoQuality;
 }
 
 export const ANGEL_COLORS: AngelColorConfig[] = [

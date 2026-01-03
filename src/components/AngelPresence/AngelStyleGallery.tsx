@@ -1,7 +1,7 @@
 import { memo, useRef, useMemo, useState, useEffect, useCallback } from 'react';
-import { Check, Eye, Upload, Trash2, ImageIcon, Play } from 'lucide-react';
-import { ANGEL_STYLES, ANGEL_COLORS, type AngelStyle, type AngelColor } from './types';
-import { AngelSVGMap, VIDEO_SOURCES, type VideoAngelStyleId } from './AngelSVGs';
+import { Check, Eye, Upload, Trash2, ImageIcon, Play, Zap, Sparkles } from 'lucide-react';
+import { ANGEL_STYLES, ANGEL_COLORS, type AngelStyle, type AngelColor, type VideoQuality } from './types';
+import { AngelSVGMap, VIDEO_SOURCES, getVideoSourcesForQuality, type VideoAngelStyleId } from './AngelSVGs';
 import { cn } from '@/lib/utils';
 import AngelPresence from './index';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,8 @@ interface AngelStyleGalleryProps {
   onSparklesChange: (enabled: boolean) => void;
   trailEnabled: boolean;
   onTrailChange: (enabled: boolean) => void;
+  videoQuality: VideoQuality;
+  onVideoQualityChange: (quality: VideoQuality) => void;
   customImageUrl?: string;
   onCustomImageUpload?: (file: File) => void;
   onCustomImageRemove?: () => void;
@@ -38,6 +40,8 @@ const AngelStyleGallery = memo(({
   onSparklesChange,
   trailEnabled,
   onTrailChange,
+  videoQuality,
+  onVideoQualityChange,
   customImageUrl,
   onCustomImageUpload,
   onCustomImageRemove,
@@ -234,13 +238,55 @@ const AngelStyleGallery = memo(({
 
       {/* Video Angel Styles */}
       <div className="pt-4 border-t border-border/30">
-        <div className="flex items-center gap-2 mb-3">
-          <Play className="w-4 h-4 text-muted-foreground" />
-          <h4 className="text-sm font-medium text-foreground/80">Video Angels</h4>
-          {!prefersReducedMotion && (
-            <span className="text-[10px] text-muted-foreground">(hover to preview)</span>
-          )}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Play className="w-4 h-4 text-muted-foreground" />
+            <h4 className="text-sm font-medium text-foreground/80">Video Angels</h4>
+            {!prefersReducedMotion && (
+              <span className="text-[10px] text-muted-foreground">(hover to preview)</span>
+            )}
+          </div>
         </div>
+        
+        {/* Video Quality Toggle */}
+        <div className="mb-4 p-3 rounded-lg bg-muted/30 border border-border/30">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-foreground/70">Video Quality</span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onVideoQualityChange('high')}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg border-2 transition-all duration-200 text-sm",
+                videoQuality === 'high'
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border/50 hover:border-primary/50 text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Sparkles className="w-4 h-4" />
+              <div className="text-left">
+                <div className="font-medium">High Quality</div>
+                <div className="text-[10px] opacity-70">Sharper visuals</div>
+              </div>
+            </button>
+            <button
+              onClick={() => onVideoQualityChange('performance')}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg border-2 transition-all duration-200 text-sm",
+                videoQuality === 'performance'
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border/50 hover:border-primary/50 text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Zap className="w-4 h-4" />
+              <div className="text-left">
+                <div className="font-medium">Performance</div>
+                <div className="text-[10px] opacity-70">Smoother playback</div>
+              </div>
+            </button>
+          </div>
+        </div>
+        
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {videoStyles.map((style) => {
             const isSelected = currentStyle === style.id && !customImageUrl;
@@ -301,10 +347,10 @@ const AngelStyleGallery = memo(({
                         background: 'transparent',
                       }}
                     >
-                      {videoSources.webmSrc && (
-                        <source src={videoSources.webmSrc} type="video/webm" />
+                      {videoSources.webmHighSrc && (
+                        <source src={videoSources.webmHighSrc} type="video/webm" />
                       )}
-                      <source src={videoSources.mp4Src} type="video/mp4" />
+                      <source src={videoSources.mp4HighSrc} type="video/mp4" />
                     </video>
                   ) : posterSrc ? (
                     <img 

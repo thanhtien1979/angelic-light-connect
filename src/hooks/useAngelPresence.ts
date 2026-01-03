@@ -22,5 +22,5 @@ export function useAngelPresence() {
 }
 
 // Re-export types
-export type { AngelStyle, AngelColor, AngelPresenceSettings } from '@/components/AngelPresence/types';
+export type { AngelStyle, AngelColor, AngelPresenceSettings, VideoQuality } from '@/components/AngelPresence/types';
 export type { SyncStatus } from '@/contexts/AngelPresenceContext';
