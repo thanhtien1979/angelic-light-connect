@@ -198,16 +198,18 @@ export const HealingAngelSVG = memo(() => (
 HealingAngelSVG.displayName = 'HealingAngelSVG';
 
 export const FairyAngelSVG = memo(() => (
-  <img 
-    src={fairyAngelImage} 
-    alt="" 
-    className="w-12 h-12 object-contain"
-    style={{ 
-      pointerEvents: 'none',
-      userSelect: 'none',
-    }}
-    draggable={false}
-  />
+  <div className="relative motion-safe:animate-fairy-float">
+    <img 
+      src={fairyAngelImage} 
+      alt="" 
+      className="w-12 h-12 object-contain motion-safe:animate-fairy-wings"
+      style={{ 
+        pointerEvents: 'none',
+        userSelect: 'none',
+      }}
+      draggable={false}
+    />
+  </div>
 ));
 FairyAngelSVG.displayName = 'FairyAngelSVG';
 
