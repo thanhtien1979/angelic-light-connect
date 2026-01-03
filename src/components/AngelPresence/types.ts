@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint';
 
 export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
 
@@ -227,6 +227,74 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
       followEasing: 0.13,
       sparkleIntensity: 1.4,
       trailIntensity: 1.3,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-blue',
+    name: 'Blue Fairy',
+    description: 'Serene blue fairy with elegant wings',
+    glowIntensity: 0.65,
+    glowColor: 'rgba(150,200,255,0.6)',
+    scale: 1,
+    animation: {
+      floatDuration: 3,
+      floatAmplitude: 4,
+      flapDuration: 2.5,
+      followEasing: 0.12,
+      sparkleIntensity: 1.2,
+      trailIntensity: 1.1,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-red',
+    name: 'Red Fairy',
+    description: 'Playful fairy with colorful wings',
+    glowIntensity: 0.7,
+    glowColor: 'rgba(255,150,180,0.6)',
+    scale: 1,
+    animation: {
+      floatDuration: 2.5,
+      floatAmplitude: 5,
+      flapDuration: 2.2,
+      followEasing: 0.14,
+      sparkleIntensity: 1.3,
+      trailIntensity: 1.2,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-pink',
+    name: 'Pink Fairy',
+    description: 'Graceful fairy with pink & gold wings',
+    glowIntensity: 0.68,
+    glowColor: 'rgba(255,180,200,0.6)',
+    scale: 1,
+    animation: {
+      floatDuration: 2.8,
+      floatAmplitude: 4.5,
+      flapDuration: 2.4,
+      followEasing: 0.13,
+      sparkleIntensity: 1.25,
+      trailIntensity: 1.15,
+      bouncy: true,
+    },
+  },
+  {
+    id: 'fairy-mint',
+    name: 'Mint Fairy',
+    description: 'Sweet fairy with mint green wings',
+    glowIntensity: 0.6,
+    glowColor: 'rgba(180,255,220,0.6)',
+    scale: 1,
+    animation: {
+      floatDuration: 3.2,
+      floatAmplitude: 4,
+      flapDuration: 2.6,
+      followEasing: 0.11,
+      sparkleIntensity: 1.1,
+      trailIntensity: 1.0,
       bouncy: true,
     },
   },
