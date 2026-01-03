@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Import fairy images
@@ -10,12 +10,12 @@ import fairyPurple from "@/assets/floating-fairy-purple.png";
 import fairyYellow from "@/assets/floating-fairy-yellow.png";
 
 const fairyImages = [
-  { image: fairyGreen, sparkleColor: "hsl(120, 70%, 70%)" },
-  { image: fairyGold, sparkleColor: "hsl(45, 90%, 70%)" },
-  { image: fairyBrown, sparkleColor: "hsl(35, 80%, 65%)" },
-  { image: fairyPink, sparkleColor: "hsl(340, 80%, 75%)" },
-  { image: fairyPurple, sparkleColor: "hsl(280, 70%, 75%)" },
-  { image: fairyYellow, sparkleColor: "hsl(50, 90%, 75%)" },
+  { image: fairyGreen, sparkleColor: "hsl(120, 70%, 70%)", note: 523.25 }, // C5
+  { image: fairyGold, sparkleColor: "hsl(45, 90%, 70%)", note: 587.33 }, // D5
+  { image: fairyBrown, sparkleColor: "hsl(35, 80%, 65%)", note: 659.25 }, // E5
+  { image: fairyPink, sparkleColor: "hsl(340, 80%, 75%)", note: 698.46 }, // F5
+  { image: fairyPurple, sparkleColor: "hsl(280, 70%, 75%)", note: 783.99 }, // G5
+  { image: fairyYellow, sparkleColor: "hsl(50, 90%, 75%)", note: 880 }, // A5
 ];
 
 interface Sparkle {
@@ -30,18 +30,62 @@ interface FloatingFairiesProps {
   isReducedMotion?: boolean;
 }
 
+// Create a gentle fairy chime sound
+const playFairySound = (frequency: number) => {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Main tone
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    
+    // Gentle fade in and out
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+    
+    // Add harmonics for a bell-like sound
+    const harmonic = audioContext.createOscillator();
+    const harmonicGain = audioContext.createGain();
+    harmonic.type = "sine";
+    harmonic.frequency.setValueAtTime(frequency * 2, audioContext.currentTime);
+    harmonicGain.gain.setValueAtTime(0, audioContext.currentTime);
+    harmonicGain.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 0.03);
+    harmonicGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    harmonic.connect(harmonicGain);
+    harmonicGain.connect(audioContext.destination);
+    
+    oscillator.start();
+    harmonic.start();
+    oscillator.stop(audioContext.currentTime + 0.6);
+    harmonic.stop(audioContext.currentTime + 0.4);
+    
+    setTimeout(() => audioContext.close(), 700);
+  } catch (e) {
+    // Audio not supported
+  }
+};
+
 const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+  const [lastPlayedTime, setLastPlayedTime] = useState<Record<number, number>>({});
 
   const fairies = useMemo(() => 
     fairyImages.map((fairy, i) => {
       const baseAngle = (i * 60) + Math.random() * 30;
-      const distance = 320 + Math.random() * 60; // Increased distance - outside the circle
+      const distance = 320 + Math.random() * 60;
       
       return {
         id: i,
         image: fairy.image,
         sparkleColor: fairy.sparkleColor,
+        note: fairy.note,
         size: 55 + Math.random() * 25,
         startAngle: baseAngle,
         distance,
@@ -53,6 +97,17 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
       };
     }), []
   );
+
+  const handleFairyHover = useCallback((fairyId: number, note: number) => {
+    const now = Date.now();
+    const lastPlayed = lastPlayedTime[fairyId] || 0;
+    
+    // Throttle sound to once per second per fairy
+    if (now - lastPlayed > 1000) {
+      playFairySound(note);
+      setLastPlayedTime(prev => ({ ...prev, [fairyId]: now }));
+    }
+  }, [lastPlayedTime]);
 
   // Generate sparkles periodically
   useEffect(() => {
@@ -171,6 +226,7 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
             
             {/* Counter-rotate and flutter */}
             <motion.div
+              className="cursor-pointer pointer-events-auto"
               animate={{
                 rotate: [0, -5, 0, 5, 0],
                 scale: [1, 1.05, 1, 0.95, 1],
@@ -180,6 +236,8 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
+              whileHover={{ scale: 1.2 }}
+              onMouseEnter={() => handleFairyHover(fairy.id, fairy.note)}
             >
               <motion.img
                 src={fairy.image}
