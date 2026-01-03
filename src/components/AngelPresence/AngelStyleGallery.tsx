@@ -1,11 +1,13 @@
 import { memo } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Eye } from 'lucide-react';
 import { ANGEL_STYLES, ANGEL_COLORS, type AngelStyle, type AngelColor } from './types';
 import { AngelSVGMap } from './AngelSVGs';
 import { cn } from '@/lib/utils';
+import AngelPresence from './index';
 
 /**
  * AngelStyleGallery - Allows users to choose between angel designs and colors
+ * Includes live preview that reflects current settings
  */
 
 interface AngelStyleGalleryProps {
@@ -34,8 +36,35 @@ const AngelStyleGallery = memo(({
   
   return (
     <div className="space-y-6">
+      {/* Live Preview Section */}
+      <div className="flex flex-col items-center">
+        <div className="flex items-center gap-2 mb-3">
+          <Eye className="w-4 h-4 text-muted-foreground" />
+          <h4 className="text-sm font-medium text-foreground/80">Live Preview</h4>
+        </div>
+        <div 
+          className="rounded-2xl border border-border/30 bg-gradient-to-b from-background/50 to-muted/20 p-2"
+          style={{
+            boxShadow: `0 0 30px ${currentColorConfig.glowColor.replace('0.6', '0.15')}`,
+          }}
+        >
+          <AngelPresence
+            enabled={true}
+            style={currentStyle}
+            color={currentColor}
+            sparklesEnabled={sparklesEnabled}
+            trailEnabled={trailEnabled}
+            previewMode={true}
+            previewSize={140}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground mt-2 text-center">
+          Your angel companion as it appears on site
+        </p>
+      </div>
+
       {/* Style selection */}
-      <div>
+      <div className="pt-4 border-t border-border/30">
         <h4 className="text-sm font-medium text-foreground/80 mb-3">Angel Style</h4>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {ANGEL_STYLES.map((style) => {

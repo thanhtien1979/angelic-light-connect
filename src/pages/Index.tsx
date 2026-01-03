@@ -26,6 +26,7 @@ const Index = () => {
   const { 
     isEnabled: angelPresenceEnabled, 
     style: angelStyle,
+    color: angelColor,
     sparklesEnabled,
     trailEnabled,
   } = useAngelPresence();
@@ -48,6 +49,7 @@ const Index = () => {
       <AngelPresence 
         enabled={angelPresenceEnabled} 
         style={angelStyle}
+        color={angelColor}
         sparklesEnabled={sparklesEnabled}
         trailEnabled={trailEnabled}
       />
