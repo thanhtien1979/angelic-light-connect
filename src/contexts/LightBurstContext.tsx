@@ -3,12 +3,14 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 const LIGHT_BURST_SETTINGS_KEY = "angel-light-burst-settings";
 
 export type LightBurstSize = 'small' | 'medium' | 'large';
+export type LightBurstEffect = 'light' | 'snow' | 'flowers' | 'hearts' | 'stars' | 'butterflies';
 
 export interface LightBurstSettings {
   enabled: boolean;
   soundEnabled: boolean;
   color: 'gold' | 'blue' | 'pink' | 'purple' | 'green' | 'rainbow';
   size: LightBurstSize;
+  effect: LightBurstEffect;
 }
 
 interface LightBurstContextType {
@@ -21,6 +23,7 @@ const DEFAULT_SETTINGS: LightBurstSettings = {
   soundEnabled: true,
   color: 'gold',
   size: 'medium',
+  effect: 'light',
 };
 
 export const LIGHT_BURST_COLORS = {
@@ -36,6 +39,15 @@ export const LIGHT_BURST_SIZES = {
   small: { scale: 0.6, name: 'Nhỏ', icon: 'S' },
   medium: { scale: 1, name: 'Vừa', icon: 'M' },
   large: { scale: 1.5, name: 'Lớn', icon: 'L' },
+} as const;
+
+export const LIGHT_BURST_EFFECTS = {
+  light: { name: 'Ánh Sáng', emoji: '✨' },
+  snow: { name: 'Tuyết Rơi', emoji: '❄️' },
+  flowers: { name: 'Hoa Rơi', emoji: '🌸' },
+  hearts: { name: 'Tim Bay', emoji: '💕' },
+  stars: { name: 'Ngôi Sao', emoji: '⭐' },
+  butterflies: { name: 'Bướm Bay', emoji: '🦋' },
 } as const;
 
 const LightBurstContext = createContext<LightBurstContextType | undefined>(undefined);

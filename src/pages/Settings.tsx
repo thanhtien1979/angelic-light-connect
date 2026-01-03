@@ -19,7 +19,7 @@ import { useSoundSettings } from "@/hooks/useSoundSettings";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { SyncIndicator } from "@/components/AngelPresence/SyncIndicator";
-import { useLightBurst, LIGHT_BURST_COLORS, LIGHT_BURST_SIZES, LightBurstSettings, LightBurstSize } from "@/contexts/LightBurstContext";
+import { useLightBurst, LIGHT_BURST_COLORS, LIGHT_BURST_SIZES, LIGHT_BURST_EFFECTS, LightBurstSettings, LightBurstSize, LightBurstEffect } from "@/contexts/LightBurstContext";
 import { ResetConfirmDialog } from "@/components/AngelPresence/ResetConfirmDialog";
 
 type SettingsSection = "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
@@ -717,6 +717,33 @@ const Settings = () => {
                                       <span className="text-xs font-bold text-primary">{sizeInfo.icon}</span>
                                     </div>
                                     <span className="text-xs font-medium">{sizeInfo.name}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Effect Type Selection */}
+                          <div className="mt-4">
+                            <Label className="text-sm font-medium mb-3 block">Kiểu Hiệu Ứng</Label>
+                            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                              {(Object.keys(LIGHT_BURST_EFFECTS) as Array<LightBurstEffect>).map((effectKey) => {
+                                const effectInfo = LIGHT_BURST_EFFECTS[effectKey];
+                                const isSelected = lightBurstSettings.effect === effectKey;
+                                
+                                return (
+                                  <button
+                                    key={effectKey}
+                                    onClick={() => updateLightBurstSetting("effect", effectKey)}
+                                    className={cn(
+                                      "p-3 rounded-xl border text-center transition-all duration-200",
+                                      isSelected
+                                        ? "border-primary bg-primary/10 shadow-md scale-105"
+                                        : "border-border/50 hover:border-primary/30 bg-card/30"
+                                    )}
+                                  >
+                                    <div className="text-2xl mb-1">{effectInfo.emoji}</div>
+                                    <span className="text-xs font-medium">{effectInfo.name}</span>
                                   </button>
                                 );
                               })}
