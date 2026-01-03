@@ -1,5 +1,5 @@
 import { memo, useRef, useMemo, useState, useEffect, useCallback } from 'react';
-import { Check, Eye, Upload, Trash2, ImageIcon, Play, Zap, Sparkles } from 'lucide-react';
+import { Check, Eye, Upload, Trash2, ImageIcon, Play, Zap, Sparkles, ChevronDown, RotateCcw } from 'lucide-react';
 import { ANGEL_STYLES, ANGEL_COLORS, type AngelStyle, type AngelColor, type VideoQuality } from './types';
 import { AngelSVGMap, VIDEO_SOURCES, getVideoSourcesForQuality, type VideoAngelStyleId } from './AngelSVGs';
 import { cn } from '@/lib/utils';
@@ -7,6 +7,7 @@ import AngelPresence from './index';
 import { Button } from '@/components/ui/button';
 import PresetThemeSelector from './PresetThemeSelector';
 import type { AngelPreset } from './presets';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 /**
  * AngelStyleGallery - Allows users to choose between angel designs and colors
@@ -34,6 +35,7 @@ interface AngelStyleGalleryProps {
   isLoggedIn?: boolean;
   hiddenStyles?: AngelStyle[];
   onDeleteStyle?: (styleId: AngelStyle) => void;
+  onRestoreStyle?: (styleId: AngelStyle) => void;
 }
 
 const AngelStyleGallery = memo(({
@@ -54,7 +56,9 @@ const AngelStyleGallery = memo(({
   isLoggedIn = false,
   hiddenStyles = [],
   onDeleteStyle,
+  onRestoreStyle,
 }: AngelStyleGalleryProps) => {
+  const [isHiddenListOpen, setIsHiddenListOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hoverVideoRef = useRef<HTMLVideoElement>(null);
   const [hoveredVideoStyle, setHoveredVideoStyle] = useState<string | null>(null);
@@ -77,11 +81,21 @@ const AngelStyleGallery = memo(({
   const currentColorConfig = ANGEL_COLORS.find(c => c.id === currentColor) || ANGEL_COLORS[0];
   
   // Separate static and video angel styles, filtering out hidden ones
-  const { staticStyles, videoStyles } = useMemo(() => {
+  const { staticStyles, videoStyles, hiddenStaticStyles, hiddenVideoStyles } = useMemo(() => {
     const staticStyles = ANGEL_STYLES.filter(s => !s.isVideo && !hiddenStyles.includes(s.id));
     const videoStyles = ANGEL_STYLES.filter(s => s.isVideo && !hiddenStyles.includes(s.id));
-    return { staticStyles, videoStyles };
+    const hiddenStaticStyles = ANGEL_STYLES.filter(s => !s.isVideo && hiddenStyles.includes(s.id));
+    const hiddenVideoStyles = ANGEL_STYLES.filter(s => s.isVideo && hiddenStyles.includes(s.id));
+    return { staticStyles, videoStyles, hiddenStaticStyles, hiddenVideoStyles };
   }, [hiddenStyles]);
+  
+  // Handle restore click
+  const handleRestoreStyle = useCallback((e: React.MouseEvent, styleId: AngelStyle) => {
+    e.stopPropagation();
+    if (onRestoreStyle) {
+      onRestoreStyle(styleId);
+    }
+  }, [onRestoreStyle]);
   
   // Check if a style can be deleted (not a default style)
   const canDeleteStyle = useCallback((styleId: AngelStyle) => {
@@ -420,7 +434,117 @@ const AngelStyleGallery = memo(({
         </div>
       </div>
 
-      {/* Custom Image Upload */}
+      {/* Hidden Angels Section - Collapsible */}
+      {(hiddenStaticStyles.length > 0 || hiddenVideoStyles.length > 0) && (
+        <Collapsible open={isHiddenListOpen} onOpenChange={setIsHiddenListOpen}>
+          <div className="pt-4 border-t border-border/30">
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-2">
+                  <RotateCcw className="w-4 h-4 text-muted-foreground" />
+                  <h4 className="text-sm font-medium text-foreground/80">
+                    Đã ẩn ({hiddenStaticStyles.length + hiddenVideoStyles.length})
+                  </h4>
+                </div>
+                <ChevronDown className={cn(
+                  "w-4 h-4 text-muted-foreground transition-transform duration-200",
+                  isHiddenListOpen && "rotate-180"
+                )} />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {/* Hidden static styles */}
+                {hiddenStaticStyles.map((style) => {
+                  const AngelSVG = AngelSVGMap[style.id];
+                  
+                  return (
+                    <div
+                      key={style.id}
+                      className="relative flex flex-col items-center p-4 rounded-xl border-2 border-border/30 bg-muted/30 opacity-60 hover:opacity-100 transition-all duration-200 group/card"
+                    >
+                      {/* Restore button */}
+                      <button
+                        onClick={(e) => handleRestoreStyle(e, style.id)}
+                        className="absolute top-2 right-2 w-7 h-7 bg-primary/80 hover:bg-primary rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 z-10"
+                        title="Khôi phục thiên thần"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-primary-foreground" />
+                      </button>
+                      
+                      <div 
+                        className="w-12 h-12 flex items-center justify-center mb-2 rounded-full transition-all duration-300 grayscale group-hover/card:grayscale-0"
+                        style={{
+                          background: `radial-gradient(circle, ${currentColorConfig.glowColor} 0%, transparent 70%)`,
+                        }}
+                      >
+                        <div style={{ transform: `scale(${style.scale * 0.85})` }}>
+                          <AngelSVG />
+                        </div>
+                      </div>
+                      
+                      <span className="text-sm font-medium text-muted-foreground group-hover/card:text-foreground">{style.name}</span>
+                    </div>
+                  );
+                })}
+                
+                {/* Hidden video styles */}
+                {hiddenVideoStyles.map((style) => {
+                  const videoSources = VIDEO_SOURCES[style.id as VideoAngelStyleId];
+                  const posterSrc = videoSources?.posterSrc;
+                  
+                  return (
+                    <div
+                      key={style.id}
+                      className="relative flex flex-col items-center p-4 rounded-xl border-2 border-border/30 bg-muted/30 opacity-60 hover:opacity-100 transition-all duration-200 group/card"
+                    >
+                      {/* Video badge */}
+                      <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-background/80 backdrop-blur-sm rounded text-[10px] font-medium text-muted-foreground flex items-center gap-0.5">
+                        <Play className="w-2.5 h-2.5" />
+                        VIDEO
+                      </div>
+                      
+                      {/* Restore button */}
+                      <button
+                        onClick={(e) => handleRestoreStyle(e, style.id)}
+                        className="absolute top-2 right-2 w-7 h-7 bg-primary/80 hover:bg-primary rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 z-10"
+                        title="Khôi phục thiên thần"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-primary-foreground" />
+                      </button>
+                      
+                      <div 
+                        className="w-12 h-12 flex items-center justify-center mb-2 rounded-full overflow-hidden transition-all duration-300 grayscale group-hover/card:grayscale-0"
+                        style={{
+                          background: 'radial-gradient(circle, rgba(255,223,140,0.95) 0%, rgba(218,165,32,0.9) 40%, rgba(184,134,11,0.85) 100%)',
+                        }}
+                      >
+                        {posterSrc ? (
+                          <img 
+                            src={posterSrc} 
+                            alt={style.name}
+                            className="w-12 h-12 object-cover rounded-full"
+                            style={{ mixBlendMode: 'multiply' }}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <Play className="w-5 h-5 text-amber-800/60" />
+                        )}
+                      </div>
+                      
+                      <span className="text-sm font-medium text-muted-foreground group-hover/card:text-foreground">{style.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-3 text-center">
+                Nhấn vào nút khôi phục để hiện lại thiên thần
+              </p>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+      )}
+
       {isLoggedIn && (
         <div className="pt-4 border-t border-border/30">
           <h4 className="text-sm font-medium text-foreground/80 mb-3">Custom Angel Image</h4>

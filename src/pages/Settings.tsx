@@ -60,6 +60,7 @@ const Settings = () => {
     removeCustomImage,
     resetToDefaults,
     deleteStyle,
+    restoreStyle,
   } = useAngelPresence();
 
   // Notification settings state
@@ -307,6 +308,7 @@ const Settings = () => {
                           isLoggedIn={!!user}
                           hiddenStyles={hiddenStyles}
                           onDeleteStyle={deleteStyle}
+                          onRestoreStyle={restoreStyle}
                         />
                       </motion.div>
                     )}
