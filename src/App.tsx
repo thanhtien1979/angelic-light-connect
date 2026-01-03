@@ -45,6 +45,7 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
     color: angelColor,
     sparklesEnabled,
     trailEnabled,
+    customImageUrl,
   } = useAngelPresence();
   
   return (
@@ -56,6 +57,7 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
         color={angelColor}
         sparklesEnabled={sparklesEnabled}
         trailEnabled={trailEnabled}
+        imageUrl={customImageUrl}
       />
       <SessionExpiredDialog isOpen={isSessionExpired} onClose={hideSessionExpired} />
     </>

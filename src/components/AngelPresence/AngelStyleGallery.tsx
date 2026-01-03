@@ -1,9 +1,10 @@
-import { memo } from 'react';
-import { Check, Eye } from 'lucide-react';
+import { memo, useRef } from 'react';
+import { Check, Eye, Upload, Trash2, ImageIcon } from 'lucide-react';
 import { ANGEL_STYLES, ANGEL_COLORS, type AngelStyle, type AngelColor } from './types';
 import { AngelSVGMap } from './AngelSVGs';
 import { cn } from '@/lib/utils';
 import AngelPresence from './index';
+import { Button } from '@/components/ui/button';
 
 /**
  * AngelStyleGallery - Allows users to choose between angel designs and colors
@@ -19,6 +20,11 @@ interface AngelStyleGalleryProps {
   onSparklesChange: (enabled: boolean) => void;
   trailEnabled: boolean;
   onTrailChange: (enabled: boolean) => void;
+  customImageUrl?: string;
+  onCustomImageUpload?: (file: File) => void;
+  onCustomImageRemove?: () => void;
+  isUploading?: boolean;
+  isLoggedIn?: boolean;
 }
 
 const AngelStyleGallery = memo(({
@@ -30,9 +36,27 @@ const AngelStyleGallery = memo(({
   onSparklesChange,
   trailEnabled,
   onTrailChange,
+  customImageUrl,
+  onCustomImageUpload,
+  onCustomImageRemove,
+  isUploading = false,
+  isLoggedIn = false,
 }: AngelStyleGalleryProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // Get current color config for glow preview
   const currentColorConfig = ANGEL_COLORS.find(c => c.id === currentColor) || ANGEL_COLORS[0];
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onCustomImageUpload) {
+      onCustomImageUpload(file);
+    }
+    // Reset input so same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -54,6 +78,7 @@ const AngelStyleGallery = memo(({
             color={currentColor}
             sparklesEnabled={sparklesEnabled}
             trailEnabled={trailEnabled}
+            imageUrl={customImageUrl}
             previewMode={true}
             previewSize={140}
           />
@@ -69,12 +94,18 @@ const AngelStyleGallery = memo(({
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {ANGEL_STYLES.map((style) => {
             const AngelSVG = AngelSVGMap[style.id];
-            const isSelected = currentStyle === style.id;
+            const isSelected = currentStyle === style.id && !customImageUrl;
             
             return (
               <button
                 key={style.id}
-                onClick={() => onStyleChange(style.id)}
+                onClick={() => {
+                  onStyleChange(style.id);
+                  // Clear custom image when selecting a preset style
+                  if (customImageUrl && onCustomImageRemove) {
+                    onCustomImageRemove();
+                  }
+                }}
                 className={cn(
                   "relative flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-200",
                   isSelected 
@@ -111,6 +142,86 @@ const AngelStyleGallery = memo(({
           })}
         </div>
       </div>
+
+      {/* Custom Image Upload */}
+      {isLoggedIn && (
+        <div className="pt-4 border-t border-border/30">
+          <h4 className="text-sm font-medium text-foreground/80 mb-3">Custom Angel Image</h4>
+          
+          {customImageUrl ? (
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-primary/5 border-2 border-primary">
+              {/* Custom image preview */}
+              <div 
+                className="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center"
+                style={{
+                  background: `radial-gradient(circle, ${currentColorConfig.glowColor} 0%, transparent 70%)`,
+                }}
+              >
+                <img 
+                  src={customImageUrl} 
+                  alt="Custom angel" 
+                  className="w-12 h-12 object-contain"
+                />
+              </div>
+              
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">Custom Image Active</p>
+                <p className="text-xs text-muted-foreground">Your custom angel is following your cursor</p>
+              </div>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onCustomImageRemove}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ) : (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className={cn(
+                "w-full flex items-center gap-4 p-4 rounded-xl",
+                "border-2 border-dashed border-border/50",
+                "hover:border-primary/50 hover:bg-primary/5",
+                "transition-all duration-200",
+                isUploading && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              <div className="p-3 rounded-full bg-muted/50">
+                {isUploading ? (
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Upload className="w-5 h-5 text-muted-foreground" />
+                )}
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-medium text-foreground">
+                  {isUploading ? 'Uploading...' : 'Upload Custom Image'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PNG only, max 2MB, transparent background recommended
+                </p>
+              </div>
+            </button>
+          )}
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          
+          <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1.5">
+            <ImageIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            <span>For best results, use a PNG image with transparent background, sized around 48-64px.</span>
+          </p>
+        </div>
+      )}
 
       {/* Color selection */}
       <div className="pt-2 border-t border-border/50">

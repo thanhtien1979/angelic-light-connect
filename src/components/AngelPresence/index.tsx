@@ -38,6 +38,7 @@ const AngelPresence = memo(({
   const targetPos = useRef({ x: -100, y: -100 });
   const prevPos = useRef({ x: -100, y: -100 });
   const floatOffset = useRef(0);
+  const glowPulse = useRef(1);
   const animationFrameRef = useRef<number | null>(null);
   const lastSparkleTime = useRef(0);
   const lastTrailTime = useRef(0);
@@ -168,18 +169,25 @@ const AngelPresence = memo(({
   useEffect(() => {
     if (previewMode || !enabled || isMobile || prefersReducedMotion) return;
 
-    const easing = 0.12;
-    const floatSpeed = 0.002;
-    const floatAmplitude = 4;
-    const sparkleInterval = 300;
-    const trailInterval = 50;
-    const maxSparkles = 8;
-    const maxTrailPoints = 15;
+    const { animation } = styleConfig;
+    const easing = animation.followEasing;
+    const floatSpeed = (1 / animation.floatDuration) * 0.02;
+    const floatAmplitude = animation.floatAmplitude;
+    const sparkleInterval = Math.round(300 / animation.sparkleIntensity);
+    const trailInterval = Math.round(50 / animation.trailIntensity);
+    const maxSparkles = Math.round(8 * animation.sparkleIntensity);
+    const maxTrailPoints = Math.round(15 * animation.trailIntensity);
+    let pulsePhase = 0;
 
     const animate = () => {
       const now = Date.now();
       floatOffset.current += floatSpeed;
-      const floatY = Math.sin(floatOffset.current) * floatAmplitude;
+      
+      // Add bouncy micro-bounce for bouncy types
+      const bounceFactor = animation.bouncy 
+        ? Math.abs(Math.sin(floatOffset.current * 3)) * 1.5 
+        : 0;
+      const floatY = Math.sin(floatOffset.current) * floatAmplitude + bounceFactor;
 
       setDisplayPos(prev => {
         const dx = targetPos.current.x - prev.x;
@@ -190,7 +198,7 @@ const AngelPresence = memo(({
         const newY = prev.y + dy * easing + floatY * 0.1;
 
         if (sparklesEnabled && !prefersReducedMotion && now - lastSparkleTime.current > sparkleInterval) {
-          if (Math.random() < 0.4) {
+          if (Math.random() < 0.4 * animation.sparkleIntensity) {
             lastSparkleTime.current = now;
             const offsetX = (Math.random() - 0.5) * 60;
             const offsetY = (Math.random() - 0.5) * 60;
@@ -211,7 +219,7 @@ const AngelPresence = memo(({
 
         if (trailEnabled && !prefersReducedMotion && speed > 2 && now - lastTrailTime.current > trailInterval) {
           lastTrailTime.current = now;
-          const trailOpacity = Math.min(speed / 50, 0.8);
+          const trailOpacity = Math.min(speed / 50, 0.8) * animation.trailIntensity;
           
           setTrailPoints(prev => {
             const newPoint: TrailPoint = {
@@ -228,6 +236,14 @@ const AngelPresence = memo(({
         return { x: newX, y: newY };
       });
 
+      // Update pulse phase for pulse glow effect
+      if (animation.pulseGlow) {
+        pulsePhase += 0.02;
+        glowPulse.current = 0.8 + Math.sin(pulsePhase) * 0.2;
+      } else {
+        glowPulse.current = 1;
+      }
+
       setSparkles(prev => prev.filter(s => now - s.createdAt < 1500));
       setTrailPoints(prev => prev.filter(p => now - p.createdAt < 500));
 
@@ -241,7 +257,7 @@ const AngelPresence = memo(({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [previewMode, enabled, isMobile, prefersReducedMotion, sparklesEnabled, trailEnabled]);
+  }, [previewMode, enabled, isMobile, prefersReducedMotion, sparklesEnabled, trailEnabled, styleConfig]);
 
   // Set up mouse event listener (non-preview mode only)
   useEffect(() => {

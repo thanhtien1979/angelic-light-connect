@@ -42,11 +42,15 @@ const Settings = () => {
     color: angelColor,
     sparklesEnabled,
     trailEnabled,
+    customImageUrl,
+    isUploading: angelUploading,
     toggle: toggleAngel,
     setStyle,
     setColor,
     setSparklesEnabled,
     setTrailEnabled,
+    uploadCustomImage,
+    removeCustomImage,
   } = useAngelPresence();
 
   // Notification settings state
@@ -279,6 +283,11 @@ const Settings = () => {
                           trailEnabled={trailEnabled}
                           onSparklesChange={setSparklesEnabled}
                           onTrailChange={setTrailEnabled}
+                          customImageUrl={customImageUrl}
+                          onCustomImageUpload={uploadCustomImage}
+                          onCustomImageRemove={removeCustomImage}
+                          isUploading={angelUploading}
+                          isLoggedIn={!!user}
                         />
                       </motion.div>
                     )}

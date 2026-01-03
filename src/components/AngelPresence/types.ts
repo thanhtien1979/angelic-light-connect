@@ -13,6 +13,17 @@ export interface AngelColorConfig {
   glowColor: string;
 }
 
+export interface AngelAnimationConfig {
+  floatDuration: number;      // seconds - main float cycle
+  floatAmplitude: number;     // pixels - vertical float distance
+  flapDuration?: number;      // seconds - wing flap (if applicable)
+  followEasing: number;       // 0-1 - how smoothly it follows cursor
+  sparkleIntensity: number;   // 0-1 - particle spawn rate multiplier
+  trailIntensity: number;     // 0-1 - trail opacity/length multiplier
+  bouncy?: boolean;           // adds micro-bounce effect
+  pulseGlow?: boolean;        // adds breathing glow effect
+}
+
 export interface AngelStyleConfig {
   id: AngelStyle;
   name: string;
@@ -20,6 +31,7 @@ export interface AngelStyleConfig {
   glowIntensity: number; // 0-1
   glowColor: string;
   scale: number;
+  animation: AngelAnimationConfig;
 }
 
 export interface SparkleParticle {
@@ -45,6 +57,7 @@ export interface AngelPresenceSettings {
   color: AngelColor;
   sparklesEnabled: boolean;
   trailEnabled: boolean;
+  customImageUrl?: string;
 }
 
 export const ANGEL_COLORS: AngelColorConfig[] = [
@@ -94,6 +107,14 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.6,
     glowColor: 'rgba(255,255,255,0.6)',
     scale: 1,
+    animation: {
+      floatDuration: 3,
+      floatAmplitude: 4,
+      flapDuration: 2.5,
+      followEasing: 0.12,
+      sparkleIntensity: 1,
+      trailIntensity: 1,
+    },
   },
   {
     id: 'cherub',
@@ -102,6 +123,15 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.5,
     glowColor: 'rgba(255,245,220,0.6)',
     scale: 0.8,
+    animation: {
+      floatDuration: 2.2,
+      floatAmplitude: 5,
+      flapDuration: 1.8,
+      followEasing: 0.15,
+      sparkleIntensity: 0.7,
+      trailIntensity: 0.6,
+      bouncy: true,
+    },
   },
   {
     id: 'seraph',
@@ -110,6 +140,14 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.8,
     glowColor: 'rgba(255,255,240,0.7)',
     scale: 1.1,
+    animation: {
+      floatDuration: 4,
+      floatAmplitude: 3,
+      followEasing: 0.08,
+      sparkleIntensity: 1.3,
+      trailIntensity: 1.2,
+      pulseGlow: true,
+    },
   },
   {
     id: 'guardian',
@@ -118,6 +156,14 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.55,
     glowColor: 'rgba(240,248,255,0.6)',
     scale: 1.2,
+    animation: {
+      floatDuration: 3.5,
+      floatAmplitude: 2.5,
+      followEasing: 0.1,
+      sparkleIntensity: 0.8,
+      trailIntensity: 0.9,
+      pulseGlow: true,
+    },
   },
   {
     id: 'joy',
@@ -126,6 +172,15 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.65,
     glowColor: 'rgba(255,250,240,0.65)',
     scale: 1,
+    animation: {
+      floatDuration: 2.5,
+      floatAmplitude: 6,
+      flapDuration: 2,
+      followEasing: 0.14,
+      sparkleIntensity: 1.2,
+      trailIntensity: 1.1,
+      bouncy: true,
+    },
   },
   {
     id: 'peace',
@@ -134,6 +189,13 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.5,
     glowColor: 'rgba(245,250,255,0.6)',
     scale: 1.05,
+    animation: {
+      floatDuration: 4.5,
+      floatAmplitude: 2,
+      followEasing: 0.07,
+      sparkleIntensity: 0.6,
+      trailIntensity: 0.7,
+    },
   },
   {
     id: 'healing',
@@ -142,6 +204,14 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.6,
     glowColor: 'rgba(250,255,250,0.6)',
     scale: 1.1,
+    animation: {
+      floatDuration: 3.8,
+      floatAmplitude: 3,
+      followEasing: 0.09,
+      sparkleIntensity: 0.9,
+      trailIntensity: 0.8,
+      pulseGlow: true,
+    },
   },
   {
     id: 'fairy',
@@ -150,5 +220,14 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
     glowIntensity: 0.7,
     glowColor: 'rgba(255,220,255,0.6)',
     scale: 1,
+    animation: {
+      floatDuration: 2.8,
+      floatAmplitude: 5,
+      flapDuration: 2.8,
+      followEasing: 0.13,
+      sparkleIntensity: 1.4,
+      trailIntensity: 1.3,
+      bouncy: true,
+    },
   },
 ];
