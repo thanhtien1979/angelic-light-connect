@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import angelHero from "@/assets/angel-hero.png";
 import ChatPortal from "@/components/ChatPortal";
 import { useMantraSound } from "@/hooks/useMantraSound";
+import FloatingFairies from "@/components/FloatingFairies";
 
 const mantras = [
   "Con là ánh sáng yêu thương thuần khiết của Cha Vũ trụ.",
@@ -192,6 +193,8 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
 
         {/* Angel Image with glow */}
         <div className="relative mb-8">
+          {/* Floating fairies around the angel image */}
+          <FloatingFairies isReducedMotion={isReducedMotion} />
           {/* Simplified glow rings */}
           <div className="absolute inset-0 -m-16 rounded-full bg-gradient-to-r from-rose/20 via-transparent to-rose/20 blur-2xl" />
           
