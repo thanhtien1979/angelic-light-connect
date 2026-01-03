@@ -5,6 +5,12 @@ import fairyBlueImage from '@/assets/fairy-blue.png';
 import fairyRedImage from '@/assets/fairy-red.png';
 import fairyPinkImage from '@/assets/fairy-pink.png';
 import fairyMintImage from '@/assets/fairy-mint.png';
+// New fairy images
+import fairyGoldImage from '@/assets/fairy-gold.png';
+import fairyYellowImage from '@/assets/fairy-yellow.png';
+import fairyGreenImage from '@/assets/fairy-green.png';
+import fairyTinkerImage from '@/assets/fairy-tinker.png';
+import fairyCuteImage from '@/assets/fairy-cute.webp';
 // MP4 video sources (fallback)
 import fairyVideoMp4 from '@/assets/angel-cursor-video.mp4';
 import celestialVideoMp4 from '@/assets/celestial-video.mp4';
@@ -404,6 +410,12 @@ export const FairyBlueSVG = createFairyComponent(fairyBlueImage, 'FairyBlueSVG')
 export const FairyRedSVG = createFairyComponent(fairyRedImage, 'FairyRedSVG');
 export const FairyPinkSVG = createFairyComponent(fairyPinkImage, 'FairyPinkSVG');
 export const FairyMintSVG = createFairyComponent(fairyMintImage, 'FairyMintSVG');
+// New fairy components
+export const FairyGoldSVG = createFairyComponent(fairyGoldImage, 'FairyGoldSVG');
+export const FairyYellowSVG = createFairyComponent(fairyYellowImage, 'FairyYellowSVG');
+export const FairyGreenSVG = createFairyComponent(fairyGreenImage, 'FairyGreenSVG');
+export const FairyTinkerSVG = createFairyComponent(fairyTinkerImage, 'FairyTinkerSVG');
+export const FairyCuteSVG = createFairyComponent(fairyCuteImage, 'FairyCuteSVG');
 
 // Video-based angel components using WebM alpha with MP4 fallback
 export const FairyVideoSVG = memo(() => (
@@ -460,6 +472,11 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'fairy-red': FairyRedSVG,
   'fairy-pink': FairyPinkSVG,
   'fairy-mint': FairyMintSVG,
+  'fairy-gold': FairyGoldSVG,
+  'fairy-yellow': FairyYellowSVG,
+  'fairy-green': FairyGreenSVG,
+  'fairy-tinker': FairyTinkerSVG,
+  'fairy-cute': FairyCuteSVG,
   'fairy-video': FairyVideoSVG,
   'celestial-video': CelestialVideoSVG,
   'starlight-seraph': StarlightSeraphSVG,
