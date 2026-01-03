@@ -5,7 +5,7 @@ import { ANGEL_STYLES, ANGEL_COLORS } from "./types";
 import { AngelSVGMap } from "./AngelSVGs";
 import SparkleParticles from "./SparkleParticles";
 import LightTrail from "./LightTrail";
-import angelCursorVideo from "@/assets/angel-cursor-video.mp4";
+
 /**
  * AngelPresence - A gentle, sacred angelic presence that accompanies the user
  * Supports preview mode for settings display
@@ -50,20 +50,20 @@ const AngelPresence = memo(({
   
   const isMobile = useIsMobile();
 
-  // Get current style config
+  // Get current style config - re-compute when style changes
   const styleConfig = useMemo(() => 
     ANGEL_STYLES.find(s => s.id === style) || ANGEL_STYLES[0],
     [style]
   );
 
-  // Get current color config
+  // Get current color config - re-compute when color changes
   const colorConfig = useMemo(() => 
     ANGEL_COLORS.find(c => c.id === color) || ANGEL_COLORS[0],
     [color]
   );
 
-  // Get angel component
-  const AngelSVG = AngelSVGMap[style];
+  // Get angel component based on current style - re-compute when style changes
+  const AngelSVG = useMemo(() => AngelSVGMap[style] || AngelSVGMap['classic'], [style]);
 
   // Check for reduced motion preference
   useEffect(() => {
@@ -315,7 +315,7 @@ const AngelPresence = memo(({
             }}
           />
           
-          {/* Angel Visual - Video */}
+          {/* Angel Visual - Uses selected style from context */}
           <div style={{ transform: `scale(${styleConfig.scale * 0.75})` }}>
             {imageUrl ? (
               <img
@@ -325,15 +325,7 @@ const AngelPresence = memo(({
                 draggable={false}
               />
             ) : (
-              <video
-                src={angelCursorVideo}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-12 h-12 object-contain"
-                style={{ pointerEvents: 'none', background: 'transparent' }}
-              />
+              <AngelSVG />
             )}
           </div>
         </div>
@@ -378,7 +370,7 @@ const AngelPresence = memo(({
           }}
         />
         
-        {/* Angel Visual - Video */}
+        {/* Angel Visual - Uses selected style from context */}
         <div style={{ transform: `scale(${styleConfig.scale})` }}>
           {imageUrl ? (
             <img
@@ -388,15 +380,7 @@ const AngelPresence = memo(({
               draggable={false}
             />
           ) : (
-            <video
-              src={angelCursorVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-14 h-14 object-contain"
-              style={{ pointerEvents: 'none', background: 'transparent' }}
-            />
+            <AngelSVG />
           )}
         </div>
       </div>
