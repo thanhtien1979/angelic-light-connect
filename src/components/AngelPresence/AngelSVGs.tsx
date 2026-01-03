@@ -20,7 +20,9 @@ import celestialVideoPoster from '@/assets/posters/celestial-video-poster.png';
 import starlightSeraphPoster from '@/assets/posters/starlight-seraph-poster.png';
 import auroraGuardianPoster from '@/assets/posters/aurora-guardian-poster.png';
 import nebulaMessengerPoster from '@/assets/posters/nebula-messenger-poster.png';
-import grokAngelPoster from '@/assets/posters/grok-angel-poster.png';
+import grokAngel1Poster from '@/assets/posters/grok-angel-poster.png';
+import grokAngel2Poster from '@/assets/posters/grok-angel-2-poster.png';
+import grokAngel3Poster from '@/assets/posters/grok-angel-3-poster.png';
 
 // Video sources configuration with quality variants
 // When WebM files with alpha are available, add webmHighSrc/webmPerfSrc properties
@@ -56,17 +58,17 @@ export const VIDEO_SOURCES: Record<string, VideoSources> = {
   'grok-angel-1': {
     mp4HighSrc: grokAngel1Mp4,
     mp4PerfSrc: grokAngel1Mp4,
-    posterSrc: grokAngelPoster,
+    posterSrc: grokAngel1Poster,
   },
   'grok-angel-2': {
     mp4HighSrc: grokAngel2Mp4,
     mp4PerfSrc: grokAngel2Mp4,
-    posterSrc: grokAngelPoster,
+    posterSrc: grokAngel2Poster,
   },
   'grok-angel-3': {
     mp4HighSrc: grokAngel3Mp4,
     mp4PerfSrc: grokAngel3Mp4,
-    posterSrc: grokAngelPoster,
+    posterSrc: grokAngel3Poster,
   },
 };
 
