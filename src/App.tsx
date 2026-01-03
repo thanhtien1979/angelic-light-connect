@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
 import ChatButton from "./components/ChatButton";
+import FloatingAmbientPlayer from "./components/FloatingAmbientPlayer";
 import { usePresence } from "./hooks/usePresence";
 import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
 import { useTokenRefresh } from "./hooks/useTokenRefresh";
@@ -87,6 +88,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <ChatButton />
+              <FloatingAmbientPlayer />
             </AppInitializer>
           </BrowserRouter>
         </TooltipProvider>
