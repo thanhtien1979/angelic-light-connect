@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones } from "lucide-react";
+import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -528,7 +529,7 @@ const Settings = () => {
                     <div className="flex items-center justify-between p-3 rounded-xl bg-card/30 border border-border/50">
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-full bg-muted/50">
-                          <VolumeX className="w-4 h-4 text-muted-foreground" />
+                          <Headphones className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div>
                           <Label className="text-sm font-medium text-foreground">
@@ -545,6 +546,24 @@ const Settings = () => {
                         disabled={prefersReducedMotion}
                       />
                     </div>
+
+                    {/* Ambient Sound Player - only show when ambient sounds are enabled */}
+                    {soundSettings.ambientSounds && !prefersReducedMotion && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="pt-4 border-t border-border/50"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Music className="w-4 h-4 text-primary" />
+                            <Label className="text-sm font-medium">{t("settings.sound.ambientPlayer")}</Label>
+                          </div>
+                          <AmbientSoundPlayer />
+                        </div>
+                      </motion.div>
+                    )}
                   </CardContent>
                 </>
               )}
