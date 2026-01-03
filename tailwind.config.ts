@@ -206,6 +206,31 @@ export default {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
         },
+        "fairy-wings": {
+          "0%, 100%": { 
+            transform: "scaleX(1) rotate(0deg)",
+          },
+          "25%": { 
+            transform: "scaleX(0.96) rotate(-1deg)",
+          },
+          "50%": { 
+            transform: "scaleX(1.02) rotate(0.5deg)",
+          },
+          "75%": { 
+            transform: "scaleX(0.97) rotate(-0.5deg)",
+          },
+        },
+        "fairy-float": {
+          "0%, 100%": { 
+            transform: "translateY(0px) rotate(0deg)",
+          },
+          "33%": { 
+            transform: "translateY(-2px) rotate(0.5deg)",
+          },
+          "66%": { 
+            transform: "translateY(-1px) rotate(-0.5deg)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -226,6 +251,8 @@ export default {
         "stardust": "stardustFloat 4s ease-out infinite",
         "magic-glow": "softPulseGlow 3s ease-in-out infinite",
         "spin-slow": "spin-slow 120s linear infinite",
+        "fairy-wings": "fairy-wings 2.8s ease-in-out infinite",
+        "fairy-float": "fairy-float 3.2s ease-in-out infinite",
       },
     },
   },
