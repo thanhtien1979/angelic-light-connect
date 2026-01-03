@@ -2,12 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { AngelStyle, AngelColor, AngelPresenceSettings } from '@/components/AngelPresence/types';
+import { toast } from 'sonner';
 
 /**
  * Hook to manage Angel Presence state and settings
  */
 
 const STORAGE_KEY = 'angel-presence-settings';
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_DIMENSIONS = 512;
 
 const defaultSettings: AngelPresenceSettings = {
   enabled: true,
@@ -15,12 +18,70 @@ const defaultSettings: AngelPresenceSettings = {
   color: 'white',
   sparklesEnabled: true,
   trailEnabled: true,
+  customImageUrl: undefined,
 };
+
+// Validate and resize image
+async function processCustomImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // Validate file type - only PNG
+    if (file.type !== 'image/png') {
+      reject(new Error('Only PNG images are allowed'));
+      return;
+    }
+    
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      reject(new Error('Image must be smaller than 2MB'));
+      return;
+    }
+    
+    const img = new Image();
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      img.onload = () => {
+        let { width, height } = img;
+        
+        // Resize if needed
+        if (width > MAX_DIMENSIONS || height > MAX_DIMENSIONS) {
+          const ratio = Math.min(MAX_DIMENSIONS / width, MAX_DIMENSIONS / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        
+        // Draw to canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          reject(new Error('Failed to process image'));
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to data URL (stored directly for simplicity)
+        const dataUrl = canvas.toDataURL('image/png', 0.9);
+        resolve(dataUrl);
+      };
+      
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target?.result as string;
+    };
+    
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
 
 export function useAngelPresence() {
   const { user } = useAuth();
   const [settings, setSettings] = useState<AngelPresenceSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Load settings on mount
   useEffect(() => {
@@ -50,6 +111,7 @@ export function useAngelPresence() {
               color: (storedSettings.color as AngelColor) || defaultSettings.color,
               sparklesEnabled: storedSettings.sparklesEnabled ?? defaultSettings.sparklesEnabled,
               trailEnabled: storedSettings.trailEnabled ?? defaultSettings.trailEnabled,
+              customImageUrl: storedSettings.customImageUrl,
             });
           }
         } else {
@@ -82,6 +144,7 @@ export function useAngelPresence() {
           color: newSettings.color,
           sparklesEnabled: newSettings.sparklesEnabled,
           trailEnabled: newSettings.trailEnabled,
+          customImageUrl: newSettings.customImageUrl,
         });
         
         await supabase
@@ -142,6 +205,36 @@ export function useAngelPresence() {
     await saveSettings(newSettings);
   }, [settings, saveSettings]);
 
+  // Upload custom image
+  const uploadCustomImage = useCallback(async (file: File) => {
+    if (!user) {
+      toast.error('Please sign in to upload a custom angel image');
+      return;
+    }
+    
+    setIsUploading(true);
+    try {
+      const dataUrl = await processCustomImage(file);
+      const newSettings = { ...settings, customImageUrl: dataUrl };
+      setSettings(newSettings);
+      await saveSettings(newSettings);
+      toast.success('Custom angel image uploaded!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to upload image';
+      toast.error(message);
+    } finally {
+      setIsUploading(false);
+    }
+  }, [user, settings, saveSettings]);
+
+  // Remove custom image
+  const removeCustomImage = useCallback(async () => {
+    const newSettings = { ...settings, customImageUrl: undefined };
+    setSettings(newSettings);
+    await saveSettings(newSettings);
+    toast.success('Custom angel image removed');
+  }, [settings, saveSettings]);
+
   return {
     // Settings
     isEnabled: settings.enabled,
@@ -149,7 +242,9 @@ export function useAngelPresence() {
     color: settings.color,
     sparklesEnabled: settings.sparklesEnabled,
     trailEnabled: settings.trailEnabled,
+    customImageUrl: settings.customImageUrl,
     isLoading,
+    isUploading,
     
     // Actions
     toggle,
@@ -158,5 +253,7 @@ export function useAngelPresence() {
     setColor,
     setSparklesEnabled,
     setTrailEnabled,
+    uploadCustomImage,
+    removeCustomImage,
   };
 }
