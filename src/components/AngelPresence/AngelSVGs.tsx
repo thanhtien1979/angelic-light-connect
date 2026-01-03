@@ -6,6 +6,7 @@ import fairyRedImage from '@/assets/fairy-red.png';
 import fairyPinkImage from '@/assets/fairy-pink.png';
 import fairyMintImage from '@/assets/fairy-mint.png';
 import fairyVideoSrc from '@/assets/angel-cursor-video.mp4';
+import celestialVideoSrc from '@/assets/celestial-video.mp4';
 
 /**
  * Angel SVG Components - Each represents a different angel style
@@ -248,6 +249,31 @@ export const FairyVideoSVG = memo(() => (
 ));
 FairyVideoSVG.displayName = 'FairyVideoSVG';
 
+// Celestial video-based angel component with reduced motion support
+export const CelestialVideoSVG = memo(() => {
+  const prefersReducedMotion = typeof window !== 'undefined' 
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  return (
+    <div className="relative">
+      <video 
+        src={celestialVideoSrc}
+        autoPlay={!prefersReducedMotion}
+        loop
+        muted
+        playsInline
+        className="w-[72px] h-[72px] object-contain"
+        style={{ 
+          pointerEvents: 'none',
+          userSelect: 'none',
+          background: 'transparent',
+        }}
+      />
+    </div>
+  );
+});
+CelestialVideoSVG.displayName = 'CelestialVideoSVG';
+
 // Map styles to SVG components
 export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   classic: ClassicAngelSVG,
@@ -263,4 +289,5 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'fairy-pink': FairyPinkSVG,
   'fairy-mint': FairyMintSVG,
   'fairy-video': FairyVideoSVG,
+  'celestial-video': CelestialVideoSVG,
 };
