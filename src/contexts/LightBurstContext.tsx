@@ -2,10 +2,13 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 
 const LIGHT_BURST_SETTINGS_KEY = "angel-light-burst-settings";
 
+export type LightBurstSize = 'small' | 'medium' | 'large';
+
 export interface LightBurstSettings {
   enabled: boolean;
   soundEnabled: boolean;
   color: 'gold' | 'blue' | 'pink' | 'purple' | 'green' | 'rainbow';
+  size: LightBurstSize;
 }
 
 interface LightBurstContextType {
@@ -17,6 +20,7 @@ const DEFAULT_SETTINGS: LightBurstSettings = {
   enabled: true,
   soundEnabled: true,
   color: 'gold',
+  size: 'medium',
 };
 
 export const LIGHT_BURST_COLORS = {
@@ -26,6 +30,12 @@ export const LIGHT_BURST_COLORS = {
   purple: { hue: 270, name: 'Tím Huyền Bí' },
   green: { hue: 140, name: 'Xanh Thiên Nhiên' },
   rainbow: { hue: 0, name: 'Cầu Vồng' },
+} as const;
+
+export const LIGHT_BURST_SIZES = {
+  small: { scale: 0.6, name: 'Nhỏ', icon: 'S' },
+  medium: { scale: 1, name: 'Vừa', icon: 'M' },
+  large: { scale: 1.5, name: 'Lớn', icon: 'L' },
 } as const;
 
 const LightBurstContext = createContext<LightBurstContextType | undefined>(undefined);
