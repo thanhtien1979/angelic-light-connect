@@ -46,6 +46,7 @@ const Settings = () => {
     trailEnabled,
     customImageUrl,
     videoQuality,
+    hiddenStyles,
     isUploading: angelUploading,
     isLoading: angelLoading,
     syncStatus,
@@ -58,6 +59,7 @@ const Settings = () => {
     uploadCustomImage,
     removeCustomImage,
     resetToDefaults,
+    deleteStyle,
   } = useAngelPresence();
 
   // Notification settings state
@@ -303,6 +305,8 @@ const Settings = () => {
                           onCustomImageRemove={removeCustomImage}
                           isUploading={angelUploading}
                           isLoggedIn={!!user}
+                          hiddenStyles={hiddenStyles}
+                          onDeleteStyle={deleteStyle}
                         />
                       </motion.div>
                     )}
