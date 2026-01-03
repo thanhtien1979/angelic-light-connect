@@ -11,6 +11,15 @@ import fairyYellowImage from '@/assets/fairy-yellow.png';
 import fairyGreenImage from '@/assets/fairy-green.png';
 import fairyTinkerImage from '@/assets/fairy-tinker.png';
 import fairyCuteImage from '@/assets/fairy-cute.webp';
+// More fairy images
+import fairyStarImage from '@/assets/fairy-star.png';
+import fairyLeafImage from '@/assets/fairy-leaf.png';
+import fairySunnyImage from '@/assets/fairy-sunny.png';
+import fairyButterflyImage from '@/assets/fairy-butterfly.webp';
+import fairySpringImage from '@/assets/fairy-spring.webp';
+import fairyHeartImage from '@/assets/fairy-heart.png';
+import fairyLoveImage from '@/assets/fairy-love.png';
+import fairyLavenderImage from '@/assets/fairy-lavender.png';
 // MP4 video sources (fallback)
 import fairyVideoMp4 from '@/assets/angel-cursor-video.mp4';
 import celestialVideoMp4 from '@/assets/celestial-video.mp4';
@@ -416,6 +425,15 @@ export const FairyYellowSVG = createFairyComponent(fairyYellowImage, 'FairyYello
 export const FairyGreenSVG = createFairyComponent(fairyGreenImage, 'FairyGreenSVG');
 export const FairyTinkerSVG = createFairyComponent(fairyTinkerImage, 'FairyTinkerSVG');
 export const FairyCuteSVG = createFairyComponent(fairyCuteImage, 'FairyCuteSVG');
+// More fairy components
+export const FairyStarSVG = createFairyComponent(fairyStarImage, 'FairyStarSVG');
+export const FairyLeafSVG = createFairyComponent(fairyLeafImage, 'FairyLeafSVG');
+export const FairySunnySVG = createFairyComponent(fairySunnyImage, 'FairySunnySVG');
+export const FairyButterflySVG = createFairyComponent(fairyButterflyImage, 'FairyButterflySVG');
+export const FairySpringSVG = createFairyComponent(fairySpringImage, 'FairySpringSVG');
+export const FairyHeartSVG = createFairyComponent(fairyHeartImage, 'FairyHeartSVG');
+export const FairyLoveSVG = createFairyComponent(fairyLoveImage, 'FairyLoveSVG');
+export const FairyLavenderSVG = createFairyComponent(fairyLavenderImage, 'FairyLavenderSVG');
 
 // Video-based angel components using WebM alpha with MP4 fallback
 export const FairyVideoSVG = memo(() => (
@@ -477,6 +495,14 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'fairy-green': FairyGreenSVG,
   'fairy-tinker': FairyTinkerSVG,
   'fairy-cute': FairyCuteSVG,
+  'fairy-star': FairyStarSVG,
+  'fairy-leaf': FairyLeafSVG,
+  'fairy-sunny': FairySunnySVG,
+  'fairy-butterfly': FairyButterflySVG,
+  'fairy-spring': FairySpringSVG,
+  'fairy-heart': FairyHeartSVG,
+  'fairy-love': FairyLoveSVG,
+  'fairy-lavender': FairyLavenderSVG,
   'fairy-video': FairyVideoSVG,
   'celestial-video': CelestialVideoSVG,
   'starlight-seraph': StarlightSeraphSVG,
