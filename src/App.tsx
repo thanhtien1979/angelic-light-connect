@@ -21,26 +21,42 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
 import ChatButton from "./components/ChatButton";
 import FloatingAmbientPlayer from "./components/FloatingAmbientPlayer";
+import AngelPresence from "./components/AngelPresence";
 import { usePresence } from "./hooks/usePresence";
 import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
 import { useTokenRefresh } from "./hooks/useTokenRefresh";
 import { useSessionExpired } from "./hooks/useSessionExpired";
+import { useAngelPresence } from "./hooks/useAngelPresence";
 import { SessionExpiredDialog } from "./components/SessionExpiredDialog";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { SoundSettingsProvider } from "./contexts/SoundSettingsContext";
 
 const queryClient = new QueryClient();
 
-// Component to initialize presence, notifications, and token refresh
+// Component to initialize presence, notifications, token refresh, and global angel
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   usePresence();
   useFriendRequestSound();
   useTokenRefresh();
   const { isSessionExpired, hideSessionExpired } = useSessionExpired();
+  const { 
+    isEnabled: angelEnabled, 
+    style: angelStyle,
+    color: angelColor,
+    sparklesEnabled,
+    trailEnabled,
+  } = useAngelPresence();
   
   return (
     <>
       {children}
+      <AngelPresence 
+        enabled={angelEnabled} 
+        style={angelStyle}
+        color={angelColor}
+        sparklesEnabled={sparklesEnabled}
+        trailEnabled={trailEnabled}
+      />
       <SessionExpiredDialog isOpen={isSessionExpired} onClose={hideSessionExpired} />
     </>
   );
