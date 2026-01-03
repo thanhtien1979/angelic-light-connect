@@ -5,7 +5,7 @@ import { ANGEL_STYLES, ANGEL_COLORS } from "./types";
 import { AngelSVGMap } from "./AngelSVGs";
 import SparkleParticles from "./SparkleParticles";
 import LightTrail from "./LightTrail";
-
+import angelCursorVideo from "@/assets/angel-cursor-video.mp4";
 /**
  * AngelPresence - A gentle, sacred angelic presence that accompanies the user
  * Supports preview mode for settings display
@@ -315,9 +315,26 @@ const AngelPresence = memo(({
             }}
           />
           
-          {/* Angel Visual */}
+          {/* Angel Visual - Video */}
           <div style={{ transform: `scale(${styleConfig.scale * 0.75})` }}>
-            <AngelSVG />
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt=""
+                className="w-12 h-12 object-contain"
+                draggable={false}
+              />
+            ) : (
+              <video
+                src={angelCursorVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-12 h-12 object-contain"
+                style={{ pointerEvents: 'none', background: 'transparent' }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -361,7 +378,7 @@ const AngelPresence = memo(({
           }}
         />
         
-        {/* Angel Visual */}
+        {/* Angel Visual - Video */}
         <div style={{ transform: `scale(${styleConfig.scale})` }}>
           {imageUrl ? (
             <img
@@ -371,7 +388,15 @@ const AngelPresence = memo(({
               draggable={false}
             />
           ) : (
-            <AngelSVG />
+            <video
+              src={angelCursorVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-14 h-14 object-contain"
+              style={{ pointerEvents: 'none', background: 'transparent' }}
+            />
           )}
         </div>
       </div>
