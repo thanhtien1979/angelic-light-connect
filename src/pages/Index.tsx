@@ -18,18 +18,9 @@ import WalletLinkBanner from "@/components/WalletLinkBanner";
 import MagicalSparkles from "@/components/MagicalSparkles";
 import AuroraBackground from "@/components/AuroraBackground";
 import StardustTrail from "@/components/StardustTrail";
-import AngelPresence from "@/components/AngelPresence";
-import { useAngelPresence } from "@/hooks/useAngelPresence";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const { 
-    isEnabled: angelPresenceEnabled, 
-    style: angelStyle,
-    color: angelColor,
-    sparklesEnabled,
-    trailEnabled,
-  } = useAngelPresence();
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
@@ -44,15 +35,6 @@ const Index = () => {
       
       {/* Stardust Trail - Follow cursor */}
       <StardustTrail />
-      
-      {/* Angel Presence - Gentle angelic companion */}
-      <AngelPresence 
-        enabled={angelPresenceEnabled} 
-        style={angelStyle}
-        color={angelColor}
-        sparklesEnabled={sparklesEnabled}
-        trailEnabled={trailEnabled}
-      />
       
       {/* Gentle Meditation Reminder */}
       <GentleMeditationReminder />
