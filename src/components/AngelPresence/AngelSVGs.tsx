@@ -202,10 +202,11 @@ export const FairyAngelSVG = memo(() => (
     <img 
       src={fairyAngelImage} 
       alt="" 
-      className="w-12 h-12 object-contain motion-safe:animate-fairy-wings"
+      className="w-16 h-16 object-contain motion-safe:animate-fairy-wings"
       style={{ 
         pointerEvents: 'none',
         userSelect: 'none',
+        background: 'transparent',
       }}
       draggable={false}
     />
