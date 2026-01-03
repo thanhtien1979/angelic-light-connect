@@ -1,7 +1,7 @@
-import { memo, useRef } from 'react';
-import { Check, Eye, Upload, Trash2, ImageIcon } from 'lucide-react';
+import { memo, useRef, useMemo } from 'react';
+import { Check, Eye, Upload, Trash2, ImageIcon, Play } from 'lucide-react';
 import { ANGEL_STYLES, ANGEL_COLORS, type AngelStyle, type AngelColor } from './types';
-import { AngelSVGMap } from './AngelSVGs';
+import { AngelSVGMap, VIDEO_SOURCES, type VideoAngelStyleId } from './AngelSVGs';
 import { cn } from '@/lib/utils';
 import AngelPresence from './index';
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,13 @@ const AngelStyleGallery = memo(({
   
   // Get current color config for glow preview
   const currentColorConfig = ANGEL_COLORS.find(c => c.id === currentColor) || ANGEL_COLORS[0];
+  
+  // Separate static and video angel styles
+  const { staticStyles, videoStyles } = useMemo(() => {
+    const staticStyles = ANGEL_STYLES.filter(s => !s.isVideo);
+    const videoStyles = ANGEL_STYLES.filter(s => s.isVideo);
+    return { staticStyles, videoStyles };
+  }, []);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -114,11 +121,11 @@ const AngelStyleGallery = memo(({
         />
       </div>
 
-      {/* Style selection */}
+      {/* Static Angel Styles */}
       <div className="pt-4 border-t border-border/30">
         <h4 className="text-sm font-medium text-foreground/80 mb-3">Angel Style</h4>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {ANGEL_STYLES.map((style) => {
+          {staticStyles.map((style) => {
             const AngelSVG = AngelSVGMap[style.id];
             const isSelected = currentStyle === style.id && !customImageUrl;
             
@@ -127,7 +134,6 @@ const AngelStyleGallery = memo(({
                 key={style.id}
                 onClick={() => {
                   onStyleChange(style.id);
-                  // Clear custom image when selecting a preset style
                   if (customImageUrl && onCustomImageRemove) {
                     onCustomImageRemove();
                   }
@@ -139,14 +145,12 @@ const AngelStyleGallery = memo(({
                     : "border-border/50 hover:border-primary/50 hover:bg-accent/50"
                 )}
               >
-                {/* Selection indicator */}
                 {isSelected && (
                   <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                     <Check className="w-3 h-3 text-primary-foreground" />
                   </div>
                 )}
                 
-                {/* Angel preview with current color glow */}
                 <div 
                   className="w-14 h-14 flex items-center justify-center mb-2 rounded-full transition-all duration-300"
                   style={{
@@ -158,7 +162,77 @@ const AngelStyleGallery = memo(({
                   </div>
                 </div>
                 
-                {/* Style info */}
+                <span className="text-sm font-medium text-foreground">{style.name}</span>
+                <span className="text-xs text-muted-foreground text-center mt-1 line-clamp-2">
+                  {style.description}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Video Angel Styles */}
+      <div className="pt-4 border-t border-border/30">
+        <div className="flex items-center gap-2 mb-3">
+          <Play className="w-4 h-4 text-muted-foreground" />
+          <h4 className="text-sm font-medium text-foreground/80">Video Angels</h4>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {videoStyles.map((style) => {
+            const isSelected = currentStyle === style.id && !customImageUrl;
+            const videoSources = VIDEO_SOURCES[style.id as VideoAngelStyleId];
+            const posterSrc = videoSources?.posterSrc;
+            
+            return (
+              <button
+                key={style.id}
+                onClick={() => {
+                  onStyleChange(style.id);
+                  if (customImageUrl && onCustomImageRemove) {
+                    onCustomImageRemove();
+                  }
+                }}
+                className={cn(
+                  "relative flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-200",
+                  isSelected 
+                    ? "border-primary bg-primary/10 shadow-lg" 
+                    : "border-border/50 hover:border-primary/50 hover:bg-accent/50"
+                )}
+              >
+                {isSelected && (
+                  <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                    <Check className="w-3 h-3 text-primary-foreground" />
+                  </div>
+                )}
+                
+                {/* Video badge */}
+                <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-background/80 backdrop-blur-sm rounded text-[10px] font-medium text-muted-foreground flex items-center gap-0.5">
+                  <Play className="w-2.5 h-2.5" />
+                  VIDEO
+                </div>
+                
+                {/* Poster thumbnail with glow */}
+                <div 
+                  className="w-14 h-14 flex items-center justify-center mb-2 rounded-full overflow-hidden transition-all duration-300"
+                  style={{
+                    background: `radial-gradient(circle, ${currentColorConfig.glowColor} 0%, transparent 70%)`,
+                  }}
+                >
+                  {posterSrc ? (
+                    <img 
+                      src={posterSrc} 
+                      alt={style.name}
+                      className="w-12 h-12 object-cover rounded-full"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center">
+                      <Play className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                
                 <span className="text-sm font-medium text-foreground">{style.name}</span>
                 <span className="text-xs text-muted-foreground text-center mt-1 line-clamp-2">
                   {style.description}
