@@ -1,6 +1,6 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Waves, TreePine, CloudRain, Volume2, VolumeX, Info } from "lucide-react";
+import { Waves, TreePine, CloudRain, Volume2, VolumeX, Info, Clock } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useAmbientSound, AmbientSoundType, getJourneyAmbientSound } from "@/hooks/useAmbientSound";
@@ -12,7 +12,6 @@ interface MeditationAmbientSelectorProps {
   className?: string;
   compact?: boolean;
   journeyId?: string; // The meditation journey/playlist ID for per-journey persistence
-  onMeditationEnd?: () => void; // Optional callback when meditation ends to trigger gentle fade
 }
 
 // Simplified sounds for meditation context
@@ -56,6 +55,12 @@ const MeditationAmbientSelector = ({
   } = useAmbientSound();
 
   const isAmbientAllowed = isSoundAllowed("ambientSounds");
+
+  // Get the saved sound for this journey (for "recently used" indicator)
+  const journeySavedSound = useMemo(() => {
+    if (!journeyId) return null;
+    return getJourneyAmbientSound(journeyId);
+  }, [journeyId]);
 
   // When journeyId changes, preselect the saved sound for that journey (without playing)
   useEffect(() => {
@@ -103,6 +108,7 @@ const MeditationAmbientSelector = ({
         {MEDITATION_AMBIENT_SOUNDS.map((sound) => {
           const Icon = sound.icon;
           const isActive = selectedSound === sound.id && isPlaying;
+          const isRecentlyUsed = journeySavedSound === sound.id && !isActive;
 
           return (
             <button
@@ -113,13 +119,31 @@ const MeditationAmbientSelector = ({
                 "relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
                 isActive
                   ? `bg-gradient-to-br ${sound.gradient} shadow-lg`
-                  : "bg-white/60 hover:bg-white/80 border border-gold-light/30"
+                  : isRecentlyUsed
+                    ? "bg-white/80 border-2 border-gold-light/50"
+                    : "bg-white/60 hover:bg-white/80 border border-gold-light/30"
               )}
             >
               <Icon className={cn(
                 "w-5 h-5 transition-colors",
-                isActive ? "text-white" : "text-muted-foreground"
+                isActive ? "text-white" : isRecentlyUsed ? "text-gold" : "text-muted-foreground"
               )} />
+              
+              {/* Recently used indicator (subtle dot) */}
+              <AnimatePresence>
+                {isRecentlyUsed && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    className="absolute -bottom-0.5 left-1/2 -translate-x-1/2"
+                  >
+                    <div className="flex items-center gap-0.5">
+                      <Clock className="w-2 h-2 text-gold/70" />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               
               {/* Playing pulse indicator */}
               <AnimatePresence>
@@ -181,6 +205,7 @@ const MeditationAmbientSelector = ({
         {MEDITATION_AMBIENT_SOUNDS.map((sound) => {
           const Icon = sound.icon;
           const isActive = selectedSound === sound.id && isPlaying;
+          const isRecentlyUsed = journeySavedSound === sound.id && !isActive;
 
           return (
             <motion.button
@@ -193,19 +218,38 @@ const MeditationAmbientSelector = ({
                 "relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-300",
                 isActive
                   ? `bg-gradient-to-br ${sound.gradient} shadow-lg shadow-${sound.gradient.split("-")[1]}/30`
-                  : "bg-white/60 hover:bg-white/80 border border-gold-light/30"
+                  : isRecentlyUsed
+                    ? "bg-white/80 border-2 border-gold-light/50"
+                    : "bg-white/60 hover:bg-white/80 border border-gold-light/30"
               )}
             >
               <Icon className={cn(
                 "w-6 h-6 transition-colors",
-                isActive ? "text-white" : "text-muted-foreground"
+                isActive ? "text-white" : isRecentlyUsed ? "text-gold" : "text-muted-foreground"
               )} />
               <span className={cn(
                 "text-xs font-medium",
-                isActive ? "text-white" : "text-muted-foreground"
+                isActive ? "text-white" : isRecentlyUsed ? "text-gold" : "text-muted-foreground"
               )}>
                 {t(sound.nameKey)}
               </span>
+
+              {/* Recently used indicator */}
+              <AnimatePresence>
+                {isRecentlyUsed && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    className="absolute -bottom-1.5 left-1/2 -translate-x-1/2"
+                  >
+                    <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-gold-light/20 border border-gold-light/30">
+                      <Clock className="w-2 h-2 text-gold/70" />
+                      <span className="text-[8px] text-gold/70 font-medium">{t("common.recent") || "Gần đây"}</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Playing pulse indicator */}
               <AnimatePresence>
