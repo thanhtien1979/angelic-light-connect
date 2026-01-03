@@ -1,5 +1,5 @@
 import { memo, useRef, useEffect, useState } from 'react';
-import type { AngelStyle } from './types';
+import type { AngelStyle, VideoSources, VideoQuality } from './types';
 import fairyAngelImage from '@/assets/fairy-angel-cursor.png';
 import fairyBlueImage from '@/assets/fairy-blue.png';
 import fairyRedImage from '@/assets/fairy-red.png';
@@ -18,35 +18,56 @@ import starlightSeraphPoster from '@/assets/posters/starlight-seraph-poster.png'
 import auroraGuardianPoster from '@/assets/posters/aurora-guardian-poster.png';
 import nebulaMessengerPoster from '@/assets/posters/nebula-messenger-poster.png';
 
-// Video sources configuration with WebM (alpha) and MP4 fallback
-// When WebM files with alpha are available, add webmSrc property
-export const VIDEO_SOURCES: Record<string, { webmSrc?: string; mp4Src: string; posterSrc: string }> = {
+// Video sources configuration with quality variants
+// When WebM files with alpha are available, add webmHighSrc/webmPerfSrc properties
+// When WebM files with alpha are available, add webmHighSrc/webmPerfSrc properties
+export const VIDEO_SOURCES: Record<string, VideoSources> = {
   'fairy-video': {
-    // webmSrc: fairyVideoWebm, // Add when WebM with alpha is available
-    mp4Src: fairyVideoMp4,
+    // webmHighSrc: fairyVideoWebmHigh, // Add when WebM with alpha is available
+    // webmPerfSrc: fairyVideoWebmPerf, // Add when WebM performance version is available
+    mp4HighSrc: fairyVideoMp4,
+    mp4PerfSrc: fairyVideoMp4, // Use same for now, replace with lower res version
     posterSrc: fairyVideoPoster,
   },
   'celestial-video': {
-    // webmSrc: celestialVideoWebm, // Add when WebM with alpha is available
-    mp4Src: celestialVideoMp4,
+    mp4HighSrc: celestialVideoMp4,
+    mp4PerfSrc: celestialVideoMp4,
     posterSrc: celestialVideoPoster,
   },
   'starlight-seraph': {
-    // webmSrc: starlightSeraphWebm, // Add when WebM with alpha is available
-    mp4Src: starlightSeraphMp4,
+    mp4HighSrc: starlightSeraphMp4,
+    mp4PerfSrc: starlightSeraphMp4,
     posterSrc: starlightSeraphPoster,
   },
   'aurora-guardian': {
-    // webmSrc: auroraGuardianWebm, // Add when WebM with alpha is available
-    mp4Src: auroraGuardianMp4,
+    mp4HighSrc: auroraGuardianMp4,
+    mp4PerfSrc: auroraGuardianMp4,
     posterSrc: auroraGuardianPoster,
   },
   'nebula-messenger': {
-    // webmSrc: nebulaMessengerWebm, // Add when WebM with alpha is available
-    mp4Src: nebulaMessengerMp4,
+    mp4HighSrc: nebulaMessengerMp4,
+    mp4PerfSrc: nebulaMessengerMp4,
     posterSrc: nebulaMessengerPoster,
   },
 };
+
+// Helper to get video sources based on quality setting
+export function getVideoSourcesForQuality(styleId: string, quality: VideoQuality): { webmSrc?: string; mp4Src: string } {
+  const sources = VIDEO_SOURCES[styleId];
+  if (!sources) return { mp4Src: '' };
+  
+  if (quality === 'high') {
+    return {
+      webmSrc: sources.webmHighSrc,
+      mp4Src: sources.mp4HighSrc,
+    };
+  } else {
+    return {
+      webmSrc: sources.webmPerfSrc,
+      mp4Src: sources.mp4PerfSrc || sources.mp4HighSrc,
+    };
+  }
+}
 
 export type VideoAngelStyleId = keyof typeof VIDEO_SOURCES;
 
@@ -83,7 +104,9 @@ const VideoAngelComponent = memo(({ styleId, size = 68, className = '' }: VideoA
     }
   }, [prefersReducedMotion]);
   
-  const sources = VIDEO_SOURCES[styleId];
+  // Use high quality sources by default for the individual component
+  // The actual quality is controlled via context in the main AngelPresence
+  const qualitySources = getVideoSourcesForQuality(styleId, 'high');
   
   return (
     <div className={`relative ${className}`}>
@@ -104,11 +127,11 @@ const VideoAngelComponent = memo(({ styleId, size = 68, className = '' }: VideoA
         }}
       >
         {/* WebM with alpha channel (if available) - browser tries this first */}
-        {(sources as any).webmSrc && (
-          <source src={(sources as any).webmSrc} type="video/webm" />
+        {qualitySources.webmSrc && (
+          <source src={qualitySources.webmSrc} type="video/webm" />
         )}
         {/* MP4 fallback */}
-        <source src={sources.mp4Src} type="video/mp4" />
+        <source src={qualitySources.mp4Src} type="video/mp4" />
       </video>
     </div>
   );

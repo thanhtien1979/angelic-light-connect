@@ -45,6 +45,7 @@ const Settings = () => {
     sparklesEnabled,
     trailEnabled,
     customImageUrl,
+    videoQuality,
     isUploading: angelUploading,
     isLoading: angelLoading,
     syncStatus,
@@ -53,6 +54,7 @@ const Settings = () => {
     setColor,
     setSparklesEnabled,
     setTrailEnabled,
+    setVideoQuality,
     uploadCustomImage,
     removeCustomImage,
     resetToDefaults,
@@ -294,6 +296,8 @@ const Settings = () => {
                           trailEnabled={trailEnabled}
                           onSparklesChange={setSparklesEnabled}
                           onTrailChange={setTrailEnabled}
+                          videoQuality={videoQuality}
+                          onVideoQualityChange={setVideoQuality}
                           customImageUrl={customImageUrl}
                           onCustomImageUpload={uploadCustomImage}
                           onCustomImageRemove={removeCustomImage}

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import type { AngelStyle, AngelColor, AngelPresenceSettings } from '@/components/AngelPresence/types';
+import type { AngelStyle, AngelColor, AngelPresenceSettings, VideoQuality } from '@/components/AngelPresence/types';
 import { toast } from 'sonner';
 
 const STORAGE_KEY = 'angel-presence-settings';
@@ -19,6 +19,7 @@ export const defaultSettings: AngelPresenceSettings = {
   sparklesEnabled: true,
   trailEnabled: true,
   customImageUrl: undefined,
+  videoQuality: 'high',
 };
 
 // Validate and resize image
@@ -93,6 +94,7 @@ interface AngelPresenceContextValue {
   sparklesEnabled: boolean;
   trailEnabled: boolean;
   customImageUrl?: string;
+  videoQuality: VideoQuality;
   isLoading: boolean;
   isUploading: boolean;
   isHydrated: boolean;
@@ -105,6 +107,7 @@ interface AngelPresenceContextValue {
   setColor: (color: AngelColor) => void;
   setSparklesEnabled: (value: boolean) => void;
   setTrailEnabled: (value: boolean) => void;
+  setVideoQuality: (quality: VideoQuality) => void;
   uploadCustomImage: (file: File) => Promise<void>;
   removeCustomImage: () => void;
   resetToDefaults: () => Promise<void>;
@@ -185,6 +188,7 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
               sparklesEnabled: dbSettings?.sparklesEnabled ?? defaultSettings.sparklesEnabled,
               trailEnabled: dbSettings?.trailEnabled ?? defaultSettings.trailEnabled,
               customImageUrl: dbSettings?.customImageUrl,
+              videoQuality: (dbSettings?.videoQuality as 'high' | 'performance') || defaultSettings.videoQuality,
             };
             
             setSettings(loadedSettings);
@@ -227,6 +231,7 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
         sparklesEnabled: newSettings.sparklesEnabled,
         trailEnabled: newSettings.trailEnabled,
         customImageUrl: newSettings.customImageUrl,
+        videoQuality: newSettings.videoQuality,
       };
       
       const { error } = await supabase
@@ -333,6 +338,11 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     saveSettings(newSettings);
   }, [settings, saveSettings]);
 
+  const setVideoQuality = useCallback((quality: VideoQuality) => {
+    const newSettings = { ...settings, videoQuality: quality };
+    saveSettings(newSettings);
+  }, [settings, saveSettings]);
+
   const uploadCustomImage = useCallback(async (file: File) => {
     if (!user) {
       toast.error('Please sign in to upload a custom angel image');
@@ -392,6 +402,7 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     sparklesEnabled: settings.sparklesEnabled,
     trailEnabled: settings.trailEnabled,
     customImageUrl: settings.customImageUrl,
+    videoQuality: settings.videoQuality,
     isLoading,
     isUploading,
     isHydrated,
@@ -402,10 +413,11 @@ export function AngelPresenceProvider({ children }: { children: React.ReactNode 
     setColor,
     setSparklesEnabled,
     setTrailEnabled,
+    setVideoQuality,
     uploadCustomImage,
     removeCustomImage,
     resetToDefaults,
-  }), [settings, isLoading, isUploading, isHydrated, syncStatus, toggle, setEnabled, setStyle, setColor, setSparklesEnabled, setTrailEnabled, uploadCustomImage, removeCustomImage, resetToDefaults]);
+  }), [settings, isLoading, isUploading, isHydrated, syncStatus, toggle, setEnabled, setStyle, setColor, setSparklesEnabled, setTrailEnabled, setVideoQuality, uploadCustomImage, removeCustomImage, resetToDefaults]);
 
   return (
     <AngelPresenceContext.Provider value={value}>
