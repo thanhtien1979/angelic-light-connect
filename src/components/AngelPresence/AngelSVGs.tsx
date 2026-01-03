@@ -19,28 +19,34 @@ import auroraGuardianPoster from '@/assets/posters/aurora-guardian-poster.png';
 import nebulaMessengerPoster from '@/assets/posters/nebula-messenger-poster.png';
 
 // Video sources configuration with WebM (alpha) and MP4 fallback
-export const VIDEO_SOURCES = {
+// When WebM files with alpha are available, add webmSrc property
+export const VIDEO_SOURCES: Record<string, { webmSrc?: string; mp4Src: string; posterSrc: string }> = {
   'fairy-video': {
+    // webmSrc: fairyVideoWebm, // Add when WebM with alpha is available
     mp4Src: fairyVideoMp4,
     posterSrc: fairyVideoPoster,
   },
   'celestial-video': {
+    // webmSrc: celestialVideoWebm, // Add when WebM with alpha is available
     mp4Src: celestialVideoMp4,
     posterSrc: celestialVideoPoster,
   },
   'starlight-seraph': {
+    // webmSrc: starlightSeraphWebm, // Add when WebM with alpha is available
     mp4Src: starlightSeraphMp4,
     posterSrc: starlightSeraphPoster,
   },
   'aurora-guardian': {
+    // webmSrc: auroraGuardianWebm, // Add when WebM with alpha is available
     mp4Src: auroraGuardianMp4,
     posterSrc: auroraGuardianPoster,
   },
   'nebula-messenger': {
+    // webmSrc: nebulaMessengerWebm, // Add when WebM with alpha is available
     mp4Src: nebulaMessengerMp4,
     posterSrc: nebulaMessengerPoster,
   },
-} as const;
+};
 
 export type VideoAngelStyleId = keyof typeof VIDEO_SOURCES;
 
