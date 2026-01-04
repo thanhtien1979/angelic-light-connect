@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil, User, Camera } from "lucide-react";
 import CopyMessageButton from "@/components/CopyMessageButton";
+import ShareMessageButton from "@/components/ShareMessageButton";
+import SpeakMessageButton from "@/components/SpeakMessageButton";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
@@ -927,11 +929,20 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                         </div>
                       ) : (
                         <>
-                          {/* Copy button */}
-                          <CopyMessageButton 
-                            text={message.content} 
-                            position={message.role === "user" ? "left" : "right"} 
-                          />
+                          {/* Action buttons */}
+                          <div className={`absolute z-20 top-2 flex items-center gap-1 ${message.role === "user" ? "left-2" : "right-2"}`}>
+                            <CopyMessageButton 
+                              text={message.content} 
+                              position={message.role === "user" ? "left" : "right"} 
+                              className="relative !static !opacity-0 group-hover:!opacity-100"
+                            />
+                            {message.role === "assistant" && (
+                              <>
+                                <ShareMessageButton text={message.content} />
+                                <SpeakMessageButton text={message.content} />
+                              </>
+                            )}
+                          </div>
                           <div className="relative z-10 font-chat text-sm sm:text-[15px] leading-relaxed text-foreground/90" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
                             {message.role === "assistant" ? (
                               // Direct display for fast streaming - no typing effect
