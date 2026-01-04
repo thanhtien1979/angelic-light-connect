@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2, Pencil, Check } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -24,6 +24,9 @@ import { ResetConfirmDialog } from "@/components/AngelPresence/ResetConfirmDialo
 import { useUserAvatar } from "@/hooks/useUserAvatar";
 import { getUserInitials, getAvatarColor } from "@/lib/userInitials";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type SettingsSection = "profile" | "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
 type ThemeOption = "light" | "dark" | "system" | "twilight" | "ocean" | "forest" | "midnight" | "sunrise";
@@ -45,6 +48,9 @@ const Settings = () => {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [mounted, setMounted] = useState(false);
   const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
+  const [displayName, setDisplayName] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isSavingName, setIsSavingName] = useState(false);
   const {
     isEnabled: angelEnabled,
     style: angelStyle,
@@ -93,9 +99,59 @@ const Settings = () => {
     localStorage.setItem("angel-notification-settings", JSON.stringify(notificationSettings));
   }, [notificationSettings]);
 
+  // Fetch display name from profile
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchProfile = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", user.id)
+        .single();
+      
+      if (data?.display_name) {
+        setDisplayName(data.display_name);
+      }
+    };
+    
+    fetchProfile();
+  }, [user]);
+
   const handleThemeChange = async (newTheme: ThemeOption) => {
     setTheme(newTheme);
     await syncTheme(newTheme);
+  };
+
+  const handleSaveDisplayName = async () => {
+    if (!user || !displayName.trim()) return;
+    
+    const trimmedName = displayName.trim();
+    if (trimmedName.length > 50) {
+      toast.error("Tên hiển thị không được quá 50 ký tự");
+      return;
+    }
+    
+    setIsSavingName(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          display_name: trimmedName,
+          updated_at: new Date().toISOString(),
+        });
+      
+      if (error) throw error;
+      
+      toast.success("Đã cập nhật tên hiển thị!");
+      setIsEditingName(false);
+    } catch (error) {
+      console.error("Error updating display name:", error);
+      toast.error("Không thể cập nhật tên. Vui lòng thử lại.");
+    } finally {
+      setIsSavingName(false);
+    }
   };
 
   const handleNotificationChange = (key: keyof NotificationSettings) => (checked: boolean) => {
@@ -397,12 +453,78 @@ const Settings = () => {
                           />
                         </div>
                         
+                        {/* Display Name Section */}
+                        <div className="p-6 rounded-xl bg-muted/30 border border-border/50 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-base font-medium">Tên hiển thị</Label>
+                            {!isEditingName && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsEditingName(true)}
+                                className="gap-2"
+                              >
+                                <Pencil className="w-4 h-4" />
+                                Chỉnh sửa
+                              </Button>
+                            )}
+                          </div>
+                          
+                          {isEditingName ? (
+                            <div className="flex gap-2">
+                              <Input
+                                value={displayName}
+                                onChange={(e) => setDisplayName(e.target.value)}
+                                placeholder="Nhập tên hiển thị của bạn"
+                                maxLength={50}
+                                className="flex-1"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    handleSaveDisplayName();
+                                  } else if (e.key === "Escape") {
+                                    setIsEditingName(false);
+                                  }
+                                }}
+                              />
+                              <Button
+                                onClick={handleSaveDisplayName}
+                                disabled={isSavingName || !displayName.trim()}
+                                size="icon"
+                                className="shrink-0"
+                              >
+                                {isSavingName ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Check className="w-4 h-4" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setIsEditingName(false)}
+                                className="shrink-0"
+                              >
+                                ✕
+                              </Button>
+                            </div>
+                          ) : (
+                            <p className="text-foreground">
+                              {displayName || <span className="text-muted-foreground italic">Chưa có tên hiển thị</span>}
+                            </p>
+                          )}
+                          
+                          <p className="text-xs text-muted-foreground">
+                            Tên này sẽ hiển thị cho người khác trong cộng đồng và tin nhắn.
+                          </p>
+                        </div>
+                        
                         {/* Info Note */}
                         <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
                           <p className="text-xs text-muted-foreground flex items-start gap-2">
                             <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                             <span>
-                              <span className="font-medium text-primary">Lưu ý:</span> Ảnh đại diện sẽ được hiển thị trong tin nhắn chat và hồ sơ của bạn. Kích thước tối đa 2MB.
+                              <span className="font-medium text-primary">Lưu ý:</span> Ảnh đại diện và tên hiển thị sẽ được hiển thị trong tin nhắn chat và hồ sơ của bạn.
                             </span>
                           </p>
                         </div>
