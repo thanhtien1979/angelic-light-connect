@@ -1635,7 +1635,7 @@ const detectLanguage = (): Language => {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>(detectLanguage);
+  const [language, setLanguageState] = useState<Language>(() => detectLanguage());
 
   useEffect(() => {
     localStorage.setItem(LANGUAGE_KEY, language);
