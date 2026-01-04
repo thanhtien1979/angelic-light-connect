@@ -390,23 +390,23 @@ const NavigationHeader = () => {
             </motion.button>
 
             {/* Desktop Navigation - 2 rows */}
-            <nav className="hidden lg:flex flex-col items-center gap-1">
+            <nav className="hidden lg:flex flex-col items-center gap-0.5">
               {/* Row 1 */}
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-1 xl:gap-2">
                 {navLinksConfig.slice(0, 5).map((link) => 
                   link.isPage && link.path ? (
                     <Link key={link.id} to={link.path}>
                       <motion.span
-                        className={`relative px-2 xl:px-3 py-1 text-xs xl:text-sm font-medium transition-colors text-foreground/80 hover:text-foreground inline-flex items-center gap-1 whitespace-nowrap ${
-                          link.id === "friends" ? "text-pink-500 hover:text-pink-400" : ""
-                        }`}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
+                        className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full inline-flex items-center gap-1.5 whitespace-nowrap
+                          hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
+                          ${link.id === "friends" ? "text-pink-500 hover:text-pink-400 hover:bg-pink-500/10" : "text-foreground/80"}`}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        {link.id === "friends" && <UserPlus className="w-3 h-3 xl:w-4 xl:h-4" />}
+                        {link.id === "friends" && <UserPlus className="w-3.5 h-3.5" />}
                         {t(link.labelKey)}
                         {link.showBadge && user && pendingRequests.length > 0 && (
-                          <Badge className="bg-pink-500 text-white text-[9px] px-1 py-0 h-3.5 min-w-3.5 flex items-center justify-center animate-pulse">
+                          <Badge className="bg-pink-500 text-white text-[9px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
                             {pendingRequests.length}
                           </Badge>
                         )}
@@ -416,19 +416,20 @@ const NavigationHeader = () => {
                     <motion.button
                       key={link.id}
                       onClick={() => scrollToSection(link.id)}
-                      className={`relative px-2 xl:px-3 py-1 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap ${
-                        activeSection === link.id
-                          ? "text-gold"
-                          : "text-foreground/80 hover:text-foreground"
-                      }`}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
+                      className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full whitespace-nowrap
+                        hover:bg-primary/10 hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
+                        ${activeSection === link.id
+                          ? "text-gold bg-gold/10 shadow-[0_0_15px_hsla(45,80%,60%,0.3)]"
+                          : "text-foreground/80 hover:text-primary"
+                        }`}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       {t(link.labelKey)}
                       {activeSection === link.id && (
                         <motion.div
                           layoutId="activeIndicator1"
-                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-gradient-to-r from-gold/70 to-gold rounded-full"
+                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-gold/70 via-gold to-gold/70 rounded-full"
                           transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         />
                       )}
@@ -437,21 +438,21 @@ const NavigationHeader = () => {
                 )}
               </div>
               {/* Row 2 */}
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-1 xl:gap-2">
                 {navLinksConfig.slice(5).map((link) => 
                   link.isPage && link.path ? (
                     <Link key={link.id} to={link.path}>
                       <motion.span
-                        className={`relative px-2 xl:px-3 py-1 text-xs xl:text-sm font-medium transition-colors text-foreground/80 hover:text-foreground inline-flex items-center gap-1 whitespace-nowrap ${
-                          link.id === "friends" ? "text-pink-500 hover:text-pink-400" : ""
-                        }`}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
+                        className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full inline-flex items-center gap-1.5 whitespace-nowrap
+                          hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
+                          ${link.id === "friends" ? "text-pink-500 hover:text-pink-400 hover:bg-pink-500/10" : "text-foreground/80"}`}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        {link.id === "friends" && <UserPlus className="w-3 h-3 xl:w-4 xl:h-4" />}
+                        {link.id === "friends" && <UserPlus className="w-3.5 h-3.5" />}
                         {t(link.labelKey)}
                         {link.showBadge && user && pendingRequests.length > 0 && (
-                          <Badge className="bg-pink-500 text-white text-[9px] px-1 py-0 h-3.5 min-w-3.5 flex items-center justify-center animate-pulse">
+                          <Badge className="bg-pink-500 text-white text-[9px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
                             {pendingRequests.length}
                           </Badge>
                         )}
@@ -461,19 +462,20 @@ const NavigationHeader = () => {
                     <motion.button
                       key={link.id}
                       onClick={() => scrollToSection(link.id)}
-                      className={`relative px-2 xl:px-3 py-1 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap ${
-                        activeSection === link.id
-                          ? "text-gold"
-                          : "text-foreground/80 hover:text-foreground"
-                      }`}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
+                      className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full whitespace-nowrap
+                        hover:bg-primary/10 hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
+                        ${activeSection === link.id
+                          ? "text-gold bg-gold/10 shadow-[0_0_15px_hsla(45,80%,60%,0.3)]"
+                          : "text-foreground/80 hover:text-primary"
+                        }`}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       {t(link.labelKey)}
                       {activeSection === link.id && (
                         <motion.div
                           layoutId="activeIndicator2"
-                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-gradient-to-r from-gold/70 to-gold rounded-full"
+                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-gold/70 via-gold to-gold/70 rounded-full"
                           transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         />
                       )}
