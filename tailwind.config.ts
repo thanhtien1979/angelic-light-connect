@@ -84,6 +84,7 @@ export default {
         serif: ["Cormorant Garamond", "serif"],
         sans: ["Inter", "sans-serif"],
         chat: ["Lora", "Georgia", "serif"],
+        arabic: ["Noto Sans Arabic", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

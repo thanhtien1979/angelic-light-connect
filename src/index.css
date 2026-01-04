@@ -347,6 +347,17 @@
     font-family: 'Inter', sans-serif;
     transition: background-color 400ms ease, color 400ms ease;
   }
+
+  /* RTL language font support - Arabic */
+  [dir="rtl"] body,
+  [dir="rtl"] * {
+    font-family: 'Noto Sans Arabic', 'Inter', sans-serif;
+  }
+
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, 
+  [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+    font-family: 'Noto Sans Arabic', 'Cormorant Garamond', serif;
+  }
   
   /* Theme transition for key elements */
   html:not(.reduce-motion) *,
@@ -1262,13 +1273,29 @@ body.dark::before {
     text-align: right;
   }
 
-  [dir="rtl"] .flex-row {
+  /* RTL: Items alignment swap - commonly used for header items */
+  [dir="rtl"] .items-start:not(.rtl-keep) {
+    align-items: flex-end;
+  }
+
+  [dir="rtl"] .items-end:not(.rtl-keep) {
+    align-items: flex-start;
+  }
+
+  /* RTL: Flex row direction - auto-reverse unless rtl-keep is specified */
+  [dir="rtl"] .flex-row:not(.rtl-keep) {
     flex-direction: row-reverse;
   }
 
+  /* RTL: Gap spacing works automatically, no changes needed */
+  
+  /* RTL: Space utilities - reverse the spacing direction */
+  [dir="rtl"] .space-x-1 > :not([hidden]) ~ :not([hidden]),
   [dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]),
   [dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]),
-  [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]),
+  [dir="rtl"] .space-x-5 > :not([hidden]) ~ :not([hidden]),
+  [dir="rtl"] .space-x-6 > :not([hidden]) ~ :not([hidden]) {
     --tw-space-x-reverse: 1;
   }
 
@@ -1358,5 +1385,108 @@ body.dark::before {
     border-bottom-right-radius: 0;
     border-top-left-radius: 0.5rem;
     border-bottom-left-radius: 0.5rem;
+  }
+
+  /* RTL-aware flex containers */
+  [dir="rtl"] .rtl-flex-reverse {
+    flex-direction: row-reverse;
+  }
+
+  /* RTL gap and spacing adjustments */
+  [dir="rtl"] .gap-x-2 > *,
+  [dir="rtl"] .gap-x-3 > *,
+  [dir="rtl"] .gap-x-4 > * {
+    /* Gap works the same in RTL, no adjustment needed */
+  }
+
+  /* RTL-aware gradient directions */
+  [dir="rtl"] .bg-gradient-to-r {
+    background-image: linear-gradient(to left, var(--tw-gradient-stops));
+  }
+
+  [dir="rtl"] .bg-gradient-to-l {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  }
+
+  /* RTL chat bubbles - user messages on left, assistant on right */
+  [dir="rtl"] .chat-user-message {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  [dir="rtl"] .chat-assistant-message {
+    margin-right: 0;
+    margin-left: auto;
+  }
+
+  /* RTL navigation and sidebar */
+  [dir="rtl"] .sidebar-left {
+    left: auto;
+    right: 0;
+  }
+
+  [dir="rtl"] .sidebar-right {
+    right: auto;
+    left: 0;
+  }
+
+  /* RTL transform origin adjustments */
+  [dir="rtl"] .origin-left {
+    transform-origin: right;
+  }
+
+  [dir="rtl"] .origin-right {
+    transform-origin: left;
+  }
+
+  /* RTL scrollbar position */
+  [dir="rtl"] {
+    scrollbar-gutter: stable both-edges;
+  }
+
+  /* RTL animation directions */
+  [dir="rtl"] .animate-slide-in-left {
+    animation-direction: reverse;
+  }
+
+  /* RTL dropdown/popover positioning */
+  [dir="rtl"] [data-align="start"] {
+    --radix-dropdown-content-transform-origin: top right;
+  }
+
+  [dir="rtl"] [data-align="end"] {
+    --radix-dropdown-content-transform-origin: top left;
+  }
+
+  /* RTL: Icons that should flip (arrows, chevrons) */
+  [dir="rtl"] .rtl-mirror {
+    transform: scaleX(-1);
+  }
+
+  /* RTL: Force LTR for specific elements (numbers, code, etc) */
+  [dir="rtl"] .rtl-ltr {
+    direction: ltr;
+    text-align: left;
+  }
+
+  /* RTL: Keep original direction for specific containers */
+  [dir="rtl"] .rtl-keep {
+    direction: ltr;
+  }
+
+  /* RTL: Input fields should keep LTR for better UX with mixed content */
+  [dir="rtl"] input[type="email"],
+  [dir="rtl"] input[type="url"],
+  [dir="rtl"] input[type="tel"],
+  [dir="rtl"] input[type="number"] {
+    direction: ltr;
+    text-align: right;
+  }
+
+  /* RTL: Code blocks should remain LTR */
+  [dir="rtl"] code,
+  [dir="rtl"] pre {
+    direction: ltr;
+    text-align: left;
   }
 }
