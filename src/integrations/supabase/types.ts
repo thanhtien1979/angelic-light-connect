@@ -1118,6 +1118,42 @@ export type Database = {
           },
         ]
       }
+      shared_conversations: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          messages: Json
+          share_id: string
+          title: string | null
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          messages: Json
+          share_id: string
+          title?: string | null
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          messages?: Json
+          share_id?: string
+          title?: string | null
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
       shared_light_moments: {
         Row: {
           created_at: string
