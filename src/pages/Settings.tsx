@@ -51,6 +51,9 @@ const Settings = () => {
   const [displayName, setDisplayName] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [isSavingName, setIsSavingName] = useState(false);
+  const [bio, setBio] = useState("");
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [isSavingBio, setIsSavingBio] = useState(false);
   const {
     isEnabled: angelEnabled,
     style: angelStyle,
@@ -99,19 +102,22 @@ const Settings = () => {
     localStorage.setItem("angel-notification-settings", JSON.stringify(notificationSettings));
   }, [notificationSettings]);
 
-  // Fetch display name from profile
+  // Fetch display name and bio from profile
   useEffect(() => {
     if (!user) return;
     
     const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name")
+        .select("display_name, bio")
         .eq("id", user.id)
         .single();
       
       if (data?.display_name) {
         setDisplayName(data.display_name);
+      }
+      if (data?.bio) {
+        setBio(data.bio);
       }
     };
     
@@ -519,12 +525,106 @@ const Settings = () => {
                           </p>
                         </div>
                         
+                        {/* Bio Section */}
+                        <div className="p-6 rounded-xl bg-muted/30 border border-border/50 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-base font-medium">Tiểu sử</Label>
+                            {!isEditingBio && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsEditingBio(true)}
+                                className="gap-2"
+                              >
+                                <Pencil className="w-4 h-4" />
+                                Chỉnh sửa
+                              </Button>
+                            )}
+                          </div>
+                          
+                          {isEditingBio ? (
+                            <div className="space-y-2">
+                              <textarea
+                                value={bio}
+                                onChange={(e) => setBio(e.target.value)}
+                                placeholder="Viết vài dòng giới thiệu về bản thân..."
+                                maxLength={200}
+                                rows={3}
+                                className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === "Escape") {
+                                    setIsEditingBio(false);
+                                  }
+                                }}
+                              />
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-muted-foreground">
+                                  {bio.length}/200 ký tự
+                                </span>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setIsEditingBio(false)}
+                                  >
+                                    Hủy
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={async () => {
+                                      if (!user) return;
+                                      setIsSavingBio(true);
+                                      try {
+                                        const { error } = await supabase
+                                          .from("profiles")
+                                          .upsert({
+                                            id: user.id,
+                                            bio: bio.trim() || null,
+                                            updated_at: new Date().toISOString(),
+                                          });
+                                        
+                                        if (error) throw error;
+                                        
+                                        toast.success("Đã cập nhật tiểu sử!");
+                                        setIsEditingBio(false);
+                                      } catch (error) {
+                                        console.error("Error updating bio:", error);
+                                        toast.error("Không thể cập nhật tiểu sử. Vui lòng thử lại.");
+                                      } finally {
+                                        setIsSavingBio(false);
+                                      }
+                                    }}
+                                    disabled={isSavingBio}
+                                    className="gap-2"
+                                  >
+                                    {isSavingBio ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <Check className="w-4 h-4" />
+                                    )}
+                                    Lưu
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-foreground text-sm whitespace-pre-wrap">
+                              {bio || <span className="text-muted-foreground italic">Chưa có tiểu sử</span>}
+                            </p>
+                          )}
+                          
+                          <p className="text-xs text-muted-foreground">
+                            Tiểu sử ngắn gọn về bạn sẽ hiển thị trên hồ sơ công khai của bạn.
+                          </p>
+                        </div>
+                        
                         {/* Info Note */}
                         <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
                           <p className="text-xs text-muted-foreground flex items-start gap-2">
                             <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                             <span>
-                              <span className="font-medium text-primary">Lưu ý:</span> Ảnh đại diện và tên hiển thị sẽ được hiển thị trong tin nhắn chat và hồ sơ của bạn.
+                              <span className="font-medium text-primary">Lưu ý:</span> Ảnh đại diện, tên hiển thị và tiểu sử sẽ được hiển thị trong hồ sơ của bạn.
                             </span>
                           </p>
                         </div>
