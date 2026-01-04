@@ -25,6 +25,7 @@ import ChatButton from "./components/ChatButton";
 import FloatingAmbientPlayer from "./components/FloatingAmbientPlayer";
 import AngelPresence from "./components/AngelPresence";
 import ClickLightBurst from "./components/ClickLightBurst";
+import LanguageSuggestionBanner from "./components/LanguageSuggestionBanner";
 import { usePresence } from "./hooks/usePresence";
 import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
 import { useTokenRefresh } from "./hooks/useTokenRefresh";
@@ -81,6 +82,7 @@ const App = () => (
               <Sonner />
               <BrowserRouter>
                 <AppInitializer>
+                  <LanguageSuggestionBanner />
                   <DailyLightGreeting />
                   <Routes>
                     <Route path="/" element={<Index />} />
