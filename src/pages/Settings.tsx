@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2, Pencil, Check, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
@@ -27,6 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import ImageCropEditor from "@/components/ImageCropEditor";
 
 type SettingsSection = "profile" | "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
 type ThemeOption = "light" | "dark" | "system" | "twilight" | "ocean" | "forest" | "midnight" | "sunrise";
@@ -65,6 +66,8 @@ const Settings = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const {
     isEnabled: angelEnabled,
     style: angelStyle,
@@ -463,7 +466,22 @@ const Settings = () => {
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                uploadAvatar(file);
+                                // Validate file type
+                                if (!file.type.startsWith("image/")) {
+                                  toast.error("Vui lòng chọn file ảnh");
+                                  e.target.value = "";
+                                  return;
+                                }
+                                // Validate file size (max 5MB for crop, will compress later)
+                                if (file.size > 5 * 1024 * 1024) {
+                                  toast.error("Ảnh phải nhỏ hơn 5MB");
+                                  e.target.value = "";
+                                  return;
+                                }
+                                // Open crop editor
+                                const url = URL.createObjectURL(file);
+                                setCropImageUrl(url);
+                                setPendingFile(file);
                               }
                               e.target.value = "";
                             }}
@@ -1471,6 +1489,40 @@ const Settings = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* Image Crop Editor Modal */}
+      <AnimatePresence>
+        {cropImageUrl && (
+          <ImageCropEditor
+            imageUrl={cropImageUrl}
+            onSave={async (editedImageUrl) => {
+              // Convert blob URL to File
+              try {
+                const response = await fetch(editedImageUrl);
+                const blob = await response.blob();
+                const croppedFile = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+                
+                // Upload the cropped image
+                await uploadAvatar(croppedFile);
+                
+                // Cleanup
+                URL.revokeObjectURL(editedImageUrl);
+                if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
+                setCropImageUrl(null);
+                setPendingFile(null);
+              } catch (error) {
+                console.error("Error processing cropped image:", error);
+                toast.error("Không thể xử lý ảnh. Vui lòng thử lại.");
+              }
+            }}
+            onCancel={() => {
+              if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
+              setCropImageUrl(null);
+              setPendingFile(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
