@@ -141,24 +141,25 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
   const [burstSparkles, setBurstSparkles] = useState<BurstSparkle[]>([]);
   const [ringWaves, setRingWaves] = useState<RingWave[]>([]);
 
+  // Optimized: Only 4 fairies instead of 6
   const fairies = useMemo(() => 
-    fairyImages.map((fairy, i) => {
-      const baseAngle = (i * 60) + Math.random() * 30;
-      const distance = 350 + Math.random() * 70; // 350-420px - further outside the cover circle
+    fairyImages.slice(0, 4).map((fairy, i) => {
+      const baseAngle = (i * 90) + 20;
+      const distance = 360 + (i % 2) * 40;
       
       return {
         id: i,
         image: fairy.image,
         sparkleColor: fairy.sparkleColor,
         note: fairy.note,
-        size: 55 + Math.random() * 25,
+        size: 50 + (i % 2) * 20,
         startAngle: baseAngle,
         distance,
-        duration: 18 + Math.random() * 8,
-        floatDuration: 3 + Math.random() * 2,
-        delay: i * 0.5,
+        duration: 20 + i * 5,
+        floatDuration: 3.5,
+        delay: i * 0.8,
         direction: i % 2 === 0 ? 1 : -1,
-        floatAmplitude: 12 + Math.random() * 12,
+        floatAmplitude: 10,
       };
     }), []
   );
@@ -222,40 +223,42 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
     }, 1000);
   }, []);
 
-  // Generate sparkles periodically
+  // Generate sparkles periodically - optimized with longer interval
   useEffect(() => {
     if (isReducedMotion) return;
 
     const interval = setInterval(() => {
-      const newSparkles: Sparkle[] = fairies.map((fairy) => {
-        const currentTime = Date.now() / 1000;
-        const elapsedTime = currentTime - fairy.delay;
-        const currentAngle = fairy.startAngle + (elapsedTime / fairy.duration) * 360 * fairy.direction;
-        const angleRad = (currentAngle * Math.PI) / 180;
-        
-        const x = Math.cos(angleRad) * fairy.distance;
-        const y = Math.sin(angleRad) * fairy.distance;
-        
-        return {
-          id: Date.now() + fairy.id + Math.random(),
-          x: x + (Math.random() - 0.5) * 30,
-          y: y + (Math.random() - 0.5) * 30,
-          size: 4 + Math.random() * 6,
-          color: fairy.sparkleColor,
-        };
-      });
+      // Only generate sparkles for 2 fairies at a time (alternating)
+      const currentIdx = Math.floor(Date.now() / 400) % fairies.length;
+      const fairy = fairies[currentIdx];
+      
+      const currentTime = Date.now() / 1000;
+      const elapsedTime = currentTime - fairy.delay;
+      const currentAngle = fairy.startAngle + (elapsedTime / fairy.duration) * 360 * fairy.direction;
+      const angleRad = (currentAngle * Math.PI) / 180;
+      
+      const x = Math.cos(angleRad) * fairy.distance;
+      const y = Math.sin(angleRad) * fairy.distance;
+      
+      const newSparkle: Sparkle = {
+        id: Date.now() + Math.random(),
+        x: x + (Math.random() - 0.5) * 25,
+        y: y + (Math.random() - 0.5) * 25,
+        size: 5 + Math.random() * 5,
+        color: fairy.sparkleColor,
+      };
 
-      setSparkles(prev => [...prev.slice(-30), ...newSparkles]);
-    }, 200);
+      setSparkles(prev => [...prev.slice(-16), newSparkle]);
+    }, 400); // Slower interval
 
     return () => clearInterval(interval);
   }, [fairies, isReducedMotion]);
 
-  // Clean up old sparkles
+  // Clean up old sparkles - less frequent
   useEffect(() => {
     const cleanup = setInterval(() => {
-      setSparkles(prev => prev.slice(-24));
-    }, 1000);
+      setSparkles(prev => prev.slice(-12));
+    }, 1500);
     return () => clearInterval(cleanup);
   }, []);
 

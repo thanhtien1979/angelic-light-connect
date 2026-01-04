@@ -1,23 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import NavigationHeader from "@/components/NavigationHeader";
 import HeroSection from "@/components/HeroSection";
-import SacredPillars from "@/components/SacredPillars";
-import VisionMission from "@/components/VisionMission";
-import FunEcosystemPlatforms from "@/components/FunEcosystemPlatforms";
-import MeditationPortal from "@/components/MeditationPortal";
-import MiniMeditationPlayer from "@/components/MiniMeditationPlayer";
-import Testimonials from "@/components/Testimonials";
-import CallToAction from "@/components/CallToAction";
 import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
-import GlobalAngelicAura from "@/components/GlobalAngelicAura";
-import { GentleMeditationReminder } from "@/components/GentleMeditationReminder";
-import QuickBreathingWidget from "@/components/QuickBreathingWidget";
-import WeeklyReflectionPrompt from "@/components/WeeklyReflectionPrompt";
-import WalletLinkBanner from "@/components/WalletLinkBanner";
-import MagicalSparkles from "@/components/MagicalSparkles";
-import AuroraBackground from "@/components/AuroraBackground";
-import StardustTrail from "@/components/StardustTrail";
+
+// Lazy load heavy components for better initial load
+const SacredPillars = lazy(() => import("@/components/SacredPillars"));
+const VisionMission = lazy(() => import("@/components/VisionMission"));
+const FunEcosystemPlatforms = lazy(() => import("@/components/FunEcosystemPlatforms"));
+const MeditationPortal = lazy(() => import("@/components/MeditationPortal"));
+const Testimonials = lazy(() => import("@/components/Testimonials"));
+const CallToAction = lazy(() => import("@/components/CallToAction"));
+
+// Lazy load floating widgets
+const MiniMeditationPlayer = lazy(() => import("@/components/MiniMeditationPlayer"));
+const QuickBreathingWidget = lazy(() => import("@/components/QuickBreathingWidget"));
+const WeeklyReflectionPrompt = lazy(() => import("@/components/WeeklyReflectionPrompt"));
+const WalletLinkBanner = lazy(() => import("@/components/WalletLinkBanner"));
+const GentleMeditationReminder = lazy(() => import("@/components/GentleMeditationReminder").then(m => ({ default: m.GentleMeditationReminder })));
+
+// Lazy load background effects (non-critical)
+const GlobalAngelicAura = lazy(() => import("@/components/GlobalAngelicAura"));
+const MagicalSparkles = lazy(() => import("@/components/MagicalSparkles"));
+const AuroraBackground = lazy(() => import("@/components/AuroraBackground"));
+const StardustTrail = lazy(() => import("@/components/StardustTrail"));
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -33,56 +39,56 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      {/* Aurora Background - Flowing gradient waves */}
-      <AuroraBackground />
-      
-      {/* Global Angelic Aura - Divine presence throughout */}
-      <GlobalAngelicAura />
-      
-      {/* Magical Sparkles - Twinkling stars */}
-      <MagicalSparkles />
-      
-      {/* Stardust Trail - Follow cursor */}
-      <StardustTrail />
+      {/* Background effects - lazy loaded, non-blocking */}
+      <Suspense fallback={null}>
+        <AuroraBackground />
+        <GlobalAngelicAura />
+        <MagicalSparkles />
+        <StardustTrail />
+      </Suspense>
       
       {/* Gentle Meditation Reminder */}
-      <GentleMeditationReminder />
+      <Suspense fallback={null}>
+        <GentleMeditationReminder />
+      </Suspense>
       
-      {/* Navigation */}
+      {/* Navigation - critical, not lazy */}
       <NavigationHeader />
       
       {/* Content */}
       <main 
-        className={`relative z-10 transition-all duration-500 ease-out motion-reduce:transition-none ${
+        className={`relative z-10 transition-all duration-300 ease-out motion-reduce:transition-none ${
           isAppReady 
             ? 'opacity-100 translate-y-0' 
-            : 'opacity-0 translate-y-2'
+            : 'opacity-0 translate-y-1'
         }`}
       >
+        {/* Hero is critical - not lazy */}
         <HeroSection onOpenAuth={() => setIsAuthOpen(true)} />
-        <SacredPillars />
-        <VisionMission />
-        <FunEcosystemPlatforms />
-        <MeditationPortal />
-        <Testimonials />
-        <CallToAction />
+        
+        {/* Below-fold content - lazy loaded */}
+        <Suspense fallback={<div className="min-h-[50vh]" />}>
+          <SacredPillars />
+          <VisionMission />
+          <FunEcosystemPlatforms />
+          <MeditationPortal />
+          <Testimonials />
+          <CallToAction />
+        </Suspense>
+        
         <Footer />
       </main>
 
       {/* Auth Modal */}
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
-      {/* Floating Mini Meditation Player */}
-      <MiniMeditationPlayer />
-
-      {/* Quick Breathing Widget */}
-      <QuickBreathingWidget />
-
-      {/* Weekly Reflection Prompt */}
-      <WeeklyReflectionPrompt />
-
-      {/* Wallet Link Banner */}
-      <WalletLinkBanner />
+      {/* Floating widgets - lazy loaded after main content */}
+      <Suspense fallback={null}>
+        <MiniMeditationPlayer />
+        <QuickBreathingWidget />
+        <WeeklyReflectionPrompt />
+        <WalletLinkBanner />
+      </Suspense>
     </div>
   );
 };

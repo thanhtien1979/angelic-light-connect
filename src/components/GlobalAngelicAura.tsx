@@ -1,40 +1,38 @@
-import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useState, useEffect, memo } from "react";
 
-// Optimized: Reduced from 20 particles to 8, 6 orbs to 3
-// Added GPU optimization with will-change
-
-const GlobalAngelicAura = () => {
-  // Reduced particle count for performance
+// Optimized: Reduced particles, uses CSS animations, memoized
+const GlobalAngelicAura = memo(() => {
+  const [isEnabled, setIsEnabled] = useState(true);
+  
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (window.innerWidth < 768 || prefersReducedMotion) {
+      setIsEnabled(false);
+    }
+  }, []);
+  // Reduced to 4 particles for performance
   const particles = useMemo(() => 
-    Array.from({ length: 8 }, (_, i) => ({
-      x: 10 + Math.random() * 80,
-      y: 10 + Math.random() * 80,
-      size: 15 + Math.random() * 25,
-      delay: Math.random() * 5,
-      duration: 8 + Math.random() * 6,
+    Array.from({ length: 4 }, (_, i) => ({
+      x: 15 + i * 22,
+      y: 20 + (i % 2) * 55,
+      size: 20 + i * 8,
+      delay: i * 1.5,
       color: [
-        "hsla(348, 80%, 75%, 0.25)",
-        "hsla(350, 85%, 82%, 0.2)",
-        "hsla(340, 70%, 88%, 0.3)",
-      ][i % 3],
-    })), []
-  );
-
-  // Reduced orbs from 6 to 3
-  const orbs = useMemo(() => 
-    Array.from({ length: 3 }, (_, i) => ({
-      x: 15 + i * 35,
-      y: 20 + (i % 2) * 50,
-      size: 120 + i * 40,
-      delay: i * 2,
-      color: [
-        "hsla(348, 75%, 80%, 0.12)",
-        "hsla(340, 70%, 85%, 0.1)",
-        "hsla(320, 60%, 88%, 0.08)",
+        "hsla(348, 80%, 75%, 0.2)",
+        "hsla(350, 85%, 82%, 0.15)",
+        "hsla(340, 70%, 88%, 0.25)",
+        "hsla(345, 75%, 80%, 0.18)",
       ][i],
     })), []
   );
+
+  // Reduced to 2 orbs
+  const orbs = useMemo(() => [
+    { x: 20, y: 25, size: 140, delay: 0, color: "hsla(348, 75%, 80%, 0.1)" },
+    { x: 75, y: 65, size: 160, delay: 2, color: "hsla(340, 70%, 85%, 0.08)" },
+  ], []);
+
+  if (!isEnabled) return null;
 
   return (
     <>
@@ -100,10 +98,8 @@ const GlobalAngelicAura = () => {
               width: `${particle.size}px`,
               height: `${particle.size}px`,
               background: `radial-gradient(circle, ${particle.color} 0%, transparent 70%)`,
-              filter: `blur(${particle.size * 0.12}px)`,
+              filter: `blur(${particle.size * 0.1}px)`,
               animationDelay: `${particle.delay}s`,
-              animationDuration: `${particle.duration}s`,
-              willChange: "transform, opacity",
             }}
           />
         ))}
@@ -113,11 +109,13 @@ const GlobalAngelicAura = () => {
       <div 
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse at center, transparent 50%, hsla(340, 50%, 90%, 0.12) 100%)`,
+          background: `radial-gradient(ellipse at center, transparent 50%, hsla(340, 50%, 90%, 0.1) 100%)`,
         }}
       />
     </>
   );
-};
+});
+
+GlobalAngelicAura.displayName = 'GlobalAngelicAura';
 
 export default GlobalAngelicAura;
