@@ -389,50 +389,98 @@ const NavigationHeader = () => {
               </span>
             </motion.button>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-0.5">
-              {navLinksConfig.map((link) => 
-                link.isPage && link.path ? (
-                  <Link key={link.id} to={link.path}>
-                    <motion.span
-                      className={`relative px-2 xl:px-3 py-1.5 text-xs xl:text-sm font-medium transition-colors text-foreground/80 hover:text-foreground inline-flex items-center gap-1 whitespace-nowrap ${
-                        link.id === "friends" ? "text-pink-500 hover:text-pink-400" : ""
+            {/* Desktop Navigation - 2 rows */}
+            <nav className="hidden lg:flex flex-col items-center gap-1">
+              {/* Row 1 */}
+              <div className="flex items-center gap-0.5">
+                {navLinksConfig.slice(0, 5).map((link) => 
+                  link.isPage && link.path ? (
+                    <Link key={link.id} to={link.path}>
+                      <motion.span
+                        className={`relative px-2 xl:px-3 py-1 text-xs xl:text-sm font-medium transition-colors text-foreground/80 hover:text-foreground inline-flex items-center gap-1 whitespace-nowrap ${
+                          link.id === "friends" ? "text-pink-500 hover:text-pink-400" : ""
+                        }`}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        {link.id === "friends" && <UserPlus className="w-3 h-3 xl:w-4 xl:h-4" />}
+                        {t(link.labelKey)}
+                        {link.showBadge && user && pendingRequests.length > 0 && (
+                          <Badge className="bg-pink-500 text-white text-[9px] px-1 py-0 h-3.5 min-w-3.5 flex items-center justify-center animate-pulse">
+                            {pendingRequests.length}
+                          </Badge>
+                        )}
+                      </motion.span>
+                    </Link>
+                  ) : (
+                    <motion.button
+                      key={link.id}
+                      onClick={() => scrollToSection(link.id)}
+                      className={`relative px-2 xl:px-3 py-1 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap ${
+                        activeSection === link.id
+                          ? "text-gold"
+                          : "text-foreground/80 hover:text-foreground"
                       }`}
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                     >
-                      {link.id === "friends" && <UserPlus className="w-3 h-3 xl:w-4 xl:h-4" />}
                       {t(link.labelKey)}
-                      {link.showBadge && user && pendingRequests.length > 0 && (
-                        <Badge className="bg-pink-500 text-white text-[9px] px-1 py-0 h-3.5 min-w-3.5 flex items-center justify-center animate-pulse">
-                          {pendingRequests.length}
-                        </Badge>
+                      {activeSection === link.id && (
+                        <motion.div
+                          layoutId="activeIndicator1"
+                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-gradient-to-r from-gold/70 to-gold rounded-full"
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
                       )}
-                    </motion.span>
-                  </Link>
-                ) : (
-                  <motion.button
-                    key={link.id}
-                    onClick={() => scrollToSection(link.id)}
-                    className={`relative px-2 xl:px-3 py-1.5 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap ${
-                      activeSection === link.id
-                        ? "text-gold"
-                        : "text-foreground/80 hover:text-foreground"
-                    }`}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    {t(link.labelKey)}
-                    {activeSection === link.id && (
-                      <motion.div
-                        layoutId="activeIndicator"
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-gradient-to-r from-gold/70 to-gold rounded-full"
-                        style={{ boxShadow: "0 0 10px hsla(348, 80%, 75%, 0.5)" }}
-                      />
-                    )}
-                  </motion.button>
-                )
-              )}
+                    </motion.button>
+                  )
+                )}
+              </div>
+              {/* Row 2 */}
+              <div className="flex items-center gap-0.5">
+                {navLinksConfig.slice(5).map((link) => 
+                  link.isPage && link.path ? (
+                    <Link key={link.id} to={link.path}>
+                      <motion.span
+                        className={`relative px-2 xl:px-3 py-1 text-xs xl:text-sm font-medium transition-colors text-foreground/80 hover:text-foreground inline-flex items-center gap-1 whitespace-nowrap ${
+                          link.id === "friends" ? "text-pink-500 hover:text-pink-400" : ""
+                        }`}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        {link.id === "friends" && <UserPlus className="w-3 h-3 xl:w-4 xl:h-4" />}
+                        {t(link.labelKey)}
+                        {link.showBadge && user && pendingRequests.length > 0 && (
+                          <Badge className="bg-pink-500 text-white text-[9px] px-1 py-0 h-3.5 min-w-3.5 flex items-center justify-center animate-pulse">
+                            {pendingRequests.length}
+                          </Badge>
+                        )}
+                      </motion.span>
+                    </Link>
+                  ) : (
+                    <motion.button
+                      key={link.id}
+                      onClick={() => scrollToSection(link.id)}
+                      className={`relative px-2 xl:px-3 py-1 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap ${
+                        activeSection === link.id
+                          ? "text-gold"
+                          : "text-foreground/80 hover:text-foreground"
+                      }`}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      {t(link.labelKey)}
+                      {activeSection === link.id && (
+                        <motion.div
+                          layoutId="activeIndicator2"
+                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-gradient-to-r from-gold/70 to-gold rounded-full"
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                    </motion.button>
+                  )
+                )}
+              </div>
             </nav>
 
             {/* Theme Toggle, Wallet, Notifications, Light Indicator, User Menu & Mobile Menu Button */}
