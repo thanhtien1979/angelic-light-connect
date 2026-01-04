@@ -32,6 +32,11 @@ const auroraConfigs = {
     wave2: "hsla(135, 40%, 35%, 0.1), hsla(145, 45%, 40%, 0.09), hsla(140, 45%, 38%, 0.1)",
     wave3: "hsla(155, 40%, 32%, 0.08), hsla(135, 40%, 35%, 0.07), hsla(145, 45%, 38%, 0.08)",
   },
+  midnight: {
+    wave1: "hsla(215, 30%, 35%, 0.1), hsla(220, 25%, 40%, 0.08), hsla(210, 30%, 38%, 0.09)",
+    wave2: "hsla(220, 25%, 32%, 0.07), hsla(215, 30%, 38%, 0.06), hsla(225, 25%, 35%, 0.07)",
+    wave3: "hsla(210, 30%, 30%, 0.05), hsla(220, 25%, 35%, 0.04), hsla(215, 30%, 32%, 0.05)",
+  },
 };
 
 const AuroraBackground = () => {
@@ -71,6 +76,7 @@ const AuroraBackground = () => {
   const driftAnimation = prefersReducedMotion ? "none" : "aurora-drift 20s ease-in-out infinite";
 
   const isLight = themeKey === "light";
+  const isMidnight = themeKey === "midnight";
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -158,6 +164,43 @@ const AuroraBackground = () => {
         />
       </div>
 
+      {/* Starfield overlay - only for Midnight theme */}
+      {isMidnight && (
+        <div
+          className="absolute inset-0 transition-opacity duration-700"
+          style={{
+            backgroundImage: `
+              radial-gradient(1px 1px at 10% 15%, hsla(220, 30%, 85%, 0.6) 0%, transparent 100%),
+              radial-gradient(1.5px 1.5px at 25% 8%, hsla(215, 40%, 90%, 0.5) 0%, transparent 100%),
+              radial-gradient(1px 1px at 40% 22%, hsla(210, 35%, 80%, 0.55) 0%, transparent 100%),
+              radial-gradient(2px 2px at 55% 5%, hsla(220, 35%, 88%, 0.4) 0%, transparent 100%),
+              radial-gradient(1px 1px at 70% 18%, hsla(215, 30%, 82%, 0.5) 0%, transparent 100%),
+              radial-gradient(1.5px 1.5px at 85% 12%, hsla(220, 40%, 85%, 0.45) 0%, transparent 100%),
+              radial-gradient(1px 1px at 15% 35%, hsla(210, 30%, 80%, 0.5) 0%, transparent 100%),
+              radial-gradient(1px 1px at 30% 42%, hsla(215, 35%, 85%, 0.4) 0%, transparent 100%),
+              radial-gradient(2px 2px at 50% 30%, hsla(220, 40%, 90%, 0.35) 0%, transparent 100%),
+              radial-gradient(1px 1px at 65% 38%, hsla(215, 30%, 82%, 0.5) 0%, transparent 100%),
+              radial-gradient(1.5px 1.5px at 80% 28%, hsla(210, 35%, 88%, 0.4) 0%, transparent 100%),
+              radial-gradient(1px 1px at 92% 35%, hsla(220, 30%, 80%, 0.45) 0%, transparent 100%),
+              radial-gradient(1px 1px at 8% 55%, hsla(215, 35%, 85%, 0.5) 0%, transparent 100%),
+              radial-gradient(1.5px 1.5px at 22% 62%, hsla(220, 40%, 82%, 0.4) 0%, transparent 100%),
+              radial-gradient(1px 1px at 38% 50%, hsla(210, 30%, 88%, 0.45) 0%, transparent 100%),
+              radial-gradient(2px 2px at 58% 58%, hsla(215, 35%, 85%, 0.35) 0%, transparent 100%),
+              radial-gradient(1px 1px at 75% 52%, hsla(220, 30%, 80%, 0.5) 0%, transparent 100%),
+              radial-gradient(1px 1px at 88% 60%, hsla(215, 40%, 85%, 0.4) 0%, transparent 100%),
+              radial-gradient(1.5px 1.5px at 12% 78%, hsla(210, 35%, 82%, 0.45) 0%, transparent 100%),
+              radial-gradient(1px 1px at 28% 85%, hsla(220, 30%, 88%, 0.5) 0%, transparent 100%),
+              radial-gradient(1px 1px at 45% 72%, hsla(215, 35%, 80%, 0.4) 0%, transparent 100%),
+              radial-gradient(2px 2px at 62% 80%, hsla(210, 40%, 85%, 0.35) 0%, transparent 100%),
+              radial-gradient(1px 1px at 78% 75%, hsla(220, 30%, 82%, 0.5) 0%, transparent 100%),
+              radial-gradient(1.5px 1.5px at 90% 82%, hsla(215, 35%, 88%, 0.4) 0%, transparent 100%)
+            `,
+            opacity: 0.7,
+            pointerEvents: "none",
+          }}
+        />
+      )}
+
       {/* Subtle noise overlay for all themes */}
       <div
         className="absolute inset-0 transition-opacity duration-500"
@@ -165,7 +208,7 @@ const AuroraBackground = () => {
           backgroundImage: noiseSvg,
           backgroundRepeat: "repeat",
           backgroundSize: "128px 128px",
-          opacity: isLight ? 0.025 : 0.035,
+          opacity: isLight ? 0.025 : isMidnight ? 0.02 : 0.035,
           mixBlendMode: isLight ? "overlay" : "soft-light",
           pointerEvents: "none",
         }}
@@ -200,6 +243,12 @@ function getBaseGradient(theme: string): string {
         radial-gradient(ellipse 90% 60% at 25% 30%, hsla(145, 45%, 38%, 0.18) 0%, transparent 55%),
         radial-gradient(ellipse 75% 50% at 70% 65%, hsla(135, 40%, 32%, 0.16) 0%, transparent 50%),
         radial-gradient(ellipse 85% 70% at 50% 45%, hsla(155, 40%, 28%, 0.14) 0%, transparent 55%)
+      `;
+    case "midnight":
+      return `
+        radial-gradient(ellipse 90% 70% at 20% 30%, hsla(215, 30%, 18%, 0.3) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 50% at 75% 60%, hsla(220, 25%, 22%, 0.25) 0%, transparent 55%),
+        radial-gradient(ellipse 85% 65% at 50% 45%, hsla(210, 30%, 15%, 0.2) 0%, transparent 55%)
       `;
     default: // light
       return `
@@ -237,6 +286,11 @@ function getOrbGradient(theme: string, orbIndex: number): string {
       "radial-gradient(circle, hsla(145, 45%, 45%, 0.2) 0%, transparent 55%)",
       "radial-gradient(circle, hsla(135, 40%, 35%, 0.18) 0%, transparent 55%)",
       "radial-gradient(circle, hsla(140, 50%, 40%, 0.15) 0%, transparent 50%)",
+    ],
+    midnight: [
+      "radial-gradient(circle, hsla(215, 30%, 35%, 0.15) 0%, transparent 60%)",
+      "radial-gradient(circle, hsla(220, 25%, 40%, 0.12) 0%, transparent 55%)",
+      "radial-gradient(circle, hsla(210, 30%, 32%, 0.1) 0%, transparent 50%)",
     ],
   };
 
