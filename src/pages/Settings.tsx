@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2, Pencil, Check, Mail } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2, Pencil, Check, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -57,6 +57,14 @@ const Settings = () => {
   const [newEmail, setNewEmail] = useState("");
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isSavingEmail, setIsSavingEmail] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
     isEnabled: angelEnabled,
     style: angelStyle,
@@ -729,6 +737,143 @@ const Settings = () => {
                           
                           <p className="text-xs text-muted-foreground">
                             Khi thay đổi email, bạn sẽ nhận được email xác nhận tại địa chỉ mới.
+                          </p>
+                        </div>
+                        
+                        {/* Password Section */}
+                        <div className="p-6 rounded-xl bg-muted/30 border border-border/50 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-base font-medium flex items-center gap-2">
+                              <Lock className="w-4 h-4" />
+                              Mật khẩu
+                            </Label>
+                            {!isEditingPassword && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsEditingPassword(true)}
+                                className="gap-2"
+                              >
+                                <Pencil className="w-4 h-4" />
+                                Đổi mật khẩu
+                              </Button>
+                            )}
+                          </div>
+                          
+                          {isEditingPassword ? (
+                            <div className="space-y-4">
+                              {/* New Password */}
+                              <div className="space-y-2">
+                                <Label className="text-sm text-muted-foreground">Mật khẩu mới</Label>
+                                <div className="relative">
+                                  <Input
+                                    type={showNewPassword ? "text" : "password"}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="Nhập mật khẩu mới"
+                                    className="pr-10"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                  >
+                                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              {/* Confirm Password */}
+                              <div className="space-y-2">
+                                <Label className="text-sm text-muted-foreground">Xác nhận mật khẩu mới</Label>
+                                <div className="relative">
+                                  <Input
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Nhập lại mật khẩu mới"
+                                    className="pr-10"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                  >
+                                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              {/* Password requirements */}
+                              <p className="text-xs text-muted-foreground">
+                                Mật khẩu phải có ít nhất 6 ký tự.
+                              </p>
+                              
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setIsEditingPassword(false);
+                                    setNewPassword("");
+                                    setConfirmPassword("");
+                                  }}
+                                >
+                                  Hủy
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={async () => {
+                                    // Validation
+                                    if (newPassword.length < 6) {
+                                      toast.error("Mật khẩu phải có ít nhất 6 ký tự");
+                                      return;
+                                    }
+                                    
+                                    if (newPassword !== confirmPassword) {
+                                      toast.error("Mật khẩu xác nhận không khớp");
+                                      return;
+                                    }
+                                    
+                                    setIsSavingPassword(true);
+                                    try {
+                                      const { error } = await supabase.auth.updateUser({
+                                        password: newPassword,
+                                      });
+                                      
+                                      if (error) throw error;
+                                      
+                                      toast.success("Đã cập nhật mật khẩu thành công!");
+                                      setIsEditingPassword(false);
+                                      setNewPassword("");
+                                      setConfirmPassword("");
+                                    } catch (error: any) {
+                                      console.error("Error updating password:", error);
+                                      toast.error(error.message || "Không thể cập nhật mật khẩu. Vui lòng thử lại.");
+                                    } finally {
+                                      setIsSavingPassword(false);
+                                    }
+                                  }}
+                                  disabled={isSavingPassword || !newPassword || !confirmPassword}
+                                  className="gap-2"
+                                >
+                                  {isSavingPassword ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Check className="w-4 h-4" />
+                                  )}
+                                  Cập nhật
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-foreground text-sm">
+                              ••••••••
+                            </p>
+                          )}
+                          
+                          <p className="text-xs text-muted-foreground">
+                            Đổi mật khẩu để bảo vệ tài khoản của bạn.
                           </p>
                         </div>
                         
