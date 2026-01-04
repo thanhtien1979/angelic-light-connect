@@ -958,6 +958,7 @@ export type Database = {
         Row: {
           agreed_to_light_law: boolean | null
           avatar_url: string | null
+          bio: string | null
           created_at: string
           display_name: string | null
           id: string
@@ -967,6 +968,7 @@ export type Database = {
         Insert: {
           agreed_to_light_law?: boolean | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           id: string
@@ -976,6 +978,7 @@ export type Database = {
         Update: {
           agreed_to_light_law?: boolean | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
