@@ -1817,6 +1817,14 @@ export type Database = {
       }
       increment_share_view: { Args: { p_share_id: string }; Returns: undefined }
       is_group_admin: { Args: { p_group_id: string }; Returns: boolean }
+      is_group_creator: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_group_member: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_service_role: { Args: never; Returns: boolean }
       record_credit_usage: {
         Args: { p_amount: number; p_description?: string; p_user_id: string }
