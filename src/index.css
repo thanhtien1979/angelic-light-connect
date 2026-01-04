@@ -288,24 +288,24 @@
   .sunrise {
     /* Warm golden/peach dawn base */
     --background: 35 45% 92%; /* Soft warm cream */
-    --foreground: 25 40% 18%; /* Warm dark brown text */
+    --foreground: 25 50% 12%; /* Dark brown text - increased contrast */
     --card: 38 50% 95%; /* Warm translucent panels */
-    --card-foreground: 25 40% 18%;
+    --card-foreground: 25 50% 12%;
     --popover: 38 50% 94%;
-    --popover-foreground: 25 40% 18%;
+    --popover-foreground: 25 50% 12%;
     
     /* Sunrise gold / amber primary */
     --primary: 35 85% 55%; /* Warm sunrise gold */
-    --primary-foreground: 25 45% 15%; /* Dark brown for contrast */
+    --primary-foreground: 25 60% 10%; /* Very dark brown for contrast */
     --secondary: 38 40% 88%; /* Soft peach secondary */
-    --secondary-foreground: 25 38% 22%;
+    --secondary-foreground: 25 50% 15%;
     --muted: 35 35% 90%;
-    --muted-foreground: 25 30% 40%;
+    --muted-foreground: 25 40% 30%;
     --accent: 28 75% 52%; /* Sunrise amber */
-    --accent-foreground: 25 45% 15%; /* Dark for contrast */
+    --accent-foreground: 25 60% 10%; /* Very dark for contrast */
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 35 30% 82%; /* Warm soft border */
+    --border: 35 30% 75%; /* Warm soft border - slightly darker */
     --input: 35 30% 82%;
     --ring: 35 85% 55%;
     
@@ -322,12 +322,12 @@
     --ambient-overlay: 35 50% 85%;
     
     --sidebar-background: 38 48% 94%;
-    --sidebar-foreground: 25 40% 18%;
+    --sidebar-foreground: 25 50% 12%;
     --sidebar-primary: 35 85% 55%;
-    --sidebar-primary-foreground: 25 45% 15%;
+    --sidebar-primary-foreground: 25 60% 10%;
     --sidebar-accent: 38 40% 88%;
-    --sidebar-accent-foreground: 25 38% 22%;
-    --sidebar-border: 35 30% 82%;
+    --sidebar-accent-foreground: 25 50% 15%;
+    --sidebar-border: 35 30% 75%;
     --sidebar-ring: 35 85% 55%;
   }
 }
