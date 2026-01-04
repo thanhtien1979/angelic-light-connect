@@ -391,7 +391,9 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   };
 
   return (
-    <section id="chat" className="relative overflow-hidden">
+    <section id="chat" className="relative overflow-hidden w-full">
+      {/* Centered chat container for desktop with responsive padding */}
+      <div className="mx-auto w-full max-w-[880px] px-3 sm:px-6 lg:px-8">
       {/* Camly Coin Reward Notification */}
       <CamlyCoinNotification
         show={showCoinNotification}
@@ -416,7 +418,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.3, type: "spring", stiffness: 400, damping: 25 }}
             onClick={() => setIsExpanded(true)}
-            className="w-full max-w-md mx-auto flex items-center gap-3 px-5 py-4 bg-white/80 backdrop-blur-xl rounded-full border border-rose-soft/40 shadow-[0_10px_40px_hsla(348,80%,80%,0.25)] transition-colors duration-300 group cursor-pointer"
+            className="w-full flex items-center gap-3 px-5 py-4 bg-white/80 backdrop-blur-xl rounded-full border border-rose-soft/40 shadow-[0_10px_40px_hsla(348,80%,80%,0.25)] transition-colors duration-300 group cursor-pointer"
           >
             {/* Avatar */}
             <motion.div 
@@ -698,7 +700,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
             />
 
             {/* Messages */}
-            <div className="p-6 space-y-4 min-h-[300px] max-h-[400px] overflow-y-auto">
+            <div className="px-4 sm:px-6 py-4 space-y-4 min-h-[300px] max-h-[50vh] sm:max-h-[400px] overflow-y-auto pb-20 sm:pb-6 scroll-smooth">
               {isRestoring ? (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -848,11 +850,12 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     )}
                     
                     <div
-                      className={`relative max-w-[80%] px-5 py-3 rounded-2xl ${
+                      className={`relative max-w-[88%] sm:max-w-[80%] lg:max-w-[75%] px-4 sm:px-5 py-3 rounded-2xl break-words ${
                         message.role === "user"
                           ? "bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 shadow-md"
                           : "bg-gradient-to-br from-rose-light/60 to-white/80 border border-rose-soft/40 shadow-[0_0_25px_hsla(348,80%,85%,0.25)]"
                       }`}
+                      style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
                     >
                       {/* Shimmer effect when Angel responds */}
                       {message.role === "assistant" && (
@@ -922,12 +925,12 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                           </div>
                         </div>
                       ) : (
-                        <div className="relative z-10 font-chat text-[15px] leading-relaxed text-foreground/90">
+                        <div className="relative z-10 font-chat text-sm sm:text-[15px] leading-relaxed text-foreground/90" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
                           {message.role === "assistant" ? (
                             // Direct display for fast streaming - no typing effect
                             <FormattedChatText text={message.content} />
                           ) : (
-                            <span className="whitespace-pre-wrap">{message.content}</span>
+                            <span>{message.content}</span>
                           )}
                         </div>
                       )}
@@ -1027,8 +1030,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               )}
             </AnimatePresence>
 
-            {/* Input bar - Rose theme */}
-            <form onSubmit={handleSubmit} className="p-4 sm:p-5 border-t border-rose-soft/20 bg-white/50">
+            {/* Input bar - Rose theme - sticky at bottom with safe-area */}
+            <form onSubmit={handleSubmit} className="sticky bottom-0 p-3 sm:p-5 border-t border-rose-soft/20 bg-white/90 backdrop-blur-md" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
               {/* Hidden file input for chat attachments */}
               <input
                 type="file"
@@ -1188,6 +1191,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
           setPendingMessage(null);
         }}
       />
+      </div>
     </section>
   );
 };
