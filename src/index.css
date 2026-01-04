@@ -6,86 +6,94 @@
 
 @layer base {
   :root {
-    /* Divine Rose Aura Color Palette - Deeper & More Vibrant */
-    --background: 340 70% 94%; /* Deeper Rose Pink */
-    --foreground: 351 30% 20%; /* Deep rose-brown */
+    /* Divine Rose Aura Color Palette - Deeper & Richer */
+    --background: 330 45% 92%; /* Deeper warm rose with subtle lavender */
+    --foreground: 351 30% 18%; /* Deep rose-brown */
     
-    /* Sacred Rose - More saturated */
-    --rose: 348 80% 75%; /* Vibrant Rose Pink */
-    --rose-light: 340 80% 90%; /* Light Rose */
-    --rose-glow: 348 85% 80%; /* Glowing Rose */
-    --rose-soft: 349 65% 70%; /* Soft Rose */
+    /* Sacred Rose - Rich and warm */
+    --rose: 348 75% 72%; /* Deeper Rose Pink */
+    --rose-light: 340 70% 88%; /* Soft Rose */
+    --rose-glow: 348 80% 78%; /* Glowing Rose */
+    --rose-soft: 349 60% 68%; /* Muted Rose */
     
     /* Legacy gold mapped to rose for compatibility */
-    --gold: 348 80% 75%;
-    --gold-light: 340 80% 90%;
-    --gold-glow: 348 85% 80%;
+    --gold: 348 75% 72%;
+    --gold-light: 340 70% 88%;
+    --gold-glow: 348 80% 78%;
     
     /* Celestial Rose - Deeper */
-    --sky: 340 65% 85%;
-    --sky-light: 340 75% 92%;
+    --sky: 340 55% 82%;
+    --sky-light: 340 65% 90%;
     
-    /* Rainbow Prism - Rose tinted */
-    --prism-start: 348 75% 78%;
-    --prism-mid: 340 70% 82%;
-    --prism-end: 349 65% 72%;
+    /* Rainbow Prism - Rose tinted, richer */
+    --prism-start: 348 70% 74%;
+    --prism-mid: 340 65% 78%;
+    --prism-end: 349 60% 68%;
     
-    /* UI Colors - Deeper Pink */
-    --card: 343 60% 92%; /* Warm Rose Card */
-    --card-foreground: 351 30% 20%;
-    --popover: 343 60% 92%;
-    --popover-foreground: 351 30% 20%;
-    --primary: 348 80% 72%; /* Vibrant Blush Pink */
-    --primary-foreground: 351 30% 18%;
-    --secondary: 343 55% 88%; /* Deeper Warm Cloud */
-    --secondary-foreground: 350 30% 32%;
-    --muted: 340 50% 90%;
-    --muted-foreground: 350 30% 35%;
-    --accent: 348 80% 75%; /* Vibrant Pink Accent */
-    --accent-foreground: 351 30% 18%;
+    /* UI Colors - Deeper, Richer Pink with warmth */
+    --card: 335 50% 95%; /* Warmer Rose Card with higher opacity feel */
+    --card-foreground: 351 30% 18%;
+    --popover: 335 50% 95%;
+    --popover-foreground: 351 30% 18%;
+    --primary: 348 75% 68%; /* Deeper Blush Pink */
+    --primary-foreground: 351 30% 16%;
+    --secondary: 335 45% 90%; /* Deeper Warm Cloud */
+    --secondary-foreground: 350 30% 28%;
+    --muted: 332 42% 88%;
+    --muted-foreground: 350 28% 32%;
+    --accent: 348 75% 72%; /* Rich Pink Accent */
+    --accent-foreground: 351 30% 16%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 349 60% 82%; /* Soft Rose Border */
-    --input: 349 60% 88%;
-    --ring: 348 80% 75%;
-    --radius: 1.25rem; /* Larger rounded corners */
+    --border: 345 50% 80%; /* Deeper Rose Border */
+    --input: 345 50% 86%;
+    --ring: 348 75% 72%;
+    --radius: 1.25rem;
     
-    --sidebar-background: 340 70% 94%;
-    --sidebar-foreground: 351 30% 20%;
-    --sidebar-primary: 348 80% 75%;
-    --sidebar-primary-foreground: 351 30% 18%;
-    --sidebar-accent: 343 60% 90%;
-    --sidebar-accent-foreground: 351 30% 20%;
-    --sidebar-border: 349 60% 82%;
-    --sidebar-ring: 348 80% 75%;
+    /* Ambient depth layer */
+    --ambient-overlay: 280 30% 50%; /* Subtle purple for depth */
+    
+    --sidebar-background: 330 45% 92%;
+    --sidebar-foreground: 351 30% 18%;
+    --sidebar-primary: 348 75% 72%;
+    --sidebar-primary-foreground: 351 30% 16%;
+    --sidebar-accent: 335 50% 88%;
+    --sidebar-accent-foreground: 351 30% 18%;
+    --sidebar-border: 345 50% 80%;
+    --sidebar-ring: 348 75% 72%;
   }
 
   .dark {
-    --background: 350 20% 8%;
-    --foreground: 340 40% 95%;
-    --card: 350 20% 12%;
-    --card-foreground: 340 40% 95%;
-    --popover: 350 20% 12%;
-    --popover-foreground: 340 40% 95%;
-    --primary: 348 68% 76%;
-    --primary-foreground: 350 20% 8%;
-    --secondary: 350 20% 15%;
-    --secondary-foreground: 340 40% 90%;
-    --muted: 350 20% 15%;
-    --muted-foreground: 340 30% 70%;
-    --accent: 348 68% 76%;
-    --accent-foreground: 350 20% 8%;
-    --border: 350 20% 20%;
-    --input: 350 20% 20%;
-    --ring: 348 68% 76%;
-    --sidebar-background: 350 20% 10%;
-    --sidebar-foreground: 340 40% 95%;
-    --sidebar-primary: 348 68% 76%;
-    --sidebar-primary-foreground: 350 20% 8%;
-    --sidebar-accent: 350 20% 15%;
-    --sidebar-accent-foreground: 340 40% 90%;
-    --sidebar-border: 350 20% 20%;
-    --sidebar-ring: 348 68% 76%;
+    /* Deep twilight with soft purple-indigo undertones */
+    --background: 280 25% 10%; /* Deep indigo-purple */
+    --foreground: 340 35% 94%;
+    --card: 280 22% 14%; /* Slightly lighter, warmer card */
+    --card-foreground: 340 35% 94%;
+    --popover: 280 22% 14%;
+    --popover-foreground: 340 35% 94%;
+    --primary: 348 65% 74%;
+    --primary-foreground: 280 25% 10%;
+    --secondary: 280 22% 18%; /* Deeper secondary */
+    --secondary-foreground: 340 35% 88%;
+    --muted: 280 20% 18%;
+    --muted-foreground: 340 28% 68%;
+    --accent: 348 65% 74%;
+    --accent-foreground: 280 25% 10%;
+    --border: 280 20% 22%; /* Subtle purple border */
+    --input: 280 20% 22%;
+    --ring: 348 65% 74%;
+    
+    /* Ambient depth layer for dark mode */
+    --ambient-overlay: 260 40% 20%;
+    
+    --sidebar-background: 280 25% 12%;
+    --sidebar-foreground: 340 35% 94%;
+    --sidebar-primary: 348 65% 74%;
+    --sidebar-primary-foreground: 280 25% 10%;
+    --sidebar-accent: 280 22% 18%;
+    --sidebar-accent-foreground: 340 35% 88%;
+    --sidebar-border: 280 20% 22%;
+    --sidebar-ring: 348 65% 74%;
   }
 }
 
@@ -150,28 +158,53 @@
     z-index: -1;
   }
   
-  /* Sacred Pillar - Rose */
+  /* Sacred Pillar - Rose with deeper glass effect */
   .sacred-pillar {
     background: linear-gradient(180deg, 
-      hsla(340, 100%, 99%, 0.95) 0%,
-      hsla(343, 50%, 97%, 0.98) 50%,
-      hsla(340, 100%, 99%, 0.95) 100%
+      hsla(335, 50%, 98%, 0.96) 0%,
+      hsla(340, 45%, 96%, 0.98) 50%,
+      hsla(335, 50%, 98%, 0.96) 100%
     );
-    backdrop-filter: blur(20px);
-    border: 1px solid hsla(349, 55%, 78%, 0.3);
+    backdrop-filter: blur(24px);
+    border: 1px solid hsla(345, 50%, 75%, 0.35);
     border-radius: 1.5rem;
     box-shadow: 
-      0 20px 60px hsla(348, 68%, 86%, 0.2),
-      inset 0 1px 0 hsla(0, 0%, 100%, 0.8);
+      0 20px 60px hsla(348, 65%, 80%, 0.22),
+      0 4px 20px hsla(280, 30%, 50%, 0.08),
+      inset 0 1px 0 hsla(0, 0%, 100%, 0.75),
+      inset 0 0 30px hsla(340, 50%, 95%, 0.3);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .dark .sacred-pillar {
+    background: linear-gradient(180deg, 
+      hsla(280, 22%, 16%, 0.95) 0%,
+      hsla(280, 20%, 14%, 0.97) 50%,
+      hsla(280, 22%, 16%, 0.95) 100%
+    );
+    border: 1px solid hsla(280, 25%, 30%, 0.4);
+    box-shadow: 
+      0 20px 60px hsla(280, 30%, 10%, 0.4),
+      0 4px 20px hsla(348, 50%, 50%, 0.08),
+      inset 0 1px 0 hsla(280, 30%, 30%, 0.3),
+      inset 0 0 30px hsla(280, 25%, 20%, 0.4);
   }
   
   .sacred-pillar:hover {
     transform: translateY(-8px);
     box-shadow: 
-      0 30px 80px hsla(348, 68%, 86%, 0.3),
-      inset 0 1px 0 hsla(0, 0%, 100%, 0.9),
-      0 0 40px hsla(348, 68%, 86%, 0.25);
+      0 30px 80px hsla(348, 65%, 80%, 0.32),
+      0 8px 30px hsla(280, 30%, 50%, 0.12),
+      inset 0 1px 0 hsla(0, 0%, 100%, 0.85),
+      inset 0 0 40px hsla(340, 50%, 95%, 0.35);
+  }
+  
+  .dark .sacred-pillar:hover {
+    box-shadow: 
+      0 30px 80px hsla(280, 30%, 10%, 0.5),
+      0 8px 30px hsla(348, 50%, 50%, 0.12),
+      inset 0 1px 0 hsla(280, 30%, 35%, 0.4),
+      inset 0 0 40px hsla(280, 25%, 22%, 0.5);
   }
   
   /* Divine Button - Rose */
@@ -204,14 +237,59 @@
     background: linear-gradient(90deg, transparent, hsla(348, 68%, 86%, 0.6), transparent);
   }
   
-  /* Glass Card - Rose */
+  /* Glass Card - Rose with richer depth */
   .glass-card {
-    background: hsla(343, 50%, 97%, 0.9);
-    backdrop-filter: blur(20px);
-    border: 1px solid hsla(349, 55%, 78%, 0.25);
+    background: hsla(335, 50%, 97%, 0.94);
+    backdrop-filter: blur(24px);
+    border: 1px solid hsla(345, 50%, 78%, 0.3);
     border-radius: 1.25rem;
-    box-shadow: 0 8px 32px hsla(348, 68%, 86%, 0.15);
+    box-shadow: 
+      0 8px 32px hsla(348, 60%, 80%, 0.18),
+      0 2px 12px hsla(280, 30%, 50%, 0.06),
+      inset 0 0 20px hsla(340, 50%, 95%, 0.25);
   }
+  
+  .dark .glass-card {
+    background: hsla(280, 22%, 15%, 0.94);
+    border: 1px solid hsla(280, 25%, 28%, 0.35);
+    box-shadow: 
+      0 8px 32px hsla(280, 30%, 8%, 0.35),
+      0 2px 12px hsla(348, 50%, 50%, 0.05),
+      inset 0 0 20px hsla(280, 25%, 18%, 0.35);
+  }
+}
+
+/* Ambient depth overlay - very subtle */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 20%,
+    hsla(280, 35%, 60%, 0.025) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    ellipse 100% 60% at 80% 80%,
+    hsla(340, 40%, 65%, 0.02) 0%,
+    transparent 45%
+  );
+}
+
+.dark body::before,
+body.dark::before {
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 20%,
+    hsla(260, 45%, 25%, 0.04) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    ellipse 100% 60% at 80% 80%,
+    hsla(348, 40%, 30%, 0.03) 0%,
+    transparent 45%
+  );
 }
 
 @layer utilities {
