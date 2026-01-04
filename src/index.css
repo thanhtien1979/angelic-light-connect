@@ -283,6 +283,53 @@
     --sidebar-border: 240 10% 14%;
     --sidebar-ring: 215 35% 60%;
   }
+
+  /* Sunrise Theme - Warm dawn, golden amber to soft sky */
+  .sunrise {
+    /* Warm golden/peach dawn base */
+    --background: 35 45% 92%; /* Soft warm cream */
+    --foreground: 25 40% 18%; /* Warm dark brown text */
+    --card: 38 50% 95%; /* Warm translucent panels */
+    --card-foreground: 25 40% 18%;
+    --popover: 38 50% 94%;
+    --popover-foreground: 25 40% 18%;
+    
+    /* Sunrise gold / amber primary */
+    --primary: 35 85% 55%; /* Warm sunrise gold */
+    --primary-foreground: 35 45% 98%;
+    --secondary: 38 40% 88%; /* Soft peach secondary */
+    --secondary-foreground: 25 38% 22%;
+    --muted: 35 35% 90%;
+    --muted-foreground: 25 30% 45%;
+    --accent: 28 75% 52%; /* Sunrise amber */
+    --accent-foreground: 35 45% 98%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 35 30% 82%; /* Warm soft border */
+    --input: 35 30% 82%;
+    --ring: 35 85% 55%;
+    
+    /* Sunrise warm tones */
+    --rose: 30 80% 58%;
+    --rose-light: 35 75% 72%;
+    --rose-glow: 32 85% 62%;
+    --rose-soft: 38 70% 55%;
+    --gold: 35 85% 55%;
+    --gold-light: 38 80% 68%;
+    --gold-glow: 32 90% 60%;
+    
+    /* Ambient dawn warmth */
+    --ambient-overlay: 35 50% 85%;
+    
+    --sidebar-background: 38 48% 94%;
+    --sidebar-foreground: 25 40% 18%;
+    --sidebar-primary: 35 85% 55%;
+    --sidebar-primary-foreground: 35 45% 98%;
+    --sidebar-accent: 38 40% 88%;
+    --sidebar-accent-foreground: 25 38% 22%;
+    --sidebar-border: 35 30% 82%;
+    --sidebar-ring: 35 85% 55%;
+  }
 }
 
 @layer base {
