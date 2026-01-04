@@ -299,6 +299,15 @@ const Settings = () => {
     { value: "ja", label: t("settings.language.japanese"), flag: "🇯🇵" },
     { value: "ko", label: t("settings.language.korean"), flag: "🇰🇷" },
     { value: "fr", label: t("settings.language.french"), flag: "🇫🇷" },
+    { value: "es", label: t("settings.language.spanish"), flag: "🇪🇸" },
+    { value: "de", label: t("settings.language.german"), flag: "🇩🇪" },
+    { value: "pt", label: t("settings.language.portuguese"), flag: "🇧🇷" },
+    { value: "it", label: t("settings.language.italian"), flag: "🇮🇹" },
+    { value: "th", label: t("settings.language.thai"), flag: "🇹🇭" },
+    { value: "id", label: t("settings.language.indonesian"), flag: "🇮🇩" },
+    { value: "hi", label: t("settings.language.hindi"), flag: "🇮🇳" },
+    { value: "ru", label: t("settings.language.russian"), flag: "🇷🇺" },
+    { value: "ar", label: t("settings.language.arabic"), flag: "🇸🇦" },
   ];
 
   return (
