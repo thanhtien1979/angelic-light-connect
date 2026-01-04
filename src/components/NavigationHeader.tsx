@@ -1,6 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun, Wallet, Loader2, Check, Unlink, ChevronDown, Coins, Users, UserPlus } from "lucide-react";
+import { 
+  Menu, X, Sun, Wallet, Loader2, Check, Unlink, ChevronDown, Coins, Users, UserPlus,
+  Home, MessageCircle, Sparkles, FileText, Heart, Palette, UsersRound, Star, LucideIcon,
+  Wind, Brain, Music
+} from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
@@ -33,18 +37,29 @@ interface NavLink {
   isPage?: boolean;
   path?: string;
   showBadge?: boolean;
+  icon: LucideIcon;
+  subItems?: { labelKey: string; path: string; icon: LucideIcon }[];
 }
 
 const navLinksConfig: NavLink[] = [
-  { id: "hero", labelKey: "nav.home" },
-  { id: "chat", labelKey: "nav.chat" },
-  { id: "meditation", labelKey: "nav.meditation" },
-  { id: "whitepaper", labelKey: "nav.whitepaper", isPage: true, path: "/camly-whitepaper" },
-  { id: "testimonials", labelKey: "nav.testimonials", isPage: true, path: "/testimonials" },
-  { id: "studio", labelKey: "nav.studio", isPage: true, path: "/studio" },
-  { id: "community", labelKey: "nav.community", isPage: true, path: "/community", showBadge: true },
-  { id: "friends", labelKey: "nav.friends", isPage: true, path: "/friends", showBadge: true },
-  { id: "light-score", labelKey: "nav.lightScore", isPage: true, path: "/diem-anh-sang" },
+  { id: "hero", labelKey: "nav.home", icon: Home },
+  { id: "chat", labelKey: "nav.chat", icon: MessageCircle },
+  { 
+    id: "meditation", 
+    labelKey: "nav.meditation", 
+    icon: Sparkles,
+    subItems: [
+      { labelKey: "Thiền hướng dẫn", path: "#meditation", icon: Brain },
+      { labelKey: "Bài tập thở", path: "#breathing", icon: Wind },
+      { labelKey: "Âm thanh thư giãn", path: "#ambient", icon: Music },
+    ]
+  },
+  { id: "whitepaper", labelKey: "nav.whitepaper", isPage: true, path: "/camly-whitepaper", icon: FileText },
+  { id: "testimonials", labelKey: "nav.testimonials", isPage: true, path: "/testimonials", icon: Heart },
+  { id: "studio", labelKey: "nav.studio", isPage: true, path: "/studio", icon: Palette },
+  { id: "community", labelKey: "nav.community", isPage: true, path: "/community", showBadge: true, icon: UsersRound },
+  { id: "friends", labelKey: "nav.friends", isPage: true, path: "/friends", showBadge: true, icon: UserPlus },
+  { id: "light-score", labelKey: "nav.lightScore", isPage: true, path: "/diem-anh-sang", icon: Star },
 ];
 
 const BLESSING_MESSAGES = [
@@ -393,30 +408,91 @@ const NavigationHeader = () => {
             <nav className="hidden lg:flex flex-col items-center gap-0.5">
               {/* Row 1 */}
               <div className="flex items-center gap-1 xl:gap-2">
-                {navLinksConfig.slice(0, 5).map((link) => 
-                  link.isPage && link.path ? (
-                    <Link key={link.id} to={link.path}>
-                      <motion.span
-                        className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full inline-flex items-center gap-1.5 whitespace-nowrap
-                          hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
-                          ${link.id === "friends" ? "text-pink-500 hover:text-pink-400 hover:bg-pink-500/10" : "text-foreground/80"}`}
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        {link.id === "friends" && <UserPlus className="w-3.5 h-3.5" />}
-                        {t(link.labelKey)}
-                        {link.showBadge && user && pendingRequests.length > 0 && (
-                          <Badge className="bg-pink-500 text-white text-[9px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
-                            {pendingRequests.length}
-                          </Badge>
-                        )}
-                      </motion.span>
-                    </Link>
-                  ) : (
+                {navLinksConfig.slice(0, 5).map((link) => {
+                  const IconComponent = link.icon;
+                  
+                  // Item with dropdown
+                  if (link.subItems && link.subItems.length > 0) {
+                    return (
+                      <DropdownMenu key={link.id}>
+                        <DropdownMenuTrigger asChild>
+                          <motion.button
+                            className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full whitespace-nowrap inline-flex items-center gap-1.5
+                              hover:bg-primary/10 hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
+                              ${activeSection === link.id
+                                ? "text-gold bg-gold/10 shadow-[0_0_15px_hsla(45,80%,60%,0.3)]"
+                                : "text-foreground/80 hover:text-primary"
+                              }`}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <IconComponent className="w-3.5 h-3.5" />
+                            {t(link.labelKey)}
+                            <ChevronDown className="w-3 h-3 opacity-60" />
+                          </motion.button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent 
+                          align="center" 
+                          className="z-50 bg-card/95 backdrop-blur-md border-primary/20 shadow-xl min-w-[180px]"
+                        >
+                          <DropdownMenuItem 
+                            onClick={() => scrollToSection(link.id)}
+                            className="cursor-pointer hover:bg-primary/10 gap-2"
+                          >
+                            <IconComponent className="w-4 h-4" />
+                            <span>{t(link.labelKey)}</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          {link.subItems.map((subItem, idx) => {
+                            const SubIcon = subItem.icon;
+                            return (
+                              <DropdownMenuItem
+                                key={idx}
+                                onClick={() => {
+                                  const sectionId = subItem.path.replace('#', '');
+                                  scrollToSection(sectionId);
+                                }}
+                                className="cursor-pointer hover:bg-primary/10 gap-2"
+                              >
+                                <SubIcon className="w-4 h-4" />
+                                <span>{subItem.labelKey}</span>
+                              </DropdownMenuItem>
+                            );
+                          })}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    );
+                  }
+                  
+                  // Regular page link
+                  if (link.isPage && link.path) {
+                    return (
+                      <Link key={link.id} to={link.path}>
+                        <motion.span
+                          className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full inline-flex items-center gap-1.5 whitespace-nowrap
+                            hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
+                            ${link.id === "friends" ? "text-pink-500 hover:text-pink-400 hover:bg-pink-500/10" : "text-foreground/80"}`}
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <IconComponent className="w-3.5 h-3.5" />
+                          {t(link.labelKey)}
+                          {link.showBadge && user && pendingRequests.length > 0 && (
+                            <Badge className="bg-pink-500 text-white text-[9px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
+                              {pendingRequests.length}
+                            </Badge>
+                          )}
+                        </motion.span>
+                      </Link>
+                    );
+                  }
+                  
+                  // Section scroll button
+                  return (
                     <motion.button
                       key={link.id}
                       onClick={() => scrollToSection(link.id)}
-                      className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full whitespace-nowrap
+                      className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full whitespace-nowrap inline-flex items-center gap-1.5
                         hover:bg-primary/10 hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
                         ${activeSection === link.id
                           ? "text-gold bg-gold/10 shadow-[0_0_15px_hsla(45,80%,60%,0.3)]"
@@ -425,6 +501,7 @@ const NavigationHeader = () => {
                       whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
                     >
+                      <IconComponent className="w-3.5 h-3.5" />
                       {t(link.labelKey)}
                       {activeSection === link.id && (
                         <motion.div
@@ -434,35 +511,43 @@ const NavigationHeader = () => {
                         />
                       )}
                     </motion.button>
-                  )
-                )}
+                  );
+                })}
               </div>
               {/* Row 2 */}
               <div className="flex items-center gap-1 xl:gap-2">
-                {navLinksConfig.slice(5).map((link) => 
-                  link.isPage && link.path ? (
-                    <Link key={link.id} to={link.path}>
-                      <motion.span
-                        className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full inline-flex items-center gap-1.5 whitespace-nowrap
-                          hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
-                          ${link.id === "friends" ? "text-pink-500 hover:text-pink-400 hover:bg-pink-500/10" : "text-foreground/80"}`}
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        {link.id === "friends" && <UserPlus className="w-3.5 h-3.5" />}
-                        {t(link.labelKey)}
-                        {link.showBadge && user && pendingRequests.length > 0 && (
-                          <Badge className="bg-pink-500 text-white text-[9px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
-                            {pendingRequests.length}
-                          </Badge>
-                        )}
-                      </motion.span>
-                    </Link>
-                  ) : (
+                {navLinksConfig.slice(5).map((link) => {
+                  const IconComponent = link.icon;
+                  
+                  // Regular page link
+                  if (link.isPage && link.path) {
+                    return (
+                      <Link key={link.id} to={link.path}>
+                        <motion.span
+                          className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full inline-flex items-center gap-1.5 whitespace-nowrap
+                            hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
+                            ${link.id === "friends" ? "text-pink-500 hover:text-pink-400 hover:bg-pink-500/10" : "text-foreground/80"}`}
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <IconComponent className="w-3.5 h-3.5" />
+                          {t(link.labelKey)}
+                          {link.showBadge && user && pendingRequests.length > 0 && (
+                            <Badge className="bg-pink-500 text-white text-[9px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
+                              {pendingRequests.length}
+                            </Badge>
+                          )}
+                        </motion.span>
+                      </Link>
+                    );
+                  }
+                  
+                  // Section scroll button
+                  return (
                     <motion.button
                       key={link.id}
                       onClick={() => scrollToSection(link.id)}
-                      className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full whitespace-nowrap
+                      className={`relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full whitespace-nowrap inline-flex items-center gap-1.5
                         hover:bg-primary/10 hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]
                         ${activeSection === link.id
                           ? "text-gold bg-gold/10 shadow-[0_0_15px_hsla(45,80%,60%,0.3)]"
@@ -471,6 +556,7 @@ const NavigationHeader = () => {
                       whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
                     >
+                      <IconComponent className="w-3.5 h-3.5" />
                       {t(link.labelKey)}
                       {activeSection === link.id && (
                         <motion.div
@@ -480,8 +566,8 @@ const NavigationHeader = () => {
                         />
                       )}
                     </motion.button>
-                  )
-                )}
+                  );
+                })}
               </div>
             </nav>
 
