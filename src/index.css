@@ -236,6 +236,53 @@
     --sidebar-border: 155 25% 22%;
     --sidebar-ring: 145 45% 50%;
   }
+
+  /* Midnight Theme - Cosmic starfield, deep black */
+  .midnight {
+    /* Deep charcoal base (avoid pure black for comfort) */
+    --background: 240 15% 5%; /* Near-black with slight blue undertone */
+    --foreground: 220 20% 92%; /* Soft silver text */
+    --card: 240 12% 8%; /* Dark translucent panels */
+    --card-foreground: 220 20% 92%;
+    --popover: 240 12% 7%;
+    --popover-foreground: 220 20% 92%;
+    
+    /* Moonlight blue / muted silver primary */
+    --primary: 215 35% 60%; /* Soft moonlight blue */
+    --primary-foreground: 240 15% 5%;
+    --secondary: 240 10% 12%; /* Deep secondary */
+    --secondary-foreground: 220 18% 88%;
+    --muted: 240 10% 10%;
+    --muted-foreground: 220 15% 55%;
+    --accent: 210 30% 55%; /* Faint blue accent */
+    --accent-foreground: 240 15% 5%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 10% 14%; /* Faint, low-contrast outlines */
+    --input: 240 10% 14%;
+    --ring: 215 35% 60%;
+    
+    /* Starlight tones */
+    --rose: 215 40% 62%;
+    --rose-light: 210 45% 75%;
+    --rose-glow: 220 50% 70%;
+    --rose-soft: 215 35% 55%;
+    --gold: 215 35% 60%;
+    --gold-light: 210 40% 72%;
+    --gold-glow: 220 45% 68%;
+    
+    /* Ambient cosmic depth */
+    --ambient-overlay: 240 20% 12%;
+    
+    --sidebar-background: 240 12% 6%;
+    --sidebar-foreground: 220 20% 92%;
+    --sidebar-primary: 215 35% 60%;
+    --sidebar-primary-foreground: 240 15% 5%;
+    --sidebar-accent: 240 10% 12%;
+    --sidebar-accent-foreground: 220 18% 88%;
+    --sidebar-border: 240 10% 14%;
+    --sidebar-ring: 215 35% 60%;
+  }
 }
 
 @layer base {
