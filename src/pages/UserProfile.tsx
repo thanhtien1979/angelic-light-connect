@@ -27,6 +27,7 @@ interface UserProfileData {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
+  bio: string | null;
   created_at: string;
 }
 
@@ -112,7 +113,7 @@ const UserProfile = () => {
       // Fetch profile
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, created_at")
+        .select("id, display_name, avatar_url, bio, created_at")
         .eq("id", targetUserId)
         .maybeSingle();
 
@@ -362,6 +363,12 @@ const UserProfile = () => {
           <h2 className="text-2xl font-serif font-semibold text-foreground mb-1">
             {profile.display_name || "Linh hồn ánh sáng"}
           </h2>
+          
+          {profile.bio && (
+            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-3 whitespace-pre-wrap">
+              {profile.bio}
+            </p>
+          )}
           
           <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mb-4">
             <Calendar className="w-4 h-4" />

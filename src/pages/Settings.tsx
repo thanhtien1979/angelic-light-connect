@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2, Pencil, Check } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2, Pencil, Check, Mail } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -54,6 +54,9 @@ const Settings = () => {
   const [bio, setBio] = useState("");
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [isSavingBio, setIsSavingBio] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [isSavingEmail, setIsSavingEmail] = useState(false);
   const {
     isEnabled: angelEnabled,
     style: angelStyle,
@@ -616,6 +619,116 @@ const Settings = () => {
                           
                           <p className="text-xs text-muted-foreground">
                             Tiểu sử ngắn gọn về bạn sẽ hiển thị trên hồ sơ công khai của bạn.
+                          </p>
+                        </div>
+                        
+                        {/* Email Section */}
+                        <div className="p-6 rounded-xl bg-muted/30 border border-border/50 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-base font-medium flex items-center gap-2">
+                              <Mail className="w-4 h-4" />
+                              Email
+                            </Label>
+                            {!isEditingEmail && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setNewEmail(user?.email || "");
+                                  setIsEditingEmail(true);
+                                }}
+                                className="gap-2"
+                              >
+                                <Pencil className="w-4 h-4" />
+                                Thay đổi
+                              </Button>
+                            )}
+                          </div>
+                          
+                          {isEditingEmail ? (
+                            <div className="space-y-3">
+                              <Input
+                                type="email"
+                                value={newEmail}
+                                onChange={(e) => setNewEmail(e.target.value)}
+                                placeholder="Nhập email mới"
+                                className="flex-1"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === "Escape") {
+                                    setIsEditingEmail(false);
+                                    setNewEmail("");
+                                  }
+                                }}
+                              />
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setIsEditingEmail(false);
+                                    setNewEmail("");
+                                  }}
+                                >
+                                  Hủy
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={async () => {
+                                    if (!newEmail.trim() || newEmail === user?.email) {
+                                      setIsEditingEmail(false);
+                                      return;
+                                    }
+                                    
+                                    // Basic email validation
+                                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                    if (!emailRegex.test(newEmail.trim())) {
+                                      toast.error("Email không hợp lệ");
+                                      return;
+                                    }
+                                    
+                                    setIsSavingEmail(true);
+                                    try {
+                                      const { error } = await supabase.auth.updateUser({
+                                        email: newEmail.trim(),
+                                      });
+                                      
+                                      if (error) throw error;
+                                      
+                                      toast.success("Đã gửi email xác nhận đến địa chỉ mới. Vui lòng kiểm tra hộp thư.");
+                                      setIsEditingEmail(false);
+                                      setNewEmail("");
+                                    } catch (error: any) {
+                                      console.error("Error updating email:", error);
+                                      if (error.message?.includes("already registered")) {
+                                        toast.error("Email này đã được sử dụng bởi tài khoản khác");
+                                      } else {
+                                        toast.error("Không thể cập nhật email. Vui lòng thử lại.");
+                                      }
+                                    } finally {
+                                      setIsSavingEmail(false);
+                                    }
+                                  }}
+                                  disabled={isSavingEmail || !newEmail.trim() || newEmail === user?.email}
+                                  className="gap-2"
+                                >
+                                  {isSavingEmail ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Check className="w-4 h-4" />
+                                  )}
+                                  Cập nhật
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-foreground">
+                              {user?.email}
+                            </p>
+                          )}
+                          
+                          <p className="text-xs text-muted-foreground">
+                            Khi thay đổi email, bạn sẽ nhận được email xác nhận tại địa chỉ mới.
                           </p>
                         </div>
                         
