@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import { compressImage } from "@/lib/imageCompression";
 
 export const useUserAvatar = () => {
   const { user } = useAuth();
@@ -42,25 +43,34 @@ export const useUserAvatar = () => {
       return null;
     }
 
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Ảnh phải nhỏ hơn 2MB");
+    // Validate file size (max 5MB before compression)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ảnh phải nhỏ hơn 5MB");
       return null;
     }
 
     setIsUploading(true);
 
     try {
+      // Compress image for avatar (512x512 max, high quality JPEG)
+      const compressedFile = await compressImage(file, {
+        maxWidth: 512,
+        maxHeight: 512,
+        quality: 0.85,
+        outputFormat: "image/jpeg",
+      });
+
+      console.log(`Avatar compression: ${(file.size / 1024).toFixed(1)}KB → ${(compressedFile.size / 1024).toFixed(1)}KB`);
+
       // Generate unique filename
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/avatar.${fileExt}`;
+      const fileName = `${user.id}/avatar.jpg`;
 
       // Upload to storage
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(fileName, file, {
+        .upload(fileName, compressedFile, {
           upsert: true,
-          contentType: file.type,
+          contentType: compressedFile.type,
         });
 
       if (uploadError) {
