@@ -1124,10 +1124,12 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean
+          last_viewed_at: string | null
           messages: Json
           share_id: string
           title: string | null
           user_id: string
+          view_count: number | null
           visibility: string
         }
         Insert: {
@@ -1135,10 +1137,12 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          last_viewed_at?: string | null
           messages: Json
           share_id: string
           title?: string | null
           user_id: string
+          view_count?: number | null
           visibility?: string
         }
         Update: {
@@ -1146,10 +1150,12 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          last_viewed_at?: string | null
           messages?: Json
           share_id?: string
           title?: string | null
           user_id?: string
+          view_count?: number | null
           visibility?: string
         }
         Relationships: []
@@ -1809,6 +1815,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_share_view: { Args: { p_share_id: string }; Returns: undefined }
       is_service_role: { Args: never; Returns: boolean }
       record_credit_usage: {
         Args: { p_amount: number; p_description?: string; p_user_id: string }

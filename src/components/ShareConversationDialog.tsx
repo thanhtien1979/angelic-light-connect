@@ -12,7 +12,9 @@ import {
   Eye,
   EyeOff,
   Trash2,
-  X
+  X,
+  Clock,
+  BarChart3
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,10 +50,19 @@ const ShareConversationDialog = ({ isOpen, onClose, messages }: ShareConversatio
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isCreatingLink, setIsCreatingLink] = useState(false);
   const [visibility, setVisibility] = useState<"unlisted" | "public">("unlisted");
+  const [expiresIn, setExpiresIn] = useState<"1d" | "7d" | "30d" | "never">("never");
   const [generatedShareUrl, setGeneratedShareUrl] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [userSharedLinks, setUserSharedLinks] = useState<Array<{ id: string; share_id: string; created_at: string; visibility: string }>>([]);
+  const [userSharedLinks, setUserSharedLinks] = useState<Array<{ 
+    id: string; 
+    share_id: string; 
+    created_at: string; 
+    visibility: string;
+    expires_at: string | null;
+    view_count: number;
+    last_viewed_at: string | null;
+  }>>([]);
   const [isLoadingLinks, setIsLoadingLinks] = useState(false);
   const chatContentRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +78,18 @@ const ShareConversationDialog = ({ isOpen, onClose, messages }: ShareConversatio
     return result;
   };
 
+  // Calculate expiration date
+  const getExpirationDate = (expiresIn: string): string | null => {
+    if (expiresIn === "never") return null;
+    const now = new Date();
+    switch (expiresIn) {
+      case "1d": return new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+      case "7d": return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      case "30d": return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      default: return null;
+    }
+  };
+
   // Load user's existing shared links
   const loadUserSharedLinks = async () => {
     if (!user) return;
@@ -74,13 +97,13 @@ const ShareConversationDialog = ({ isOpen, onClose, messages }: ShareConversatio
     try {
       const { data, error } = await supabase
         .from("shared_conversations")
-        .select("id, share_id, created_at, visibility")
+        .select("id, share_id, created_at, visibility, expires_at, view_count, last_viewed_at")
         .eq("user_id", user.id)
         .eq("is_active", true)
         .order("created_at", { ascending: false });
       
       if (!error && data) {
-        setUserSharedLinks(data);
+        setUserSharedLinks(data as typeof userSharedLinks);
       }
     } catch (err) {
       console.error("Error loading shared links:", err);
@@ -159,6 +182,8 @@ const ShareConversationDialog = ({ isOpen, onClose, messages }: ShareConversatio
         timestamp: new Date().toISOString(),
       }));
       
+      const expiresAt = getExpirationDate(expiresIn);
+      
       const { error } = await supabase
         .from("shared_conversations")
         .insert({
@@ -167,6 +192,7 @@ const ShareConversationDialog = ({ isOpen, onClose, messages }: ShareConversatio
           title: `Cuộc trò chuyện - ${new Date().toLocaleDateString("vi-VN")}`,
           messages: sanitizedMessages,
           visibility,
+          expires_at: expiresAt,
         });
       
       if (error) throw error;
@@ -228,6 +254,36 @@ const ShareConversationDialog = ({ isOpen, onClose, messages }: ShareConversatio
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Format relative time for last viewed
+  const formatRelativeTime = (dateString: string | null) => {
+    if (!dateString) return "Chưa có lượt xem";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Vừa xong";
+    if (diffMins < 60) return `${diffMins} phút trước`;
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    return `${diffDays} ngày trước`;
+  };
+
+  // Check if link is expired
+  const isExpired = (expiresAt: string | null) => {
+    if (!expiresAt) return false;
+    return new Date(expiresAt) < new Date();
+  };
+
+  // Format expiration info
+  const formatExpiration = (expiresAt: string | null) => {
+    if (!expiresAt) return "Vĩnh viễn";
+    const date = new Date(expiresAt);
+    if (date < new Date()) return "Đã hết hạn";
+    return `Hết hạn ${formatDate(expiresAt)}`;
   };
 
   return (
@@ -446,6 +502,34 @@ const ShareConversationDialog = ({ isOpen, onClose, messages }: ShareConversatio
                     </RadioGroup>
                   </div>
 
+                  {/* Expiration Options */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Thời hạn liên kết:
+                    </Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { value: "1d", label: "1 ngày" },
+                        { value: "7d", label: "7 ngày" },
+                        { value: "30d", label: "30 ngày" },
+                        { value: "never", label: "Vĩnh viễn" },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => setExpiresIn(option.value as typeof expiresIn)}
+                          className={`p-2 text-sm rounded-lg border transition-all ${
+                            expiresIn === option.value
+                              ? "border-primary bg-primary/10 text-primary font-medium"
+                              : "border-rose-soft/30 hover:border-primary/50"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="flex gap-3">
                     <Button
                       variant="outline"
@@ -486,39 +570,57 @@ const ShareConversationDialog = ({ isOpen, onClose, messages }: ShareConversatio
                   {userSharedLinks.length > 0 && (
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Liên kết đã tạo:</Label>
-                      <div className="max-h-[150px] overflow-y-auto space-y-2">
+                      <div className="max-h-[200px] overflow-y-auto space-y-2">
                         {userSharedLinks.map((link) => (
                           <div
                             key={link.id}
-                            className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                            className={`p-3 rounded-lg border ${
+                              isExpired(link.expires_at)
+                                ? "bg-red-50/50 border-red-200"
+                                : "bg-muted/30 border-rose-soft/30"
+                            }`}
                           >
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-sm font-medium truncate flex-1">
                                 /share/{link.share_id}
                               </p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatDate(link.created_at)} · {link.visibility === "public" ? "Công khai" : "Không công khai"}
-                              </p>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(`${window.location.origin}/share/${link.share_id}`);
+                                    toast.success("Đã sao chép!");
+                                  }}
+                                  disabled={isExpired(link.expires_at)}
+                                >
+                                  <Copy className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleRevokeLink(link.id)}
+                                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(`${window.location.origin}/share/${link.share_id}`);
-                                  toast.success("Đã sao chép!");
-                                }}
-                              >
-                                <Copy className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleRevokeLink(link.id)}
-                                className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                              <span>{link.visibility === "public" ? "Công khai" : "Không công khai"}</span>
+                              <span className="flex items-center gap-1">
+                                <BarChart3 className="w-3 h-3" />
+                                {link.view_count} lượt xem
+                              </span>
+                              {link.last_viewed_at && (
+                                <span>· Xem gần nhất: {formatRelativeTime(link.last_viewed_at)}</span>
+                              )}
+                            </div>
+                            <div className={`text-xs mt-1 flex items-center gap-1 ${
+                              isExpired(link.expires_at) ? "text-red-600" : "text-muted-foreground"
+                            }`}>
+                              <Clock className="w-3 h-3" />
+                              {formatExpiration(link.expires_at)}
                             </div>
                           </div>
                         ))}

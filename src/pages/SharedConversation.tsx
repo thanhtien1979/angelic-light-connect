@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowLeft, Calendar, MessageCircle, AlertTriangle } from "lucide-react";
+import { Sparkles, ArrowLeft, Calendar, MessageCircle, AlertTriangle, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import angelAvatar from "@/assets/angel-avatar.jpg";
@@ -21,6 +21,8 @@ interface SharedConversationData {
   messages: SharedMessage[];
   visibility: string;
   created_at: string;
+  expires_at: string | null;
+  view_count: number;
 }
 
 const SharedConversation = () => {
@@ -40,7 +42,7 @@ const SharedConversation = () => {
       try {
         const { data, error: fetchError } = await supabase
           .from("shared_conversations")
-          .select("id, share_id, title, messages, visibility, created_at")
+          .select("id, share_id, title, messages, visibility, created_at, expires_at, view_count")
           .eq("share_id", shareId)
           .eq("is_active", true)
           .single();
@@ -54,6 +56,13 @@ const SharedConversation = () => {
           return;
         }
 
+        // Check if expired
+        if (data.expires_at && new Date(data.expires_at) < new Date()) {
+          setError("Liên kết này đã hết hạn");
+          setIsLoading(false);
+          return;
+        }
+
         if (data) {
           // Parse messages from JSONB - safely cast through unknown
           const parsedMessages = Array.isArray(data.messages) 
@@ -63,7 +72,11 @@ const SharedConversation = () => {
           setConversation({
             ...data,
             messages: parsedMessages,
+            view_count: (data.view_count || 0) + 1, // Show incremented count
           });
+
+          // Increment view count using RPC function
+          await supabase.rpc("increment_share_view", { p_share_id: shareId });
         }
       } catch (err) {
         console.error("Error fetching shared conversation:", err);
@@ -175,7 +188,7 @@ const SharedConversation = () => {
                 <h1 className="text-xl font-serif text-foreground">
                   {conversation.title || "Cuộc trò chuyện với Thiên Thần"}
                 </h1>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
                     {formatDate(conversation.created_at)}
@@ -183,6 +196,10 @@ const SharedConversation = () => {
                   <span className="flex items-center gap-1">
                     <MessageCircle className="w-4 h-4" />
                     {conversation.messages.length} tin nhắn
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Eye className="w-4 h-4" />
+                    {conversation.view_count} lượt xem
                   </span>
                 </div>
               </div>
