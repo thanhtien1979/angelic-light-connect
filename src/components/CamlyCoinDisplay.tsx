@@ -1,21 +1,27 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, TrendingUp, Star } from "lucide-react";
+import { Sparkles, TrendingUp, Star, Sun } from "lucide-react";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useAuth } from "@/hooks/useAuth";
 import { useBalanceShimmer } from "@/hooks/useBalanceShimmer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { LightBurstAnimation } from "@/components/LightBurstAnimation";
 import CoinLightMotes from "./CoinLightMotes";
+import { CamlySoulDeclaration } from "./CamlySoulDeclaration";
+import { CamlyRewardChecklist } from "./CamlyRewardChecklist";
 
 interface CamlyCoinDisplayProps {
-  variant?: "compact" | "full";
+  variant?: "compact" | "full" | "dashboard";
   showLifetime?: boolean;
+  showDeclaration?: boolean;
+  showChecklist?: boolean;
   className?: string;
 }
 
 export const CamlyCoinDisplay = ({
   variant = "compact",
   showLifetime = false,
+  showDeclaration = false,
+  showChecklist = false,
   className = "",
 }: CamlyCoinDisplayProps) => {
   const { user } = useAuth();
@@ -70,6 +76,81 @@ export const CamlyCoinDisplay = ({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+    );
+  }
+
+  // Dashboard variant - full display with declaration and checklist
+  if (variant === "dashboard") {
+    return (
+      <div className={`space-y-6 ${className}`}>
+        {/* Main balance card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-6 rounded-2xl bg-gradient-to-br from-gold/20 via-gold-light/10 to-transparent border border-gold/30"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="relative p-2 rounded-full bg-gold/20">
+                <Sparkles className="w-5 h-5 text-gold animate-coin-float" />
+                <CoinLightMotes />
+                {isShimmering && (
+                  <span 
+                    className="absolute inset-0 rounded-full border border-gold/40 animate-sacred-glow-ring pointer-events-none"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+              <h3 className="font-serif text-lg text-foreground">Happy Camly Coin</h3>
+            </div>
+            <TrendingUp className="w-5 h-5 text-gold/60" />
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Số dư hiện tại</p>
+              <motion.p
+                key={balance.total_coins}
+                initial={{ scale: 1.1, color: "hsl(45, 100%, 70%)" }}
+                animate={{ 
+                  scale: 1, 
+                  color: isShimmering ? "hsl(45, 100%, 70%)" : "hsl(var(--foreground))",
+                  textShadow: isShimmering ? "0 0 20px hsla(45, 100%, 70%, 0.6)" : "none",
+                }}
+                transition={{ duration: 0.3 }}
+                className={`text-3xl font-bold ${isShimmering ? "animate-coin-shimmer" : ""}`}
+                style={isShimmering ? {
+                  background: "linear-gradient(90deg, hsl(var(--foreground)) 0%, hsl(45, 100%, 70%) 50%, hsl(var(--foreground)) 100%)",
+                  backgroundSize: "200% 100%",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                } : undefined}
+              >
+                {balance.total_coins.toLocaleString("vi-VN")}
+                <span className="text-lg ml-1 text-gold">✨</span>
+              </motion.p>
+            </div>
+
+            {showLifetime && (
+              <div className="pt-3 border-t border-gold/20">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Tổng đã nhận</span>
+                  <span className="text-gold font-medium">
+                    {balance.lifetime_coins.toLocaleString("vi-VN")}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Soul Declaration */}
+        {showDeclaration && <CamlySoulDeclaration />}
+
+        {/* Reward Checklist */}
+        {showChecklist && <CamlyRewardChecklist showButton={false} />}
+      </div>
     );
   }
 

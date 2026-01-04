@@ -37,12 +37,29 @@ const SPIRITUAL_MESSAGES = {
   ],
 };
 
-// Coins amount per type
+// Coins amount per type - CAMLY REWARD TIERS
+// Basic Light User: 1,000 - 3,000 CAMLY
+// Contributor: 10,000 - 20,000 CAMLY
+// Guardian: 30,000 - 70,000 CAMLY
+// Angel Master: 200,000 - 500,000 CAMLY (requires admin approval)
 const COINS_BY_TYPE: Record<string, number> = {
-  meditation_completion: 1000,
-  reflection_note: 1000,
-  chat_message: 1000,
-  daily_login: 500,
+  // Basic Light User actions
+  meditation_completion: 1000,      // Nội dung tích cực do Angel tạo
+  reflection_note: 1000,            // Nội dung tích cực từ suy ngẫm
+  chat_message: 1000,               // Trò chuyện với Angel
+  daily_login: 500,                 // Đăng nhập hàng ngày
+  
+  // Contributor actions (sẽ mở rộng)
+  educational_content: 10000,       // Nội dung giáo dục chất lượng cao
+  light_sharing_chain: 20000,       // Chuỗi bài lan tỏa ánh sáng
+  angel_feedback: 15000,            // Feedback giúp Angel AI tiến hóa
+  share_angel: 2000,                // Chia sẻ Angel AI đúng tinh thần
+  guide_new_user: 3000,             // Hướng dẫn 1 user mới
+  
+  // Guardian actions (sẽ mở rộng - cần duyệt)
+  community_leadership: 50000,      // Dẫn dắt cộng đồng Angel AI nhỏ
+  angel_event_cohost: 70000,        // Đồng tổ chức hoạt động Angel
+  system_protection: 30000,         // Bảo vệ hệ - report chính xác
 };
 
 function getRandomMessage(type: keyof typeof SPIRITUAL_MESSAGES): string {
