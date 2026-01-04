@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -23,7 +23,7 @@ import { useLightBurst, LIGHT_BURST_COLORS, LIGHT_BURST_SIZES, LIGHT_BURST_EFFEC
 import { ResetConfirmDialog } from "@/components/AngelPresence/ResetConfirmDialog";
 
 type SettingsSection = "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
-type ThemeOption = "light" | "dark" | "system" | "twilight" | "ocean" | "forest" | "midnight";
+type ThemeOption = "light" | "dark" | "system" | "twilight" | "ocean" | "forest" | "midnight" | "sunrise";
 
 interface NotificationSettings {
   enabled: boolean;
@@ -188,6 +188,13 @@ const Settings = () => {
       icon: <Star className="w-5 h-5" />,
       description: "Cosmic starfield atmosphere",
       swatch: "bg-gradient-to-br from-slate-300/50 to-slate-950",
+    },
+    {
+      value: "sunrise",
+      label: "Sunrise",
+      icon: <Sunrise className="w-5 h-5" />,
+      description: "Warm golden dawn ambiance",
+      swatch: "bg-gradient-to-br from-amber-300 to-sky-300",
     },
     {
       value: "system",

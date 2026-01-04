@@ -37,6 +37,11 @@ const auroraConfigs = {
     wave2: "hsla(220, 25%, 32%, 0.07), hsla(215, 30%, 38%, 0.06), hsla(225, 25%, 35%, 0.07)",
     wave3: "hsla(210, 30%, 30%, 0.05), hsla(220, 25%, 35%, 0.04), hsla(215, 30%, 32%, 0.05)",
   },
+  sunrise: {
+    wave1: "hsla(35, 75%, 65%, 0.12), hsla(200, 50%, 70%, 0.08), hsla(30, 70%, 60%, 0.1)",
+    wave2: "hsla(200, 45%, 68%, 0.08), hsla(35, 70%, 62%, 0.07), hsla(195, 50%, 72%, 0.08)",
+    wave3: "hsla(30, 65%, 58%, 0.06), hsla(200, 45%, 70%, 0.05), hsla(35, 70%, 65%, 0.06)",
+  },
 };
 
 const AuroraBackground = () => {
@@ -250,6 +255,13 @@ function getBaseGradient(theme: string): string {
         radial-gradient(ellipse 80% 50% at 75% 60%, hsla(220, 25%, 22%, 0.25) 0%, transparent 55%),
         radial-gradient(ellipse 85% 65% at 50% 45%, hsla(210, 30%, 15%, 0.2) 0%, transparent 55%)
       `;
+    case "sunrise":
+      return `
+        radial-gradient(ellipse 100% 80% at 50% 100%, hsla(35, 80%, 65%, 0.25) 0%, transparent 50%),
+        radial-gradient(ellipse 90% 60% at 30% 70%, hsla(28, 75%, 58%, 0.2) 0%, transparent 45%),
+        radial-gradient(ellipse 85% 70% at 70% 30%, hsla(200, 50%, 72%, 0.15) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 50% at 50% 20%, hsla(195, 55%, 78%, 0.12) 0%, transparent 50%)
+      `;
     default: // light
       return `
         radial-gradient(ellipse 90% 60% at 20% 25%, hsla(280, 45%, 75%, 0.12) 0%, transparent 55%),
@@ -291,6 +303,11 @@ function getOrbGradient(theme: string, orbIndex: number): string {
       "radial-gradient(circle, hsla(215, 30%, 35%, 0.15) 0%, transparent 60%)",
       "radial-gradient(circle, hsla(220, 25%, 40%, 0.12) 0%, transparent 55%)",
       "radial-gradient(circle, hsla(210, 30%, 32%, 0.1) 0%, transparent 50%)",
+    ],
+    sunrise: [
+      "radial-gradient(circle, hsla(35, 75%, 62%, 0.2) 0%, transparent 55%)",
+      "radial-gradient(circle, hsla(200, 50%, 70%, 0.15) 0%, transparent 55%)",
+      "radial-gradient(circle, hsla(28, 70%, 58%, 0.18) 0%, transparent 50%)",
     ],
   };
 
