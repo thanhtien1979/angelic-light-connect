@@ -58,97 +58,81 @@ const WalletLinkBanner = () => {
     <AnimatePresence>
       {showBanner && (
         <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 50, scale: 0.95 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md mx-4"
+          initial={{ opacity: 0, x: 20, scale: 0.95 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: 20, scale: 0.95 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="fixed bottom-20 right-4 z-40 w-72"
         >
-          <div className="relative overflow-hidden bg-gradient-to-r from-primary/20 via-gold/15 to-primary/20 backdrop-blur-xl rounded-2xl border border-gold/30 shadow-[0_10px_40px_hsla(45,100%,70%,0.2)] p-4">
-            {/* Animated background glow */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-gold/10 via-gold/20 to-gold/10"
-              animate={{
-                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-              }}
-              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-              style={{ backgroundSize: "200% 100%" }}
-            />
-
+          <div className="relative overflow-hidden bg-gradient-to-br from-background/95 via-background/90 to-gold/5 backdrop-blur-lg rounded-xl border border-gold/20 shadow-lg p-3">
             {/* Close button */}
             <button
               onClick={handleDismiss}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-background/50 hover:bg-background/80 transition-colors text-muted-foreground hover:text-foreground"
+              className="absolute top-1.5 right-1.5 p-1 rounded-full bg-background/50 hover:bg-background/80 transition-colors text-muted-foreground hover:text-foreground"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3 h-3" />
             </button>
 
-            <div className="relative flex items-start gap-4">
+            <div className="relative flex items-center gap-2.5">
               {/* Icon */}
               <motion.div
-                className="flex-shrink-0 p-3 rounded-xl bg-gold/20 border border-gold/30"
-                animate={{ rotate: [0, 5, -5, 0] }}
+                className="flex-shrink-0 p-2 rounded-lg bg-gold/15 border border-gold/20"
+                animate={{ rotate: [0, 3, -3, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Wallet className="w-6 h-6 text-gold" />
+                <Wallet className="w-4 h-4 text-gold" />
               </motion.div>
 
               {/* Content */}
-              <div className="flex-1 pr-6">
-                <h3 className="font-serif text-sm font-medium text-foreground flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-gold" />
-                  Liên kết ví để nhận Happy Camly Coin
+              <div className="flex-1 pr-4">
+                <h3 className="text-xs font-medium text-foreground flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-gold" />
+                  Liên kết ví nhận Camly Coin
                 </h3>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  Kết nối ví MetaMask để lưu trữ Camly Coin và rút về ví của bạn trong tương lai!
+                <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
+                  Kết nối MetaMask để lưu trữ coin
                 </p>
-
-                {/* Connect button */}
-                <motion.button
-                  onClick={handleConnect}
-                  disabled={isConnecting}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="mt-3 flex items-center gap-2 px-4 py-2 rounded-full bg-gold/20 hover:bg-gold/30 border border-gold/40 text-gold text-xs font-medium transition-all disabled:opacity-50"
-                >
-                  {isConnecting ? (
-                    <>
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      >
-                        <Sparkles className="w-4 h-4" />
-                      </motion.div>
-                      Đang kết nối...
-                    </>
-                  ) : (
-                    <>
-                      <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
-                        alt="MetaMask"
-                        className="w-4 h-4"
-                      />
-                      Kết nối MetaMask
-                      <ArrowRight className="w-3 h-3" />
-                    </>
-                  )}
-                </motion.button>
-                {/* Don't remind button */}
-                <button
-                  onClick={handleDismissPermanently}
-                  className="mt-2 text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors underline underline-offset-2"
-                >
-                  Không nhắc lại
-                </button>
               </div>
             </div>
 
-            {/* Decorative elements */}
-            <motion.div
-              className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-gold/10 blur-2xl"
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
-              transition={{ duration: 3, repeat: Infinity }}
-            />
+            {/* Actions */}
+            <div className="flex items-center gap-2 mt-2.5">
+              <motion.button
+                onClick={handleConnect}
+                disabled={isConnecting}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold/20 hover:bg-gold/30 border border-gold/30 text-gold text-[10px] font-medium transition-all disabled:opacity-50"
+              >
+                {isConnecting ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Sparkles className="w-3 h-3" />
+                    </motion.div>
+                    Đang kết nối...
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
+                      alt="MetaMask"
+                      className="w-3 h-3"
+                    />
+                    Kết nối
+                    <ArrowRight className="w-2.5 h-2.5" />
+                  </>
+                )}
+              </motion.button>
+              <button
+                onClick={handleDismissPermanently}
+                className="text-[9px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+              >
+                Ẩn
+              </button>
+            </div>
           </div>
         </motion.div>
       )}
