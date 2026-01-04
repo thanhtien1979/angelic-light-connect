@@ -3,6 +3,7 @@ import { ShieldOff, UserX, Unlock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SkeletonUserItem } from '@/components/ui/skeleton';
 import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -26,9 +27,8 @@ const BlockedUsersList = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {[1, 2].map(i => (
-              <div key={i} className="h-16 bg-muted/30 rounded-xl animate-pulse" />
-            ))}
+            <SkeletonUserItem />
+            <SkeletonUserItem />
           </div>
         </CardContent>
       </Card>
