@@ -296,13 +296,13 @@
     
     /* Sunrise gold / amber primary */
     --primary: 35 85% 55%; /* Warm sunrise gold */
-    --primary-foreground: 35 45% 98%;
+    --primary-foreground: 25 45% 15%; /* Dark brown for contrast */
     --secondary: 38 40% 88%; /* Soft peach secondary */
     --secondary-foreground: 25 38% 22%;
     --muted: 35 35% 90%;
-    --muted-foreground: 25 30% 45%;
+    --muted-foreground: 25 30% 40%;
     --accent: 28 75% 52%; /* Sunrise amber */
-    --accent-foreground: 35 45% 98%;
+    --accent-foreground: 25 45% 15%; /* Dark for contrast */
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
     --border: 35 30% 82%; /* Warm soft border */
@@ -324,7 +324,7 @@
     --sidebar-background: 38 48% 94%;
     --sidebar-foreground: 25 40% 18%;
     --sidebar-primary: 35 85% 55%;
-    --sidebar-primary-foreground: 35 45% 98%;
+    --sidebar-primary-foreground: 25 45% 15%;
     --sidebar-accent: 38 40% 88%;
     --sidebar-accent-foreground: 25 38% 22%;
     --sidebar-border: 35 30% 82%;
