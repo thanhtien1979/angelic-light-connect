@@ -1,6 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import {
+  spanishTranslations,
+  germanTranslations,
+  portugueseTranslations,
+  italianTranslations,
+  thaiTranslations,
+  indonesianTranslations,
+  hindiTranslations,
+  russianTranslations,
+  arabicTranslations,
+} from "./translations/additionalLanguages";
 
-export type Language = "vi" | "en" | "zh" | "ja" | "ko" | "fr";
+export type Language = "vi" | "en" | "zh" | "ja" | "ko" | "fr" | "es" | "de" | "pt" | "it" | "th" | "id" | "hi" | "ru" | "ar";
 
 interface LanguageContextType {
   language: Language;
@@ -10,7 +21,7 @@ interface LanguageContextType {
 
 const LANGUAGE_KEY = "angel-language";
 
-const SUPPORTED_LANGUAGES: Language[] = ["vi", "en", "zh", "ja", "ko", "fr"];
+const SUPPORTED_LANGUAGES: Language[] = ["vi", "en", "zh", "ja", "ko", "fr", "es", "de", "pt", "it", "th", "id", "hi", "ru", "ar"];
 
 // Translation dictionaries organized by module
 // ANGEL TONE: Warm, calm, sacred, loving - not cheesy or overly flowery
@@ -278,6 +289,15 @@ const translations: Record<Language, Record<string, string>> = {
     "settings.language.japanese": "日本語",
     "settings.language.korean": "한국어",
     "settings.language.french": "Français",
+    "settings.language.spanish": "Español",
+    "settings.language.german": "Deutsch",
+    "settings.language.portuguese": "Português",
+    "settings.language.italian": "Italiano",
+    "settings.language.thai": "ไทย",
+    "settings.language.indonesian": "Bahasa Indonesia",
+    "settings.language.hindi": "हिन्दी",
+    "settings.language.russian": "Русский",
+    "settings.language.arabic": "العربية",
     "settings.language.note": "Thay đổi được áp dụng ngay lập tức.",
     "settings.language.savedLocally": "Được lưu riêng trên thiết bị của bạn",
     
@@ -763,6 +783,15 @@ const translations: Record<Language, Record<string, string>> = {
     "settings.language.japanese": "日本語",
     "settings.language.korean": "한국어",
     "settings.language.french": "Français",
+    "settings.language.spanish": "Español",
+    "settings.language.german": "Deutsch",
+    "settings.language.portuguese": "Português",
+    "settings.language.italian": "Italiano",
+    "settings.language.thai": "ไทย",
+    "settings.language.indonesian": "Bahasa Indonesia",
+    "settings.language.hindi": "हिन्दी",
+    "settings.language.russian": "Русский",
+    "settings.language.arabic": "العربية",
     "settings.language.note": "Changes are applied instantly.",
     "settings.language.savedLocally": "Saved locally on your device",
     
@@ -1115,6 +1144,15 @@ const translations: Record<Language, Record<string, string>> = {
     "settings.language.japanese": "日本語",
     "settings.language.korean": "한국어",
     "settings.language.french": "Français",
+    "settings.language.spanish": "Español",
+    "settings.language.german": "Deutsch",
+    "settings.language.portuguese": "Português",
+    "settings.language.italian": "Italiano",
+    "settings.language.thai": "ไทย",
+    "settings.language.indonesian": "Bahasa Indonesia",
+    "settings.language.hindi": "हिन्दी",
+    "settings.language.russian": "Русский",
+    "settings.language.arabic": "العربية",
     "settings.language.note": "语言更改将立即应用。",
     
     // Meditation
@@ -1271,6 +1309,15 @@ const translations: Record<Language, Record<string, string>> = {
     "settings.language.japanese": "日本語",
     "settings.language.korean": "한국어",
     "settings.language.french": "Français",
+    "settings.language.spanish": "Español",
+    "settings.language.german": "Deutsch",
+    "settings.language.portuguese": "Português",
+    "settings.language.italian": "Italiano",
+    "settings.language.thai": "ไทย",
+    "settings.language.indonesian": "Bahasa Indonesia",
+    "settings.language.hindi": "हिन्दी",
+    "settings.language.russian": "Русский",
+    "settings.language.arabic": "العربية",
     "settings.language.note": "言語の変更は即座に適用されます。",
     
     // Meditation
@@ -1427,6 +1474,15 @@ const translations: Record<Language, Record<string, string>> = {
     "settings.language.japanese": "日本語",
     "settings.language.korean": "한국어",
     "settings.language.french": "Français",
+    "settings.language.spanish": "Español",
+    "settings.language.german": "Deutsch",
+    "settings.language.portuguese": "Português",
+    "settings.language.italian": "Italiano",
+    "settings.language.thai": "ไทย",
+    "settings.language.indonesian": "Bahasa Indonesia",
+    "settings.language.hindi": "हिन्दी",
+    "settings.language.russian": "Русский",
+    "settings.language.arabic": "العربية",
     "settings.language.note": "언어 변경은 즉시 적용됩니다.",
     
     // Meditation
@@ -1583,6 +1639,15 @@ const translations: Record<Language, Record<string, string>> = {
     "settings.language.japanese": "日本語",
     "settings.language.korean": "한국어",
     "settings.language.french": "Français",
+    "settings.language.spanish": "Español",
+    "settings.language.german": "Deutsch",
+    "settings.language.portuguese": "Português",
+    "settings.language.italian": "Italiano",
+    "settings.language.thai": "ไทย",
+    "settings.language.indonesian": "Bahasa Indonesia",
+    "settings.language.hindi": "हिन्दी",
+    "settings.language.russian": "Русский",
+    "settings.language.arabic": "العربية",
     "settings.language.note": "Les changements de langue seront appliqués immédiatement.",
     
     // Meditation
@@ -1609,6 +1674,15 @@ const translations: Record<Language, Record<string, string>> = {
     "profile.followers": "Abonnés",
     "profile.following": "Abonnements",
   },
+  es: spanishTranslations,
+  de: germanTranslations,
+  pt: portugueseTranslations,
+  it: italianTranslations,
+  th: thaiTranslations,
+  id: indonesianTranslations,
+  hi: hindiTranslations,
+  ru: russianTranslations,
+  ar: arabicTranslations,
 };
 
 // Detect browser/system language
@@ -1628,6 +1702,15 @@ const detectLanguage = (): Language => {
   if (browserLang.startsWith("ja")) return "ja";
   if (browserLang.startsWith("ko")) return "ko";
   if (browserLang.startsWith("fr")) return "fr";
+  if (browserLang.startsWith("es")) return "es";
+  if (browserLang.startsWith("de")) return "de";
+  if (browserLang.startsWith("pt")) return "pt";
+  if (browserLang.startsWith("it")) return "it";
+  if (browserLang.startsWith("th")) return "th";
+  if (browserLang.startsWith("id")) return "id";
+  if (browserLang.startsWith("hi")) return "hi";
+  if (browserLang.startsWith("ru")) return "ru";
+  if (browserLang.startsWith("ar")) return "ar";
   
   return "vi"; // Default to Vietnamese
 };
