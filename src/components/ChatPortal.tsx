@@ -12,6 +12,7 @@ import { useAnonymousRateLimit } from "@/hooks/useAnonymousRateLimit";
 import { useChatReward } from "@/hooks/useChatReward";
 import { useVoiceRecording } from "@/hooks/useVoiceRecording";
 import { useUserAvatar } from "@/hooks/useUserAvatar";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { CamlyCoinNotification } from "@/components/CamlyCoinDisplay";
 import ConversationSummaryCard from "@/components/ConversationSummaryCard";
 import ChatAttachmentPreview from "@/components/ChatAttachmentPreview";
@@ -50,15 +51,17 @@ interface ChatPortalProps {
 
 // Sync status indicator component
 const SyncIndicator = ({ status }: { status: SyncStatus }) => {
-  const config: Record<SyncStatus, { icon: typeof Cloud | null; text: string; show: boolean; animate?: boolean; isError?: boolean }> = {
-    idle: { icon: null, text: "", show: false },
-    saving: { icon: Loader2, text: "Đang lưu...", show: true, animate: true },
-    saved: { icon: Check, text: "Đã lưu", show: true },
-    offline: { icon: CloudOff, text: "Ngoại tuyến", show: true },
-    error: { icon: Cloud, text: "Lỗi lưu", show: true, isError: true },
+  const { t } = useLanguage();
+  
+  const config: Record<SyncStatus, { icon: typeof Cloud | null; textKey: string; show: boolean; animate?: boolean; isError?: boolean }> = {
+    idle: { icon: null, textKey: "", show: false },
+    saving: { icon: Loader2, textKey: "common.saving", show: true, animate: true },
+    saved: { icon: Check, textKey: "common.saved", show: true },
+    offline: { icon: CloudOff, textKey: "chat.offline", show: true },
+    error: { icon: Cloud, textKey: "error.saveFailed", show: true, isError: true },
   };
 
-  const { icon: Icon, text, show, animate, isError } = config[status];
+  const { icon: Icon, textKey, show, animate, isError } = config[status];
 
   if (!show || !Icon) return null;
 
@@ -72,7 +75,7 @@ const SyncIndicator = ({ status }: { status: SyncStatus }) => {
       }`}
     >
       <Icon className={`w-3 h-3 ${animate ? "animate-spin" : ""}`} />
-      <span>{text}</span>
+      <span>{t(textKey)}</span>
     </motion.div>
   );
 };

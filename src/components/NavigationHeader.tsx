@@ -14,6 +14,7 @@ import { useBalanceShimmer } from "@/hooks/useBalanceShimmer";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
 import { useWallet, NETWORKS, NetworkId, WALLET_PROVIDERS } from "@/hooks/useWallet";
 import { useFriendships } from "@/hooks/useFriendships";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,20 +29,20 @@ import angelAvatar from "@/assets/angel-avatar.jpg";
 
 interface NavLink {
   id: string;
-  label: string;
+  labelKey: string;
   isPage?: boolean;
   path?: string;
   showBadge?: boolean;
 }
 
-const navLinks: NavLink[] = [
-  { id: "hero", label: "Trang Chủ" },
-  { id: "chat", label: "Chat Portal" },
-  { id: "meditation", label: "Thiền Định" },
-  { id: "testimonials", label: "Nhân Chứng", isPage: true, path: "/testimonials" },
-  { id: "studio", label: "Studio", isPage: true, path: "/studio" },
-  { id: "community", label: "Cộng Đồng", isPage: true, path: "/community", showBadge: true },
-  { id: "friends", label: "Kết Bạn", isPage: true, path: "/friends", showBadge: true },
+const navLinksConfig: NavLink[] = [
+  { id: "hero", labelKey: "nav.home" },
+  { id: "chat", labelKey: "nav.chat" },
+  { id: "meditation", labelKey: "nav.meditation" },
+  { id: "testimonials", labelKey: "nav.testimonials", isPage: true, path: "/testimonials" },
+  { id: "studio", labelKey: "nav.studio", isPage: true, path: "/studio" },
+  { id: "community", labelKey: "nav.community", isPage: true, path: "/community", showBadge: true },
+  { id: "friends", labelKey: "nav.friends", isPage: true, path: "/friends", showBadge: true },
 ];
 
 const BLESSING_MESSAGES = [
@@ -317,13 +318,14 @@ const NavigationHeader = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const { user } = useAuth();
   const { pendingRequests } = useFriendships();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
 
       // Find active section
-      const sections = navLinks.map((link) => ({
+      const sections = navLinksConfig.map((link) => ({
         id: link.id,
         element: document.getElementById(link.id),
       }));
@@ -387,7 +389,7 @@ const NavigationHeader = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => 
+              {navLinksConfig.map((link) => 
                 link.isPage && link.path ? (
                   <Link key={link.id} to={link.path}>
                     <motion.span
@@ -398,7 +400,7 @@ const NavigationHeader = () => {
                       whileTap={{ scale: 0.95 }}
                     >
                       {link.id === "friends" && <UserPlus className="w-4 h-4" />}
-                      {link.label}
+                      {t(link.labelKey)}
                       {link.showBadge && user && pendingRequests.length > 0 && (
                         <Badge className="bg-pink-500 text-white text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
                           {pendingRequests.length}
@@ -418,7 +420,7 @@ const NavigationHeader = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                     {activeSection === link.id && (
                       <motion.div
                         layoutId="activeIndicator"
@@ -467,7 +469,7 @@ const NavigationHeader = () => {
             className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/30 shadow-lg md:hidden"
           >
             <nav className="flex flex-col p-4 gap-1">
-              {navLinks.map((link, index) => 
+              {navLinksConfig.map((link, index) => 
                 link.isPage && link.path ? (
                   <motion.div
                     key={link.id}
@@ -484,7 +486,7 @@ const NavigationHeader = () => {
                     >
                       <span className="flex items-center gap-2">
                         {link.id === "friends" && <UserPlus className="w-4 h-4" />}
-                        {link.label}
+                        {t(link.labelKey)}
                       </span>
                       {link.showBadge && user && pendingRequests.length > 0 && (
                         <Badge className="bg-pink-500 text-white text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
@@ -506,7 +508,7 @@ const NavigationHeader = () => {
                         : "text-foreground hover:bg-gold/10"
                     }`}
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </motion.button>
                 )
               )}
