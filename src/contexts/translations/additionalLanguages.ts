@@ -14,7 +14,8 @@ export const spanishTranslations: Record<string, string> = {
   "nav.credits": "Créditos",
   "nav.chat": "Chat",
   "nav.meditation": "Meditación",
-  
+  "nav.whitepaper": "Libro blanco",
+  "nav.lightScore": "Puntuación de Luz",
   // Common buttons
   "common.save": "Guardar",
   "common.cancel": "Cancelar",
@@ -145,7 +146,8 @@ export const germanTranslations: Record<string, string> = {
   "nav.credits": "Guthaben",
   "nav.chat": "Chat",
   "nav.meditation": "Meditation",
-  
+  "nav.whitepaper": "Whitepaper",
+  "nav.lightScore": "Lichtwert",
   // Common buttons
   "common.save": "Speichern",
   "common.cancel": "Abbrechen",
@@ -242,7 +244,8 @@ export const portugueseTranslations: Record<string, string> = {
   "nav.credits": "Créditos",
   "nav.chat": "Chat",
   "nav.meditation": "Meditação",
-  
+  "nav.whitepaper": "Livro branco",
+  "nav.lightScore": "Pontuação de Luz",
   // Common buttons
   "common.save": "Salvar",
   "common.cancel": "Cancelar",
@@ -339,7 +342,8 @@ export const italianTranslations: Record<string, string> = {
   "nav.credits": "Crediti",
   "nav.chat": "Chat",
   "nav.meditation": "Meditazione",
-  
+  "nav.whitepaper": "Libro bianco",
+  "nav.lightScore": "Punteggio Luce",
   // Common buttons
   "common.save": "Salva",
   "common.cancel": "Annulla",
@@ -436,7 +440,8 @@ export const thaiTranslations: Record<string, string> = {
   "nav.credits": "เครดิต",
   "nav.chat": "แชท",
   "nav.meditation": "การทำสมาธิ",
-  
+  "nav.whitepaper": "สมุดปกขาว",
+  "nav.lightScore": "คะแนนแสง",
   // Common buttons
   "common.save": "บันทึก",
   "common.cancel": "ยกเลิก",
@@ -533,7 +538,8 @@ export const indonesianTranslations: Record<string, string> = {
   "nav.credits": "Kredit",
   "nav.chat": "Obrolan",
   "nav.meditation": "Meditasi",
-  
+  "nav.whitepaper": "Buku putih",
+  "nav.lightScore": "Skor Cahaya",
   // Common buttons
   "common.save": "Simpan",
   "common.cancel": "Batal",
@@ -630,7 +636,8 @@ export const hindiTranslations: Record<string, string> = {
   "nav.credits": "क्रेडिट",
   "nav.chat": "चैट",
   "nav.meditation": "ध्यान",
-  
+  "nav.whitepaper": "श्वेतपत्र",
+  "nav.lightScore": "प्रकाश स्कोर",
   // Common buttons
   "common.save": "सहेजें",
   "common.cancel": "रद्द करें",
@@ -727,7 +734,8 @@ export const russianTranslations: Record<string, string> = {
   "nav.credits": "Кредиты",
   "nav.chat": "Чат",
   "nav.meditation": "Медитация",
-  
+  "nav.whitepaper": "Белая книга",
+  "nav.lightScore": "Счёт Света",
   // Common buttons
   "common.save": "Сохранить",
   "common.cancel": "Отмена",
@@ -824,7 +832,8 @@ export const arabicTranslations: Record<string, string> = {
   "nav.credits": "الرصيد",
   "nav.chat": "الدردشة",
   "nav.meditation": "التأمل",
-  
+  "nav.whitepaper": "الكتاب الأبيض",
+  "nav.lightScore": "نقاط النور",
   // Common buttons
   "common.save": "حفظ",
   "common.cancel": "إلغاء",

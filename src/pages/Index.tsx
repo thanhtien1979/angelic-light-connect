@@ -4,7 +4,6 @@ import HeroSection from "@/components/HeroSection";
 import SacredPillars from "@/components/SacredPillars";
 import VisionMission from "@/components/VisionMission";
 import FunEcosystemPlatforms from "@/components/FunEcosystemPlatforms";
-import CamlyWhitepaper from "@/components/CamlyWhitepaper";
 import MeditationPortal from "@/components/MeditationPortal";
 import MiniMeditationPlayer from "@/components/MiniMeditationPlayer";
 import Testimonials from "@/components/Testimonials";
@@ -64,7 +63,6 @@ const Index = () => {
         <SacredPillars />
         <VisionMission />
         <FunEcosystemPlatforms />
-        <CamlyWhitepaper />
         <MeditationPortal />
         <Testimonials />
         <CallToAction />

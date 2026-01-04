@@ -18,6 +18,7 @@ import LightLaw from "./pages/LightLaw";
 import LightScore from "./pages/LightScore";
 import Settings from "./pages/Settings";
 import SharedConversation from "./pages/SharedConversation";
+import CamlyWhitepaper from "./pages/CamlyWhitepaper";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -86,6 +87,7 @@ const App = () => (
                   <DailyLightGreeting />
                   <Routes>
                     <Route path="/" element={<Index />} />
+                    <Route path="/camly-whitepaper" element={<CamlyWhitepaper />} />
                     <Route path="/community" element={<Community />} />
                     <Route path="/user/:userId" element={<UserProfile />} />
                     <Route path="/studio" element={<CreativeStudio />} />
