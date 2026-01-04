@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -23,7 +23,7 @@ import { useLightBurst, LIGHT_BURST_COLORS, LIGHT_BURST_SIZES, LIGHT_BURST_EFFEC
 import { ResetConfirmDialog } from "@/components/AngelPresence/ResetConfirmDialog";
 
 type SettingsSection = "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
-type ThemeOption = "light" | "dark" | "system" | "twilight";
+type ThemeOption = "light" | "dark" | "system" | "twilight" | "ocean" | "forest";
 
 interface NotificationSettings {
   enabled: boolean;
@@ -167,6 +167,20 @@ const Settings = () => {
       icon: <Flame className="w-5 h-5" />,
       description: "Warm candlelight with twilight ambiance",
       swatch: "bg-gradient-to-br from-amber-500/80 to-indigo-900",
+    },
+    {
+      value: "ocean",
+      label: "Ocean",
+      icon: <Waves className="w-5 h-5" />,
+      description: "Calm, cleansing ocean depths",
+      swatch: "bg-gradient-to-br from-teal-400 to-blue-900",
+    },
+    {
+      value: "forest",
+      label: "Forest",
+      icon: <TreePine className="w-5 h-5" />,
+      description: "Grounded, healing forest sanctuary",
+      swatch: "bg-gradient-to-br from-emerald-400 to-green-900",
     },
     {
       value: "system",
@@ -345,7 +359,7 @@ const Settings = () => {
                       <div className="flex items-center gap-2">
                         <Label className="text-sm font-medium">Theme</Label>
                       </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                         {mounted && themeOptions.map((option) => (
                           <button
                             key={option.value}

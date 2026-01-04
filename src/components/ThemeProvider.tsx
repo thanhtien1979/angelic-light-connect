@@ -8,7 +8,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange={false}
-      themes={["light", "dark", "twilight", "system"]}
+      themes={["light", "dark", "twilight", "ocean", "forest", "system"]}
       {...props}
     >
       {children}

@@ -142,6 +142,100 @@
     --sidebar-border: 260 22% 24%;
     --sidebar-ring: 38 75% 65%;
   }
+
+  /* Ocean Theme - Calm, cleansing, flowing */
+  .ocean {
+    /* Deep ocean navy/indigo base */
+    --background: 210 45% 10%; /* Deep ocean navy */
+    --foreground: 195 50% 92%; /* Light seafoam text */
+    --card: 210 40% 14%; /* Ocean card */
+    --card-foreground: 195 50% 92%;
+    --popover: 210 40% 14%;
+    --popover-foreground: 195 50% 92%;
+    
+    /* Teal/cyan primary */
+    --primary: 180 55% 55%; /* Soft teal */
+    --primary-foreground: 210 45% 10%;
+    --secondary: 210 38% 18%; /* Ocean secondary */
+    --secondary-foreground: 195 45% 88%;
+    --muted: 210 35% 16%;
+    --muted-foreground: 195 35% 65%;
+    --accent: 175 50% 50%; /* Seafoam accent */
+    --accent-foreground: 210 45% 10%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 30% 22%; /* Ocean border */
+    --input: 210 30% 22%;
+    --ring: 180 55% 55%;
+    
+    /* Ocean tones */
+    --rose: 180 50% 55%;
+    --rose-light: 175 55% 70%;
+    --rose-glow: 185 60% 60%;
+    --rose-soft: 170 45% 50%;
+    --gold: 180 55% 55%;
+    --gold-light: 175 55% 70%;
+    --gold-glow: 185 60% 60%;
+    
+    /* Ambient ocean depth */
+    --ambient-overlay: 200 50% 20%;
+    
+    --sidebar-background: 210 42% 12%;
+    --sidebar-foreground: 195 50% 92%;
+    --sidebar-primary: 180 55% 55%;
+    --sidebar-primary-foreground: 210 45% 10%;
+    --sidebar-accent: 210 38% 18%;
+    --sidebar-accent-foreground: 195 45% 88%;
+    --sidebar-border: 210 30% 22%;
+    --sidebar-ring: 180 55% 55%;
+  }
+
+  /* Forest Theme - Grounded, healing, safe */
+  .forest {
+    /* Deep forest green base */
+    --background: 155 35% 10%; /* Deep forest green */
+    --foreground: 120 30% 92%; /* Light sage text */
+    --card: 155 32% 14%; /* Forest card */
+    --card-foreground: 120 30% 92%;
+    --popover: 155 32% 14%;
+    --popover-foreground: 120 30% 92%;
+    
+    /* Sage/emerald primary */
+    --primary: 145 45% 50%; /* Soft sage */
+    --primary-foreground: 155 35% 10%;
+    --secondary: 155 30% 18%; /* Forest secondary */
+    --secondary-foreground: 120 28% 88%;
+    --muted: 155 28% 16%;
+    --muted-foreground: 120 25% 62%;
+    --accent: 135 40% 48%; /* Moss accent */
+    --accent-foreground: 155 35% 10%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 155 25% 22%; /* Forest border */
+    --input: 155 25% 22%;
+    --ring: 145 45% 50%;
+    
+    /* Forest tones */
+    --rose: 145 40% 52%;
+    --rose-light: 140 45% 68%;
+    --rose-glow: 150 50% 55%;
+    --rose-soft: 135 38% 48%;
+    --gold: 145 45% 50%;
+    --gold-light: 140 45% 68%;
+    --gold-glow: 150 50% 55%;
+    
+    /* Ambient forest depth */
+    --ambient-overlay: 145 40% 18%;
+    
+    --sidebar-background: 155 33% 12%;
+    --sidebar-foreground: 120 30% 92%;
+    --sidebar-primary: 145 45% 50%;
+    --sidebar-primary-foreground: 155 35% 10%;
+    --sidebar-accent: 155 30% 18%;
+    --sidebar-accent-foreground: 120 28% 88%;
+    --sidebar-border: 155 25% 22%;
+    --sidebar-ring: 145 45% 50%;
+  }
 }
 
 @layer base {
@@ -149,9 +243,33 @@
     @apply border-border;
   }
   
+  /* Smooth theme transitions - respect reduced motion */
+  html {
+    transition: background-color 400ms ease, color 400ms ease;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
+    transition: background-color 400ms ease, color 400ms ease;
+  }
+  
+  /* Theme transition for key elements */
+  html:not(.reduce-motion) *,
+  html:not(.reduce-motion) *::before,
+  html:not(.reduce-motion) *::after {
+    transition-property: background-color, border-color, box-shadow;
+    transition-duration: 400ms;
+    transition-timing-function: ease;
+  }
+  
+  /* Disable transitions for reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    html *,
+    html *::before,
+    html *::after {
+      transition-duration: 0ms !important;
+    }
   }
   
   h1, h2, h3, h4, h5, h6 {
