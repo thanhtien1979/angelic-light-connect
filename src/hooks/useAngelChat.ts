@@ -13,6 +13,7 @@ type Message = {
 export type SyncStatus = "idle" | "saving" | "saved" | "offline" | "error";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/angel-chat`;
+const ANALYZE_LIGHT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-light-behavior`;
 const SESSION_ID_KEY = "angel_chat_session_id";
 
 // Generate a cryptographically secure random string (64 hex chars = 256 bits)
@@ -30,6 +31,35 @@ const getSessionId = () => {
     localStorage.setItem(SESSION_ID_KEY, sessionId);
   }
   return sessionId;
+};
+
+// Analyze user message for light behavior (non-blocking)
+const analyzeLightBehavior = async (
+  userId: string,
+  content: string,
+  behaviorType: "message" | "reaction" | "comment" | "testimonial" | "moment"
+): Promise<void> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+    
+    if (!accessToken) return;
+
+    await fetch(ANALYZE_LIGHT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        content,
+        behavior_type: behaviorType,
+      }),
+    });
+  } catch {
+    // Non-critical, don't throw
+  }
 };
 
 export const useAngelChat = () => {
@@ -293,6 +323,13 @@ export const useAngelChat = () => {
             )
           );
         }
+      }
+
+      // Analyze user message for light score (non-blocking)
+      if (trimmedContent && user) {
+        analyzeLightBehavior(user.id, trimmedContent, "message").catch((err) => {
+          console.error("Light analysis failed (non-critical):", err);
+        });
       }
     } catch (error) {
       // SECURITY: Don't log error details that might contain sensitive info
