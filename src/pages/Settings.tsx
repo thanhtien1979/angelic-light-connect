@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -23,7 +23,7 @@ import { useLightBurst, LIGHT_BURST_COLORS, LIGHT_BURST_SIZES, LIGHT_BURST_EFFEC
 import { ResetConfirmDialog } from "@/components/AngelPresence/ResetConfirmDialog";
 
 type SettingsSection = "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
-type ThemeOption = "light" | "dark" | "system";
+type ThemeOption = "light" | "dark" | "system" | "twilight";
 
 interface NotificationSettings {
   enabled: boolean;
@@ -146,24 +146,34 @@ const Settings = () => {
     },
   ];
 
-  const themeOptions: { value: ThemeOption; label: string; icon: React.ReactNode; description: string }[] = [
+  const themeOptions: { value: ThemeOption; label: string; icon: React.ReactNode; description: string; swatch?: string }[] = [
     {
       value: "light",
       label: t("settings.appearance.light"),
       icon: <Sun className="w-5 h-5" />,
       description: t("settings.appearance.lightDesc"),
+      swatch: "bg-gradient-to-br from-rose-100 to-pink-50",
     },
     {
       value: "dark",
       label: t("settings.appearance.dark"),
       icon: <Moon className="w-5 h-5" />,
       description: t("settings.appearance.darkDesc"),
+      swatch: "bg-gradient-to-br from-indigo-900 to-purple-950",
+    },
+    {
+      value: "twilight",
+      label: "Twilight",
+      icon: <Flame className="w-5 h-5" />,
+      description: "Warm candlelight with twilight ambiance",
+      swatch: "bg-gradient-to-br from-amber-500/80 to-indigo-900",
     },
     {
       value: "system",
       label: t("settings.appearance.system"),
       icon: <Monitor className="w-5 h-5" />,
       description: t("settings.appearance.systemDesc"),
+      swatch: "bg-gradient-to-br from-gray-200 to-gray-600",
     },
   ];
 
@@ -335,7 +345,7 @@ const Settings = () => {
                       <div className="flex items-center gap-2">
                         <Label className="text-sm font-medium">Theme</Label>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {mounted && themeOptions.map((option) => (
                           <button
                             key={option.value}
@@ -348,9 +358,16 @@ const Settings = () => {
                             )}
                           >
                             <div className="flex flex-col items-center text-center gap-3">
+                              {/* Color swatch preview */}
+                              {option.swatch && (
+                                <div className={cn(
+                                  "w-10 h-10 rounded-full shadow-inner border border-border/30",
+                                  option.swatch
+                                )} />
+                              )}
                               <div
                                 className={cn(
-                                  "p-3 rounded-full transition-colors",
+                                  "p-2 rounded-full transition-colors",
                                   theme === option.value
                                     ? "bg-primary/20 text-primary"
                                     : "bg-muted/50 text-muted-foreground group-hover:text-foreground"
@@ -365,7 +382,7 @@ const Settings = () => {
                                 )}>
                                   {option.label}
                                 </p>
-                                <p className="text-xs text-muted-foreground mt-1">
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                                   {option.description}
                                 </p>
                               </div>

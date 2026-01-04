@@ -95,6 +95,53 @@
     --sidebar-border: 280 20% 22%;
     --sidebar-ring: 348 65% 74%;
   }
+
+  /* Twilight / Candlelight Theme - Warm, sacred, immersive */
+  .twilight {
+    /* Deep twilight indigo base with warm undertones */
+    --background: 260 30% 12%; /* Deep twilight indigo */
+    --foreground: 45 40% 92%; /* Warm cream text */
+    --card: 260 28% 16%; /* Warmer twilight card */
+    --card-foreground: 45 40% 92%;
+    --popover: 260 28% 16%;
+    --popover-foreground: 45 40% 92%;
+    
+    /* Candlelight gold primary */
+    --primary: 38 75% 65%; /* Warm candlelight gold */
+    --primary-foreground: 260 30% 12%;
+    --secondary: 260 25% 20%; /* Deeper twilight secondary */
+    --secondary-foreground: 45 35% 88%;
+    --muted: 260 22% 18%;
+    --muted-foreground: 45 25% 65%;
+    --accent: 32 70% 58%; /* Soft amber accent */
+    --accent-foreground: 260 30% 12%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 260 22% 24%; /* Subtle twilight border */
+    --input: 260 22% 24%;
+    --ring: 38 75% 65%;
+    
+    /* Rose tones with warmth */
+    --rose: 38 70% 62%;
+    --rose-light: 35 65% 75%;
+    --rose-glow: 40 75% 68%;
+    --rose-soft: 32 60% 58%;
+    --gold: 38 75% 65%;
+    --gold-light: 40 70% 78%;
+    --gold-glow: 42 80% 72%;
+    
+    /* Ambient candlelight warmth */
+    --ambient-overlay: 35 50% 25%;
+    
+    --sidebar-background: 260 28% 14%;
+    --sidebar-foreground: 45 40% 92%;
+    --sidebar-primary: 38 75% 65%;
+    --sidebar-primary-foreground: 260 30% 12%;
+    --sidebar-accent: 260 25% 20%;
+    --sidebar-accent-foreground: 45 35% 88%;
+    --sidebar-border: 260 22% 24%;
+    --sidebar-ring: 38 75% 65%;
+  }
 }
 
 @layer base {
