@@ -852,6 +852,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                       </motion.button>
                     )}
                     
+                    
                     <div
                       className={`relative group max-w-[88%] sm:max-w-[80%] lg:max-w-[75%] px-4 sm:px-5 py-3 rounded-2xl break-words ${
                         message.role === "user"
