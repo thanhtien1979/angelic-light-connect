@@ -8,6 +8,37 @@ interface CopyMessageButtonProps {
   className?: string;
 }
 
+// Fallback for Safari/older browsers
+const fallbackCopyToClipboard = (text: string): boolean => {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  textarea.style.top = '-9999px';
+  textarea.setAttribute('readonly', '');
+  document.body.appendChild(textarea);
+  
+  // iOS Safari requires special handling
+  const range = document.createRange();
+  range.selectNodeContents(textarea);
+  const selection = window.getSelection();
+  if (selection) {
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+  textarea.setSelectionRange(0, text.length);
+  
+  let success = false;
+  try {
+    success = document.execCommand('copy');
+  } catch (err) {
+    console.error('Fallback copy failed:', err);
+  }
+  
+  document.body.removeChild(textarea);
+  return success;
+};
+
 export const CopyMessageButton: React.FC<CopyMessageButtonProps> = ({
   text,
   position = 'right',
@@ -17,12 +48,27 @@ export const CopyMessageButton: React.FC<CopyMessageButtonProps> = ({
 
   const handleCopy = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(text);
+    e.preventDefault();
+    
+    let success = false;
+    
+    // Try modern Clipboard API first
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      try {
+        await navigator.clipboard.writeText(text);
+        success = true;
+      } catch (err) {
+        console.warn('Clipboard API failed, trying fallback:', err);
+        success = fallbackCopyToClipboard(text);
+      }
+    } else {
+      // Use fallback for Safari/older browsers
+      success = fallbackCopyToClipboard(text);
+    }
+    
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch (err) {
-      console.error('Failed to copy text:', err);
     }
   }, [text]);
 
@@ -31,30 +77,24 @@ export const CopyMessageButton: React.FC<CopyMessageButtonProps> = ({
       type="button"
       onClick={handleCopy}
       className={cn(
-        // Base styles
         'absolute z-20 p-1.5 rounded-md transition-all duration-200',
-        // Positioning
         position === 'right' ? 'top-2 right-2' : 'top-2 left-2',
-        // Default state - subtle
         'opacity-0 group-hover:opacity-100 focus:opacity-100',
-        // Mobile always visible but more subtle
-        'sm:opacity-0 opacity-40',
-        // Background and border
+        'sm:opacity-0 opacity-60',
         'bg-background/80 backdrop-blur-sm border border-border/30',
         'hover:bg-background hover:border-border/50',
-        // Focus styles for accessibility
         'focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1',
-        // Reduced motion support
         'motion-reduce:transition-none',
+        'touch-manipulation',
         className
       )}
-      aria-label={copied ? 'Copied' : 'Copy message'}
-      title={copied ? 'Copied!' : 'Copy to clipboard'}
+      aria-label={copied ? 'Đã sao chép' : 'Sao chép tin nhắn'}
+      title={copied ? 'Đã sao chép 🤍' : 'Sao chép'}
     >
       {copied ? (
-        <span className="flex items-center gap-1 text-xs text-primary">
-          <Check className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline text-[10px] font-medium">Copied</span>
+        <span className="flex items-center gap-1 text-xs text-primary whitespace-nowrap">
+          <Check className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="text-[10px] font-medium">Đã sao chép 🤍</span>
         </span>
       ) : (
         <Copy className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground transition-colors" />
