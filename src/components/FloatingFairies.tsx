@@ -26,6 +26,23 @@ interface Sparkle {
   color: string;
 }
 
+interface BurstSparkle {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  angle: number;
+  distance: number;
+}
+
+interface RingWave {
+  id: number;
+  x: number;
+  y: number;
+  color: string;
+}
+
 interface FloatingFairiesProps {
   isReducedMotion?: boolean;
 }
@@ -72,9 +89,57 @@ const playFairySound = (frequency: number) => {
   }
 };
 
+// Special arpeggio sound for click
+const playClickSound = (baseFrequency: number) => {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Create an arpeggio with 3 ascending notes
+    const notes = [baseFrequency, baseFrequency * 1.25, baseFrequency * 1.5];
+    
+    notes.forEach((freq, i) => {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, audioContext.currentTime + i * 0.1);
+      
+      gain.gain.setValueAtTime(0, audioContext.currentTime + i * 0.1);
+      gain.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + i * 0.1 + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.5);
+      
+      // Add shimmer harmonic
+      const shimmer = audioContext.createOscillator();
+      const shimmerGain = audioContext.createGain();
+      shimmer.type = "sine";
+      shimmer.frequency.setValueAtTime(freq * 3, audioContext.currentTime + i * 0.1);
+      shimmerGain.gain.setValueAtTime(0, audioContext.currentTime + i * 0.1);
+      shimmerGain.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + i * 0.1 + 0.02);
+      shimmerGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.3);
+      
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      shimmer.connect(shimmerGain);
+      shimmerGain.connect(audioContext.destination);
+      
+      osc.start(audioContext.currentTime + i * 0.1);
+      shimmer.start(audioContext.currentTime + i * 0.1);
+      osc.stop(audioContext.currentTime + i * 0.1 + 0.5);
+      shimmer.stop(audioContext.currentTime + i * 0.1 + 0.3);
+    });
+    
+    setTimeout(() => audioContext.close(), 1000);
+  } catch (e) {
+    // Audio not supported
+  }
+};
+
 const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [lastPlayedTime, setLastPlayedTime] = useState<Record<number, number>>({});
+  const [clickedFairy, setClickedFairy] = useState<number | null>(null);
+  const [burstSparkles, setBurstSparkles] = useState<BurstSparkle[]>([]);
+  const [ringWaves, setRingWaves] = useState<RingWave[]>([]);
 
   const fairies = useMemo(() => 
     fairyImages.map((fairy, i) => {
@@ -108,6 +173,54 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
       setLastPlayedTime(prev => ({ ...prev, [fairyId]: now }));
     }
   }, [lastPlayedTime]);
+
+  const handleFairyClick = useCallback((fairyId: number, note: number, sparkleColor: string, distance: number, startAngle: number, direction: number, duration: number, delay: number) => {
+    // Calculate current position
+    const currentTime = Date.now() / 1000;
+    const elapsedTime = currentTime - delay;
+    const currentAngle = startAngle + (elapsedTime / duration) * 360 * direction;
+    const angleRad = (currentAngle * Math.PI) / 180;
+    const x = Math.cos(angleRad) * distance;
+    const y = Math.sin(angleRad) * distance;
+
+    // Set clicked fairy for glow effect
+    setClickedFairy(fairyId);
+
+    // Play special click sound
+    playClickSound(note);
+
+    // Create burst sparkles (18 particles radiating outward)
+    const newBurstSparkles: BurstSparkle[] = Array.from({ length: 18 }, (_, i) => ({
+      id: Date.now() + i,
+      x,
+      y,
+      size: 6 + Math.random() * 8,
+      color: sparkleColor,
+      angle: (i * 20) + Math.random() * 10,
+      distance: 30 + Math.random() * 50,
+    }));
+    setBurstSparkles(newBurstSparkles);
+
+    // Create ring wave
+    const newRingWave: RingWave = {
+      id: Date.now(),
+      x,
+      y,
+      color: sparkleColor,
+    };
+    setRingWaves(prev => [...prev, newRingWave]);
+
+    // Reset after 2 seconds
+    setTimeout(() => {
+      setClickedFairy(null);
+      setBurstSparkles([]);
+    }, 2000);
+
+    // Remove ring wave after animation
+    setTimeout(() => {
+      setRingWaves(prev => prev.filter(r => r.id !== newRingWave.id));
+    }, 1000);
+  }, []);
 
   // Generate sparkles periodically
   useEffect(() => {
@@ -174,6 +287,63 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
             </motion.div>
           ))}
         </AnimatePresence>
+
+        {/* Burst sparkles on click */}
+        <AnimatePresence>
+          {burstSparkles.map((sparkle) => {
+            const endX = sparkle.x + Math.cos((sparkle.angle * Math.PI) / 180) * sparkle.distance;
+            const endY = sparkle.y + Math.sin((sparkle.angle * Math.PI) / 180) * sparkle.distance;
+            
+            return (
+              <motion.div
+                key={sparkle.id}
+                className="absolute"
+                style={{
+                  left: sparkle.x,
+                  top: sparkle.y,
+                  width: sparkle.size,
+                  height: sparkle.size,
+                }}
+                initial={{ opacity: 1, scale: 1.5, x: 0, y: 0 }}
+                animate={{ 
+                  opacity: 0, 
+                  scale: 0.5, 
+                  x: endX - sparkle.x, 
+                  y: endY - sparkle.y 
+                }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <svg viewBox="0 0 24 24" fill={sparkle.color} className="w-full h-full">
+                  <path d="M12 0L14 10L24 12L14 14L12 24L10 14L0 12L10 10L12 0Z" />
+                </svg>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {/* Ring waves on click */}
+        <AnimatePresence>
+          {ringWaves.map((ring) => (
+            <motion.div
+              key={ring.id}
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                left: ring.x,
+                top: ring.y,
+                borderWidth: 3,
+                borderStyle: "solid",
+                borderColor: ring.color,
+                marginLeft: -5,
+                marginTop: -5,
+              }}
+              initial={{ width: 10, height: 10, opacity: 1 }}
+              animate={{ width: 120, height: 120, opacity: 0, marginLeft: -60, marginTop: -60 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            />
+          ))}
+        </AnimatePresence>
       </div>
 
       {/* Fairies */}
@@ -190,7 +360,7 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
           initial={{ rotate: fairy.startAngle }}
           animate={{ rotate: fairy.startAngle + (360 * fairy.direction) }}
           transition={{
-            duration: fairy.duration,
+            duration: clickedFairy === fairy.id ? fairy.duration * 0.5 : fairy.duration,
             repeat: Infinity,
             ease: "linear",
             delay: fairy.delay,
@@ -220,8 +390,11 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
                 background: `radial-gradient(circle, ${fairy.sparkleColor}40 0%, transparent 70%)`,
                 transform: "scale(1.5)",
               }}
-              animate={{ opacity: [0.4, 0.8, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              animate={{ 
+                opacity: clickedFairy === fairy.id ? [0.8, 1, 0.8] : [0.4, 0.8, 0.4],
+                scale: clickedFairy === fairy.id ? [1.8, 2.2, 1.8] : 1.5,
+              }}
+              transition={{ duration: clickedFairy === fairy.id ? 0.3 : 2, repeat: Infinity }}
             />
             
             {/* Counter-rotate and flutter */}
@@ -229,22 +402,34 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
               className="cursor-pointer pointer-events-auto"
               animate={{
                 rotate: [0, -5, 0, 5, 0],
-                scale: [1, 1.05, 1, 0.95, 1],
+                scale: clickedFairy === fairy.id ? [1.3, 1.5, 1.3] : [1, 1.05, 1, 0.95, 1],
               }}
               transition={{
-                duration: 2,
+                duration: clickedFairy === fairy.id ? 0.5 : 2,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
               whileHover={{ scale: 1.2 }}
               onMouseEnter={() => handleFairyHover(fairy.id, fairy.note)}
+              onClick={() => handleFairyClick(
+                fairy.id, 
+                fairy.note, 
+                fairy.sparkleColor, 
+                fairy.distance, 
+                fairy.startAngle, 
+                fairy.direction, 
+                fairy.duration, 
+                fairy.delay
+              )}
             >
               <motion.img
                 src={fairy.image}
                 alt="Floating fairy"
                 className="w-full h-full object-contain"
                 style={{
-                  filter: `drop-shadow(0 0 8px ${fairy.sparkleColor})`,
+                  filter: clickedFairy === fairy.id 
+                    ? `drop-shadow(0 0 20px ${fairy.sparkleColor}) drop-shadow(0 0 40px ${fairy.sparkleColor}) brightness(1.3)`
+                    : `drop-shadow(0 0 8px ${fairy.sparkleColor})`,
                 }}
                 animate={{
                   rotate: fairy.direction === 1 
