@@ -39,6 +39,8 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.credits": "Credits",
     "nav.chat": "Trò chuyện",
     "nav.meditation": "Thiền định",
+    "nav.whitepaper": "Whitepaper",
+    "nav.lightScore": "Điểm Ánh Sáng",
     
     // Common buttons (iOS/Android style)
     "common.save": "Lưu",
@@ -518,7 +520,6 @@ const translations: Record<Language, Record<string, string>> = {
     "lightScore.avgEnergy": "Năng lượng TB",
     "lightScore.noChartData": "Chưa có dữ liệu biểu đồ",
     "lightScore.noBehaviors": "Chưa có hành vi nào được ghi nhận",
-    "nav.lightScore": "Điểm Ánh Sáng",
   },
   en: {
     // Navigation
@@ -533,6 +534,8 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.credits": "Credits",
     "nav.chat": "Chat",
     "nav.meditation": "Meditation",
+    "nav.whitepaper": "Whitepaper",
+    "nav.lightScore": "Light Score",
     
     // Common buttons (iOS/Android style)
     "common.save": "Save",
@@ -1012,7 +1015,6 @@ const translations: Record<Language, Record<string, string>> = {
     "lightScore.avgEnergy": "Avg Energy",
     "lightScore.noChartData": "No chart data yet",
     "lightScore.noBehaviors": "No behaviors recorded yet",
-    "nav.lightScore": "Light Score",
   },
   zh: {
     // Navigation
@@ -1025,7 +1027,8 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.studio": "工作室",
     "nav.friends": "朋友",
     "nav.credits": "积分",
-    
+    "nav.whitepaper": "白皮书",
+    "nav.lightScore": "光能分数",
     // Common buttons
     "common.save": "保存",
     "common.cancel": "取消",
@@ -1190,7 +1193,8 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.studio": "スタジオ",
     "nav.friends": "友達",
     "nav.credits": "クレジット",
-    
+    "nav.whitepaper": "ホワイトペーパー",
+    "nav.lightScore": "ライトスコア",
     // Common buttons
     "common.save": "保存",
     "common.cancel": "キャンセル",
@@ -1355,7 +1359,8 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.studio": "스튜디오",
     "nav.friends": "친구",
     "nav.credits": "크레딧",
-    
+    "nav.whitepaper": "백서",
+    "nav.lightScore": "빛 점수",
     // Common buttons
     "common.save": "저장",
     "common.cancel": "취소",
@@ -1520,7 +1525,8 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.studio": "Studio",
     "nav.friends": "Amis",
     "nav.credits": "Crédits",
-    
+    "nav.whitepaper": "Livre blanc",
+    "nav.lightScore": "Score Lumière",
     // Common buttons
     "common.save": "Enregistrer",
     "common.cancel": "Annuler",

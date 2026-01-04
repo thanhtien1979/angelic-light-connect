@@ -39,6 +39,7 @@ const navLinksConfig: NavLink[] = [
   { id: "hero", labelKey: "nav.home" },
   { id: "chat", labelKey: "nav.chat" },
   { id: "meditation", labelKey: "nav.meditation" },
+  { id: "whitepaper", labelKey: "nav.whitepaper", isPage: true, path: "/camly-whitepaper" },
   { id: "testimonials", labelKey: "nav.testimonials", isPage: true, path: "/testimonials" },
   { id: "studio", labelKey: "nav.studio", isPage: true, path: "/studio" },
   { id: "community", labelKey: "nav.community", isPage: true, path: "/community", showBadge: true },
