@@ -482,6 +482,23 @@ const translations: Record<Language, Record<string, string>> = {
     "a11y.notifications": "Thông báo",
     "a11y.profile": "Hồ sơ",
     "a11y.home": "Trang chủ",
+    
+    // Light Score
+    "lightScore.title": "Điểm Ánh Sáng",
+    "lightScore.subtitle": "Theo dõi năng lượng tâm linh của bạn",
+    "lightScore.ascending": "Tần số đang thăng hoa",
+    "lightScore.stable": "Năng lượng ổn định",
+    "lightScore.descending": "Cần được nâng đỡ",
+    "lightScore.chart7Days": "Năng lượng 7 ngày qua",
+    "lightScore.recentBehaviors": "Hành vi gần đây",
+    "lightScore.angelMessage": "Thông điệp từ Angel",
+    "lightScore.positive": "Tích cực",
+    "lightScore.negative": "Tiêu cực",
+    "lightScore.neutral": "Trung tính",
+    "lightScore.avgEnergy": "Năng lượng TB",
+    "lightScore.noChartData": "Chưa có dữ liệu biểu đồ",
+    "lightScore.noBehaviors": "Chưa có hành vi nào được ghi nhận",
+    "nav.lightScore": "Điểm Ánh Sáng",
   },
   en: {
     // Navigation
@@ -950,6 +967,23 @@ const translations: Record<Language, Record<string, string>> = {
     "a11y.notifications": "Notifications",
     "a11y.profile": "Profile",
     "a11y.home": "Home",
+    
+    // Light Score
+    "lightScore.title": "Light Score",
+    "lightScore.subtitle": "Track your spiritual energy",
+    "lightScore.ascending": "Frequency is rising",
+    "lightScore.stable": "Energy is stable",
+    "lightScore.descending": "Needs support",
+    "lightScore.chart7Days": "Energy over 7 days",
+    "lightScore.recentBehaviors": "Recent behaviors",
+    "lightScore.angelMessage": "Message from Angel",
+    "lightScore.positive": "Positive",
+    "lightScore.negative": "Negative",
+    "lightScore.neutral": "Neutral",
+    "lightScore.avgEnergy": "Avg Energy",
+    "lightScore.noChartData": "No chart data yet",
+    "lightScore.noBehaviors": "No behaviors recorded yet",
+    "nav.lightScore": "Light Score",
   },
   zh: {
     // Navigation

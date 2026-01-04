@@ -43,6 +43,7 @@ const navLinksConfig: NavLink[] = [
   { id: "studio", labelKey: "nav.studio", isPage: true, path: "/studio" },
   { id: "community", labelKey: "nav.community", isPage: true, path: "/community", showBadge: true },
   { id: "friends", labelKey: "nav.friends", isPage: true, path: "/friends", showBadge: true },
+  { id: "light-score", labelKey: "nav.lightScore", isPage: true, path: "/diem-anh-sang" },
 ];
 
 const BLESSING_MESSAGES = [
