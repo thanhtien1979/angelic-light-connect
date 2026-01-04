@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil, User, Camera } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil, User, Camera, Share2 } from "lucide-react";
 import CopyMessageButton from "@/components/CopyMessageButton";
 import ShareMessageButton from "@/components/ShareMessageButton";
 import SpeakMessageButton from "@/components/SpeakMessageButton";
@@ -21,6 +21,7 @@ import FormattedChatText from "@/components/FormattedChatText";
 import EmotionalIndicator, { detectEmotion } from "@/components/EmotionalIndicator";
 import BreathingExercise from "@/components/BreathingExercise";
 import TurnstileVerificationDialog from "@/components/TurnstileVerificationDialog";
+import ShareConversationDialog from "@/components/ShareConversationDialog";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import chatPortalVideo from "@/assets/chat-portal-video.mp4";
 import { toast } from "sonner";
@@ -152,6 +153,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [pendingMessage, setPendingMessage] = useState<{ content: string; images?: Array<{ type: "image"; base64: string; mimeType: string }> } | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -549,6 +551,18 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+                {/* Share conversation button */}
+                {messages.length > 0 && (
+                  <motion.button
+                    onClick={() => setShowShareDialog(true)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="p-2 rounded-full hover:bg-rose-light/30 transition-colors group"
+                    title="Chia sẻ cuộc trò chuyện"
+                  >
+                    <Share2 className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </motion.button>
+                )}
                 {/* Start New Conversation button */}
                 <motion.button
                   onClick={handleStartNewConversation}
@@ -1223,6 +1237,13 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
           setShowVerificationDialog(false);
           setPendingMessage(null);
         }}
+      />
+
+      {/* Share Conversation Dialog */}
+      <ShareConversationDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        messages={messages}
       />
       </div>
     </section>

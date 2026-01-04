@@ -16,6 +16,7 @@ import AdminTestimonials from "./pages/AdminTestimonials";
 import AdminUsers from "./pages/AdminUsers";
 import LightLaw from "./pages/LightLaw";
 import Settings from "./pages/Settings";
+import SharedConversation from "./pages/SharedConversation";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -92,6 +93,7 @@ const App = () => (
                     <Route path="/admin/testimonials" element={<AdminTestimonials />} />
                     <Route path="/admin/users" element={<AdminUsers />} />
                     <Route path="/luat-anh-sang" element={<LightLaw />} />
+                    <Route path="/share/:shareId" element={<SharedConversation />} />
                     <Route
                       path="/profile"
                       element={
