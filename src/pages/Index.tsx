@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NavigationHeader from "@/components/NavigationHeader";
 import HeroSection from "@/components/HeroSection";
 import SacredPillars from "@/components/SacredPillars";
@@ -21,6 +21,15 @@ import StardustTrail from "@/components/StardustTrail";
 
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isAppReady, setIsAppReady] = useState(false);
+
+  useEffect(() => {
+    // Trigger fade-in after first mount
+    const timer = requestAnimationFrame(() => {
+      setIsAppReady(true);
+    });
+    return () => cancelAnimationFrame(timer);
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
@@ -43,7 +52,13 @@ const Index = () => {
       <NavigationHeader />
       
       {/* Content */}
-      <main className="relative z-10">
+      <main 
+        className={`relative z-10 transition-all duration-500 ease-out motion-reduce:transition-none ${
+          isAppReady 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-2'
+        }`}
+      >
         <HeroSection onOpenAuth={() => setIsAuthOpen(true)} />
         <SacredPillars />
         <VisionMission />
