@@ -1715,6 +1715,11 @@ const detectLanguage = (): Language => {
   return "vi"; // Default to Vietnamese
 };
 
+// RTL languages list
+const RTL_LANGUAGES: Language[] = ["ar"];
+
+const isRTL = (lang: Language): boolean => RTL_LANGUAGES.includes(lang);
+
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
@@ -1724,8 +1729,17 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(LANGUAGE_KEY, language);
     // Update document lang attribute for accessibility
     document.documentElement.lang = language;
-    // Set text direction (for future RTL support)
-    document.documentElement.dir = "ltr"; // All current languages are LTR
+    // Set text direction based on language
+    const dir = isRTL(language) ? "rtl" : "ltr";
+    document.documentElement.dir = dir;
+    // Also set the dir attribute on body for better compatibility
+    document.body.dir = dir;
+    // Add/remove RTL class for custom styling
+    if (isRTL(language)) {
+      document.documentElement.classList.add("rtl");
+    } else {
+      document.documentElement.classList.remove("rtl");
+    }
   }, [language]);
 
   const setLanguage = useCallback((lang: Language) => {
@@ -1751,3 +1765,6 @@ export const useLanguage = (): LanguageContextType => {
   }
   return context;
 };
+
+// Export RTL helper for components that need it
+export { isRTL };
