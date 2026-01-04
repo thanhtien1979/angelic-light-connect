@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { UserPlus, Sparkles, Loader2 } from "lucide-react";
+import { UserPlus, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFollow } from "@/hooks/useFollow";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 
 interface SuggestedUser {
@@ -138,9 +139,18 @@ export const FollowSuggestions = () => {
   if (!user || isLoading) {
     return (
       <div className="p-4 rounded-2xl bg-card/60 border border-border/50">
-        <div className="flex items-center justify-center py-6">
-          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2 rounded-lg bg-gold/20">
+            <Sparkles className="w-4 h-4 text-gold" />
+          </div>
+          <div>
+            <h3 className="font-medium text-foreground">Gợi ý theo dõi</h3>
+            <p className="text-xs text-muted-foreground">
+              Những linh hồn bạn có thể biết
+            </p>
+          </div>
         </div>
+        <SkeletonList count={3} compact />
       </div>
     );
   }

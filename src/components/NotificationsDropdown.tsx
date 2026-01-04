@@ -22,6 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SkeletonNotification } from "@/components/ui/skeleton";
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -243,8 +244,10 @@ export const NotificationsDropdown = () => {
         {/* Notifications List */}
         <ScrollArea className="max-h-[400px]">
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+            <div className="p-3 space-y-2">
+              <SkeletonNotification />
+              <SkeletonNotification />
+              <SkeletonNotification />
             </div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-8 px-4">
