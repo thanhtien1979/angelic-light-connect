@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil, User, Camera } from "lucide-react";
 import CopyMessageButton from "@/components/CopyMessageButton";
@@ -24,6 +24,8 @@ import TurnstileVerificationDialog from "@/components/TurnstileVerificationDialo
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import chatPortalVideo from "@/assets/chat-portal-video.mp4";
 import { toast } from "sonner";
+import { getUserInitials, getAvatarColor } from "@/lib/userInitials";
+import { useAuth } from "@/hooks/useAuth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -111,6 +113,7 @@ const shouldShowDailyBlessing = (): boolean => {
 };
 
 const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
+  const { user } = useAuth();
   const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, editMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
   const { summary, clearSummary } = useConversationSummary();
   const { isEnabled: isFeedbackEnabled, toggleFeedback, playSendFeedback, playNewConversationFeedback, enableAudioContext } = useFeedback();
@@ -118,6 +121,16 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { tryAwardChatReward, lastRewardResult, showNotification: showCoinNotification, dismissNotification: dismissCoinNotification } = useChatReward();
   const { isRecording, isTranscribing, startRecording, stopRecording, cancelRecording } = useVoiceRecording();
   const { avatarUrl, isUploading: isUploadingAvatar, uploadAvatar } = useUserAvatar();
+  
+  // Compute user initials and avatar color for fallback
+  const userInitials = useMemo(() => {
+    return getUserInitials(user?.user_metadata?.display_name, user?.email);
+  }, [user?.user_metadata?.display_name, user?.email]);
+  
+  const userAvatarColor = useMemo(() => {
+    const identifier = user?.user_metadata?.display_name || user?.email || "user";
+    return getAvatarColor(identifier);
+  }, [user?.user_metadata?.display_name, user?.email]);
   const [inputValue, setInputValue] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -966,8 +979,8 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                             className="w-8 h-8 rounded-full object-cover border border-primary/30 shadow-md"
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/30 flex items-center justify-center shadow-md">
-                            <User className="w-4 h-4 text-primary" />
+                          <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${userAvatarColor} flex items-center justify-center shadow-md text-white text-xs font-medium`}>
+                            {userInitials}
                           </div>
                         )}
                         {/* Upload button on hover - only for authenticated users */}

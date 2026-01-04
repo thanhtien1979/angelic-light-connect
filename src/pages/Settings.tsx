@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2 } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -21,8 +21,11 @@ import { cn } from "@/lib/utils";
 import { SyncIndicator } from "@/components/AngelPresence/SyncIndicator";
 import { useLightBurst, LIGHT_BURST_COLORS, LIGHT_BURST_SIZES, LIGHT_BURST_EFFECTS, LightBurstSettings, LightBurstSize, LightBurstEffect } from "@/contexts/LightBurstContext";
 import { ResetConfirmDialog } from "@/components/AngelPresence/ResetConfirmDialog";
+import { useUserAvatar } from "@/hooks/useUserAvatar";
+import { getUserInitials, getAvatarColor } from "@/lib/userInitials";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type SettingsSection = "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
+type SettingsSection = "profile" | "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
 type ThemeOption = "light" | "dark" | "system" | "twilight" | "ocean" | "forest" | "midnight" | "sunrise";
 
 interface NotificationSettings {
@@ -38,8 +41,10 @@ const Settings = () => {
   const { settings: soundSettings, updateSetting: updateSoundSetting, prefersReducedMotion } = useSoundSettings();
   const { settings: lightBurstSettings, updateSetting: updateLightBurstSetting } = useLightBurst();
   const { language, setLanguage, t } = useLanguage();
+  const { avatarUrl, isUploading: isUploadingAvatar, uploadAvatar, removeAvatar } = useUserAvatar();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [mounted, setMounted] = useState(false);
-  const [activeSection, setActiveSection] = useState<SettingsSection>("angel");
+  const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
   const {
     isEnabled: angelEnabled,
     style: angelStyle,
@@ -108,6 +113,12 @@ const Settings = () => {
   };
 
   const sections = [
+    {
+      id: "profile" as const,
+      label: "Hồ sơ",
+      icon: User,
+      description: "Ảnh đại diện và thông tin cá nhân",
+    },
     {
       id: "angel" as const,
       label: t("settings.angel.title"),
@@ -287,6 +298,125 @@ const Settings = () => {
             className="lg:col-span-3"
           >
             <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+              {/* Profile Section */}
+              {activeSection === "profile" && (
+                <>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="h-5 w-5 text-primary" />
+                      Hồ sơ cá nhân
+                    </CardTitle>
+                    <CardDescription>
+                      Quản lý ảnh đại diện và thông tin cá nhân của bạn
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {user ? (
+                      <>
+                        {/* Avatar Section */}
+                        <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-xl bg-muted/30 border border-border/50">
+                          {/* Avatar Display */}
+                          <div className="relative group">
+                            <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-primary/20 shadow-lg">
+                              {avatarUrl ? (
+                                <AvatarImage src={avatarUrl} alt="Avatar" className="object-cover" />
+                              ) : null}
+                              <AvatarFallback className={`bg-gradient-to-br ${getAvatarColor(user?.user_metadata?.display_name || user?.email || "user")} text-white text-2xl sm:text-3xl font-medium`}>
+                                {getUserInitials(user?.user_metadata?.display_name, user?.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                            
+                            {/* Upload overlay on hover */}
+                            <motion.button
+                              onClick={() => avatarInputRef.current?.click()}
+                              className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              disabled={isUploadingAvatar}
+                            >
+                              {isUploadingAvatar ? (
+                                <Loader2 className="w-8 h-8 text-white animate-spin" />
+                              ) : (
+                                <Camera className="w-8 h-8 text-white" />
+                              )}
+                            </motion.button>
+                          </div>
+                          
+                          {/* Avatar Actions */}
+                          <div className="flex-1 text-center sm:text-left space-y-4">
+                            <div>
+                              <h3 className="text-lg font-medium text-foreground">
+                                {user?.user_metadata?.display_name || "Chưa có tên hiển thị"}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">{user?.email}</p>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => avatarInputRef.current?.click()}
+                                disabled={isUploadingAvatar}
+                                className="gap-2"
+                              >
+                                {isUploadingAvatar ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Camera className="w-4 h-4" />
+                                )}
+                                {avatarUrl ? "Đổi ảnh" : "Tải ảnh lên"}
+                              </Button>
+                              
+                              {avatarUrl && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={removeAvatar}
+                                  className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Xóa ảnh
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Hidden file input */}
+                          <input
+                            ref={avatarInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                uploadAvatar(file);
+                              }
+                              e.target.value = "";
+                            }}
+                          />
+                        </div>
+                        
+                        {/* Info Note */}
+                        <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
+                          <p className="text-xs text-muted-foreground flex items-start gap-2">
+                            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                            <span>
+                              <span className="font-medium text-primary">Lưu ý:</span> Ảnh đại diện sẽ được hiển thị trong tin nhắn chat và hồ sơ của bạn. Kích thước tối đa 2MB.
+                            </span>
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-4">
+                        <User className="h-12 w-12 opacity-50" />
+                        <p>Vui lòng đăng nhập để quản lý hồ sơ</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </>
+              )}
+
               {activeSection === "angel" && (
                 <>
                   <CardHeader>
