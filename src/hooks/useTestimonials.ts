@@ -103,6 +103,8 @@ export const useTestimonials = () => {
   const [sortBy, setSortBy] = useState<SortBy>("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
   // Fetch user's likes
   const fetchUserLikes = useCallback(async () => {
@@ -183,6 +185,20 @@ export const useTestimonials = () => {
           );
         }
 
+        // Apply date filter
+        if (dateFrom) {
+          testimonialsWithProfiles = testimonialsWithProfiles.filter(t => 
+            new Date(t.created_at) >= dateFrom
+          );
+        }
+        if (dateTo) {
+          const endOfDay = new Date(dateTo);
+          endOfDay.setHours(23, 59, 59, 999);
+          testimonialsWithProfiles = testimonialsWithProfiles.filter(t => 
+            new Date(t.created_at) <= endOfDay
+          );
+        }
+
         setTestimonials(testimonialsWithProfiles);
       } else {
         // Use sample testimonials if no approved ones exist
@@ -203,7 +219,7 @@ export const useTestimonials = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [sortBy, searchQuery, selectedTags, userLikes]);
+  }, [sortBy, searchQuery, selectedTags, dateFrom, dateTo, userLikes]);
 
   // Fetch user's own testimonial
   const fetchUserTestimonial = useCallback(async () => {
@@ -517,6 +533,10 @@ export const useTestimonials = () => {
     setSearchQuery,
     selectedTags,
     setSelectedTags,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
     submitTestimonial,
     deleteTestimonial,
     toggleLike,
