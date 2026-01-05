@@ -11,6 +11,7 @@ import camlyCoinAvatar from "@/assets/camly-coin-avatar.png";
 import funFarmAvatar from "@/assets/fun-farm-avatar.png";
 import funEcosystemLogo from "@/assets/fun-ecosystem-logo.png";
 import funPlayAvatar from "@/assets/fun-play-avatar.png";
+import funPlanetAvatar from "@/assets/fun-planet-avatar.png";
 
 interface Platform {
   name: string;
@@ -62,7 +63,7 @@ const platforms: Platform[] = [
     name: "FUN Planet",
     subtitle: "Thế Giới Trẻ Em",
     description: "Vortex trẻ em - Vườn ươm ánh sáng cho thế hệ tương lai",
-    icon: <Globe className="w-8 h-8" />,
+    icon: <img src={funPlanetAvatar} alt="FUN Planet" className="w-12 h-12 object-cover rounded-full ring-2 ring-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.6)]" />,
     color: "from-cyan-400 to-teal-500",
     glowColor: "shadow-cyan-400/50",
     link: "https://planet.fun.rich/"
