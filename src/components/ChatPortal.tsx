@@ -1158,7 +1158,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     onPaste={handlePaste}
                     placeholder={isInitializing ? "Đang chuẩn bị..." : "Gửi thông điệp đến Angel AI..."}
                     disabled={isInputDisabled}
-                    className="w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-full bg-white/80 backdrop-blur border-2 border-rose-soft/40 focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50 text-sm sm:text-base"
+                    className="w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-full bg-white/80 backdrop-blur border-2 border-rose-soft/40 focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50 text-sm sm:text-base text-amber-900 font-medium"
                   />
                   {isInitializing && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
