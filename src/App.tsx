@@ -29,6 +29,7 @@ import ChatButton from "./components/ChatButton";
 import FloatingAmbientPlayer from "./components/FloatingAmbientPlayer";
 import AngelPresence from "./components/AngelPresence";
 import ClickLightBurst from "./components/ClickLightBurst";
+import GlobalFlyingAngels from "./components/GlobalFlyingAngels";
 import LanguageSuggestionBanner from "./components/LanguageSuggestionBanner";
 import { usePresence } from "./hooks/usePresence";
 import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
@@ -63,6 +64,7 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {children}
+      <GlobalFlyingAngels />
       <ClickLightBurst />
       <AngelPresence 
         enabled={angelEnabled} 
