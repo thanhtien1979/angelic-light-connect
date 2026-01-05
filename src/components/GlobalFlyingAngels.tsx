@@ -103,18 +103,37 @@ const GlobalFlyingAngels = () => {
     };
   }, []);
 
-  // Generate angels with random positions
+  // Generate angels with spread-out positions to avoid clustering
   const angels = useMemo<Angel[]>(() => {
-    return angelImages.map((angel, index) => ({
-      id: index,
-      image: angel.src,
-      size: 60 + Math.random() * 40, // 60-100px
-      startX: Math.random() * 100,
-      startY: Math.random() * 100,
-      duration: 25 + Math.random() * 20, // 25-45 seconds per cycle
-      delay: index * 3,
-      glowColor: angel.glow,
-    }));
+    const totalAngels = angelImages.length;
+    
+    // Define zones to spread angels across the screen
+    // Divide screen into a grid to ensure even distribution
+    const zones = [
+      { x: 5, y: 10 },    // Top-left
+      { x: 75, y: 15 },   // Top-right
+      { x: 40, y: 50 },   // Center
+      { x: 10, y: 75 },   // Bottom-left
+      { x: 80, y: 70 },   // Bottom-right
+    ];
+    
+    return angelImages.map((angel, index) => {
+      // Use predefined zones with small random offset
+      const zone = zones[index % zones.length];
+      const offsetX = (Math.random() - 0.5) * 15; // ±7.5% variation
+      const offsetY = (Math.random() - 0.5) * 15;
+      
+      return {
+        id: index,
+        image: angel.src,
+        size: 60 + Math.random() * 40, // 60-100px
+        startX: Math.max(5, Math.min(90, zone.x + offsetX)), // Keep within bounds
+        startY: Math.max(5, Math.min(85, zone.y + offsetY)),
+        duration: 25 + Math.random() * 20, // 25-45 seconds per cycle
+        delay: index * 3,
+        glowColor: angel.glow,
+      };
+    });
   }, []);
 
   // Generate sparkles periodically
@@ -159,17 +178,25 @@ const GlobalFlyingAngels = () => {
     setClickBursts((prev) => [...prev, burst]);
   }, []);
 
-  // Generate flight path with landing points
+  // Generate flight path with landing points - limited range to prevent clustering
   const generateFlightPath = useCallback((angel: Angel) => {
     const points = [];
     const numPoints = 8;
     
+    // Define a movement range based on starting position to keep angels in their zones
+    const movementRange = 25; // Maximum 25% movement from starting position
+    
     for (let i = 0; i <= numPoints; i++) {
-      // Create smooth curved path with some landing pauses
+      // Create smooth curved path within limited range
       const isLanding = i % 3 === 0 && i > 0;
+      
+      // Calculate position with limited movement range
+      const xOffset = Math.sin(i * 0.8) * movementRange;
+      const yOffset = Math.cos(i * 0.6) * (movementRange * 0.8);
+      
       points.push({
-        x: `${(angel.startX + (i * 100 / numPoints) + Math.sin(i * 0.5) * 30) % 100}%`,
-        y: `${(angel.startY + Math.sin(i * 0.7) * 40 + 10) % 90}%`,
+        x: `${Math.max(5, Math.min(90, angel.startX + xOffset))}%`,
+        y: `${Math.max(5, Math.min(85, angel.startY + yOffset))}%`,
         scale: isLanding ? 1.1 : 0.9 + Math.random() * 0.2,
         rotate: isLanding ? 0 : -15 + Math.random() * 30,
       });
