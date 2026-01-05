@@ -347,14 +347,57 @@ const MobileDropdownItem = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const IconComponent = link.icon;
 
+  // Stagger animation variants for sub-items
+  const containerVariants = {
+    hidden: { height: 0, opacity: 0 },
+    visible: { 
+      height: "auto", 
+      opacity: 1,
+      transition: {
+        type: "spring" as const,
+        stiffness: 300,
+        damping: 30,
+        opacity: { duration: 0.2 },
+        staggerChildren: 0.08,
+        delayChildren: 0.05
+      }
+    },
+    exit: { 
+      height: 0, 
+      opacity: 0,
+      transition: {
+        type: "spring" as const,
+        stiffness: 400,
+        damping: 35,
+        opacity: { duration: 0.15 }
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -15 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: {
+        type: "spring" as const,
+        stiffness: 350,
+        damping: 25
+      }
+    },
+    exit: { opacity: 0, x: -10 }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ delay: index * 0.05, type: "spring", stiffness: 300, damping: 25 }}
     >
-      <button
+      <motion.button
         onClick={() => setIsExpanded(!isExpanded)}
+        whileHover={{ x: 5, backgroundColor: "hsla(45, 80%, 60%, 0.1)" }}
+        whileTap={{ scale: 0.98 }}
         className={`flex items-center justify-between w-full text-left px-4 py-3 rounded-xl transition-colors font-medium ${
           activeSection === link.id
             ? "bg-gold/15 text-gold"
@@ -367,19 +410,19 @@ const MobileDropdownItem = ({
         </span>
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
           <ChevronRight className="w-4 h-4 opacity-60" />
         </motion.div>
-      </button>
+      </motion.button>
       
       <AnimatePresence>
         {isExpanded && link.subItems && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="overflow-hidden"
           >
             <div className="pl-6 py-1 space-y-1">
@@ -389,30 +432,34 @@ const MobileDropdownItem = ({
                 
                 if (isHashLink) {
                   return (
-                    <button
+                    <motion.button
                       key={subItem.path}
+                      variants={itemVariants}
+                      whileHover={{ x: 5, backgroundColor: "hsla(var(--primary), 0.1)" }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => {
                         scrollToSection(subItem.path.replace("#", ""));
                         onClose();
                       }}
-                      className="flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm text-foreground/80 hover:bg-primary/10 hover:text-primary transition-colors"
+                      className="flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm text-foreground/80 hover:text-primary transition-colors"
                     >
                       <SubIcon className="w-4 h-4 text-primary/60" />
                       {subItem.labelKey}
-                    </button>
+                    </motion.button>
                   );
                 }
                 
                 return (
-                  <Link
-                    key={subItem.path}
-                    to={subItem.path}
-                    onClick={onClose}
-                    className="flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm text-foreground/80 hover:bg-primary/10 hover:text-primary transition-colors"
-                  >
-                    <SubIcon className="w-4 h-4 text-primary/60" />
-                    {subItem.labelKey}
-                  </Link>
+                  <motion.div key={subItem.path} variants={itemVariants}>
+                    <Link
+                      to={subItem.path}
+                      onClick={onClose}
+                      className="flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm text-foreground/80 hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <SubIcon className="w-4 h-4 text-primary/60" />
+                      {subItem.labelKey}
+                    </Link>
+                  </motion.div>
                 );
               })}
             </div>
@@ -523,37 +570,63 @@ const NavigationHeader = () => {
                           >
                             <IconComponent className="w-3.5 h-3.5" />
                             {t(link.labelKey)}
-                            <ChevronDown className="w-3 h-3 opacity-60" />
+                            <motion.span
+                              initial={false}
+                              className="inline-flex"
+                            >
+                              <ChevronDown className="w-3 h-3 opacity-60" />
+                            </motion.span>
                           </motion.button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
                           align="center" 
-                          className="z-50 bg-card/95 backdrop-blur-md border-primary/20 shadow-xl min-w-[180px]"
+                          className="z-50 bg-card/95 backdrop-blur-md border-primary/20 shadow-xl min-w-[180px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2"
+                          sideOffset={8}
                         >
-                          <DropdownMenuItem 
-                            onClick={() => scrollToSection(link.id)}
-                            className="cursor-pointer hover:bg-primary/10 gap-2"
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 25, duration: 0.2 }}
                           >
-                            <IconComponent className="w-4 h-4" />
-                            <span>{t(link.labelKey)}</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {link.subItems.map((subItem, idx) => {
-                            const SubIcon = subItem.icon;
-                            return (
-                              <DropdownMenuItem
-                                key={idx}
-                                onClick={() => {
-                                  const sectionId = subItem.path.replace('#', '');
-                                  scrollToSection(sectionId);
-                                }}
-                                className="cursor-pointer hover:bg-primary/10 gap-2"
+                            <DropdownMenuItem 
+                              onClick={() => scrollToSection(link.id)}
+                              className="cursor-pointer hover:bg-primary/10 gap-2"
+                            >
+                              <motion.div
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.05 }}
+                                className="flex items-center gap-2 w-full"
                               >
-                                <SubIcon className="w-4 h-4" />
-                                <span>{subItem.labelKey}</span>
-                              </DropdownMenuItem>
-                            );
-                          })}
+                                <IconComponent className="w-4 h-4" />
+                                <span>{t(link.labelKey)}</span>
+                              </motion.div>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {link.subItems.map((subItem, idx) => {
+                              const SubIcon = subItem.icon;
+                              return (
+                                <DropdownMenuItem
+                                  key={idx}
+                                  onClick={() => {
+                                    const sectionId = subItem.path.replace('#', '');
+                                    scrollToSection(sectionId);
+                                  }}
+                                  className="cursor-pointer hover:bg-primary/10 gap-2"
+                                >
+                                  <motion.div
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.08 + idx * 0.05 }}
+                                    className="flex items-center gap-2 w-full"
+                                  >
+                                    <SubIcon className="w-4 h-4" />
+                                    <span>{subItem.labelKey}</span>
+                                  </motion.div>
+                                </DropdownMenuItem>
+                              );
+                            })}
+                          </motion.div>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     );
@@ -695,10 +768,15 @@ const NavigationHeader = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, y: -20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -15, scale: 0.98 }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 350, 
+              damping: 30,
+              opacity: { duration: 0.2 }
+            }}
             className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/30 shadow-lg md:hidden max-h-[80vh] overflow-y-auto"
           >
             <nav className="flex flex-col p-4 gap-1">
