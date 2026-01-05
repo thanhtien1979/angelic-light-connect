@@ -15,6 +15,7 @@ import Testimonials from "./pages/Testimonials";
 import TestimonialCategory from "./pages/TestimonialCategory";
 import AdminTestimonials from "./pages/AdminTestimonials";
 import AdminUsers from "./pages/AdminUsers";
+import AdminCommentReports from "./pages/AdminCommentReports";
 import LightLaw from "./pages/LightLaw";
 import LightScore from "./pages/LightScore";
 import Settings from "./pages/Settings";
@@ -99,6 +100,7 @@ const App = () => (
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/admin/testimonials" element={<AdminTestimonials />} />
                     <Route path="/admin/users" element={<AdminUsers />} />
+                    <Route path="/admin/comment-reports" element={<AdminCommentReports />} />
                     <Route path="/luat-anh-sang" element={<LightLaw />} />
                     <Route path="/diem-anh-sang" element={<LightScore />} />
                     <Route path="/share/:shareId" element={<SharedConversation />} />
