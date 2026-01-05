@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTestimonials, Testimonial } from "@/hooks/useTestimonials";
+import { useTestimonialTags } from "@/hooks/useTestimonialTags";
 import { useR2Upload } from "@/hooks/useR2Upload";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useTestimonialBadges, BadgeType } from "@/hooks/useTestimonialBadges";
@@ -31,6 +32,8 @@ import TestimonialComments from "@/components/TestimonialComments";
 import TestimonialShareDialog from "@/components/TestimonialShareDialog";
 import FeaturedTestimonialsCarousel from "@/components/FeaturedTestimonialsCarousel";
 import TestimonialBadges from "@/components/TestimonialBadges";
+import TestimonialTagSelector from "@/components/TestimonialTagSelector";
+import TestimonialTagDisplay from "@/components/TestimonialTagDisplay";
 
 
 const TestimonialCard = ({ 
@@ -95,6 +98,13 @@ const TestimonialCard = ({
           <p className="text-foreground/90 mb-4 leading-relaxed italic font-serif flex-1">
             "{testimonial.testimony}"
           </p>
+
+          {/* Tags */}
+          {testimonial.tags && testimonial.tags.length > 0 && (
+            <div className="mb-3">
+              <TestimonialTagDisplay tags={testimonial.tags} size="xs" />
+            </div>
+          )}
 
           {/* Image if exists */}
           {testimonial.image_url && (
@@ -184,6 +194,7 @@ const Testimonials = () => {
   const { user, isAuthenticated } = useAuth();
   const { isAdmin } = useAdminRole();
   const { badgeInfoList } = useTestimonialBadges();
+  const { tags: availableTags } = useTestimonialTags();
   const { 
     testimonials, 
     featuredTestimonials,
@@ -194,6 +205,8 @@ const Testimonials = () => {
     setSortBy,
     searchQuery,
     setSearchQuery,
+    selectedTags,
+    setSelectedTags,
     submitTestimonial,
     deleteTestimonial,
     toggleLike,
@@ -205,6 +218,7 @@ const Testimonials = () => {
   
   const [newTestimony, setNewTestimony] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [formTags, setFormTags] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -224,10 +238,11 @@ const Testimonials = () => {
   };
 
   const handleSubmit = async () => {
-    const success = await submitTestimonial(newTestimony, imageUrl || undefined);
+    const success = await submitTestimonial(newTestimony, imageUrl || undefined, formTags);
     if (success) {
       setNewTestimony("");
       setImageUrl(null);
+      setFormTags([]);
       setIsDialogOpen(false);
     }
   };
@@ -244,8 +259,20 @@ const Testimonials = () => {
     if (open && userTestimonial) {
       setNewTestimony(userTestimonial.testimony);
       setImageUrl(userTestimonial.image_url || null);
+      setFormTags(userTestimonial.tags || []);
+    } else if (!open) {
+      // Reset form when closing
+      setFormTags([]);
     }
     setIsDialogOpen(open);
+  };
+
+  const handleFormTagToggle = (tagName: string) => {
+    if (formTags.includes(tagName)) {
+      setFormTags(formTags.filter(t => t !== tagName));
+    } else {
+      setFormTags([...formTags, tagName]);
+    }
   };
 
   return (
@@ -347,6 +374,17 @@ const Testimonials = () => {
                       <Progress value={progress} className="h-2" />
                     )}
                   </div>
+
+                  {/* Tag selection */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">Chọn chủ đề (tùy chọn)</p>
+                    <TestimonialTagSelector
+                      tags={availableTags}
+                      selectedTags={formTags}
+                      onTagToggle={handleFormTagToggle}
+                      size="sm"
+                    />
+                  </div>
                   
                   <DialogFooter className="gap-2">
                     {userTestimonial && (
@@ -439,6 +477,8 @@ const Testimonials = () => {
             setSortBy={setSortBy}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            selectedTags={selectedTags}
+            onTagsChange={setSelectedTags}
           />
 
           {/* Testimonials Grid */}

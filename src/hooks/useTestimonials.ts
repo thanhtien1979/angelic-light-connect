@@ -23,6 +23,7 @@ export interface Testimonial {
   is_featured: boolean;
   created_at: string;
   image_url?: string | null;
+  tags?: string[];
   likes_count: number;
   comments_count: number;
   isLikedByMe?: boolean;
@@ -100,8 +101,8 @@ export const useTestimonials = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>("featured");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
-
   // Fetch user's likes
   const fetchUserLikes = useCallback(async () => {
     if (!user) {
@@ -158,6 +159,7 @@ export const useTestimonials = () => {
         
         let testimonialsWithProfiles = data.map(t => ({
           ...t,
+          tags: (t as any).tags || [],
           likes_count: t.likes_count || 0,
           comments_count: t.comments_count || 0,
           isLikedByMe: userLikes.has(t.id),
@@ -170,6 +172,13 @@ export const useTestimonials = () => {
           testimonialsWithProfiles = testimonialsWithProfiles.filter(t => 
             t.testimony.toLowerCase().includes(query) ||
             t.profile?.display_name?.toLowerCase().includes(query)
+          );
+        }
+
+        // Apply tag filter
+        if (selectedTags.length > 0) {
+          testimonialsWithProfiles = testimonialsWithProfiles.filter(t => 
+            t.tags && selectedTags.some(tag => t.tags?.includes(tag))
           );
         }
 
@@ -193,7 +202,7 @@ export const useTestimonials = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [sortBy, searchQuery, userLikes]);
+  }, [sortBy, searchQuery, selectedTags, userLikes]);
 
   // Fetch user's own testimonial
   const fetchUserTestimonial = useCallback(async () => {
@@ -406,7 +415,7 @@ export const useTestimonials = () => {
   };
 
   // Submit new testimonial
-  const submitTestimonial = async (testimony: string, imageUrl?: string) => {
+  const submitTestimonial = async (testimony: string, imageUrl?: string, tags?: string[]) => {
     if (!user) {
       toast.error("Vui lòng đăng nhập để chia sẻ");
       return false;
@@ -432,9 +441,10 @@ export const useTestimonials = () => {
           .update({ 
             testimony, 
             image_url: imageUrl || null,
+            tags: tags || [],
             is_approved: false,
             updated_at: new Date().toISOString(),
-          })
+          } as any)
           .eq("id", userTestimonial.id);
 
         if (error) throw error;
@@ -447,8 +457,9 @@ export const useTestimonials = () => {
             user_id: user.id,
             testimony,
             image_url: imageUrl || null,
+            tags: tags || [],
             is_approved: false,
-          });
+          } as any);
 
         if (error) throw error;
         toast.success("Cảm ơn bạn đã chia sẻ! Nhân chứng đang chờ duyệt.");
@@ -500,6 +511,8 @@ export const useTestimonials = () => {
     setSortBy,
     searchQuery,
     setSearchQuery,
+    selectedTags,
+    setSelectedTags,
     submitTestimonial,
     deleteTestimonial,
     toggleLike,
