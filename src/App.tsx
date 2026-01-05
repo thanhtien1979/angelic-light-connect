@@ -12,6 +12,7 @@ import Credits from "./pages/Credits";
 import Friends from "./pages/Friends";
 import UserProfile from "./pages/UserProfile";
 import Testimonials from "./pages/Testimonials";
+import TestimonialCategory from "./pages/TestimonialCategory";
 import AdminTestimonials from "./pages/AdminTestimonials";
 import AdminUsers from "./pages/AdminUsers";
 import LightLaw from "./pages/LightLaw";
@@ -94,6 +95,7 @@ const App = () => (
                     <Route path="/credits" element={<Credits />} />
                     <Route path="/friends" element={<Friends />} />
                     <Route path="/testimonials" element={<Testimonials />} />
+                    <Route path="/testimonials/category/:categoryName" element={<TestimonialCategory />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/admin/testimonials" element={<AdminTestimonials />} />
                     <Route path="/admin/users" element={<AdminUsers />} />
