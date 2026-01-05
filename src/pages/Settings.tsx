@@ -29,6 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageCropEditor from "@/components/ImageCropEditor";
 import { useFlyingAngels, emitFlyingAngelsChange } from "@/hooks/useFlyingAngels";
+import { Slider } from "@/components/ui/slider";
 
 type SettingsSection = "profile" | "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
 type ThemeOption = "light" | "dark" | "system" | "twilight" | "ocean" | "forest" | "midnight" | "sunrise";
@@ -95,7 +96,7 @@ const Settings = () => {
   } = useAngelPresence();
 
   // Flying angels settings
-  const { isEnabled: flyingAngelsEnabled, toggle: toggleFlyingAngels } = useFlyingAngels();
+  const { isEnabled: flyingAngelsEnabled, toggle: toggleFlyingAngels, settings: flyingAngelsSettings, updateSettings: updateFlyingAngelsSettings } = useFlyingAngels();
 
   const handleFlyingAngelsToggle = async (enabled: boolean) => {
     await toggleFlyingAngels(enabled);
@@ -968,25 +969,93 @@ const Settings = () => {
                     </div>
 
                     {/* Flying Angels Toggle */}
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border/50">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-amber-500/10">
-                          <Feather className="w-5 h-5 text-amber-500" />
+                    <div className="space-y-4 p-4 rounded-lg bg-muted/30 border border-border/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-amber-500/10">
+                            <Feather className="w-5 h-5 text-amber-500" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor="flying-angels-toggle" className="text-base font-medium">
+                              Thiên thần bay
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Các thiên thần bay tự do khắp giao diện (chỉ trên desktop)
+                            </p>
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="flying-angels-toggle" className="text-base font-medium">
-                            Thiên thần bay
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Các thiên thần bay tự do khắp giao diện (chỉ trên desktop)
-                          </p>
-                        </div>
+                        <Switch
+                          id="flying-angels-toggle"
+                          checked={flyingAngelsEnabled}
+                          onCheckedChange={handleFlyingAngelsToggle}
+                        />
                       </div>
-                      <Switch
-                        id="flying-angels-toggle"
-                        checked={flyingAngelsEnabled}
-                        onCheckedChange={handleFlyingAngelsToggle}
-                      />
+                      
+                      {flyingAngelsEnabled && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="space-y-6 pt-4 border-t border-border/30"
+                        >
+                          {/* Angel Count Slider */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium">Số lượng thiên thần</Label>
+                              <span className="text-sm text-primary font-medium">{flyingAngelsSettings.angelCount}</span>
+                            </div>
+                            <Slider
+                              value={[flyingAngelsSettings.angelCount]}
+                              onValueChange={(value) => updateFlyingAngelsSettings({ angelCount: value[0] })}
+                              min={1}
+                              max={15}
+                              step={1}
+                              className="cursor-pointer"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Điều chỉnh số lượng thiên thần bay trên màn hình (1-15)
+                            </p>
+                          </div>
+                          
+                          {/* Size Slider */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium">Kích thước</Label>
+                              <span className="text-sm text-primary font-medium">{flyingAngelsSettings.size}px</span>
+                            </div>
+                            <Slider
+                              value={[flyingAngelsSettings.size]}
+                              onValueChange={(value) => updateFlyingAngelsSettings({ size: value[0] })}
+                              min={40}
+                              max={150}
+                              step={10}
+                              className="cursor-pointer"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Kích thước của các thiên thần (40-150px)
+                            </p>
+                          </div>
+                          
+                          {/* Speed Slider */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium">Tốc độ bay</Label>
+                              <span className="text-sm text-primary font-medium">{flyingAngelsSettings.speed}x</span>
+                            </div>
+                            <Slider
+                              value={[flyingAngelsSettings.speed]}
+                              onValueChange={(value) => updateFlyingAngelsSettings({ speed: value[0] })}
+                              min={0.5}
+                              max={2}
+                              step={0.1}
+                              className="cursor-pointer"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Tốc độ di chuyển của các thiên thần (0.5x - 2x)
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
                     </div>
 
                     {angelEnabled && (
