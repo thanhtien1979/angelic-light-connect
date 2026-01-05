@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2, Pencil, Check, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, User, Palette, Bell, Shield, Sparkles, Sun, Moon, Monitor, MessageSquare, Info, BellRing, Volume2, VolumeX, Languages, Globe, Music, BellDot, Headphones, Zap, Flame, Waves, TreePine, Star, Sunrise, Camera, Trash2, Loader2, Pencil, Check, Mail, Lock, Eye, EyeOff, Feather } from "lucide-react";
 import AmbientSoundPlayer from "@/components/AmbientSoundPlayer";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageCropEditor from "@/components/ImageCropEditor";
+import { useFlyingAngels, emitFlyingAngelsChange } from "@/hooks/useFlyingAngels";
 
 type SettingsSection = "profile" | "angel" | "appearance" | "notifications" | "privacy" | "sound" | "language";
 type ThemeOption = "light" | "dark" | "system" | "twilight" | "ocean" | "forest" | "midnight" | "sunrise";
@@ -93,7 +94,14 @@ const Settings = () => {
     restoreStyle,
   } = useAngelPresence();
 
-  // Notification settings state
+  // Flying angels settings
+  const { isEnabled: flyingAngelsEnabled, toggle: toggleFlyingAngels } = useFlyingAngels();
+
+  const handleFlyingAngelsToggle = async (enabled: boolean) => {
+    await toggleFlyingAngels(enabled);
+    emitFlyingAngelsChange(enabled);
+  };
+
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(() => {
     const saved = localStorage.getItem("angel-notification-settings");
     if (saved) {
@@ -956,6 +964,28 @@ const Settings = () => {
                         id="angel-toggle"
                         checked={angelEnabled}
                         onCheckedChange={toggleAngel}
+                      />
+                    </div>
+
+                    {/* Flying Angels Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-amber-500/10">
+                          <Feather className="w-5 h-5 text-amber-500" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="flying-angels-toggle" className="text-base font-medium">
+                            Thiên thần bay
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Các thiên thần bay tự do khắp giao diện (chỉ trên desktop)
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="flying-angels-toggle"
+                        checked={flyingAngelsEnabled}
+                        onCheckedChange={handleFlyingAngelsToggle}
                       />
                     </div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { subscribeFlyingAngels } from "@/hooks/useFlyingAngels";
 
 // Import angel images
 import angelTinker from "@/assets/flying-angel-tinker.png";
@@ -26,6 +27,13 @@ interface Sparkle {
   size: number;
 }
 
+interface ClickBurst {
+  id: number;
+  x: number;
+  y: number;
+  color: string;
+}
+
 const angelImages = [
   { src: angelTinker, glow: "rgba(144, 238, 144, 0.6)" },
   { src: angelGreen, glow: "rgba(34, 197, 94, 0.6)" },
@@ -34,19 +42,29 @@ const angelImages = [
   { src: angelButterfly, glow: "rgba(251, 146, 60, 0.6)" },
 ];
 
+const LOCAL_STORAGE_KEY = "flying-angels-enabled";
+
 const GlobalFlyingAngels = () => {
-  const [isEnabled, setIsEnabled] = useState(true);
+  const [isEnabled, setIsEnabled] = useState(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved !== null) {
+      return saved === "true";
+    }
+    return true;
+  });
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+  const [clickBursts, setClickBursts] = useState<ClickBurst[]>([]);
   const [windowSize, setWindowSize] = useState({ width: 1200, height: 800 });
+  const [isMobile, setIsMobile] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   // Check for reduced motion preference and mobile
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const isMobile = window.innerWidth < 768;
+    const isMobileDevice = window.innerWidth < 768;
     
-    if (mediaQuery.matches || isMobile) {
-      setIsEnabled(false);
-    }
+    setPrefersReducedMotion(mediaQuery.matches);
+    setIsMobile(isMobileDevice);
 
     setWindowSize({
       width: window.innerWidth,
@@ -58,13 +76,31 @@ const GlobalFlyingAngels = () => {
         width: window.innerWidth,
         height: window.innerHeight,
       });
-      if (window.innerWidth < 768) {
-        setIsEnabled(false);
-      }
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    const handleMotionChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
     };
 
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    mediaQuery.addEventListener("change", handleMotionChange);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      mediaQuery.removeEventListener("change", handleMotionChange);
+    };
+  }, []);
+
+  // Subscribe to global toggle events
+  useEffect(() => {
+    const unsubscribe = subscribeFlyingAngels((enabled) => {
+      setIsEnabled(enabled);
+      localStorage.setItem(LOCAL_STORAGE_KEY, String(enabled));
+    });
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   // Generate angels with random positions
@@ -83,7 +119,7 @@ const GlobalFlyingAngels = () => {
 
   // Generate sparkles periodically
   useEffect(() => {
-    if (!isEnabled) return;
+    if (!isEnabled || isMobile || prefersReducedMotion) return;
 
     const interval = setInterval(() => {
       const newSparkle: Sparkle = {
@@ -96,14 +132,31 @@ const GlobalFlyingAngels = () => {
     }, 800);
 
     return () => clearInterval(interval);
-  }, [isEnabled, windowSize]);
+  }, [isEnabled, isMobile, prefersReducedMotion, windowSize]);
 
-  // Clean up old sparkles
+  // Clean up old sparkles and bursts
   useEffect(() => {
     const cleanup = setInterval(() => {
       setSparkles((prev) => prev.slice(-10));
+      setClickBursts((prev) => prev.filter((b) => Date.now() - b.id < 1500));
     }, 3000);
     return () => clearInterval(cleanup);
+  }, []);
+
+  // Handle angel click - create sparkle burst
+  const handleAngelClick = useCallback((e: React.MouseEvent, glowColor: string) => {
+    e.stopPropagation();
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const burst: ClickBurst = {
+      id: Date.now(),
+      x: centerX,
+      y: centerY,
+      color: glowColor,
+    };
+    setClickBursts((prev) => [...prev, burst]);
   }, []);
 
   // Generate flight path with landing points
@@ -124,7 +177,7 @@ const GlobalFlyingAngels = () => {
     return points;
   }, []);
 
-  if (!isEnabled) return null;
+  if (!isEnabled || isMobile || prefersReducedMotion) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
@@ -135,7 +188,7 @@ const GlobalFlyingAngels = () => {
         return (
           <motion.div
             key={angel.id}
-            className="absolute"
+            className="absolute pointer-events-auto cursor-pointer"
             initial={{
               x: `${angel.startX}%`,
               y: `${angel.startY}%`,
@@ -155,9 +208,12 @@ const GlobalFlyingAngels = () => {
               ease: "easeInOut",
               times: flightPath.map((_, i) => i / (flightPath.length - 1)),
             }}
+            onClick={(e) => handleAngelClick(e, angel.glowColor)}
             style={{
               filter: `drop-shadow(0 0 12px ${angel.glowColor})`,
             }}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
           >
             {/* Wing flutter animation */}
             <motion.img
@@ -181,7 +237,7 @@ const GlobalFlyingAngels = () => {
             
             {/* Trail sparkles behind angel */}
             <motion.div
-              className="absolute -z-10"
+              className="absolute -z-10 pointer-events-none"
               style={{
                 left: "50%",
                 top: "100%",
@@ -223,12 +279,109 @@ const GlobalFlyingAngels = () => {
         );
       })}
 
+      {/* Click burst effects */}
+      <AnimatePresence>
+        {clickBursts.map((burst) => (
+          <motion.div
+            key={burst.id}
+            className="fixed pointer-events-none"
+            style={{
+              left: burst.x,
+              top: burst.y,
+              transform: "translate(-50%, -50%)",
+            }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5 }}
+          >
+            {/* Central glow */}
+            <motion.div
+              className="absolute rounded-full"
+              style={{
+                background: `radial-gradient(circle, ${burst.color} 0%, transparent 70%)`,
+                width: 60,
+                height: 60,
+                left: -30,
+                top: -30,
+              }}
+              initial={{ scale: 0, opacity: 1 }}
+              animate={{ scale: 3, opacity: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            />
+            
+            {/* Sparkle particles */}
+            {[...Array(12)].map((_, i) => {
+              const angle = (i * 30) * (Math.PI / 180);
+              const distance = 50 + Math.random() * 50;
+              return (
+                <motion.div
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: 6 + Math.random() * 6,
+                    height: 6 + Math.random() * 6,
+                    background: burst.color,
+                    boxShadow: `0 0 8px ${burst.color}`,
+                    left: 0,
+                    top: 0,
+                  }}
+                  initial={{ x: 0, y: 0, scale: 1, opacity: 1 }}
+                  animate={{
+                    x: Math.cos(angle) * distance,
+                    y: Math.sin(angle) * distance,
+                    scale: 0,
+                    opacity: 0,
+                  }}
+                  transition={{
+                    duration: 0.8 + Math.random() * 0.4,
+                    ease: "easeOut",
+                  }}
+                />
+              );
+            })}
+            
+            {/* Star shapes */}
+            {[...Array(6)].map((_, i) => {
+              const angle = (i * 60 + 30) * (Math.PI / 180);
+              const distance = 30 + Math.random() * 40;
+              return (
+                <motion.div
+                  key={`star-${i}`}
+                  className="absolute text-lg"
+                  style={{
+                    left: 0,
+                    top: 0,
+                    color: burst.color,
+                    textShadow: `0 0 10px ${burst.color}`,
+                  }}
+                  initial={{ x: 0, y: 0, scale: 1, opacity: 1, rotate: 0 }}
+                  animate={{
+                    x: Math.cos(angle) * distance,
+                    y: Math.sin(angle) * distance,
+                    scale: 0,
+                    opacity: 0,
+                    rotate: 180,
+                  }}
+                  transition={{
+                    duration: 0.6 + Math.random() * 0.3,
+                    ease: "easeOut",
+                  }}
+                >
+                  ✦
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
       {/* Background sparkles */}
       <AnimatePresence>
         {sparkles.map((sparkle) => (
           <motion.div
             key={sparkle.id}
-            className="absolute rounded-full bg-amber-300"
+            className="absolute rounded-full bg-amber-300 pointer-events-none"
             style={{
               left: sparkle.x,
               top: sparkle.y,
