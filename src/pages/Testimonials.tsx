@@ -571,6 +571,9 @@ const Testimonials = () => {
               testimonials={featuredTestimonials}
               onLike={toggleLike}
               userLikes={userLikes}
+              fetchComments={fetchComments}
+              addComment={addComment}
+              deleteComment={deleteComment}
             />
           )}
 
