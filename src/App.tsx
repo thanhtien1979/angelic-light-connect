@@ -16,6 +16,7 @@ import TestimonialCategory from "./pages/TestimonialCategory";
 import AdminTestimonials from "./pages/AdminTestimonials";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCommentReports from "./pages/AdminCommentReports";
+import AdminDashboard from "./pages/AdminDashboard";
 import LightLaw from "./pages/LightLaw";
 import LightScore from "./pages/LightScore";
 import Settings from "./pages/Settings";
@@ -34,6 +35,7 @@ import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
 import { useTokenRefresh } from "./hooks/useTokenRefresh";
 import { useSessionExpired } from "./hooks/useSessionExpired";
 import { useAngelPresence } from "./hooks/useAngelPresence";
+import { useAdminReportNotifications } from "./hooks/useAdminReportNotifications";
 import { SessionExpiredDialog } from "./components/SessionExpiredDialog";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { SoundSettingsProvider } from "./contexts/SoundSettingsContext";
@@ -47,6 +49,7 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   usePresence();
   useFriendRequestSound();
   useTokenRefresh();
+  useAdminReportNotifications();
   const { isSessionExpired, hideSessionExpired } = useSessionExpired();
   const { 
     isEnabled: angelEnabled, 
@@ -101,6 +104,7 @@ const App = () => (
                     <Route path="/admin/testimonials" element={<AdminTestimonials />} />
                     <Route path="/admin/users" element={<AdminUsers />} />
                     <Route path="/admin/comment-reports" element={<AdminCommentReports />} />
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/luat-anh-sang" element={<LightLaw />} />
                     <Route path="/diem-anh-sang" element={<LightScore />} />
                     <Route path="/share/:shareId" element={<SharedConversation />} />

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, MessageSquare, Sparkles, Settings, Moon, Sun, Monitor } from "lucide-react";
+import { User, LogOut, MessageSquare, Sparkles, Settings, Moon, Sun, Monitor, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useDailyGreeting } from "@/hooks/useDailyGreeting";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { useTheme } from "next-themes";
 import { Link } from "react-router-dom";
 
@@ -14,6 +15,7 @@ const UserMenu = ({ onOpenAuth }: UserMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, isAuthenticated, signOut, isLoading } = useAuth();
   const { hasNewGreeting, markGreetingSeen } = useDailyGreeting();
+  const { isAdmin } = useAdminRole();
   const { theme, setTheme } = useTheme();
 
   const handleProfileClick = () => {
@@ -151,6 +153,17 @@ const UserMenu = ({ onOpenAuth }: UserMenuProps) => {
                   <Settings className="w-5 h-5 text-gold" />
                   <span className="text-foreground">Cài đặt</span>
                 </Link>
+
+                {isAdmin && (
+                  <Link
+                    to="/admin/dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-pink-500/10 transition-colors"
+                  >
+                    <LayoutDashboard className="w-5 h-5 text-pink-500" />
+                    <span className="text-foreground">Admin Dashboard</span>
+                  </Link>
+                )}
 
                 <button
                   onClick={() => {
