@@ -1209,6 +1209,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          parent_id: string | null
           testimonial_id: string
           user_id: string
         }
@@ -1216,6 +1217,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          parent_id?: string | null
           testimonial_id: string
           user_id: string
         }
@@ -1223,10 +1225,18 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          parent_id?: string | null
           testimonial_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "testimonial_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "testimonial_comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "testimonial_comments_testimonial_id_fkey"
             columns: ["testimonial_id"]
@@ -1258,6 +1268,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "testimonial_likes_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "testimonials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      testimonial_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          reaction_type: string
+          testimonial_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction_type: string
+          testimonial_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          testimonial_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "testimonial_reactions_testimonial_id_fkey"
             columns: ["testimonial_id"]
             isOneToOne: false
             referencedRelation: "testimonials"
@@ -1840,6 +1882,13 @@ export type Database = {
           p_window_minutes?: number
         }
         Returns: boolean
+      }
+      get_testimonial_reaction_counts: {
+        Args: { p_testimonial_id: string }
+        Returns: {
+          count: number
+          reaction_type: string
+        }[]
       }
       has_role: {
         Args: {

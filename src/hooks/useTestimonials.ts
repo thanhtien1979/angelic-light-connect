@@ -367,8 +367,8 @@ export const useTestimonials = () => {
     }
   };
 
-  // Add comment
-  const addComment = async (testimonialId: string, content: string) => {
+  // Add comment (supports replies with parentId)
+  const addComment = async (testimonialId: string, content: string, parentId?: string) => {
     if (!user) {
       toast.error("Vui lòng đăng nhập để bình luận");
       return false;
@@ -386,7 +386,8 @@ export const useTestimonials = () => {
           testimonial_id: testimonialId,
           user_id: user.id,
           content: content.trim(),
-        });
+          parent_id: parentId || null,
+        } as any);
 
       if (error) throw error;
       return true;
