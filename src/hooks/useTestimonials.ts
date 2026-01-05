@@ -23,6 +23,7 @@ export interface Testimonial {
   is_featured: boolean;
   created_at: string;
   image_url?: string | null;
+  video_url?: string | null;
   tags?: string[];
   likes_count: number;
   comments_count: number;
@@ -415,7 +416,7 @@ export const useTestimonials = () => {
   };
 
   // Submit new testimonial
-  const submitTestimonial = async (testimony: string, imageUrl?: string, tags?: string[]) => {
+  const submitTestimonial = async (testimony: string, imageUrl?: string, videoUrl?: string, tags?: string[]) => {
     if (!user) {
       toast.error("Vui lòng đăng nhập để chia sẻ");
       return false;
@@ -441,6 +442,7 @@ export const useTestimonials = () => {
           .update({ 
             testimony, 
             image_url: imageUrl || null,
+            video_url: videoUrl || null,
             tags: tags || [],
             is_approved: false,
             updated_at: new Date().toISOString(),
@@ -457,6 +459,7 @@ export const useTestimonials = () => {
             user_id: user.id,
             testimony,
             image_url: imageUrl || null,
+            video_url: videoUrl || null,
             tags: tags || [],
             is_approved: false,
           } as any);
