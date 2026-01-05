@@ -39,8 +39,8 @@ import TestimonialCategoryTabs from "@/components/TestimonialCategoryTabs";
 import TestimonialSubmitForm from "@/components/TestimonialSubmitForm";
 import TestimonialVideoPlayer from "@/components/TestimonialVideoPlayer";
 import TestimonialReactions from "@/components/TestimonialReactions";
-
-
+import TestimonialAdvancedSearch from "@/components/TestimonialAdvancedSearch";
+import TestimonialUserStats from "@/components/TestimonialUserStats";
 const TestimonialCard = ({ 
   testimonial,
   index,
@@ -228,6 +228,10 @@ const Testimonials = () => {
     setSearchQuery,
     selectedTags,
     setSelectedTags,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
     submitTestimonial,
     deleteTestimonial,
     toggleLike,
@@ -551,7 +555,17 @@ const Testimonials = () => {
             </motion.div>
           )}
 
-          {/* Featured Carousel */}
+          {/* User Stats */}
+          {isAuthenticated && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="mb-8"
+            >
+              <TestimonialUserStats />
+            </motion.div>
+          )}
           {featuredTestimonials.length > 0 && !selectedCategory && (
             <FeaturedTestimonialsCarousel
               testimonials={featuredTestimonials}
@@ -575,6 +589,30 @@ const Testimonials = () => {
               </Badge>
             </motion.div>
           )}
+
+          {/* Advanced Search */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mb-6"
+          >
+            <TestimonialAdvancedSearch
+              tags={availableTags}
+              onSearch={(filters) => {
+                setSearchQuery(filters.query);
+                setSelectedTags(filters.tags);
+                setDateFrom(filters.dateFrom);
+                setDateTo(filters.dateTo);
+              }}
+              initialFilters={{
+                query: searchQuery,
+                tags: selectedTags,
+                dateFrom,
+                dateTo,
+              }}
+            />
+          </motion.div>
 
           {/* Filters */}
           <TestimonialFilters

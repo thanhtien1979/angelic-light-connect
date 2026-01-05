@@ -12,6 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import ReportCommentDialog from "@/components/ReportCommentDialog";
 
 export interface TestimonialComment {
   id: string;
@@ -255,6 +256,14 @@ const TestimonialComments = ({
               comment.is_pinned ? "text-primary fill-primary" : "text-muted-foreground hover:text-primary"
             )} />
           </Button>
+        )}
+
+        {/* Report button (for other users' comments) */}
+        {user && user.id !== comment.user_id && (
+          <ReportCommentDialog
+            commentId={comment.id}
+            commentContent={comment.content}
+          />
         )}
 
         {/* Delete button */}
