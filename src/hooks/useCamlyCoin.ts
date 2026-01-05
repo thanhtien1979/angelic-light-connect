@@ -2,7 +2,24 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { triggerSessionExpired } from "@/hooks/useSessionExpired";
 
+// Helper to get fresh access token
+const getFreshAccessToken = async (): Promise<string | null> => {
+  try {
+    // Try to refresh the session first
+    const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+    if (refreshError || !refreshData.session) {
+      // If refresh fails, try getting current session
+      const { data: sessionData } = await supabase.auth.getSession();
+      return sessionData.session?.access_token ?? null;
+    }
+    return refreshData.session.access_token;
+  } catch (error) {
+    console.error("Error getting fresh token:", error);
+    return null;
+  }
+};
 interface LightAcknowledgement {
   id: string;
   acknowledgement_type: string;
@@ -138,11 +155,10 @@ export const useCamlyCoin = () => {
     }
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
+      const accessToken = await getFreshAccessToken();
       
       if (!accessToken) {
-        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        triggerSessionExpired();
         return null;
       }
       
@@ -167,8 +183,7 @@ export const useCamlyCoin = () => {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Session expired, trigger re-auth silently
-          console.log("Session expired during meditation reward");
+          triggerSessionExpired();
           return null;
         }
         throw new Error(result.error || "Unknown error");
@@ -206,11 +221,10 @@ export const useCamlyCoin = () => {
     }
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
+      const accessToken = await getFreshAccessToken();
       
       if (!accessToken) {
-        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        triggerSessionExpired();
         return null;
       }
       
@@ -236,7 +250,7 @@ export const useCamlyCoin = () => {
 
       if (!response.ok) {
         if (response.status === 401) {
-          console.log("Session expired during reflection reward");
+          triggerSessionExpired();
           return null;
         }
         throw new Error(result.error || "Unknown error");
@@ -269,8 +283,7 @@ export const useCamlyCoin = () => {
     }
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
+      const accessToken = await getFreshAccessToken();
       
       if (!accessToken) {
         return null; // Silently fail if no session
@@ -296,7 +309,7 @@ export const useCamlyCoin = () => {
 
       if (!response.ok) {
         if (response.status === 401) {
-          console.log("Session expired during chat reward");
+          // For chat, just silently fail - don't interrupt user
           return null;
         }
         console.error("Chat reward error:", result.error);
