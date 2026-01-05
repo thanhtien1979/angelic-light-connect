@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Trash2, Loader2, MessageCircle, Reply, ChevronDown, ChevronUp } from "lucide-react";
+import { Send, Trash2, Loader2, MessageCircle, Reply, ChevronDown, ChevronUp, Pin } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export interface TestimonialComment {
   id: string;
@@ -17,6 +20,7 @@ export interface TestimonialComment {
   content: string;
   created_at: string;
   parent_id?: string | null;
+  is_pinned?: boolean;
   profile?: {
     display_name: string | null;
     avatar_url: string | null;
@@ -27,6 +31,7 @@ export interface TestimonialComment {
 interface TestimonialCommentsProps {
   testimonialId: string;
   commentsCount: number;
+  testimonialOwnerId?: string;
   fetchComments: (testimonialId: string) => Promise<TestimonialComment[]>;
   addComment: (testimonialId: string, content: string, parentId?: string) => Promise<boolean>;
   deleteComment: (commentId: string) => Promise<boolean>;
@@ -35,6 +40,7 @@ interface TestimonialCommentsProps {
 const TestimonialComments = ({
   testimonialId,
   commentsCount,
+  testimonialOwnerId,
   fetchComments,
   addComment,
   deleteComment,
@@ -48,6 +54,9 @@ const TestimonialComments = ({
   const [replyingTo, setReplyingTo] = useState<TestimonialComment | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
+  const [isPinning, setIsPinning] = useState(false);
+
+  const isOwner = user?.id === testimonialOwnerId;
 
   const loadComments = async () => {
     setIsLoading(true);
@@ -68,14 +77,54 @@ const TestimonialComments = ({
       }
     });
 
-    // Attach replies to parent comments
-    const threaded = parentComments.map(parent => ({
-      ...parent,
-      replies: repliesMap[parent.id] || [],
-    }));
+    // Attach replies to parent comments and sort with pinned first
+    const threaded = parentComments
+      .map(parent => ({
+        ...parent,
+        replies: repliesMap[parent.id] || [],
+      }))
+      .sort((a, b) => {
+        // Pinned comments first
+        if (a.is_pinned && !b.is_pinned) return -1;
+        if (!a.is_pinned && b.is_pinned) return 1;
+        return 0;
+      });
 
     setComments(threaded);
     setIsLoading(false);
+  };
+
+  const handlePinComment = async (commentId: string, currentlyPinned: boolean) => {
+    if (!isOwner) return;
+    
+    setIsPinning(true);
+    try {
+      // If pinning, unpin all other comments first
+      if (!currentlyPinned) {
+        const unpinResult = await (supabase
+          .from("testimonial_comments") as any)
+          .update({ is_pinned: false })
+          .eq("testimonial_id", testimonialId)
+          .eq("is_pinned", true);
+        if (unpinResult.error) throw unpinResult.error;
+      }
+
+      // Toggle pin status
+      const { error } = await (supabase
+        .from("testimonial_comments") as any)
+        .update({ is_pinned: !currentlyPinned })
+        .eq("id", commentId);
+
+      if (error) throw error;
+
+      toast.success(!currentlyPinned ? "Đã ghim bình luận" : "Đã bỏ ghim bình luận");
+      await loadComments();
+    } catch (error) {
+      console.error("Error pinning comment:", error);
+      toast.error("Không thể ghim bình luận");
+    } finally {
+      setIsPinning(false);
+    }
   };
 
   useEffect(() => {
@@ -141,8 +190,20 @@ const TestimonialComments = ({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn("flex gap-3 group", isReply && "ml-8 mt-2")}
+      className={cn(
+        "flex gap-3 group relative",
+        isReply && "ml-8 mt-2",
+        comment.is_pinned && !isReply && "bg-primary/5 -mx-2 px-2 py-2 rounded-lg border border-primary/20"
+      )}
     >
+      {/* Pinned badge */}
+      {comment.is_pinned && !isReply && (
+        <Badge className="absolute -top-2 left-2 bg-primary/90 text-primary-foreground text-[10px] px-2 py-0.5">
+          <Pin className="w-2.5 h-2.5 mr-1" />
+          Đã ghim
+        </Badge>
+      )}
+
       <Avatar className={cn("flex-shrink-0", isReply ? "w-6 h-6" : "w-8 h-8")}>
         <AvatarImage src={comment.profile?.avatar_url || ""} />
         <AvatarFallback className={cn("bg-primary/10", isReply ? "text-[10px]" : "text-xs")}>
@@ -176,16 +237,38 @@ const TestimonialComments = ({
           </button>
         )}
       </div>
-      {user?.id === comment.user_id && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => handleDelete(comment.id)}
-          className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
-        >
-          <Trash2 className="w-3 h-3 text-muted-foreground hover:text-destructive" />
-        </Button>
-      )}
+
+      {/* Action buttons */}
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Pin button (only for owner, parent comments) */}
+        {isOwner && !isReply && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handlePinComment(comment.id, !!comment.is_pinned)}
+            disabled={isPinning}
+            className="h-6 w-6"
+            title={comment.is_pinned ? "Bỏ ghim" : "Ghim bình luận"}
+          >
+            <Pin className={cn(
+              "w-3 h-3",
+              comment.is_pinned ? "text-primary fill-primary" : "text-muted-foreground hover:text-primary"
+            )} />
+          </Button>
+        )}
+
+        {/* Delete button */}
+        {user?.id === comment.user_id && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleDelete(comment.id)}
+            className="h-6 w-6"
+          >
+            <Trash2 className="w-3 h-3 text-muted-foreground hover:text-destructive" />
+          </Button>
+        )}
+      </div>
     </motion.div>
   );
 

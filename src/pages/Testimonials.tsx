@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTestimonials, Testimonial } from "@/hooks/useTestimonials";
 import { useTestimonialTags } from "@/hooks/useTestimonialTags";
 import { useR2Upload } from "@/hooks/useR2Upload";
+import { useUserTestimonialNotifications } from "@/hooks/useTestimonialRealtime";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useTestimonialBadges, BadgeType } from "@/hooks/useTestimonialBadges";
 import { Button } from "@/components/ui/button";
@@ -178,6 +179,7 @@ const TestimonialCard = ({
               <TestimonialComments
                 testimonialId={testimonial.id}
                 commentsCount={testimonial.comments_count}
+                testimonialOwnerId={testimonial.user_id}
                 fetchComments={fetchComments}
                 addComment={addComment}
                 deleteComment={deleteComment}
@@ -234,6 +236,9 @@ const Testimonials = () => {
     deleteComment,
     userLikes,
   } = useTestimonials();
+  
+  // Enable realtime notifications for user's testimonials
+  useUserTestimonialNotifications();
   
   const [newTestimony, setNewTestimony] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
