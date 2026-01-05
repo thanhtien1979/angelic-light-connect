@@ -1,13 +1,46 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { subscribeFlyingAngels } from "@/hooks/useFlyingAngels";
+import { subscribeFlyingAngels, subscribeFlyingAngelsSettings, FlyingAngelsSettings } from "@/hooks/useFlyingAngels";
 
-// Import angel images
+// Import angel images - original flying angels
 import angelTinker from "@/assets/flying-angel-tinker.png";
 import angelGreen from "@/assets/flying-angel-green.png";
 import angelGold from "@/assets/flying-angel-gold.png";
 import angelHeart from "@/assets/flying-angel-heart.png";
 import angelButterfly from "@/assets/flying-angel-butterfly.webp";
+import flyingAngel from "@/assets/flying-angel.png";
+import flyingAngel2 from "@/assets/flying-angel-2.png";
+import flyingAngel3 from "@/assets/flying-angel-3.png";
+import flyingAngel4 from "@/assets/flying-angel-4.png";
+
+// Import floating fairies
+import floatingFairyPink from "@/assets/floating-fairy-pink.png";
+import floatingFairyGold from "@/assets/floating-fairy-gold.png";
+import floatingFairyPurple from "@/assets/floating-fairy-purple.png";
+import floatingFairyGreen from "@/assets/floating-fairy-green.png";
+import floatingFairyYellow from "@/assets/floating-fairy-yellow.png";
+import floatingFairyBrown from "@/assets/floating-fairy-brown.png";
+
+// All available angel/fairy images with their glow colors
+const allAngelImages = [
+  // Flying angels
+  { src: angelTinker, glow: "rgba(144, 238, 144, 0.6)", name: "Tinker" },
+  { src: angelGreen, glow: "rgba(34, 197, 94, 0.6)", name: "Green" },
+  { src: angelGold, glow: "rgba(251, 191, 36, 0.6)", name: "Gold" },
+  { src: angelHeart, glow: "rgba(244, 114, 182, 0.6)", name: "Heart" },
+  { src: angelButterfly, glow: "rgba(251, 146, 60, 0.6)", name: "Butterfly" },
+  { src: flyingAngel, glow: "rgba(255, 255, 255, 0.6)", name: "Classic" },
+  { src: flyingAngel2, glow: "rgba(147, 197, 253, 0.6)", name: "Sky" },
+  { src: flyingAngel3, glow: "rgba(253, 186, 116, 0.6)", name: "Sunset" },
+  { src: flyingAngel4, glow: "rgba(196, 181, 253, 0.6)", name: "Lavender" },
+  // Floating fairies
+  { src: floatingFairyPink, glow: "rgba(244, 114, 182, 0.6)", name: "Pink Fairy" },
+  { src: floatingFairyGold, glow: "rgba(251, 191, 36, 0.6)", name: "Gold Fairy" },
+  { src: floatingFairyPurple, glow: "rgba(168, 85, 247, 0.6)", name: "Purple Fairy" },
+  { src: floatingFairyGreen, glow: "rgba(34, 197, 94, 0.6)", name: "Green Fairy" },
+  { src: floatingFairyYellow, glow: "rgba(250, 204, 21, 0.6)", name: "Yellow Fairy" },
+  { src: floatingFairyBrown, glow: "rgba(180, 83, 9, 0.6)", name: "Brown Fairy" },
+];
 
 interface Angel {
   id: number;
@@ -34,15 +67,14 @@ interface ClickBurst {
   color: string;
 }
 
-const angelImages = [
-  { src: angelTinker, glow: "rgba(144, 238, 144, 0.6)" },
-  { src: angelGreen, glow: "rgba(34, 197, 94, 0.6)" },
-  { src: angelGold, glow: "rgba(251, 191, 36, 0.6)" },
-  { src: angelHeart, glow: "rgba(244, 114, 182, 0.6)" },
-  { src: angelButterfly, glow: "rgba(251, 146, 60, 0.6)" },
-];
-
 const LOCAL_STORAGE_KEY = "flying-angels-enabled";
+const SETTINGS_STORAGE_KEY = "flying-angels-settings";
+
+const DEFAULT_SETTINGS: FlyingAngelsSettings = {
+  angelCount: 5,
+  size: 80,
+  speed: 1,
+};
 
 const GlobalFlyingAngels = () => {
   const [isEnabled, setIsEnabled] = useState(() => {
@@ -52,6 +84,19 @@ const GlobalFlyingAngels = () => {
     }
     return true;
   });
+  
+  const [settings, setSettings] = useState<FlyingAngelsSettings>(() => {
+    const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (saved) {
+      try {
+        return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+      } catch {
+        return DEFAULT_SETTINGS;
+      }
+    }
+    return DEFAULT_SETTINGS;
+  });
+  
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [clickBursts, setClickBursts] = useState<ClickBurst[]>([]);
   const [windowSize, setWindowSize] = useState({ width: 1200, height: 800 });
@@ -102,39 +147,60 @@ const GlobalFlyingAngels = () => {
       unsubscribe();
     };
   }, []);
+  
+  // Subscribe to settings changes
+  useEffect(() => {
+    const unsubscribe = subscribeFlyingAngelsSettings((newSettings) => {
+      setSettings(newSettings);
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(newSettings));
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
-  // Generate angels with spread-out positions to avoid clustering
+  // Generate angels with spread-out positions based on settings
   const angels = useMemo<Angel[]>(() => {
-    const totalAngels = angelImages.length;
+    const count = Math.min(settings.angelCount, allAngelImages.length);
     
-    // Define zones to spread angels across the screen
-    // Divide screen into a grid to ensure even distribution
-    const zones = [
-      { x: 5, y: 10 },    // Top-left
-      { x: 75, y: 15 },   // Top-right
-      { x: 40, y: 50 },   // Center
-      { x: 10, y: 75 },   // Bottom-left
-      { x: 80, y: 70 },   // Bottom-right
-    ];
+    // Shuffle array to get random angels
+    const shuffled = [...allAngelImages].sort(() => Math.random() - 0.5);
+    const selectedAngels = shuffled.slice(0, count);
     
-    return angelImages.map((angel, index) => {
-      // Use predefined zones with small random offset
-      const zone = zones[index % zones.length];
-      const offsetX = (Math.random() - 0.5) * 15; // ±7.5% variation
-      const offsetY = (Math.random() - 0.5) * 15;
+    // Generate spread-out zones based on count
+    const generateZones = (n: number) => {
+      const zones = [];
+      const cols = Math.ceil(Math.sqrt(n));
+      const rows = Math.ceil(n / cols);
+      
+      for (let i = 0; i < n; i++) {
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        zones.push({
+          x: 10 + (col / cols) * 75 + Math.random() * 10,
+          y: 10 + (row / rows) * 70 + Math.random() * 10,
+        });
+      }
+      return zones;
+    };
+    
+    const zones = generateZones(count);
+    
+    return selectedAngels.map((angel, index) => {
+      const zone = zones[index];
       
       return {
         id: index,
         image: angel.src,
-        size: 60 + Math.random() * 40, // 60-100px
-        startX: Math.max(5, Math.min(90, zone.x + offsetX)), // Keep within bounds
-        startY: Math.max(5, Math.min(85, zone.y + offsetY)),
-        duration: 25 + Math.random() * 20, // 25-45 seconds per cycle
-        delay: index * 3,
+        size: settings.size * (0.8 + Math.random() * 0.4), // ±20% variation
+        startX: Math.max(5, Math.min(90, zone.x)),
+        startY: Math.max(5, Math.min(85, zone.y)),
+        duration: (25 + Math.random() * 20) / settings.speed, // Affected by speed
+        delay: index * 2,
         glowColor: angel.glow,
       };
     });
-  }, []);
+  }, [settings.angelCount, settings.size, settings.speed]);
 
   // Generate sparkles periodically
   useEffect(() => {
