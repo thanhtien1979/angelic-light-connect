@@ -37,6 +37,7 @@ import TestimonialTagDisplay from "@/components/TestimonialTagDisplay";
 import TestimonialCategoryTabs from "@/components/TestimonialCategoryTabs";
 import TestimonialSubmitForm from "@/components/TestimonialSubmitForm";
 import TestimonialVideoPlayer from "@/components/TestimonialVideoPlayer";
+import TestimonialReactions from "@/components/TestimonialReactions";
 
 
 const TestimonialCard = ({ 
@@ -145,6 +146,11 @@ const TestimonialCard = ({
               <p className="font-medium text-foreground">{name}</p>
               <p className="text-sm text-muted-foreground">Người tìm kiếm ánh sáng</p>
             </div>
+          </div>
+
+          {/* Reactions */}
+          <div className="mb-3">
+            <TestimonialReactions testimonialId={testimonial.id} />
           </div>
 
           {/* Actions: Like, Comment, Share */}
