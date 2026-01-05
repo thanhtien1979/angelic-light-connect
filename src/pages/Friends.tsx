@@ -24,6 +24,7 @@ import BlockedUsersList from "@/components/BlockedUsersList";
 import ReportUserDialog from "@/components/ReportUserDialog";
 import VideoCallModal from "@/components/VideoCallModal";
 import ProfileViewModal from "@/components/ProfileViewModal";
+import FriendSuggestions from "@/components/FriendSuggestions";
 
 const Friends = () => {
   const { user } = useAuth();
@@ -240,6 +241,16 @@ const Friends = () => {
             <p className="text-xs text-blue-600 dark:text-blue-400">Đã gửi</p>
           </motion.div>
         </div>
+
+        {/* Friend Suggestions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="mb-8"
+        >
+          <FriendSuggestions />
+        </motion.div>
 
         {/* Main Content */}
         <motion.div
