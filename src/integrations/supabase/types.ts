@@ -1301,9 +1301,11 @@ export type Database = {
           is_approved: boolean | null
           is_featured: boolean | null
           likes_count: number
+          tags: string[] | null
           testimony: string
           updated_at: string | null
           user_id: string
+          video_url: string | null
         }
         Insert: {
           comments_count?: number
@@ -1313,9 +1315,11 @@ export type Database = {
           is_approved?: boolean | null
           is_featured?: boolean | null
           likes_count?: number
+          tags?: string[] | null
           testimony: string
           updated_at?: string | null
           user_id: string
+          video_url?: string | null
         }
         Update: {
           comments_count?: number
@@ -1325,9 +1329,11 @@ export type Database = {
           is_approved?: boolean | null
           is_featured?: boolean | null
           likes_count?: number
+          tags?: string[] | null
           testimony?: string
           updated_at?: string | null
           user_id?: string
+          video_url?: string | null
         }
         Relationships: []
       }

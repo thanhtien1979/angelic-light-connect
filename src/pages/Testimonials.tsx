@@ -1,10 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, Star, Sparkles, Send, Loader2, 
   PenLine, Trash2, Clock, CheckCircle, Heart,
-  ImagePlus, X, Shield
+  ImagePlus, X, Shield, Video, Play
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTestimonials, Testimonial } from "@/hooks/useTestimonials";
@@ -34,6 +34,9 @@ import FeaturedTestimonialsCarousel from "@/components/FeaturedTestimonialsCarou
 import TestimonialBadges from "@/components/TestimonialBadges";
 import TestimonialTagSelector from "@/components/TestimonialTagSelector";
 import TestimonialTagDisplay from "@/components/TestimonialTagDisplay";
+import TestimonialCategoryTabs from "@/components/TestimonialCategoryTabs";
+import TestimonialSubmitForm from "@/components/TestimonialSubmitForm";
+import TestimonialVideoPlayer from "@/components/TestimonialVideoPlayer";
 
 
 const TestimonialCard = ({ 
@@ -106,8 +109,18 @@ const TestimonialCard = ({
             </div>
           )}
 
+          {/* Video if exists */}
+          {testimonial.video_url && (
+            <div className="mb-4">
+              <TestimonialVideoPlayer 
+                videoUrl={testimonial.video_url}
+                className="h-40"
+              />
+            </div>
+          )}
+
           {/* Image if exists */}
-          {testimonial.image_url && (
+          {testimonial.image_url && !testimonial.video_url && (
             <div className="mb-4 rounded-xl overflow-hidden">
               <img 
                 src={testimonial.image_url} 
@@ -221,7 +234,25 @@ const Testimonials = () => {
   const [formTags, setFormTags] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Calculate testimonial counts per category
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    testimonials.forEach(t => {
+      t.tags?.forEach(tag => {
+        counts[tag] = (counts[tag] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [testimonials]);
+
+  // Filter testimonials by selected category
+  const filteredTestimonials = useMemo(() => {
+    if (!selectedCategory) return testimonials;
+    return testimonials.filter(t => t.tags?.includes(selectedCategory));
+  }, [testimonials, selectedCategory]);
 
   const { uploadToR2, isUploading, progress } = useR2Upload({
     folder: "testimonials",
@@ -238,13 +269,21 @@ const Testimonials = () => {
   };
 
   const handleSubmit = async () => {
-    const success = await submitTestimonial(newTestimony, imageUrl || undefined, formTags);
+    const success = await submitTestimonial(newTestimony, imageUrl || undefined, undefined, formTags);
     if (success) {
       setNewTestimony("");
       setImageUrl(null);
       setFormTags([]);
       setIsDialogOpen(false);
     }
+  };
+
+  const handleFormSubmit = async (testimony: string, imgUrl?: string, videoUrl?: string, tags?: string[]) => {
+    const success = await submitTestimonial(testimony, imgUrl, videoUrl, tags);
+    if (success) {
+      setIsDialogOpen(false);
+    }
+    return success;
   };
 
   const handleDelete = async () => {
@@ -420,13 +459,13 @@ const Testimonials = () => {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 py-12">
+        <main className="max-w-7xl mx-auto px-4 py-8">
           {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-12"
+            className="text-center mb-8"
           >
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary font-bold mb-4">
               Những Linh Hồn Đã Thức Tỉnh
@@ -436,13 +475,33 @@ const Testimonials = () => {
             </p>
           </motion.div>
 
-          {/* Featured Carousel */}
-          {featuredTestimonials.length > 0 && (
-            <FeaturedTestimonialsCarousel
-              testimonials={featuredTestimonials}
-              onLike={toggleLike}
-              userLikes={userLikes}
+          {/* Category Tabs - Positioned at top */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8"
+          >
+            <TestimonialCategoryTabs
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              testimonialCounts={categoryCounts}
             />
+          </motion.div>
+
+          {/* Submit Form for authenticated users */}
+          {isAuthenticated && !userTestimonial && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mb-8"
+            >
+              <TestimonialSubmitForm
+                onSubmit={handleFormSubmit}
+                isSubmitting={isSubmitting}
+              />
+            </motion.div>
           )}
 
           {/* User's testimonial status */}
@@ -452,22 +511,66 @@ const Testimonials = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-8 p-4 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm"
             >
-              <div className="flex items-center gap-3">
-                {userTestimonial.is_approved ? (
-                  <>
-                    <CheckCircle className="w-5 h-5 text-emerald-500" />
-                    <span className="text-foreground">Nhân chứng của bạn đã được duyệt và hiển thị</span>
-                  </>
-                ) : (
-                  <>
-                    <Clock className="w-5 h-5 text-amber-500" />
-                    <span className="text-foreground">Nhân chứng của bạn đang chờ duyệt</span>
-                  </>
-                )}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {userTestimonial.is_approved ? (
+                    <>
+                      <CheckCircle className="w-5 h-5 text-emerald-500" />
+                      <span className="text-foreground">Nhân chứng của bạn đã được duyệt</span>
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="w-5 h-5 text-amber-500" />
+                      <span className="text-foreground">Đang chờ duyệt</span>
+                    </>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleOpenDialog(true)}
+                  className="gap-2"
+                >
+                  <PenLine className="w-4 h-4" />
+                  Chỉnh sửa
+                </Button>
               </div>
               <p className="mt-2 text-sm text-muted-foreground italic">
                 "{userTestimonial.testimony}"
               </p>
+              {userTestimonial.video_url && (
+                <div className="mt-3">
+                  <TestimonialVideoPlayer 
+                    videoUrl={userTestimonial.video_url}
+                    className="h-32 max-w-xs"
+                  />
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Featured Carousel */}
+          {featuredTestimonials.length > 0 && !selectedCategory && (
+            <FeaturedTestimonialsCarousel
+              testimonials={featuredTestimonials}
+              onLike={toggleLike}
+              userLikes={userLikes}
+            />
+          )}
+
+          {/* Category Header when filtered */}
+          {selectedCategory && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="mb-6 flex items-center gap-3"
+            >
+              <h2 className="text-2xl font-serif font-bold text-foreground">
+                Chủ đề: {selectedCategory}
+              </h2>
+              <Badge variant="secondary">
+                {filteredTestimonials.length} bài viết
+              </Badge>
             </motion.div>
           )}
 
@@ -488,14 +591,24 @@ const Testimonials = () => {
                 <div key={i} className="h-64 rounded-2xl bg-muted/50 animate-pulse" />
               ))}
             </div>
-          ) : testimonials.length === 0 ? (
+          ) : filteredTestimonials.length === 0 ? (
             <div className="text-center py-16">
               <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Không tìm thấy nhân chứng nào</p>
+              <p className="text-muted-foreground">
+                {selectedCategory 
+                  ? `Chưa có bài viết nào trong chủ đề "${selectedCategory}"`
+                  : "Không tìm thấy nhân chứng nào"
+                }
+              </p>
+              {isAuthenticated && selectedCategory && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Hãy là người đầu tiên chia sẻ trong chủ đề này!
+                </p>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {testimonials.map((testimonial, index) => (
+              {filteredTestimonials.map((testimonial, index) => (
                 <TestimonialCard
                   key={testimonial.id}
                   testimonial={testimonial}
