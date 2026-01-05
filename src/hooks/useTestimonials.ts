@@ -444,13 +444,13 @@ export const useTestimonials = () => {
             image_url: imageUrl || null,
             video_url: videoUrl || null,
             tags: tags || [],
-            is_approved: false,
+            is_approved: true,
             updated_at: new Date().toISOString(),
           } as any)
           .eq("id", userTestimonial.id);
 
         if (error) throw error;
-        toast.success("Đã cập nhật nhân chứng. Đang chờ duyệt...");
+        toast.success("Đã cập nhật nhân chứng thành công! ✨");
       } else {
         // Insert new
         const { error } = await supabase
@@ -461,11 +461,11 @@ export const useTestimonials = () => {
             image_url: imageUrl || null,
             video_url: videoUrl || null,
             tags: tags || [],
-            is_approved: false,
+            is_approved: true,
           } as any);
 
         if (error) throw error;
-        toast.success("Cảm ơn bạn đã chia sẻ! Nhân chứng đang chờ duyệt.");
+        toast.success("Cảm ơn bạn đã chia sẻ! Nhân chứng đã được đăng. 🌟");
       }
 
       await fetchUserTestimonial();
