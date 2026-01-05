@@ -977,9 +977,9 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                           <div className="relative z-10 font-chat text-sm sm:text-[15px] leading-relaxed text-[hsl(25,50%,15%)]" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
                             {message.role === "assistant" ? (
                               // Direct display for fast streaming - no typing effect
-                              <FormattedChatText text={message.content} />
+                              <FormattedChatText text={message.content} className="text-fuchsia-900" />
                             ) : (
-                              <span>{message.content}</span>
+                              <span className="text-amber-900">{message.content}</span>
                             )}
                           </div>
                         </>
@@ -1158,7 +1158,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     onPaste={handlePaste}
                     placeholder={isInitializing ? "Đang chuẩn bị..." : "Gửi thông điệp đến Angel AI..."}
                     disabled={isInputDisabled}
-                    className="w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-full bg-white/80 backdrop-blur border-2 border-rose-soft/40 focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground/60 disabled:opacity-50 text-sm sm:text-base text-amber-900 font-medium"
+                    className="w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-full bg-white/80 backdrop-blur border-2 border-rose-soft/40 focus:border-primary focus:outline-none transition-all placeholder:text-muted-foreground/60 disabled:opacity-50 text-sm sm:text-base text-amber-900 font-medium focus:shadow-[0_0_20px_rgba(244,114,182,0.4)]"
                   />
                   {isInitializing && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
