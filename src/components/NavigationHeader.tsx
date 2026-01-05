@@ -6,6 +6,7 @@ import {
   Wind, Brain, Music, Images, Link2, TrendingUp
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import LanguageSelector from "./LanguageSelector";
 import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import AuthModal from "./AuthModal";
@@ -741,6 +742,7 @@ const NavigationHeader = () => {
 
             {/* Theme Toggle, Wallet, Notifications, Light Indicator, User Menu & Mobile Menu Button */}
             <div className="flex items-center gap-2 sm:gap-3">
+              <LanguageSelector />
               <ThemeToggle />
               <WalletIndicator />
               <NotificationCenter />
