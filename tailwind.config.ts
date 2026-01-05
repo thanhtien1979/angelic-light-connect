@@ -24,6 +24,8 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        // Strong text color - always readable
+        "text-strong": "hsl(var(--text-strong))",
         // Divine Rose Aura colors
         rose: {
           DEFAULT: "hsl(var(--rose))",
