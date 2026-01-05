@@ -165,6 +165,15 @@ export const useCamlyCoin = () => {
 
       const result = await response.json();
 
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Session expired, trigger re-auth silently
+          console.log("Session expired during meditation reward");
+          return null;
+        }
+        throw new Error(result.error || "Unknown error");
+      }
+
       if (result.success) {
         setBalance({
           total_coins: result.totalCoins,
@@ -225,6 +234,14 @@ export const useCamlyCoin = () => {
 
       const result = await response.json();
 
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log("Session expired during reflection reward");
+          return null;
+        }
+        throw new Error(result.error || "Unknown error");
+      }
+
       if (result.success) {
         setBalance({
           total_coins: result.totalCoins,
@@ -276,6 +293,15 @@ export const useCamlyCoin = () => {
       );
 
       const result = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log("Session expired during chat reward");
+          return null;
+        }
+        console.error("Chat reward error:", result.error);
+        return null;
+      }
 
       if (result.success) {
         setBalance({
