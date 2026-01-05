@@ -53,6 +53,7 @@ const navLinksConfig: NavLink[] = [
       { labelKey: "Thiền hướng dẫn", path: "#meditation", icon: Brain },
       { labelKey: "Bài tập thở", path: "#breathing", icon: Wind },
       { labelKey: "Âm thanh thư giãn", path: "#ambient", icon: Music },
+      { labelKey: "Nhật ký cảm xúc", path: "/mood-journal", icon: Heart },
     ]
   },
   { id: "whitepaper", labelKey: "nav.whitepaper", isPage: true, path: "/camly-whitepaper", icon: FileText },

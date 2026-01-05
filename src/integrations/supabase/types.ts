@@ -751,6 +751,81 @@ export type Database = {
           },
         ]
       }
+      mood_entries: {
+        Row: {
+          activities: string[] | null
+          ai_insight: string | null
+          created_at: string
+          emotions: string[] | null
+          entry_date: string
+          id: string
+          mood_label: string
+          mood_score: number
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          activities?: string[] | null
+          ai_insight?: string | null
+          created_at?: string
+          emotions?: string[] | null
+          entry_date?: string
+          id?: string
+          mood_label: string
+          mood_score: number
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          activities?: string[] | null
+          ai_insight?: string | null
+          created_at?: string
+          emotions?: string[] | null
+          entry_date?: string
+          id?: string
+          mood_label?: string
+          mood_score?: number
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mood_insights: {
+        Row: {
+          created_at: string
+          id: string
+          insight_text: string
+          insight_type: string
+          patterns_detected: Json | null
+          period_end: string
+          period_start: string
+          recommendations: string[] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insight_text: string
+          insight_type: string
+          patterns_detected?: Json | null
+          period_end: string
+          period_start: string
+          recommendations?: string[] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insight_text?: string
+          insight_type?: string
+          patterns_detected?: Json | null
+          period_end?: string
+          period_start?: string
+          recommendations?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       nft_transactions: {
         Row: {
           blockchain: string
@@ -1585,6 +1660,45 @@ export type Database = {
           updated_at?: string
           user_id?: string
           warning_level?: number
+        }
+        Relationships: []
+      }
+      user_memory: {
+        Row: {
+          context: string | null
+          created_at: string
+          id: string
+          importance_score: number | null
+          last_referenced_at: string | null
+          memory_key: string
+          memory_type: string
+          memory_value: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          id?: string
+          importance_score?: number | null
+          last_referenced_at?: string | null
+          memory_key: string
+          memory_type: string
+          memory_value: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          id?: string
+          importance_score?: number | null
+          last_referenced_at?: string | null
+          memory_key?: string
+          memory_type?: string
+          memory_value?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

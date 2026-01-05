@@ -22,6 +22,7 @@ import LightScore from "./pages/LightScore";
 import Settings from "./pages/Settings";
 import SharedConversation from "./pages/SharedConversation";
 import CamlyWhitepaper from "./pages/CamlyWhitepaper";
+import MoodJournal from "./pages/MoodJournal";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
@@ -109,6 +110,7 @@ const App = () => (
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/luat-anh-sang" element={<LightLaw />} />
                     <Route path="/diem-anh-sang" element={<LightScore />} />
+                    <Route path="/mood-journal" element={<MoodJournal />} />
                     <Route path="/share/:shareId" element={<SharedConversation />} />
                     <Route
                       path="/profile"
