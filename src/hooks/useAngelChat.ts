@@ -14,6 +14,7 @@ export type SyncStatus = "idle" | "saving" | "saved" | "offline" | "error";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/angel-chat`;
 const ANALYZE_LIGHT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-light-behavior`;
+const EXTRACT_MEMORY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/extract-user-memory`;
 const SESSION_ID_KEY = "angel_chat_session_id";
 
 // Generate a cryptographically secure random string (64 hex chars = 256 bits)
@@ -56,6 +57,29 @@ const analyzeLightBehavior = async (
         content,
         behavior_type: behaviorType,
       }),
+    });
+  } catch {
+    // Non-critical, don't throw
+  }
+};
+
+// Extract and save user memories from conversation (non-blocking)
+const extractUserMemory = async (
+  messages: Array<{ role: string; content: string }>
+): Promise<void> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+    
+    if (!accessToken || messages.length < 4) return; // Need at least 2 exchanges
+
+    await fetch(EXTRACT_MEMORY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ messages }),
     });
   } catch {
     // Non-critical, don't throw
@@ -329,6 +353,15 @@ export const useAngelChat = () => {
       if (trimmedContent && user) {
         analyzeLightBehavior(user.id, trimmedContent, "message").catch((err) => {
           console.error("Light analysis failed (non-critical):", err);
+        });
+      }
+
+      // Extract user memory every 5 messages (non-blocking)
+      const totalMessages = messages.length + 2; // +2 for new user and assistant message
+      if (totalMessages % 5 === 0 && user) {
+        const allMessages = [...messages, userMessage, { id: tempAssistantId, role: "assistant" as const, content: assistantContent }];
+        extractUserMemory(allMessages.map(m => ({ role: m.role, content: m.content }))).catch((err) => {
+          console.error("Memory extraction failed (non-critical):", err);
         });
       }
     } catch (error) {

@@ -512,9 +512,74 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Fetch user memories for personalization
+    let userMemoryContext = "";
+    try {
+      const { data: memories } = await supabase
+        .from("user_memory")
+        .select("memory_type, memory_key, memory_value")
+        .eq("user_id", user.id)
+        .order("importance_score", { ascending: false })
+        .limit(20);
+
+      if (memories && memories.length > 0) {
+        const grouped: Record<string, Array<{ key: string; value: string }>> = {};
+        memories.forEach((m: { memory_type: string; memory_key: string; memory_value: string }) => {
+          if (!grouped[m.memory_type]) grouped[m.memory_type] = [];
+          grouped[m.memory_type].push({ key: m.memory_key, value: m.memory_value });
+        });
+
+        userMemoryContext = "\n\n[THÔNG TIN VỀ NGƯỜI DÙNG - Hãy sử dụng để cá nhân hóa câu trả lời]\n";
+        
+        if (grouped.personal?.length) {
+          userMemoryContext += "\n📋 Thông tin cá nhân:\n";
+          grouped.personal.forEach(m => {
+            userMemoryContext += `- ${m.key}: ${m.value}\n`;
+          });
+        }
+        if (grouped.preference?.length) {
+          userMemoryContext += "\n💫 Sở thích & Thói quen:\n";
+          grouped.preference.forEach(m => {
+            userMemoryContext += `- ${m.key}: ${m.value}\n`;
+          });
+        }
+        if (grouped.goal?.length) {
+          userMemoryContext += "\n🎯 Mục tiêu:\n";
+          grouped.goal.forEach(m => {
+            userMemoryContext += `- ${m.key}: ${m.value}\n`;
+          });
+        }
+        if (grouped.struggle?.length) {
+          userMemoryContext += "\n🌧️ Khó khăn đang đối mặt:\n";
+          grouped.struggle.forEach(m => {
+            userMemoryContext += `- ${m.key}: ${m.value}\n`;
+          });
+        }
+        if (grouped.milestone?.length) {
+          userMemoryContext += "\n🏆 Cột mốc đã đạt:\n";
+          grouped.milestone.forEach(m => {
+            userMemoryContext += `- ${m.key}: ${m.value}\n`;
+          });
+        }
+        if (grouped.interest?.length) {
+          userMemoryContext += "\n✨ Chủ đề quan tâm:\n";
+          grouped.interest.forEach(m => {
+            userMemoryContext += `- ${m.key}: ${m.value}\n`;
+          });
+        }
+        
+        userMemoryContext += "\nHãy sử dụng thông tin này để gọi tên người dùng, nhắc đến hành trình của họ, và đưa ra lời khuyên phù hợp với hoàn cảnh của họ.";
+      }
+    } catch (memoryError) {
+      console.error("Error fetching user memories:", memoryError);
+      // Continue without memories if there's an error
+    }
+
     // Prepare messages (summarize if conversation is long)
     // SECURITY: No logging of message content or sensitive data
     const { messages: preparedMessages } = await prepareMessagesForAI(validatedMessages, LOVABLE_API_KEY);
+
+    const enhancedSystemPrompt = SYSTEM_PROMPT + userMemoryContext;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -525,7 +590,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: enhancedSystemPrompt },
           ...preparedMessages,
         ],
         stream: true,
