@@ -513,17 +513,8 @@ const Testimonials = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {userTestimonial.is_approved ? (
-                    <>
-                      <CheckCircle className="w-5 h-5 text-emerald-500" />
-                      <span className="text-foreground">Nhân chứng của bạn đã được duyệt</span>
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="w-5 h-5 text-amber-500" />
-                      <span className="text-foreground">Đang chờ duyệt</span>
-                    </>
-                  )}
+                  <CheckCircle className="w-5 h-5 text-emerald-500" />
+                  <span className="text-foreground">Nhân chứng của bạn đã được đăng</span>
                 </div>
                 <Button
                   variant="outline"

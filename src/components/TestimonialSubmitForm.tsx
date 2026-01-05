@@ -115,7 +115,7 @@ const TestimonialSubmitForm = ({
         </div>
         <div>
           <h3 className="font-medium text-foreground">Chia sẻ câu chuyện của bạn</h3>
-          <p className="text-sm text-muted-foreground">Truyền cảm hứng cho những linh hồn khác</p>
+          <p className="text-sm text-muted-foreground">Bài viết sẽ hiển thị ngay khi gửi ✨</p>
         </div>
       </div>
 
