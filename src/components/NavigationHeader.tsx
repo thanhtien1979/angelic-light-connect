@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Menu, X, Sun, Wallet, Loader2, Check, Unlink, ChevronDown, Coins, Users, UserPlus,
+  Menu, X, Sun, Wallet, Loader2, Check, Unlink, ChevronDown, ChevronRight, Coins, Users, UserPlus,
   Home, MessageCircle, Sparkles, FileText, Heart, Palette, UsersRound, Star, LucideIcon,
-  Wind, Brain, Music
+  Wind, Brain, Music, Images, Link2, TrendingUp
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { Link, useLocation } from "react-router-dom";
@@ -328,6 +328,101 @@ const WalletIndicator = () => {
   );
 };
 
+// Mobile dropdown item component for expandable menus
+const MobileDropdownItem = ({ 
+  link, 
+  index, 
+  activeSection, 
+  onClose, 
+  scrollToSection,
+  t 
+}: { 
+  link: NavLink; 
+  index: number; 
+  activeSection: string;
+  onClose: () => void;
+  scrollToSection: (id: string) => void;
+  t: (key: string) => string;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const IconComponent = link.icon;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.05 }}
+    >
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={`flex items-center justify-between w-full text-left px-4 py-3 rounded-xl transition-colors font-medium ${
+          activeSection === link.id
+            ? "bg-gold/15 text-gold"
+            : "text-foreground hover:bg-gold/10"
+        }`}
+      >
+        <span className="flex items-center gap-3">
+          <IconComponent className={`w-5 h-5 ${activeSection === link.id ? "text-gold" : "text-primary/70"}`} />
+          {t(link.labelKey)}
+        </span>
+        <motion.div
+          animate={{ rotate: isExpanded ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ChevronRight className="w-4 h-4 opacity-60" />
+        </motion.div>
+      </button>
+      
+      <AnimatePresence>
+        {isExpanded && link.subItems && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="pl-6 py-1 space-y-1">
+              {link.subItems.map((subItem) => {
+                const SubIcon = subItem.icon;
+                const isHashLink = subItem.path.startsWith("#");
+                
+                if (isHashLink) {
+                  return (
+                    <button
+                      key={subItem.path}
+                      onClick={() => {
+                        scrollToSection(subItem.path.replace("#", ""));
+                        onClose();
+                      }}
+                      className="flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm text-foreground/80 hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <SubIcon className="w-4 h-4 text-primary/60" />
+                      {subItem.labelKey}
+                    </button>
+                  );
+                }
+                
+                return (
+                  <Link
+                    key={subItem.path}
+                    to={subItem.path}
+                    onClick={onClose}
+                    className="flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm text-foreground/80 hover:bg-primary/10 hover:text-primary transition-colors"
+                  >
+                    <SubIcon className="w-4 h-4 text-primary/60" />
+                    {subItem.labelKey}
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
 const NavigationHeader = () => {
   const [activeSection, setActiveSection] = useState("hero");
   const [isScrolled, setIsScrolled] = useState(false);
@@ -604,52 +699,76 @@ const NavigationHeader = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/30 shadow-lg md:hidden"
+            className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/30 shadow-lg md:hidden max-h-[80vh] overflow-y-auto"
           >
             <nav className="flex flex-col p-4 gap-1">
-              {navLinksConfig.map((link, index) => 
-                link.isPage && link.path ? (
-                  <motion.div
-                    key={link.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Link
-                      to={link.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center justify-between w-full text-left px-4 py-3 rounded-xl transition-colors font-bold hover:bg-gold/10 ${
-                        link.id === "friends" ? "text-pink-500" : "text-foreground"
-                      }`}
+              {navLinksConfig.map((link, index) => {
+                const IconComponent = link.icon;
+                
+                // Item with subItems - expandable accordion
+                if (link.subItems && link.subItems.length > 0) {
+                  return (
+                    <MobileDropdownItem
+                      key={link.id}
+                      link={link}
+                      index={index}
+                      activeSection={activeSection}
+                      onClose={() => setIsMobileMenuOpen(false)}
+                      scrollToSection={scrollToSection}
+                      t={t}
+                    />
+                  );
+                }
+                
+                // Regular page link
+                if (link.isPage && link.path) {
+                  return (
+                    <motion.div
+                      key={link.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
                     >
-                      <span className="flex items-center gap-2">
-                        {link.id === "friends" && <UserPlus className="w-4 h-4" />}
-                        {t(link.labelKey)}
-                      </span>
-                      {link.showBadge && user && pendingRequests.length > 0 && (
-                        <Badge className="bg-pink-500 text-white text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
-                          {pendingRequests.length}
-                        </Badge>
-                      )}
-                    </Link>
-                  </motion.div>
-                ) : (
+                      <Link
+                        to={link.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center justify-between w-full text-left px-4 py-3 rounded-xl transition-colors font-medium hover:bg-gold/10 ${
+                          link.id === "friends" ? "text-pink-500" : "text-foreground"
+                        }`}
+                      >
+                        <span className="flex items-center gap-3">
+                          <IconComponent className="w-5 h-5 text-primary/70" />
+                          {t(link.labelKey)}
+                        </span>
+                        {link.showBadge && user && pendingRequests.length > 0 && (
+                          <Badge className="bg-pink-500 text-white text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center animate-pulse">
+                            {pendingRequests.length}
+                          </Badge>
+                        )}
+                      </Link>
+                    </motion.div>
+                  );
+                }
+                
+                // Section scroll link
+                return (
                   <motion.button
                     key={link.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.05 }}
                     onClick={() => scrollToSection(link.id)}
-                    className={`w-full text-left px-4 py-3 rounded-xl transition-colors font-bold ${
+                    className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-colors font-medium ${
                       activeSection === link.id
                         ? "bg-gold/15 text-gold"
                         : "text-foreground hover:bg-gold/10"
                     }`}
                   >
+                    <IconComponent className={`w-5 h-5 ${activeSection === link.id ? "text-gold" : "text-primary/70"}`} />
                     {t(link.labelKey)}
                   </motion.button>
-                )
-              )}
+                );
+              })}
             </nav>
           </motion.div>
         )}
