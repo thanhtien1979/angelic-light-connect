@@ -2,18 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { subscribeFlyingAngels, subscribeFlyingAngelsSettings, FlyingAngelsSettings } from "@/hooks/useFlyingAngels";
 
-// Import angel images - original flying angels
-import angelTinker from "@/assets/flying-angel-tinker.png";
-import angelGreen from "@/assets/flying-angel-green.png";
-import angelGold from "@/assets/flying-angel-gold.png";
-import angelHeart from "@/assets/flying-angel-heart.png";
-import angelButterfly from "@/assets/flying-angel-butterfly.webp";
-import flyingAngel from "@/assets/flying-angel.png";
-import flyingAngel2 from "@/assets/flying-angel-2.png";
-import flyingAngel3 from "@/assets/flying-angel-3.png";
-import flyingAngel4 from "@/assets/flying-angel-4.png";
-
-// Import floating fairies
+// Import only the 6 floating fairies from the hero section
 import floatingFairyPink from "@/assets/floating-fairy-pink.png";
 import floatingFairyGold from "@/assets/floating-fairy-gold.png";
 import floatingFairyPurple from "@/assets/floating-fairy-purple.png";
@@ -21,25 +10,14 @@ import floatingFairyGreen from "@/assets/floating-fairy-green.png";
 import floatingFairyYellow from "@/assets/floating-fairy-yellow.png";
 import floatingFairyBrown from "@/assets/floating-fairy-brown.png";
 
-// All available angel/fairy images with their glow colors
+// Only 6 floating fairies - the ones from the hero section
 const allAngelImages = [
-  // Flying angels
-  { src: angelTinker, glow: "rgba(144, 238, 144, 0.6)", name: "Tinker" },
-  { src: angelGreen, glow: "rgba(34, 197, 94, 0.6)", name: "Green" },
-  { src: angelGold, glow: "rgba(251, 191, 36, 0.6)", name: "Gold" },
-  { src: angelHeart, glow: "rgba(244, 114, 182, 0.6)", name: "Heart" },
-  { src: angelButterfly, glow: "rgba(251, 146, 60, 0.6)", name: "Butterfly" },
-  { src: flyingAngel, glow: "rgba(255, 255, 255, 0.6)", name: "Classic" },
-  { src: flyingAngel2, glow: "rgba(147, 197, 253, 0.6)", name: "Sky" },
-  { src: flyingAngel3, glow: "rgba(253, 186, 116, 0.6)", name: "Sunset" },
-  { src: flyingAngel4, glow: "rgba(196, 181, 253, 0.6)", name: "Lavender" },
-  // Floating fairies
-  { src: floatingFairyPink, glow: "rgba(244, 114, 182, 0.6)", name: "Pink Fairy" },
-  { src: floatingFairyGold, glow: "rgba(251, 191, 36, 0.6)", name: "Gold Fairy" },
-  { src: floatingFairyPurple, glow: "rgba(168, 85, 247, 0.6)", name: "Purple Fairy" },
   { src: floatingFairyGreen, glow: "rgba(34, 197, 94, 0.6)", name: "Green Fairy" },
-  { src: floatingFairyYellow, glow: "rgba(250, 204, 21, 0.6)", name: "Yellow Fairy" },
+  { src: floatingFairyGold, glow: "rgba(251, 191, 36, 0.6)", name: "Gold Fairy" },
   { src: floatingFairyBrown, glow: "rgba(180, 83, 9, 0.6)", name: "Brown Fairy" },
+  { src: floatingFairyPink, glow: "rgba(244, 114, 182, 0.6)", name: "Pink Fairy" },
+  { src: floatingFairyPurple, glow: "rgba(168, 85, 247, 0.6)", name: "Purple Fairy" },
+  { src: floatingFairyYellow, glow: "rgba(250, 204, 21, 0.6)", name: "Yellow Fairy" },
 ];
 
 interface Angel {

@@ -1008,7 +1008,7 @@ const Settings = () => {
                               value={[flyingAngelsSettings.angelCount]}
                               onValueChange={(value) => updateFlyingAngelsSettings({ angelCount: value[0] })}
                               min={1}
-                              max={15}
+                              max={6}
                               step={1}
                               className="cursor-pointer"
                             />
