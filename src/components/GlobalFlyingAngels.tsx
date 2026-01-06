@@ -159,7 +159,7 @@ const GlobalFlyingAngels = () => {
     };
   }, []);
 
-  // Generate angels with spread-out positions based on settings
+  // Generate angels with spread-out positions - each angel in a unique zone
   const angels = useMemo<Angel[]>(() => {
     const count = Math.min(settings.angelCount, allAngelImages.length);
     
@@ -167,19 +167,29 @@ const GlobalFlyingAngels = () => {
     const shuffled = [...allAngelImages].sort(() => Math.random() - 0.5);
     const selectedAngels = shuffled.slice(0, count);
     
-    // Generate spread-out zones based on count
+    // Generate spread-out zones using a 3x3 grid with padding
     const generateZones = (n: number) => {
       const zones = [];
-      const cols = Math.ceil(Math.sqrt(n));
-      const rows = Math.ceil(n / cols);
+      const gridSize = 3;
+      const padding = 10; // 10% padding between zones
+      const zoneWidth = (100 - padding * 2) / gridSize;
+      const zoneHeight = (100 - padding * 2) / gridSize;
       
+      // Create all possible zone positions
+      const allPositions = [];
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+          allPositions.push({
+            x: padding + col * zoneWidth + zoneWidth / 2 + (Math.random() - 0.5) * (zoneWidth * 0.4),
+            y: padding + row * zoneHeight + zoneHeight / 2 + (Math.random() - 0.5) * (zoneHeight * 0.4),
+          });
+        }
+      }
+      
+      // Shuffle and take required number
+      const shuffledPositions = allPositions.sort(() => Math.random() - 0.5);
       for (let i = 0; i < n; i++) {
-        const row = Math.floor(i / cols);
-        const col = i % cols;
-        zones.push({
-          x: 10 + (col / cols) * 75 + Math.random() * 10,
-          y: 10 + (row / rows) * 70 + Math.random() * 10,
-        });
+        zones.push(shuffledPositions[i % shuffledPositions.length]);
       }
       return zones;
     };
@@ -192,11 +202,11 @@ const GlobalFlyingAngels = () => {
       return {
         id: index,
         image: angel.src,
-        size: settings.size * (0.8 + Math.random() * 0.4), // ±20% variation
-        startX: Math.max(5, Math.min(90, zone.x)),
-        startY: Math.max(5, Math.min(85, zone.y)),
-        duration: (25 + Math.random() * 20) / settings.speed, // Affected by speed
-        delay: index * 2,
+        size: settings.size * (0.8 + Math.random() * 0.4),
+        startX: Math.max(5, Math.min(95, zone.x)),
+        startY: Math.max(5, Math.min(90, zone.y)),
+        duration: (30 + Math.random() * 25) / settings.speed, // Slower, more varied
+        delay: index * 1.5 + Math.random() * 3,
         glowColor: angel.glow,
       };
     });
@@ -244,27 +254,36 @@ const GlobalFlyingAngels = () => {
     setClickBursts((prev) => [...prev, burst]);
   }, []);
 
-  // Generate flight path with landing points - limited range to prevent clustering
+  // Generate flight path - free flying across the screen with more distance
   const generateFlightPath = useCallback((angel: Angel) => {
     const points = [];
-    const numPoints = 8;
+    const numPoints = 12; // More points for smoother, longer paths
     
-    // Define a movement range based on starting position to keep angels in their zones
-    const movementRange = 25; // Maximum 25% movement from starting position
+    // Larger movement range - 40-50% of screen
+    const movementRangeX = 40 + Math.random() * 10;
+    const movementRangeY = 35 + Math.random() * 10;
+    
+    // Random direction multipliers for each angel
+    const directionX = Math.random() > 0.5 ? 1 : -1;
+    const directionY = Math.random() > 0.5 ? 1 : -1;
     
     for (let i = 0; i <= numPoints; i++) {
-      // Create smooth curved path within limited range
-      const isLanding = i % 3 === 0 && i > 0;
+      const progress = i / numPoints;
+      const isLanding = i % 4 === 0 && i > 0;
       
-      // Calculate position with limited movement range
-      const xOffset = Math.sin(i * 0.8) * movementRange;
-      const yOffset = Math.cos(i * 0.6) * (movementRange * 0.8);
+      // Create more organic, sweeping movements
+      const waveX = Math.sin(progress * Math.PI * 2 + Math.random() * 0.5) * movementRangeX * directionX;
+      const waveY = Math.cos(progress * Math.PI * 1.5 + Math.random() * 0.5) * movementRangeY * directionY;
+      
+      // Add some randomness for natural feel
+      const randomOffsetX = (Math.random() - 0.5) * 10;
+      const randomOffsetY = (Math.random() - 0.5) * 8;
       
       points.push({
-        x: `${Math.max(5, Math.min(90, angel.startX + xOffset))}%`,
-        y: `${Math.max(5, Math.min(85, angel.startY + yOffset))}%`,
-        scale: isLanding ? 1.1 : 0.9 + Math.random() * 0.2,
-        rotate: isLanding ? 0 : -15 + Math.random() * 30,
+        x: `${Math.max(3, Math.min(97, angel.startX + waveX + randomOffsetX))}%`,
+        y: `${Math.max(3, Math.min(92, angel.startY + waveY + randomOffsetY))}%`,
+        scale: isLanding ? 1.15 : 0.85 + Math.random() * 0.3,
+        rotate: isLanding ? 0 : -20 + Math.random() * 40,
       });
     }
     return points;
