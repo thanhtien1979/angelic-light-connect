@@ -6,7 +6,7 @@ const LOCAL_STORAGE_KEY = "flying-angels-enabled";
 const SETTINGS_STORAGE_KEY = "flying-angels-settings";
 
 export interface FlyingAngelsSettings {
-  angelCount: number; // 1-15
+  angelCount: number; // 1-6
   size: number; // 40-150
   speed: number; // 0.5-2
 }
