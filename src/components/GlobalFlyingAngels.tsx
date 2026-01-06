@@ -141,74 +141,48 @@ const GlobalFlyingAngels = () => {
     };
   }, []);
 
-  // Generate angels with spread-out positions - each fairy stays in its own zone
+  // Generate angels with fixed zones - 6 distinct areas spread across the entire screen
   const angels = useMemo<Angel[]>(() => {
     const count = Math.min(settings.angelCount, allAngelImages.length);
 
-    // Shuffle array to get random fairies
-    const shuffled = [...allAngelImages].sort(() => Math.random() - 0.5);
-    const selectedAngels = shuffled.slice(0, count);
+    // 6 fixed zones covering the entire screen - well separated
+    // Layout: 3 columns x 2 rows with gaps between them
+    const fixedZones = [
+      // Top row (y: 5-45%)
+      { minX: 3, maxX: 28, minY: 3, maxY: 42, cx: 15, cy: 22 },    // Top-left
+      { minX: 37, maxX: 63, minY: 3, maxY: 38, cx: 50, cy: 20 },   // Top-center  
+      { minX: 72, maxX: 97, minY: 3, maxY: 42, cx: 85, cy: 22 },   // Top-right
+      // Bottom row (y: 55-95%)
+      { minX: 3, maxX: 28, minY: 58, maxY: 97, cx: 15, cy: 78 },   // Bottom-left
+      { minX: 37, maxX: 63, minY: 62, maxY: 97, cx: 50, cy: 80 },  // Bottom-center
+      { minX: 72, maxX: 97, minY: 58, maxY: 97, cx: 85, cy: 78 },  // Bottom-right
+    ];
 
-    const generateZones = (n: number) => {
-      const cols = 3;
-      const rows = 2;
-      const padding = 6;
-      const zoneWidth = (100 - padding * 2) / cols;
-      const zoneHeight = (100 - padding * 2) / rows;
-
-      const zones = [] as Array<{
-        minX: number;
-        maxX: number;
-        minY: number;
-        maxY: number;
-        cx: number;
-        cy: number;
-      }>;
-
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-          const minX = padding + col * zoneWidth;
-          const maxX = padding + (col + 1) * zoneWidth;
-          const minY = padding + row * zoneHeight;
-          const maxY = padding + (row + 1) * zoneHeight;
-
-          zones.push({
-            minX,
-            maxX,
-            minY,
-            maxY,
-            cx: (minX + maxX) / 2,
-            cy: (minY + maxY) / 2,
-          });
-        }
-      }
-
-      return zones.sort(() => Math.random() - 0.5).slice(0, n);
-    };
-
-    const zones = generateZones(count);
+    // Always use all 6 fairies in order (no shuffle) so each fairy gets a unique zone
+    const selectedAngels = allAngelImages.slice(0, count);
 
     return selectedAngels.map((angel, index) => {
-      const zone = zones[index] ?? zones[0] ?? { minX: 6, maxX: 94, minY: 6, maxY: 90, cx: 50, cy: 50 };
+      const zone = fixedZones[index];
 
-      const jitterX = (Math.random() - 0.5) * Math.min(8, (zone.maxX - zone.minX) * 0.25);
-      const jitterY = (Math.random() - 0.5) * Math.min(8, (zone.maxY - zone.minY) * 0.25);
+      // Small random offset within zone center
+      const jitterX = (Math.random() - 0.5) * 8;
+      const jitterY = (Math.random() - 0.5) * 8;
 
-      const startX = Math.max(zone.minX + 2, Math.min(zone.maxX - 2, zone.cx + jitterX));
-      const startY = Math.max(zone.minY + 2, Math.min(zone.maxY - 2, zone.cy + jitterY));
+      const startX = Math.max(zone.minX + 3, Math.min(zone.maxX - 3, zone.cx + jitterX));
+      const startY = Math.max(zone.minY + 3, Math.min(zone.maxY - 3, zone.cy + jitterY));
 
       return {
         id: index,
         image: angel.src,
-        size: settings.size * (0.8 + Math.random() * 0.4),
+        size: settings.size * (0.85 + Math.random() * 0.3),
         startX,
         startY,
         minX: zone.minX,
         maxX: zone.maxX,
         minY: zone.minY,
         maxY: zone.maxY,
-        duration: (34 + Math.random() * 26) / settings.speed,
-        delay: index * 2.2 + Math.random() * 2,
+        duration: (30 + Math.random() * 20) / settings.speed,
+        delay: index * 1.5,
         glowColor: angel.glow,
       };
     });
