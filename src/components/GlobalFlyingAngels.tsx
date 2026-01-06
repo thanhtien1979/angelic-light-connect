@@ -141,78 +141,86 @@ const GlobalFlyingAngels = () => {
     };
   }, []);
 
-  // Generate angels with fixed zones - 6 distinct areas spread across the entire screen
+  // Generate angels with unique dispersed positions across the viewport
   const angels = useMemo<Angel[]>(() => {
     const count = Math.min(settings.angelCount, allAngelImages.length);
-
-    // 6 fixed zones covering the entire screen - well separated
-    // Layout: 3 columns x 2 rows with gaps between them
-    const fixedZones = [
-      // Top row (y: 5-45%)
-      { minX: 3, maxX: 28, minY: 3, maxY: 42, cx: 15, cy: 22 },    // Top-left
-      { minX: 37, maxX: 63, minY: 3, maxY: 38, cx: 50, cy: 20 },   // Top-center  
-      { minX: 72, maxX: 97, minY: 3, maxY: 42, cx: 85, cy: 22 },   // Top-right
-      // Bottom row (y: 55-95%)
-      { minX: 3, maxX: 28, minY: 58, maxY: 97, cx: 15, cy: 78 },   // Bottom-left
-      { minX: 37, maxX: 63, minY: 62, maxY: 97, cx: 50, cy: 80 },  // Bottom-center
-      { minX: 72, maxX: 97, minY: 58, maxY: 97, cx: 85, cy: 78 },  // Bottom-right
-    ];
-
-    // Always use all 6 fairies in order (no shuffle) so each fairy gets a unique zone
     const selectedAngels = allAngelImages.slice(0, count);
+    const minDistance = 15; // Minimum 15% distance between angels (roughly 120-180px on typical screens)
+    
+    // Generate unique spawn positions with minimum spacing
+    const generateSpawnPositions = (n: number): { x: number; y: number }[] => {
+      const positions: { x: number; y: number }[] = [];
+      const maxAttempts = 100;
+      
+      // Predefined well-distributed starting points as fallback
+      const fallbackPositions = [
+        { x: 15, y: 20 },   // Top-left area
+        { x: 80, y: 15 },   // Top-right area
+        { x: 50, y: 35 },   // Center-top
+        { x: 20, y: 65 },   // Bottom-left area
+        { x: 75, y: 70 },   // Bottom-right area
+        { x: 45, y: 55 },   // Center
+      ];
+      
+      for (let i = 0; i < n; i++) {
+        let bestPosition = fallbackPositions[i] || { x: 50, y: 50 };
+        let found = false;
+        
+        for (let attempt = 0; attempt < maxAttempts && !found; attempt++) {
+          // Random position within safe bounds: x: 10-90%, y: 10-80%
+          const x = 10 + Math.random() * 80;
+          const y = 10 + Math.random() * 70;
+          
+          // Check distance from all existing positions
+          let tooClose = false;
+          for (const pos of positions) {
+            const dist = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
+            if (dist < minDistance) {
+              tooClose = true;
+              break;
+            }
+          }
+          
+          if (!tooClose) {
+            bestPosition = { x, y };
+            found = true;
+          }
+        }
+        
+        positions.push(bestPosition);
+      }
+      
+      return positions;
+    };
+    
+    const spawnPositions = generateSpawnPositions(count);
 
     return selectedAngels.map((angel, index) => {
-      const zone = fixedZones[index];
-
-      // Small random offset within zone center
-      const jitterX = (Math.random() - 0.5) * 8;
-      const jitterY = (Math.random() - 0.5) * 8;
-
-      const startX = Math.max(zone.minX + 3, Math.min(zone.maxX - 3, zone.cx + jitterX));
-      const startY = Math.max(zone.minY + 3, Math.min(zone.maxY - 3, zone.cy + jitterY));
-
+      const spawn = spawnPositions[index];
+      
+      // Each angel gets a unique direction angle (0-360 degrees, evenly distributed)
+      const baseAngle = (index * (360 / count)) + Math.random() * 30;
+      
+      // Unique speed variation per angel
+      const speedMultiplier = 0.8 + Math.random() * 0.4;
+      
       return {
         id: index,
         image: angel.src,
         size: settings.size * (0.85 + Math.random() * 0.3),
-        startX,
-        startY,
-        minX: zone.minX,
-        maxX: zone.maxX,
-        minY: zone.minY,
-        maxY: zone.maxY,
-        duration: (30 + Math.random() * 20) / settings.speed,
-        delay: index * 1.5,
+        startX: spawn.x,
+        startY: spawn.y,
+        minX: 5,  // Allow movement across most of viewport
+        maxX: 95,
+        minY: 5,
+        maxY: 85,
+        duration: (35 + Math.random() * 25) * speedMultiplier / settings.speed,
+        delay: index * 0.8 + Math.random() * 1.5,  // Staggered start times
         glowColor: angel.glow,
+        angle: baseAngle,  // Store unique direction
       };
     });
   }, [settings.angelCount, settings.size, settings.speed]);
-
-  // Generate sparkles periodically
-  useEffect(() => {
-    if (!isEnabled || isMobile || prefersReducedMotion) return;
-
-    const interval = setInterval(() => {
-      const newSparkle: Sparkle = {
-        id: Date.now() + Math.random(),
-        x: Math.random() * windowSize.width,
-        y: Math.random() * windowSize.height,
-        size: 3 + Math.random() * 5,
-      };
-      setSparkles((prev) => [...prev.slice(-15), newSparkle]);
-    }, 800);
-
-    return () => clearInterval(interval);
-  }, [isEnabled, isMobile, prefersReducedMotion, windowSize]);
-
-  // Clean up old sparkles and bursts
-  useEffect(() => {
-    const cleanup = setInterval(() => {
-      setSparkles((prev) => prev.slice(-10));
-      setClickBursts((prev) => prev.filter((b) => Date.now() - b.id < 1500));
-    }, 3000);
-    return () => clearInterval(cleanup);
-  }, []);
 
   // Handle angel click - create sparkle burst
   const handleAngelClick = useCallback((e: React.MouseEvent, glowColor: string) => {
@@ -230,56 +238,77 @@ const GlobalFlyingAngels = () => {
     setClickBursts((prev) => [...prev, burst]);
   }, []);
 
-  // Generate flight path - deterministic per fairy and clamped to its own zone
-  const generateFlightPath = useCallback((angel: Angel) => {
-    const rand01 = (seed: number) => {
-      const x = Math.sin(seed) * 10000;
+  // Generate natural floating path - each angel has unique direction and movement
+  const generateFlightPath = useCallback((angel: Angel & { angle?: number }) => {
+    const points: { x: string; y: string; scale: number; rotate: number }[] = [];
+    const numPoints = 10;
+    
+    // Use angel's unique angle for primary direction
+    const primaryAngle = ((angel.angle || 0) * Math.PI) / 180;
+    
+    // Create unique movement pattern based on angel ID
+    const seed = angel.id + 1;
+    const rand = (n: number) => {
+      const x = Math.sin(seed * n) * 10000;
       return x - Math.floor(x);
     };
-
-    const randBetween = (seed: number, min: number, max: number) => min + rand01(seed) * (max - min);
-
-    const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
-
-    const points: { x: string; y: string; scale: number; rotate: number }[] = [];
-    const numPoints = 12;
-
-    const base = angel.id + 1;
-
-    const zoneSpanX = angel.maxX - angel.minX;
-    const zoneSpanY = angel.maxY - angel.minY;
-
-    const movementRangeX = zoneSpanX * randBetween(base * 11.1, 0.28, 0.42);
-    const movementRangeY = zoneSpanY * randBetween(base * 12.2, 0.26, 0.4);
-
-    const directionX = rand01(base * 13.3) > 0.5 ? 1 : -1;
-    const directionY = rand01(base * 14.4) > 0.5 ? 1 : -1;
-
-    const phaseX = randBetween(base * 15.5, 0, Math.PI * 2);
-    const phaseY = randBetween(base * 16.6, 0, Math.PI * 2);
-
-    const freqX = randBetween(base * 17.7, 0.85, 1.35);
-    const freqY = randBetween(base * 18.8, 0.75, 1.25);
-
+    
+    // Movement amplitude - how far the angel drifts
+    const driftAmplitudeX = 8 + rand(1.1) * 12;  // 8-20% drift
+    const driftAmplitudeY = 6 + rand(2.2) * 10;  // 6-16% drift
+    
+    // Secondary wave patterns for natural feel
+    const waveFreqX = 0.8 + rand(3.3) * 0.6;
+    const waveFreqY = 0.6 + rand(4.4) * 0.5;
+    const phaseOffsetX = rand(5.5) * Math.PI * 2;
+    const phaseOffsetY = rand(6.6) * Math.PI * 2;
+    
+    // Direction influenced by unique angle
+    const dirX = Math.cos(primaryAngle) > 0 ? 1 : -1;
+    const dirY = Math.sin(primaryAngle) > 0 ? 1 : -1;
+    
     for (let i = 0; i <= numPoints; i++) {
       const progress = i / numPoints;
-      const isLanding = i % 4 === 0 && i > 0;
-
-      const waveX = Math.sin(progress * Math.PI * 2 * freqX + phaseX) * movementRangeX * directionX;
-      const waveY = Math.cos(progress * Math.PI * 1.6 * freqY + phaseY) * movementRangeY * directionY;
-
-      const offsetX = randBetween(base * 101 + i * 7.7, -6, 6);
-      const offsetY = randBetween(base * 202 + i * 8.8, -5, 5);
-
-      const x = clamp(angel.startX + waveX + offsetX, angel.minX + 1.5, angel.maxX - 1.5);
-      const y = clamp(angel.startY + waveY + offsetY, angel.minY + 1.5, angel.maxY - 1.5);
-
-      const scale = isLanding ? 1.12 : randBetween(base * 303 + i * 9.9, 0.85, 1.08);
-      const rotate = isLanding ? 0 : randBetween(base * 404 + i * 6.6, -25, 25);
-
+      const fullCycle = progress * Math.PI * 2;
+      
+      // Primary drift motion following angel's unique direction
+      const primaryDriftX = Math.sin(fullCycle * waveFreqX + phaseOffsetX) * driftAmplitudeX * dirX;
+      const primaryDriftY = Math.cos(fullCycle * waveFreqY + phaseOffsetY) * driftAmplitudeY * dirY;
+      
+      // Secondary gentle wave for organic feel
+      const secondaryX = Math.sin(fullCycle * 2.3 + seed) * 3;
+      const secondaryY = Math.cos(fullCycle * 1.7 + seed * 0.5) * 2.5;
+      
+      // Calculate final position with soft boundary clamping
+      let x = angel.startX + primaryDriftX + secondaryX;
+      let y = angel.startY + primaryDriftY + secondaryY;
+      
+      // Soft boundary - curve back gently when approaching edges
+      const edgeSoftness = 8; // Start curving 8% from edge
+      if (x < angel.minX + edgeSoftness) {
+        x = angel.minX + edgeSoftness - Math.pow((angel.minX + edgeSoftness - x) * 0.3, 0.8);
+      } else if (x > angel.maxX - edgeSoftness) {
+        x = angel.maxX - edgeSoftness + Math.pow((x - (angel.maxX - edgeSoftness)) * 0.3, 0.8);
+      }
+      if (y < angel.minY + edgeSoftness) {
+        y = angel.minY + edgeSoftness - Math.pow((angel.minY + edgeSoftness - y) * 0.3, 0.8);
+      } else if (y > angel.maxY - edgeSoftness) {
+        y = angel.maxY - edgeSoftness + Math.pow((y - (angel.maxY - edgeSoftness)) * 0.3, 0.8);
+      }
+      
+      // Clamp to absolute bounds
+      x = Math.max(angel.minX, Math.min(angel.maxX, x));
+      y = Math.max(angel.minY, Math.min(angel.maxY, y));
+      
+      // Gentle scale breathing
+      const scale = 0.92 + Math.sin(fullCycle * 1.5 + seed * 0.7) * 0.1;
+      
+      // Subtle rotation that follows movement direction
+      const rotate = Math.sin(fullCycle + phaseOffsetX) * 12 * dirX;
+      
       points.push({ x: `${x}%`, y: `${y}%`, scale, rotate });
     }
-
+    
     return points;
   }, []);
 
