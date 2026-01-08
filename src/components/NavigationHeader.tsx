@@ -39,6 +39,7 @@ interface NavLink {
   path?: string;
   showBadge?: boolean;
   icon: LucideIcon;
+  isExternal?: boolean;
   subItems?: { labelKey: string; path: string; icon: LucideIcon }[];
 }
 
@@ -62,6 +63,7 @@ const navLinksConfig: NavLink[] = [
   { id: "community", labelKey: "nav.community", isPage: true, path: "/community", showBadge: true, icon: UsersRound },
   { id: "friends", labelKey: "nav.friends", isPage: true, path: "/friends", showBadge: true, icon: UserPlus },
   { id: "light-score", labelKey: "nav.lightScore", isPage: true, path: "/diem-anh-sang", icon: Star },
+  { id: "treasury", labelKey: "nav.treasury", isExternal: true, path: "https://treasury.fun.rich/", icon: Wallet },
 ];
 
 const BLESSING_MESSAGES = [
@@ -689,6 +691,27 @@ const NavigationHeader = () => {
                 {navLinksConfig.slice(5).map((link) => {
                   const IconComponent = link.icon;
                   
+                  // External link
+                  if (link.isExternal && link.path) {
+                    return (
+                      <a 
+                        key={link.id} 
+                        href={link.path}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <motion.span
+                          className="relative px-3 xl:px-4 py-1.5 text-xs xl:text-sm font-medium transition-all duration-300 rounded-full inline-flex items-center gap-1.5 whitespace-nowrap text-foreground/80 hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_12px_hsla(348,80%,75%,0.3)]"
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <IconComponent className="w-3.5 h-3.5" />
+                          {t(link.labelKey)}
+                        </motion.span>
+                      </a>
+                    );
+                  }
+                  
                   // Regular page link
                   if (link.isPage && link.path) {
                     return (
@@ -798,6 +821,29 @@ const NavigationHeader = () => {
                       scrollToSection={scrollToSection}
                       t={t}
                     />
+                  );
+                }
+                
+                // External link
+                if (link.isExternal && link.path) {
+                  return (
+                    <motion.div
+                      key={link.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <a
+                        href={link.path}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-colors font-medium text-foreground hover:bg-gold/10"
+                      >
+                        <IconComponent className="w-5 h-5 text-primary/70" />
+                        {t(link.labelKey)}
+                      </a>
+                    </motion.div>
                   );
                 }
                 
