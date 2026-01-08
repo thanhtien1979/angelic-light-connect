@@ -41,6 +41,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.meditation": "Thiền định",
     "nav.whitepaper": "Whitepaper",
     "nav.lightScore": "Điểm Ánh Sáng",
+    "nav.treasury": "Treasury",
     
     // Common buttons (iOS/Android style)
     "common.save": "Lưu",
