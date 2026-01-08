@@ -25,13 +25,13 @@ interface Platform {
 
 const platforms: Platform[] = [
   {
-    name: "FUN Ecosystem",
-    subtitle: "Hệ Sinh Thái Ánh Sáng",
-    description: "Vortex tổng thể - Nền tảng Web3 kết nối mọi năng lượng vũ trụ",
-    icon: <img src={funEcosystemLogo} alt="FUN Ecosystem" className="w-12 h-12 object-cover rounded-full ring-2 ring-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.6)]" />,
+    name: "Treasury",
+    subtitle: "Kho Bạc Ánh Sáng",
+    description: "Vortex tài sản - Kho bạc trung tâm quản lý toàn bộ năng lượng vũ trụ",
+    icon: <img src={funEcosystemLogo} alt="Treasury" className="w-12 h-12 object-cover rounded-full ring-2 ring-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.6)]" />,
     color: "from-purple-400 to-indigo-500",
     glowColor: "shadow-purple-400/60",
-    link: "https://fun.rich/"
+    link: "https://treasury.fun.rich/"
   },
   {
     name: "Angel AI",
