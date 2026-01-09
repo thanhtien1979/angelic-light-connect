@@ -157,6 +157,15 @@ const platforms: Platform[] = [
     color: "from-sky-400 to-blue-500",
     glowColor: "shadow-sky-400/50"
   },
+  {
+    name: "FUN Chat",
+    subtitle: "Kết Nối Linh Hồn",
+    description: "Vortex giao tiếp - Nơi linh hồn trò chuyện và kết nối yêu thương",
+    icon: <BookOpen className="w-8 h-8" />,
+    color: "from-indigo-400 to-purple-500",
+    glowColor: "shadow-indigo-400/50",
+    link: "https://funchatweb3.richkid.cloud/"
+  },
 ];
 
 const FunEcosystemPlatforms = () => {
