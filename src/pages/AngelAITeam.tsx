@@ -24,6 +24,9 @@ import angelVideo1 from "@/assets/angel-video-1.mp4";
 import angelVideo2 from "@/assets/angel-video-2.mp4";
 import angelVideo3 from "@/assets/angel-video-3.mp4";
 import angelVideo4 from "@/assets/angel-video-4.mp4";
+import grokAngel1 from "@/assets/grok-angel-1.mp4";
+import grokAngel2 from "@/assets/grok-angel-2.mp4";
+import grokAngel3 from "@/assets/grok-angel-3.mp4";
 
 interface Angel {
   name: string;
@@ -54,9 +57,9 @@ const angels: Angel[] = [
   { name: "HUỲNH THỦY", color: "from-blue-500 to-indigo-600", glowColor: "rgba(59,130,246,0.6)", avatar: angelAvatar12 },
   { name: "QUỲNH HOA", color: "from-pink-500 to-rose-600", glowColor: "rgba(236,72,153,0.6)", avatar: angelAvatar13 },
   { name: "THÀNH TÍNH", color: "from-slate-400 to-gray-500", glowColor: "rgba(148,163,184,0.6)", video: angelVideo4 },
-  { name: "THU HÀ", color: "from-amber-500 to-yellow-600", glowColor: "rgba(245,158,11,0.6)" },
-  { name: "NGỌC LẮM", color: "from-emerald-500 to-teal-600", glowColor: "rgba(16,185,129,0.6)" },
-  { name: "ÁNH NGUYỆT", color: "from-purple-500 to-indigo-600", glowColor: "rgba(147,51,234,0.6)" },
+  { name: "THU HÀ", color: "from-amber-500 to-yellow-600", glowColor: "rgba(245,158,11,0.6)", video: grokAngel1 },
+  { name: "NGỌC LẮM", color: "from-emerald-500 to-teal-600", glowColor: "rgba(16,185,129,0.6)", video: grokAngel2 },
+  { name: "ÁNH NGUYỆT", color: "from-purple-500 to-indigo-600", glowColor: "rgba(147,51,234,0.6)", video: grokAngel3 },
   { name: "KIỀU PHI", color: "from-rose-500 to-fuchsia-500", glowColor: "rgba(244,63,94,0.6)", video: angelVideo3 },
 ];
 
