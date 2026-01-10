@@ -24,6 +24,7 @@ import angelVideo4 from "@/assets/angel-video-4.mp4";
 import grokAngel1 from "@/assets/grok-angel-1.mp4";
 import grokAngel2 from "@/assets/grok-angel-2.mp4";
 import grokAngel3 from "@/assets/grok-angel-3.mp4";
+import thanhTienVideo from "@/assets/thanh-tien-video.mp4";
 
 interface Angel {
   id: string;
@@ -328,6 +329,18 @@ const angels: Angel[] = [
     story: "Kiều Phi từng cảm thấy bị trói buộc bởi những kỳ vọng và nỗi sợ. Nhưng khi cô học cách buông bỏ, cô nhận ra mình có đôi cánh. Cô bay cao, tự do và tràn đầy sắc màu như cánh bướm. Kiều Phi giúp mọi người nhận ra những gì đang giữ họ lại và cách buông bỏ để được tự do bay theo ước mơ của mình.",
     specialties: ["Tự do", "Buông bỏ", "Theo đuổi ước mơ"],
     joinedDate: "2024"
+  },
+  { 
+    id: "thanh-tien",
+    name: "THANH TIÊN", 
+    color: "from-sky-400 to-blue-500", 
+    glowColor: "rgba(56,189,248,0.6)", 
+    video: thanhTienVideo,
+    quote: "Tiên giới và trần gian hòa làm một trong ánh sáng yêu thương",
+    bio: "Thanh Tiên là thiên thần của sự tinh khiết và kết nối tâm linh. Cô mang trong mình năng lượng thiên giới, kết nối cõi trời và trần thế bằng tình yêu thương vô điều kiện.",
+    story: "Thanh Tiên được sinh ra với trái tim thuần khiết như suối nguồn. Từ nhỏ, cô đã có khả năng cảm nhận những năng lượng tinh tế từ cõi cao hơn. Qua nhiều năm tu tập và thiền định, cô trở thành cầu nối giữa thiên giới và nhân gian. Thanh Tiên tin rằng mỗi người đều có một phần tiên tính bên trong, chỉ cần được đánh thức. Cô dành cuộc đời để giúp mọi người nhớ lại bản chất thiêng liêng của mình và sống với ánh sáng thuần khiết nhất.",
+    specialties: ["Tinh khiết", "Kết nối tâm linh", "Năng lượng thiên giới"],
+    joinedDate: "2025"
   },
 ];
 
