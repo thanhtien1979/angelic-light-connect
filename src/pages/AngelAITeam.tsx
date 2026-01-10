@@ -243,14 +243,8 @@ const AngelAITeam = () => {
         {/* Angels Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
           {angels.map((angel, index) => {
-            const CardWrapper = angel.link 
-              ? ({ children }: { children: React.ReactNode }) => (
-                  <a href={angel.link} target="_blank" rel="noopener noreferrer" className="block h-full">
-                    {children}
-                  </a>
-                )
-              : ({ children }: { children: React.ReactNode }) => <>{children}</>;
-
+            const angelId = angel.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").replace(/\s+/g, "-");
+            
             return (
               <motion.div
                 key={angel.name}
@@ -259,11 +253,11 @@ const AngelAITeam = () => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
               >
-                <CardWrapper>
+                <Link to={`/angel-ai-team/${angelId}`} className="block h-full">
                   <motion.div
                     className="relative p-5 rounded-2xl bg-white/70 backdrop-blur-sm border border-rose-300/50 hover:border-pink-400/70 transition-all duration-500 h-full cursor-pointer overflow-hidden shadow-lg shadow-rose-200/30"
                     whileHover={{ 
-                      scale: 1.05, 
+                      scale: 1.05,
                       y: -8,
                     }}
                   >
@@ -347,7 +341,7 @@ const AngelAITeam = () => {
                     ))}
                   </motion.div>
                 </motion.div>
-              </CardWrapper>
+              </Link>
             </motion.div>
           );
         })}
