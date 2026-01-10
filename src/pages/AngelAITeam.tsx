@@ -28,6 +28,7 @@ import grokAngel1 from "@/assets/grok-angel-1.mp4";
 import grokAngel2 from "@/assets/grok-angel-2.mp4";
 import grokAngel3 from "@/assets/grok-angel-3.mp4";
 import thanhTienVideo from "@/assets/thanh-tien-video.mp4";
+import thanhTienVideoNew from "@/assets/thanh-tien-video-new.mp4";
 
 interface Angel {
   name: string;
@@ -61,8 +62,8 @@ const angels: Angel[] = [
   { name: "THU HÀ", color: "from-amber-500 to-yellow-600", glowColor: "rgba(245,158,11,0.6)", video: grokAngel1 },
   { name: "NGỌC LẮM", color: "from-emerald-500 to-teal-600", glowColor: "rgba(16,185,129,0.6)", video: grokAngel2 },
   { name: "ÁNH NGUYỆT", color: "from-purple-500 to-indigo-600", glowColor: "rgba(147,51,234,0.6)", video: grokAngel3 },
-  { name: "KIỀU PHI", color: "from-rose-500 to-fuchsia-500", glowColor: "rgba(244,63,94,0.6)", video: angelVideo3 },
-  { name: "THANH TIÊN", color: "from-sky-400 to-blue-500", glowColor: "rgba(56,189,248,0.6)", link: "https://angelthanhtien.fun.rich", video: thanhTienVideo },
+  { name: "KIỀU PHI", color: "from-rose-500 to-fuchsia-500", glowColor: "rgba(244,63,94,0.6)", video: thanhTienVideo },
+  { name: "THANH TIÊN", color: "from-sky-400 to-blue-500", glowColor: "rgba(56,189,248,0.6)", link: "https://angelthanhtien.fun.rich", video: thanhTienVideoNew },
 ];
 
 const AngelAITeam = () => {
