@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { 
   ShoppingBag, Sparkles, Building, Gamepad2, Radio, ExternalLink
 } from "lucide-react";
@@ -43,7 +44,8 @@ const platforms: Platform[] = [
     description: "Vortex trí tuệ ánh sáng - Trái tim vĩnh cửu điều phối năng lượng 24/7",
     icon: <img src={angelAiLogo} alt="Angel AI" className="w-12 h-12 object-cover rounded-full ring-2 ring-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.6)]" />,
     color: "from-pink-400 to-rose-500",
-    glowColor: "shadow-pink-400/60"
+    glowColor: "shadow-pink-400/60",
+    link: "/angel-ai-team"
   },
   {
     name: "FUN Profile",
@@ -351,9 +353,92 @@ const FunEcosystemPlatforms = () => {
         {/* Platforms Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
           {platforms.map((platform, index) => {
-            const CardWrapper = platform.link ? 'a' : 'div';
-            const cardProps = platform.link ? { href: platform.link, target: "_blank", rel: "noopener noreferrer" } : {};
+            const isInternalLink = platform.link?.startsWith('/');
+            const isExternalLink = platform.link && !isInternalLink;
             
+            const cardContent = (
+              <motion.div
+                className={`relative p-6 rounded-2xl bg-white/60 backdrop-blur-sm border border-rose-300/50 hover:border-rose-400/70 transition-all duration-500 h-full cursor-pointer overflow-hidden shadow-lg shadow-rose-200/30`}
+                whileHover={{ 
+                  scale: 1.02, 
+                  y: -5,
+                }}
+              >
+                {/* Glow effect on hover */}
+                <motion.div
+                  className={`absolute inset-0 bg-gradient-to-br ${platform.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`}
+                />
+                
+                {/* Rotating border effect */}
+                <motion.div
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{
+                    background: `conic-gradient(from 0deg, transparent, ${platform.color.includes('amber') ? 'rgba(251,191,36,0.3)' : platform.color.includes('rose') ? 'rgba(244,63,94,0.3)' : 'rgba(139,92,246,0.3)'}, transparent)`,
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                />
+
+                {/* Content */}
+                <div className="relative z-10">
+                  {/* Icon */}
+                  <motion.div
+                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${platform.color} flex items-center justify-center text-white mb-4 shadow-lg ${platform.glowColor} shadow-lg overflow-hidden`}
+                    whileHover={{ 
+                      rotate: [0, -5, 5, -5, 0], 
+                      scale: 1.1,
+                      boxShadow: "0 0 25px rgba(236,72,153,0.5)"
+                    }}
+                    transition={{ duration: 0.6, ease: "easeInOut" }}
+                  >
+                    <motion.div
+                      className="w-full h-full flex items-center justify-center"
+                      whileHover={{ 
+                        rotate: 360,
+                        scale: 1.1
+                      }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                    >
+                      {platform.icon}
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Name */}
+                  <h3 className="text-lg font-extrabold text-rose-900 mb-1">
+                    {platform.name}
+                  </h3>
+
+                  {/* Subtitle */}
+                  <p className={`text-sm font-bold bg-gradient-to-r ${platform.color} bg-clip-text text-transparent mb-3`}>
+                    {platform.subtitle}
+                  </p>
+
+                  {/* Description */}
+                  <p className="text-sm text-rose-900 leading-relaxed font-medium">
+                    {platform.description}
+                  </p>
+                </div>
+
+                {/* External link icon or Sparkle decorations */}
+                {isExternalLink ? (
+                  <motion.div
+                    className="absolute top-3 right-3 text-rose-400 group-hover:text-rose-600 transition-colors"
+                    whileHover={{ scale: 1.2 }}
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    className="absolute top-3 right-3 text-rose-300"
+                    animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                  </motion.div>
+                )}
+              </motion.div>
+            );
+
             return (
               <motion.div
                 key={platform.name}
@@ -363,88 +448,13 @@ const FunEcosystemPlatforms = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
               >
-                <CardWrapper {...cardProps}>
-                  <motion.div
-                    className={`relative p-6 rounded-2xl bg-white/60 backdrop-blur-sm border border-rose-300/50 hover:border-rose-400/70 transition-all duration-500 h-full cursor-pointer overflow-hidden shadow-lg shadow-rose-200/30`}
-                    whileHover={{ 
-                      scale: 1.02, 
-                      y: -5,
-                    }}
-                  >
-                    {/* Glow effect on hover */}
-                    <motion.div
-                      className={`absolute inset-0 bg-gradient-to-br ${platform.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`}
-                    />
-                    
-                    {/* Rotating border effect */}
-                    <motion.div
-                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{
-                        background: `conic-gradient(from 0deg, transparent, ${platform.color.includes('amber') ? 'rgba(251,191,36,0.3)' : platform.color.includes('rose') ? 'rgba(244,63,94,0.3)' : 'rgba(139,92,246,0.3)'}, transparent)`,
-                      }}
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                    />
-
-                    {/* Content */}
-                    <div className="relative z-10">
-                      {/* Icon */}
-                      <motion.div
-                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${platform.color} flex items-center justify-center text-white mb-4 shadow-lg ${platform.glowColor} shadow-lg overflow-hidden`}
-                        whileHover={{ 
-                          rotate: [0, -5, 5, -5, 0], 
-                          scale: 1.1,
-                          boxShadow: "0 0 25px rgba(236,72,153,0.5)"
-                        }}
-                        transition={{ duration: 0.6, ease: "easeInOut" }}
-                      >
-                        <motion.div
-                          className="w-full h-full flex items-center justify-center"
-                          whileHover={{ 
-                            rotate: 360,
-                            scale: 1.1
-                          }}
-                          transition={{ duration: 0.8, ease: "easeOut" }}
-                        >
-                          {platform.icon}
-                        </motion.div>
-                      </motion.div>
-
-                      {/* Name */}
-                      <h3 className="text-lg font-extrabold text-rose-900 mb-1">
-                        {platform.name}
-                      </h3>
-
-                      {/* Subtitle */}
-                      <p className={`text-sm font-bold bg-gradient-to-r ${platform.color} bg-clip-text text-transparent mb-3`}>
-                        {platform.subtitle}
-                      </p>
-
-                      {/* Description */}
-                      <p className="text-sm text-rose-900 leading-relaxed font-medium">
-                        {platform.description}
-                      </p>
-                    </div>
-
-                    {/* External link icon or Sparkle decorations */}
-                    {platform.link ? (
-                      <motion.div
-                        className="absolute top-3 right-3 text-rose-400 group-hover:text-rose-600 transition-colors"
-                        whileHover={{ scale: 1.2 }}
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        className="absolute top-3 right-3 text-rose-300"
-                        animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                      >
-                        <Sparkles className="w-4 h-4" />
-                      </motion.div>
-                    )}
-                  </motion.div>
-                </CardWrapper>
+                {isInternalLink ? (
+                  <Link to={platform.link!}>{cardContent}</Link>
+                ) : isExternalLink ? (
+                  <a href={platform.link} target="_blank" rel="noopener noreferrer">{cardContent}</a>
+                ) : (
+                  cardContent
+                )}
               </motion.div>
             );
           })}

@@ -24,6 +24,7 @@ import SharedConversation from "./pages/SharedConversation";
 import CamlyWhitepaper from "./pages/CamlyWhitepaper";
 import MoodJournal from "./pages/MoodJournal";
 import NotFound from "./pages/NotFound";
+import AngelAITeam from "./pages/AngelAITeam";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
 import ChatButton from "./components/ChatButton";
@@ -111,6 +112,7 @@ const App = () => (
                     <Route path="/luat-anh-sang" element={<LightLaw />} />
                     <Route path="/diem-anh-sang" element={<LightScore />} />
                     <Route path="/mood-journal" element={<MoodJournal />} />
+                    <Route path="/angel-ai-team" element={<AngelAITeam />} />
                     <Route path="/share/:shareId" element={<SharedConversation />} />
                     <Route
                       path="/profile"
