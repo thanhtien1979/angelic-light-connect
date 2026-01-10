@@ -176,7 +176,7 @@ const angels: Angel[] = [
     name: "KHẢ NHI", 
     color: "from-pink-400 to-fuchsia-500", 
     glowColor: "rgba(232,121,249,0.6)", 
-    link: "https://khanhi.lovable.app", 
+    link: "https://angelkhanhi.fun.rich", 
     avatar: angelAvatar10,
     quote: "Lắng nghe là món quà quý giá nhất ta có thể trao cho nhau",
     bio: "Khả Nhi là thiên thần của sự đồng cảm và lắng nghe. Cô có khả năng thấu hiểu sâu sắc và tạo không gian an toàn cho mọi người chia sẻ.",
