@@ -733,7 +733,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
             />
 
             {/* Messages */}
-            <div className="px-4 sm:px-6 py-4 space-y-4 min-h-[300px] max-h-[50vh] sm:max-h-[400px] overflow-y-auto pb-20 sm:pb-6 scroll-smooth">
+            <div className="px-4 sm:px-6 py-4 space-y-4 min-h-[300px] max-h-[50vh] sm:max-h-[400px] overflow-y-auto pb-20 sm:pb-6 scroll-smooth" style={{ willChange: "scroll-position", contain: "layout style" }}>
               {isRestoring ? (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -844,14 +844,16 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               ) : null}
 
               <AnimatePresence mode="popLayout">
-                {messages.map((message) => (
+                {messages.map((message, index) => (
                   <motion.div
                     key={message.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.4 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    layout={false}
                     className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} group`}
+                    style={{ willChange: index === messages.length - 1 ? "opacity, transform" : "auto" }}
                   >
                     {message.role === "assistant" && (
                       <div className="relative mr-3 flex-shrink-0">
@@ -891,40 +893,17 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                       }`}
                       style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
                     >
-                      {/* Shimmer effect when Angel responds */}
-                      {message.role === "assistant" && (
-                        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
-                          {/* Light shimmer overlay */}
-                          <div 
-                            className="absolute inset-0 opacity-30"
-                            style={{
-                              background: "linear-gradient(90deg, transparent, hsla(348, 80%, 90%, 0.5), transparent)",
-                              backgroundSize: "200% 100%",
-                              animation: "responseShimmer 3s ease-in-out infinite",
-                            }}
-                          />
-                          {/* Drifting sparkles */}
-                          {[...Array(3)].map((_, i) => (
-                            <motion.div
-                              key={i}
-                              className="absolute w-1 h-1 bg-rose rounded-full"
-                              animate={{
-                                x: [0, Math.random() * 100, 0],
-                                y: [0, Math.random() * -50, 0],
-                                opacity: [0, 0.8, 0],
-                              }}
-                              transition={{
-                                duration: 2.5 + Math.random(),
-                                repeat: Infinity,
-                                delay: i * 0.6,
-                              }}
-                              style={{
-                                left: `${20 + i * 30}%`,
-                                bottom: "10%",
-                              }}
-                            />
-                          ))}
-                        </div>
+                      {/* Subtle shimmer effect - optimized for performance */}
+                      {message.role === "assistant" && !isLoading && (
+                        <div 
+                          className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl opacity-20"
+                          style={{
+                            background: "linear-gradient(90deg, transparent 40%, hsla(348, 80%, 90%, 0.3) 50%, transparent 60%)",
+                            backgroundSize: "200% 100%",
+                            animation: "responseShimmer 4s ease-in-out infinite",
+                            willChange: "background-position",
+                          }}
+                        />
                       )}
                       {/* Message Attachments */}
                       {messageAttachments.get(message.id) && (
