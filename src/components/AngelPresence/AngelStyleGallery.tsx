@@ -382,12 +382,12 @@ const AngelStyleGallery = memo(({
                   VIDEO
                 </div>
                 
-                {/* Poster thumbnail with hover video preview - khung tròn + nền vàng ánh kim */}
+                {/* Poster thumbnail with hover video preview - khung tròn + nền trắng */}
                 <div 
                   className="w-12 h-12 flex items-center justify-center mb-2 rounded-full overflow-hidden transition-all duration-300"
                   style={{
-                    background: 'radial-gradient(circle, rgba(255,223,140,0.95) 0%, rgba(218,165,32,0.9) 40%, rgba(184,134,11,0.85) 100%)',
-                    boxShadow: '0 0 0 2px rgba(218,165,32,0.5), 0 0 10px rgba(255,215,0,0.3)',
+                    background: 'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(250,250,250,0.98) 50%, rgba(245,245,245,0.95) 100%)',
+                    boxShadow: '0 0 0 2px rgba(200,200,200,0.4), 0 0 10px rgba(255,255,255,0.5)',
                   }}
                 >
                   {isHovered && videoSources && !prefersReducedMotion ? (
