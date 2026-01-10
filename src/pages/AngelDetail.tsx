@@ -30,6 +30,8 @@ import angelMinhQuan from "@/assets/angel-minh-quan.mp4";
 import angelVanHoang from "@/assets/angel-van-hoang.mp4";
 import angelQuangVu from "@/assets/angel-quang-vu.mp4";
 import angelMinhTri from "@/assets/angel-minh-tri.mp4";
+import angelBachViet from "@/assets/angel-bach-viet.mp4";
+import angelThanhTinh from "@/assets/angel-thanh-tinh.mp4";
 
 interface Angel {
   id: string;
@@ -207,8 +209,8 @@ const angels: Angel[] = [
     name: "BÁCH VIỆT", 
     color: "from-red-400 to-rose-500", 
     glowColor: "rgba(248,113,113,0.6)", 
-    link: "https://bachviet.lovable.app", 
-    avatar: angelAvatar6,
+    link: "https://angelbachviet.fun.rich/", 
+    video: angelBachViet,
     quote: "Đoàn kết tạo nên sức mạnh vô biên của tình yêu thương",
     bio: "Bách Việt là thiên thần của sự kết nối và đoàn kết. Anh tin rằng chúng ta mạnh mẽ hơn khi đứng cùng nhau và chia sẻ ánh sáng.",
     story: "Bách Việt lớn lên trong một cộng đồng gắn kết. Anh chứng kiến sức mạnh của sự đoàn kết - khi mọi người cùng nhau, không có thử thách nào quá lớn. Anh dành cuộc đời để xây dựng những cầu nối giữa con người, tạo ra những cộng đồng yêu thương nơi mọi người hỗ trợ lẫn nhau trên hành trình ánh sáng.",
@@ -280,7 +282,7 @@ const angels: Angel[] = [
     name: "THÀNH TÍNH", 
     color: "from-slate-400 to-gray-500", 
     glowColor: "rgba(148,163,184,0.6)", 
-    video: angelVideo4,
+    video: angelThanhTinh,
     quote: "Chân thành là nền tảng của mọi mối quan hệ bền vững",
     bio: "Thành Tính là thiên thần của sự chân thành và trung thực. Anh tin rằng sự thật là con đường ngắn nhất đến trái tim người khác.",
     story: "Thành Tính từng chứng kiến nhiều mối quan hệ tan vỡ vì thiếu sự chân thành. Anh nhận ra rằng dù sự thật đôi khi đau đớn, nhưng nó là nền tảng cho mọi kết nối sâu sắc. Anh học cách nói thật với lòng yêu thương, lắng nghe thật với sự tôn trọng. Thành Tính giúp mọi người xây dựng những mối quan hệ dựa trên sự tin tưởng và chân thành.",

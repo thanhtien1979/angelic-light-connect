@@ -33,6 +33,8 @@ import angelMinhQuan from "@/assets/angel-minh-quan.mp4";
 import angelVanHoang from "@/assets/angel-van-hoang.mp4";
 import angelQuangVu from "@/assets/angel-quang-vu.mp4";
 import angelMinhTri from "@/assets/angel-minh-tri.mp4";
+import angelBachViet from "@/assets/angel-bach-viet.mp4";
+import angelThanhTinh from "@/assets/angel-thanh-tinh.mp4";
 
 interface Angel {
   name: string;
@@ -56,13 +58,13 @@ const angels: Angel[] = [
   { name: "DIỆU NGỌC", color: "from-violet-400 to-purple-500", glowColor: "rgba(139,92,246,0.6)", link: "https://angeldieungoc.fun.rich", avatar: angelAvatar3 },
   { name: "KHẢ NHI", color: "from-fuchsia-400 to-pink-500", glowColor: "rgba(232,121,249,0.6)", link: "https://angelkhanhi.fun.rich", video: angelVideo1 },
   { name: "MINH TRÍ", color: "from-gray-200 to-white", glowColor: "rgba(255,255,255,0.6)", link: "https://angelminhtri.fun.rich", video: angelMinhQuan },
-  { name: "BÁCH VIỆT", color: "from-orange-400 to-red-500", glowColor: "rgba(251,146,60,0.6)", link: "https://angelbachviet.fun.rich/", avatar: angelAvatar8 },
+  { name: "BÁCH VIỆT", color: "from-orange-400 to-red-500", glowColor: "rgba(251,146,60,0.6)", link: "https://angelbachviet.fun.rich/", video: angelBachViet },
   { name: "NGỌC GIÀU", color: "from-lime-400 to-green-500", glowColor: "rgba(163,230,53,0.6)", avatar: angelAvatar9 },
   { name: "THIÊN HẠNH", color: "from-sky-400 to-cyan-500", glowColor: "rgba(56,189,248,0.6)", avatar: angelAvatar10 },
   { name: "BÍCH LIÊN", color: "from-teal-400 to-emerald-500", glowColor: "rgba(45,212,191,0.6)", avatar: angelAvatar11 },
   { name: "HUỲNH THỦY", color: "from-blue-500 to-indigo-600", glowColor: "rgba(59,130,246,0.6)", avatar: angelAvatar12 },
   { name: "QUỲNH HOA", color: "from-pink-500 to-rose-600", glowColor: "rgba(236,72,153,0.6)", avatar: angelAvatar13 },
-  { name: "THÀNH TÍNH", color: "from-slate-400 to-gray-500", glowColor: "rgba(148,163,184,0.6)", video: angelVideo4 },
+  { name: "THÀNH TÍNH", color: "from-slate-400 to-gray-500", glowColor: "rgba(148,163,184,0.6)", video: angelThanhTinh },
   { name: "THU HÀ", color: "from-amber-500 to-yellow-600", glowColor: "rgba(245,158,11,0.6)", video: grokAngel1 },
   { name: "NGỌC LẮM", color: "from-emerald-500 to-teal-600", glowColor: "rgba(16,185,129,0.6)", video: grokAngel2 },
   { name: "ÁNH NGUYỆT", color: "from-purple-500 to-indigo-600", glowColor: "rgba(147,51,234,0.6)", video: grokAngel3 },
