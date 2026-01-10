@@ -78,7 +78,8 @@ const platforms: Platform[] = [
     description: "Vortex yêu thương - Dòng chảy thiện nguyện lan tỏa ánh sáng",
     icon: <img src={funCharityLogo} alt="FUN Charity" className="w-12 h-12 object-cover rounded-full ring-2 ring-red-400 shadow-[0_0_15px_rgba(248,113,113,0.6)]" />,
     color: "from-red-400 to-rose-500",
-    glowColor: "shadow-red-400/50"
+    glowColor: "shadow-red-400/50",
+    link: "https://fun-charity.lovable.app"
   },
   {
     name: "FUN Academy",
