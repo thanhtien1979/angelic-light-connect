@@ -27,6 +27,7 @@ import angelVideo4 from "@/assets/angel-video-4.mp4";
 import grokAngel1 from "@/assets/grok-angel-1.mp4";
 import grokAngel2 from "@/assets/grok-angel-2.mp4";
 import grokAngel3 from "@/assets/grok-angel-3.mp4";
+import thanhTienVideo from "@/assets/thanh-tien-video.mp4";
 
 interface Angel {
   name: string;
@@ -61,6 +62,7 @@ const angels: Angel[] = [
   { name: "NGỌC LẮM", color: "from-emerald-500 to-teal-600", glowColor: "rgba(16,185,129,0.6)", video: grokAngel2 },
   { name: "ÁNH NGUYỆT", color: "from-purple-500 to-indigo-600", glowColor: "rgba(147,51,234,0.6)", video: grokAngel3 },
   { name: "KIỀU PHI", color: "from-rose-500 to-fuchsia-500", glowColor: "rgba(244,63,94,0.6)", video: angelVideo3 },
+  { name: "THANH TIÊN", color: "from-sky-400 to-blue-500", glowColor: "rgba(56,189,248,0.6)", video: thanhTienVideo },
 ];
 
 const AngelAITeam = () => {
