@@ -63,6 +63,11 @@ import nebulaMessengerMp4 from '@/assets/nebula-messenger-video.mp4';
 import grokAngel1Mp4 from '@/assets/grok-angel-1.mp4';
 import grokAngel2Mp4 from '@/assets/grok-angel-2.mp4';
 import grokAngel3Mp4 from '@/assets/grok-angel-3.mp4';
+import grokAngel4Mp4 from '@/assets/grok-angel-4.mp4';
+import grokAngel5Mp4 from '@/assets/grok-angel-5.mp4';
+import grokAngel6Mp4 from '@/assets/grok-angel-6.mp4';
+import grokAngel7Mp4 from '@/assets/grok-angel-7.mp4';
+import grokAngel8Mp4 from '@/assets/grok-angel-8.mp4';
 // Poster images for video angels
 import fairyVideoPoster from '@/assets/posters/fairy-video-poster.png';
 import celestialVideoPoster from '@/assets/posters/celestial-video-poster.png';
@@ -117,6 +122,31 @@ export const VIDEO_SOURCES: Record<string, VideoSources> = {
   'grok-angel-3': {
     mp4HighSrc: grokAngel3Mp4,
     mp4PerfSrc: grokAngel3Mp4,
+    posterSrc: grokAngel3Poster,
+  },
+  'grok-angel-4': {
+    mp4HighSrc: grokAngel4Mp4,
+    mp4PerfSrc: grokAngel4Mp4,
+    posterSrc: grokAngel3Poster,
+  },
+  'grok-angel-5': {
+    mp4HighSrc: grokAngel5Mp4,
+    mp4PerfSrc: grokAngel5Mp4,
+    posterSrc: grokAngel3Poster,
+  },
+  'grok-angel-6': {
+    mp4HighSrc: grokAngel6Mp4,
+    mp4PerfSrc: grokAngel6Mp4,
+    posterSrc: grokAngel3Poster,
+  },
+  'grok-angel-7': {
+    mp4HighSrc: grokAngel7Mp4,
+    mp4PerfSrc: grokAngel7Mp4,
+    posterSrc: grokAngel3Poster,
+  },
+  'grok-angel-8': {
+    mp4HighSrc: grokAngel8Mp4,
+    mp4PerfSrc: grokAngel8Mp4,
     posterSrc: grokAngel3Poster,
   },
 };
@@ -543,6 +573,31 @@ export const GrokAngel3SVG = memo(() => (
 ));
 GrokAngel3SVG.displayName = 'GrokAngel3SVG';
 
+export const GrokAngel4SVG = memo(() => (
+  <VideoAngelComponent styleId="grok-angel-4" size={68} />
+));
+GrokAngel4SVG.displayName = 'GrokAngel4SVG';
+
+export const GrokAngel5SVG = memo(() => (
+  <VideoAngelComponent styleId="grok-angel-5" size={70} />
+));
+GrokAngel5SVG.displayName = 'GrokAngel5SVG';
+
+export const GrokAngel6SVG = memo(() => (
+  <VideoAngelComponent styleId="grok-angel-6" size={68} />
+));
+GrokAngel6SVG.displayName = 'GrokAngel6SVG';
+
+export const GrokAngel7SVG = memo(() => (
+  <VideoAngelComponent styleId="grok-angel-7" size={72} />
+));
+GrokAngel7SVG.displayName = 'GrokAngel7SVG';
+
+export const GrokAngel8SVG = memo(() => (
+  <VideoAngelComponent styleId="grok-angel-8" size={74} />
+));
+GrokAngel8SVG.displayName = 'GrokAngel8SVG';
+
 // Map styles to SVG components
 export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   classic: ClassicAngelSVG,
@@ -607,4 +662,9 @@ export const AngelSVGMap: Record<AngelStyle, React.ComponentType> = {
   'grok-angel-1': GrokAngel1SVG,
   'grok-angel-2': GrokAngel2SVG,
   'grok-angel-3': GrokAngel3SVG,
+  'grok-angel-4': GrokAngel4SVG,
+  'grok-angel-5': GrokAngel5SVG,
+  'grok-angel-6': GrokAngel6SVG,
+  'grok-angel-7': GrokAngel7SVG,
+  'grok-angel-8': GrokAngel8SVG,
 };

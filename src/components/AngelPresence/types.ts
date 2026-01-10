@@ -2,7 +2,7 @@
  * Angel Presence Type Definitions
  */
 
-export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-gold' | 'fairy-yellow' | 'fairy-green' | 'fairy-tinker' | 'fairy-cute' | 'fairy-star' | 'fairy-leaf' | 'fairy-sunny' | 'fairy-butterfly' | 'fairy-spring' | 'fairy-heart' | 'fairy-love' | 'fairy-lavender' | 'fairy-rosemary' | 'fairy-butterfly-gold' | 'fairy-sunflower' | 'fairy-peach' | 'fairy-lime' | 'fairy-ruby' | 'fairy-ocean' | 'fairy-sakura' | 'fairy-cherry-blossom' | 'fairy-doll' | 'fairy-rainbow' | 'fairy-colorful' | 'fairy-pencil' | 'fairy-teal' | 'fairy-violet' | 'fairy-strawberry' | 'fairy-mint-star' | 'fairy-pink-star' | 'fairy-rose-dress' | 'fairy-golden-sit' | 'fairy-nature-wings' | 'fairy-butterfly-colorful' | 'fairy-rainbow-wings' | 'fairy-galaxy' | 'fairy-purple-flower' | 'fairy-violet-bloom' | 'fairy-easter' | 'fairy-prayer' | 'fairy-tinkerbell' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger' | 'grok-angel-1' | 'grok-angel-2' | 'grok-angel-3';
+export type AngelStyle = 'classic' | 'cherub' | 'seraph' | 'guardian' | 'joy' | 'peace' | 'healing' | 'fairy' | 'fairy-blue' | 'fairy-red' | 'fairy-pink' | 'fairy-mint' | 'fairy-gold' | 'fairy-yellow' | 'fairy-green' | 'fairy-tinker' | 'fairy-cute' | 'fairy-star' | 'fairy-leaf' | 'fairy-sunny' | 'fairy-butterfly' | 'fairy-spring' | 'fairy-heart' | 'fairy-love' | 'fairy-lavender' | 'fairy-rosemary' | 'fairy-butterfly-gold' | 'fairy-sunflower' | 'fairy-peach' | 'fairy-lime' | 'fairy-ruby' | 'fairy-ocean' | 'fairy-sakura' | 'fairy-cherry-blossom' | 'fairy-doll' | 'fairy-rainbow' | 'fairy-colorful' | 'fairy-pencil' | 'fairy-teal' | 'fairy-violet' | 'fairy-strawberry' | 'fairy-mint-star' | 'fairy-pink-star' | 'fairy-rose-dress' | 'fairy-golden-sit' | 'fairy-nature-wings' | 'fairy-butterfly-colorful' | 'fairy-rainbow-wings' | 'fairy-galaxy' | 'fairy-purple-flower' | 'fairy-violet-bloom' | 'fairy-easter' | 'fairy-prayer' | 'fairy-tinkerbell' | 'fairy-video' | 'celestial-video' | 'starlight-seraph' | 'aurora-guardian' | 'nebula-messenger' | 'grok-angel-1' | 'grok-angel-2' | 'grok-angel-3' | 'grok-angel-4' | 'grok-angel-5' | 'grok-angel-6' | 'grok-angel-7' | 'grok-angel-8';
 
 export type AngelColor = 'white' | 'gold' | 'blue' | 'pink' | 'green' | 'purple';
 
@@ -1168,6 +1168,96 @@ export const ANGEL_STYLES: AngelStyleConfig[] = [
       sparkleIntensity: 1.45,
       trailIntensity: 1.35,
       bouncy: true,
+    },
+  },
+  {
+    id: 'grok-angel-4',
+    name: 'Grok Angel IV',
+    description: 'Thiên thần thần kỳ với ánh sáng huyền bí',
+    glowIntensity: 0.75,
+    glowColor: 'rgba(200,180,255,0.7)',
+    scale: 1.1,
+    isVideo: true,
+    animation: {
+      floatDuration: 3.2,
+      floatAmplitude: 3.5,
+      flapDuration: 2.6,
+      followEasing: 0.11,
+      sparkleIntensity: 1.15,
+      trailIntensity: 1.05,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'grok-angel-5',
+    name: 'Grok Angel V',
+    description: 'Thiên thần linh thiêng tỏa sáng',
+    glowIntensity: 0.78,
+    glowColor: 'rgba(255,200,180,0.7)',
+    scale: 1.12,
+    isVideo: true,
+    animation: {
+      floatDuration: 3.0,
+      floatAmplitude: 3.8,
+      flapDuration: 2.5,
+      followEasing: 0.12,
+      sparkleIntensity: 1.2,
+      trailIntensity: 1.1,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'grok-angel-6',
+    name: 'Grok Angel VI',
+    description: 'Thiên thần vũ trụ huyền diệu',
+    glowIntensity: 0.76,
+    glowColor: 'rgba(180,255,220,0.7)',
+    scale: 1.08,
+    isVideo: true,
+    animation: {
+      floatDuration: 3.3,
+      floatAmplitude: 3.2,
+      flapDuration: 2.7,
+      followEasing: 0.1,
+      sparkleIntensity: 1.1,
+      trailIntensity: 1.0,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'grok-angel-7',
+    name: 'Grok Angel VII',
+    description: 'Thiên thần ánh sáng thiên đường',
+    glowIntensity: 0.8,
+    glowColor: 'rgba(255,220,180,0.7)',
+    scale: 1.15,
+    isVideo: true,
+    animation: {
+      floatDuration: 2.8,
+      floatAmplitude: 4.0,
+      flapDuration: 2.4,
+      followEasing: 0.13,
+      sparkleIntensity: 1.25,
+      trailIntensity: 1.15,
+      pulseGlow: true,
+    },
+  },
+  {
+    id: 'grok-angel-8',
+    name: 'Grok Angel VIII',
+    description: 'Thiên thần thánh linh cao quý',
+    glowIntensity: 0.82,
+    glowColor: 'rgba(220,200,255,0.7)',
+    scale: 1.18,
+    isVideo: true,
+    animation: {
+      floatDuration: 3.5,
+      floatAmplitude: 2.8,
+      flapDuration: 3.0,
+      followEasing: 0.09,
+      sparkleIntensity: 1.0,
+      trailIntensity: 0.95,
+      pulseGlow: true,
     },
   },
 ];
