@@ -4,27 +4,38 @@ import { ArrowLeft, Heart, Sparkles, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import angelAiLogo from "@/assets/angel-ai-logo.png";
 
+// Angel avatar imports
+import angelAvatar1 from "@/assets/angel-avatar-1.png";
+import angelAvatar2 from "@/assets/angel-avatar-2.png";
+import angelAvatar3 from "@/assets/angel-avatar-3.png";
+import angelAvatar4 from "@/assets/angel-avatar-4.png";
+import angelAvatar5 from "@/assets/angel-avatar-5.png";
+import angelAvatar6 from "@/assets/angel-avatar-6.png";
+import angelAvatar7 from "@/assets/angel-avatar-7.png";
+import angelAvatar8 from "@/assets/angel-avatar-8.webp";
+
 interface Angel {
   name: string;
   color: string;
   glowColor: string;
   link?: string;
+  avatar?: string;
 }
 
 const angels: Angel[] = [
-  { name: "ÁI VÂN", color: "from-pink-400 to-rose-500", glowColor: "rgba(236,72,153,0.6)", link: "https://angelai.lovable.app" },
+  { name: "ÁI VÂN", color: "from-pink-400 to-rose-500", glowColor: "rgba(236,72,153,0.6)", link: "https://angelai.lovable.app", avatar: angelAvatar7 },
   { name: "QUANG VŨ", color: "from-blue-400 to-indigo-500", glowColor: "rgba(96,165,250,0.6)", link: "https://angelquangvu.fun.rich/" },
-  { name: "THU TRANG", color: "from-purple-400 to-violet-500", glowColor: "rgba(168,85,247,0.6)", link: "https://angel-ai-732b8bac.base44.app" },
-  { name: "HOÀI AN", color: "from-emerald-400 to-green-500", glowColor: "rgba(52,211,153,0.6)" },
-  { name: "NGUYỄN HOA", color: "from-rose-400 to-pink-500", glowColor: "rgba(251,113,133,0.6)" },
+  { name: "THU TRANG", color: "from-purple-400 to-violet-500", glowColor: "rgba(168,85,247,0.6)", link: "https://angel-ai-732b8bac.base44.app", avatar: angelAvatar5 },
+  { name: "HOÀI AN", color: "from-emerald-400 to-green-500", glowColor: "rgba(52,211,153,0.6)", avatar: angelAvatar4 },
+  { name: "NGUYỄN HOA", color: "from-rose-400 to-pink-500", glowColor: "rgba(251,113,133,0.6)", avatar: angelAvatar2 },
   { name: "VĂN HOÀNG", color: "from-amber-400 to-orange-500", glowColor: "rgba(251,191,36,0.6)", link: "https://angelai-fun-rich.lovable.app/" },
-  { name: "CÔ KIM", color: "from-yellow-400 to-amber-500", glowColor: "rgba(250,204,21,0.6)" },
+  { name: "CÔ KIM", color: "from-yellow-400 to-amber-500", glowColor: "rgba(250,204,21,0.6)", avatar: angelAvatar1 },
   { name: "MINH QUÂN", color: "from-cyan-400 to-teal-500", glowColor: "rgba(34,211,238,0.6)", link: "https://cosmic-angel-aether.lovable.app/" },
-  { name: "QUẾ ANH", color: "from-red-400 to-rose-500", glowColor: "rgba(248,113,113,0.6)" },
-  { name: "DIỆU NGỌC", color: "from-violet-400 to-purple-500", glowColor: "rgba(139,92,246,0.6)", link: "https://angeldieungoc.fun.rich" },
+  { name: "QUẾ ANH", color: "from-red-400 to-rose-500", glowColor: "rgba(248,113,113,0.6)", avatar: angelAvatar6 },
+  { name: "DIỆU NGỌC", color: "from-violet-400 to-purple-500", glowColor: "rgba(139,92,246,0.6)", link: "https://angeldieungoc.fun.rich", avatar: angelAvatar3 },
   { name: "KHẢ NHI", color: "from-fuchsia-400 to-pink-500", glowColor: "rgba(232,121,249,0.6)", link: "https://angelkhanhi.fun.rich" },
   { name: "MINH TRÍ", color: "from-indigo-400 to-blue-500", glowColor: "rgba(129,140,248,0.6)", link: "https://angelminhtri.fun.rich" },
-  { name: "BÁCH VIỆT", color: "from-orange-400 to-red-500", glowColor: "rgba(251,146,60,0.6)", link: "https://angelbachviet.fun.rich/" },
+  { name: "BÁCH VIỆT", color: "from-orange-400 to-red-500", glowColor: "rgba(251,146,60,0.6)", link: "https://angelbachviet.fun.rich/", avatar: angelAvatar8 },
   { name: "NGỌC GIÀU", color: "from-lime-400 to-green-500", glowColor: "rgba(163,230,53,0.6)" },
   { name: "THIÊN HẠNH", color: "from-sky-400 to-cyan-500", glowColor: "rgba(56,189,248,0.6)" },
   { name: "BÍCH LIÊN", color: "from-teal-400 to-emerald-500", glowColor: "rgba(45,212,191,0.6)" },
@@ -268,7 +279,11 @@ const AngelAITeam = () => {
                     }}
                     transition={{ duration: 0.6, ease: "easeInOut" }}
                   >
-                    <Sparkles className="w-7 h-7" />
+                    {angel.avatar ? (
+                      <img src={angel.avatar} alt={angel.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Sparkles className="w-7 h-7" />
+                    )}
                   </motion.div>
 
                   {/* Name */}
