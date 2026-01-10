@@ -13,11 +13,17 @@ import angelAvatar5 from "@/assets/angel-avatar-5.png";
 import angelAvatar6 from "@/assets/angel-avatar-6.png";
 import angelAvatar7 from "@/assets/angel-avatar-7.png";
 import angelAvatar8 from "@/assets/angel-avatar-8.webp";
+import angelAvatar9 from "@/assets/angel-avatar-9.png";
+import angelAvatar10 from "@/assets/angel-avatar-10.png";
+import angelAvatar11 from "@/assets/angel-avatar-11.png";
+import angelAvatar12 from "@/assets/angel-avatar-12.png";
+import angelAvatar13 from "@/assets/angel-avatar-13.png";
 
 // Angel video imports
 import angelVideo1 from "@/assets/angel-video-1.mp4";
 import angelVideo2 from "@/assets/angel-video-2.mp4";
 import angelVideo3 from "@/assets/angel-video-3.mp4";
+import angelVideo4 from "@/assets/angel-video-4.mp4";
 
 interface Angel {
   name: string;
@@ -42,12 +48,12 @@ const angels: Angel[] = [
   { name: "KHẢ NHI", color: "from-fuchsia-400 to-pink-500", glowColor: "rgba(232,121,249,0.6)", link: "https://angelkhanhi.fun.rich", video: angelVideo1 },
   { name: "MINH TRÍ", color: "from-indigo-400 to-blue-500", glowColor: "rgba(129,140,248,0.6)", link: "https://angelminhtri.fun.rich", video: angelVideo2 },
   { name: "BÁCH VIỆT", color: "from-orange-400 to-red-500", glowColor: "rgba(251,146,60,0.6)", link: "https://angelbachviet.fun.rich/", avatar: angelAvatar8 },
-  { name: "NGỌC GIÀU", color: "from-lime-400 to-green-500", glowColor: "rgba(163,230,53,0.6)" },
-  { name: "THIÊN HẠNH", color: "from-sky-400 to-cyan-500", glowColor: "rgba(56,189,248,0.6)" },
-  { name: "BÍCH LIÊN", color: "from-teal-400 to-emerald-500", glowColor: "rgba(45,212,191,0.6)" },
-  { name: "HUỲNH THỦY", color: "from-blue-500 to-indigo-600", glowColor: "rgba(59,130,246,0.6)" },
-  { name: "QUỲNH HOA", color: "from-pink-500 to-rose-600", glowColor: "rgba(236,72,153,0.6)" },
-  { name: "THÀNH TÍNH", color: "from-slate-400 to-gray-500", glowColor: "rgba(148,163,184,0.6)" },
+  { name: "NGỌC GIÀU", color: "from-lime-400 to-green-500", glowColor: "rgba(163,230,53,0.6)", avatar: angelAvatar9 },
+  { name: "THIÊN HẠNH", color: "from-sky-400 to-cyan-500", glowColor: "rgba(56,189,248,0.6)", avatar: angelAvatar10 },
+  { name: "BÍCH LIÊN", color: "from-teal-400 to-emerald-500", glowColor: "rgba(45,212,191,0.6)", avatar: angelAvatar11 },
+  { name: "HUỲNH THỦY", color: "from-blue-500 to-indigo-600", glowColor: "rgba(59,130,246,0.6)", avatar: angelAvatar12 },
+  { name: "QUỲNH HOA", color: "from-pink-500 to-rose-600", glowColor: "rgba(236,72,153,0.6)", avatar: angelAvatar13 },
+  { name: "THÀNH TÍNH", color: "from-slate-400 to-gray-500", glowColor: "rgba(148,163,184,0.6)", video: angelVideo4 },
   { name: "THU HÀ", color: "from-amber-500 to-yellow-600", glowColor: "rgba(245,158,11,0.6)" },
   { name: "NGỌC LẮM", color: "from-emerald-500 to-teal-600", glowColor: "rgba(16,185,129,0.6)" },
   { name: "ÁNH NGUYỆT", color: "from-purple-500 to-indigo-600", glowColor: "rgba(147,51,234,0.6)" },
