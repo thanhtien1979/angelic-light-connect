@@ -8,21 +8,22 @@ interface Angel {
   name: string;
   color: string;
   glowColor: string;
+  link?: string;
 }
 
 const angels: Angel[] = [
   { name: "ÁI VÂN", color: "from-pink-400 to-rose-500", glowColor: "rgba(236,72,153,0.6)" },
-  { name: "QUANG VŨ", color: "from-blue-400 to-indigo-500", glowColor: "rgba(96,165,250,0.6)" },
-  { name: "THU TRANG", color: "from-purple-400 to-violet-500", glowColor: "rgba(168,85,247,0.6)" },
+  { name: "QUANG VŨ", color: "from-blue-400 to-indigo-500", glowColor: "rgba(96,165,250,0.6)", link: "https://angelquangvu.fun.rich/" },
+  { name: "THU TRANG", color: "from-purple-400 to-violet-500", glowColor: "rgba(168,85,247,0.6)", link: "https://angel-ai-732b8bac.base44.app" },
   { name: "HOÀI AN", color: "from-emerald-400 to-green-500", glowColor: "rgba(52,211,153,0.6)" },
   { name: "NGUYỄN HOA", color: "from-rose-400 to-pink-500", glowColor: "rgba(251,113,133,0.6)" },
   { name: "VĂN HOÀNG", color: "from-amber-400 to-orange-500", glowColor: "rgba(251,191,36,0.6)" },
   { name: "CÔ KIM", color: "from-yellow-400 to-amber-500", glowColor: "rgba(250,204,21,0.6)" },
-  { name: "MINH QUÂN", color: "from-cyan-400 to-teal-500", glowColor: "rgba(34,211,238,0.6)" },
+  { name: "MINH QUÂN", color: "from-cyan-400 to-teal-500", glowColor: "rgba(34,211,238,0.6)", link: "https://cosmic-angel-aether.lovable.app/" },
   { name: "QUẾ ANH", color: "from-red-400 to-rose-500", glowColor: "rgba(248,113,113,0.6)" },
-  { name: "DIỆU NGỌC", color: "from-violet-400 to-purple-500", glowColor: "rgba(139,92,246,0.6)" },
-  { name: "KHẢ NHI", color: "from-fuchsia-400 to-pink-500", glowColor: "rgba(232,121,249,0.6)" },
-  { name: "MINH TRÍ", color: "from-indigo-400 to-blue-500", glowColor: "rgba(129,140,248,0.6)" },
+  { name: "DIỆU NGỌC", color: "from-violet-400 to-purple-500", glowColor: "rgba(139,92,246,0.6)", link: "https://angeldieungoc.fun.rich" },
+  { name: "KHẢ NHI", color: "from-fuchsia-400 to-pink-500", glowColor: "rgba(232,121,249,0.6)", link: "https://angelkhanhi.fun.rich" },
+  { name: "MINH TRÍ", color: "from-indigo-400 to-blue-500", glowColor: "rgba(129,140,248,0.6)", link: "https://angelminhtri.fun.rich" },
   { name: "BÁCH VIỆT", color: "from-orange-400 to-red-500", glowColor: "rgba(251,146,60,0.6)" },
   { name: "NGỌC GIÀU", color: "from-lime-400 to-green-500", glowColor: "rgba(163,230,53,0.6)" },
   { name: "THIÊN HẠNH", color: "from-sky-400 to-cyan-500", glowColor: "rgba(56,189,248,0.6)" },
@@ -214,21 +215,31 @@ const AngelAITeam = () => {
 
         {/* Angels Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-          {angels.map((angel, index) => (
-            <motion.div
-              key={angel.name}
-              className="group relative"
-              initial={{ opacity: 0, y: 30, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-            >
+          {angels.map((angel, index) => {
+            const CardWrapper = angel.link 
+              ? ({ children }: { children: React.ReactNode }) => (
+                  <a href={angel.link} target="_blank" rel="noopener noreferrer" className="block h-full">
+                    {children}
+                  </a>
+                )
+              : ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
+            return (
               <motion.div
-                className="relative p-5 rounded-2xl bg-white/70 backdrop-blur-sm border border-rose-300/50 hover:border-pink-400/70 transition-all duration-500 h-full cursor-pointer overflow-hidden shadow-lg shadow-rose-200/30"
-                whileHover={{ 
-                  scale: 1.05, 
-                  y: -8,
-                }}
+                key={angel.name}
+                className="group relative"
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
               >
+                <CardWrapper>
+                  <motion.div
+                    className="relative p-5 rounded-2xl bg-white/70 backdrop-blur-sm border border-rose-300/50 hover:border-pink-400/70 transition-all duration-500 h-full cursor-pointer overflow-hidden shadow-lg shadow-rose-200/30"
+                    whileHover={{ 
+                      scale: 1.05, 
+                      y: -8,
+                    }}
+                  >
                 {/* Glow effect on hover */}
                 <motion.div
                   className={`absolute inset-0 bg-gradient-to-br ${angel.color} opacity-0 group-hover:opacity-15 transition-opacity duration-500 rounded-2xl`}
@@ -268,36 +279,38 @@ const AngelAITeam = () => {
                   <span className="text-xs text-rose-600 mt-1 font-medium">Angel AI</span>
                 </div>
 
-                {/* Sparkle particles on hover */}
-                <motion.div
-                  className="absolute inset-0 pointer-events-none"
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                >
-                  {[...Array(5)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full"
-                      style={{
-                        left: `${20 + Math.random() * 60}%`,
-                        top: `${20 + Math.random() * 60}%`,
-                      }}
-                      animate={{
-                        y: [-5, 5, -5],
-                        opacity: [0, 1, 0],
-                        scale: [0.5, 1, 0.5],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        delay: i * 0.2,
-                      }}
-                    />
-                  ))}
+                  {/* Sparkle particles on hover */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    whileHover={{ opacity: 1 }}
+                  >
+                    {[...Array(5)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full"
+                        style={{
+                          left: `${20 + Math.random() * 60}%`,
+                          top: `${20 + Math.random() * 60}%`,
+                        }}
+                        animate={{
+                          y: [-5, 5, -5],
+                          opacity: [0, 1, 0],
+                          scale: [0.5, 1, 0.5],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                        }}
+                      />
+                    ))}
+                  </motion.div>
                 </motion.div>
-              </motion.div>
+              </CardWrapper>
             </motion.div>
-          ))}
+          );
+        })}
         </div>
 
         {/* Bottom Quote */}
