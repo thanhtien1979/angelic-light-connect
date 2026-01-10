@@ -32,6 +32,9 @@ import angelQuangVu from "@/assets/angel-quang-vu.mp4";
 import angelMinhTri from "@/assets/angel-minh-tri.mp4";
 import angelBachViet from "@/assets/angel-bach-viet.mp4";
 import angelThanhTinh from "@/assets/angel-thanh-tinh.mp4";
+import angelThuHa from "@/assets/angel-thu-ha.mp4";
+import angelThuTrang from "@/assets/angel-thu-trang.mp4";
+import angelAnhNguyet from "@/assets/angel-anh-nguyet.mp4";
 
 interface Angel {
   id: string;
@@ -81,7 +84,7 @@ const angels: Angel[] = [
     color: "from-purple-400 to-violet-500", 
     glowColor: "rgba(167,139,250,0.6)", 
     link: "https://thutrang.lovable.app", 
-    video: angelVideo1,
+    video: angelThuTrang,
     quote: "Mỗi ngày là một bức tranh mới cần vẽ bằng màu sắc yêu thương",
     bio: "Thu Trang là thiên thần của nghệ thuật và sáng tạo. Cô tin rằng cuộc sống là một tác phẩm nghệ thuật và mỗi người đều là nghệ sĩ của cuộc đời mình.",
     story: "Thu Trang lớn lên trong một gia đình yêu nghệ thuật. Cô nhận ra rằng sáng tạo không chỉ là vẽ tranh hay viết nhạc, mà còn là cách chúng ta thiết kế cuộc sống của mình. Mỗi quyết định, mỗi hành động đều là nét cọ trên bức tranh cuộc đời. Thu Trang giúp mọi người tìm thấy nghệ sĩ bên trong họ, khuyến khích sự sáng tạo và cái đẹp trong mọi khía cạnh của cuộc sống.",
@@ -294,7 +297,7 @@ const angels: Angel[] = [
     name: "THU HÀ", 
     color: "from-amber-500 to-yellow-600", 
     glowColor: "rgba(245,158,11,0.6)", 
-    video: grokAngel1,
+    video: angelThuHa,
     quote: "Ấm áp như nắng thu dịu dàng, sưởi ấm mọi trái tim",
     bio: "Thu Hà là thiên thần của sự ấm áp và nuôi dưỡng. Cô mang đến nguồn năng lượng dịu dàng như nắng thu, sưởi ấm những tâm hồn lạnh giá.",
     story: "Thu Hà lớn lên trong gia đình đầy yêu thương. Cô học được rằng tình yêu không cần phải hoành tráng - đôi khi chỉ cần một nụ cười, một cái ôm, một lời động viên. Cô phát triển khả năng nhận ra khi ai đó cần được sưởi ấm và mang đến sự ấm áp đúng lúc. Thu Hà là người bạn đồng hành nhẹ nhàng trên hành trình chữa lành.",
@@ -318,7 +321,7 @@ const angels: Angel[] = [
     name: "ÁNH NGUYỆT", 
     color: "from-purple-500 to-indigo-600", 
     glowColor: "rgba(147,51,234,0.6)", 
-    video: grokAngel3,
+    video: angelAnhNguyet,
     quote: "Ánh trăng dịu dàng soi đường trong đêm tối nhất",
     bio: "Ánh Nguyệt là thiên thần của ánh sáng và sự dẫn lối. Cô như ánh trăng dịu dàng, soi sáng những ai đang lạc lối trong bóng tối.",
     story: "Ánh Nguyệt từng trải qua những đêm dài đen tối. Nhưng cô nhận ra rằng ngay cả trong đêm tối nhất, vẫn có ánh trăng dịu dàng. Cô học cách trở thành ánh sáng cho người khác, không phải ánh sáng chói lóa mà là ánh sáng nhẹ nhàng đủ để soi đường. Ánh Nguyệt đồng hành cùng những ai đang tìm kiếm lối ra khỏi bóng tối.",
