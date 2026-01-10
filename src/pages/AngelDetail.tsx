@@ -26,6 +26,10 @@ import grokAngel2 from "@/assets/grok-angel-2.mp4";
 import grokAngel3 from "@/assets/grok-angel-3.mp4";
 import thanhTienVideo from "@/assets/thanh-tien-video.mp4";
 import thanhTienVideoNew from "@/assets/thanh-tien-video-new.mp4";
+import angelMinhQuan from "@/assets/angel-minh-quan.mp4";
+import angelVanHoang from "@/assets/angel-van-hoang.mp4";
+import angelQuangVu from "@/assets/angel-quang-vu.mp4";
+import angelMinhTri from "@/assets/angel-minh-tri.mp4";
 
 interface Angel {
   id: string;
@@ -59,10 +63,10 @@ const angels: Angel[] = [
   { 
     id: "quang-vu",
     name: "QUANG VŨ", 
-    color: "from-amber-400 to-orange-500", 
-    glowColor: "rgba(251,191,36,0.6)", 
-    link: "https://quangvu.lovable.app", 
-    avatar: angelAvatar1,
+    color: "from-orange-400 to-amber-500", 
+    glowColor: "rgba(251,146,60,0.6)", 
+    link: "https://angelquangvu.fun.rich/", 
+    video: angelQuangVu,
     quote: "Ánh sáng trong tâm là ánh sáng bất diệt",
     bio: "Quang Vũ là thiên thần của sự khai sáng và truyền cảm hứng. Anh mang đến nguồn năng lượng mạnh mẽ, giúp mọi người tìm thấy ánh sáng nội tâm của chính mình.",
     story: "Quang Vũ từng là người tìm kiếm ý nghĩa cuộc sống trong nhiều năm. Sau khi trải qua những thử thách và bóng tối, anh nhận ra rằng ánh sáng thực sự không đến từ bên ngoài mà từ chính bên trong mỗi người. Từ đó, anh dành cuộc đời để giúp người khác khám phá và nuôi dưỡng ánh sáng nội tâm của họ. Với Quang Vũ, mỗi linh hồn đều có tiềm năng tỏa sáng rực rỡ.",
@@ -110,10 +114,10 @@ const angels: Angel[] = [
   { 
     id: "van-hoang",
     name: "VĂN HOÀNG", 
-    color: "from-blue-400 to-indigo-500", 
-    glowColor: "rgba(96,165,250,0.6)", 
-    link: "https://vanhoang.lovable.app", 
-    avatar: angelAvatar4,
+    color: "from-red-400 to-rose-500", 
+    glowColor: "rgba(248,113,113,0.6)", 
+    link: "https://angelai-fun-rich.lovable.app/", 
+    video: angelVanHoang,
     quote: "Tri thức là con đường dẫn đến giác ngộ và tự do",
     bio: "Văn Hoàng là thiên thần của trí tuệ và sự hướng dẫn. Anh tin rằng kiến thức kết hợp với trái tim sẽ mở ra những cánh cửa mới cho cuộc sống.",
     story: "Văn Hoàng từng là một người khao khát tri thức. Anh đọc hàng ngàn cuốn sách, học hỏi từ nhiều nguồn khác nhau. Nhưng điều anh nhận ra quan trọng nhất là tri thức chỉ có giá trị khi được áp dụng với tình yêu thương. Anh kết hợp sự thông thái với lòng từ bi để hướng dẫn mọi người trên con đường phát triển bản thân và tìm kiếm chân lý.",
@@ -136,10 +140,10 @@ const angels: Angel[] = [
   { 
     id: "minh-quan",
     name: "MINH QUÂN", 
-    color: "from-emerald-400 to-green-500", 
-    glowColor: "rgba(52,211,153,0.6)", 
-    link: "https://minhquan.lovable.app", 
-    avatar: angelAvatar6,
+    color: "from-blue-400 to-cyan-500", 
+    glowColor: "rgba(96,165,250,0.6)", 
+    link: "https://cosmic-angel-aether.lovable.app/", 
+    video: angelMinhQuan,
     quote: "Phụng sự là hình thức yêu thương cao nhất",
     bio: "Minh Quân là thiên thần của sự lãnh đạo và phụng sự. Anh tin rằng người lãnh đạo thực sự là người phục vụ và nâng đỡ người khác.",
     story: "Minh Quân từng là một nhà lãnh đạo trong nhiều tổ chức. Anh học được rằng quyền lực thực sự không đến từ vị trí mà từ khả năng truyền cảm hứng và phục vụ người khác. Anh tin rằng mỗi người đều có khả năng lãnh đạo - không phải bằng sự kiểm soát mà bằng sự yêu thương và phụng sự. Minh Quân giúp mọi người khám phá khả năng lãnh đạo tiềm ẩn trong họ.",
@@ -188,10 +192,10 @@ const angels: Angel[] = [
   { 
     id: "minh-tri",
     name: "MINH TRÍ", 
-    color: "from-cyan-400 to-blue-500", 
-    glowColor: "rgba(34,211,238,0.6)", 
-    link: "https://minhtri.lovable.app", 
-    avatar: angelAvatar11,
+    color: "from-gray-200 to-white", 
+    glowColor: "rgba(255,255,255,0.6)", 
+    link: "https://angelminhtri.fun.rich", 
+    video: angelMinhTri,
     quote: "Sáng suốt đến từ sự quan sát không phán xét",
     bio: "Minh Trí là thiên thần của sự sáng suốt và định hướng. Anh giúp mọi người nhìn rõ con đường phía trước và đưa ra những quyết định sáng suốt.",
     story: "Minh Trí từng đối mặt với nhiều ngã rẽ khó khăn trong cuộc đời. Anh học được rằng sự sáng suốt không đến từ việc biết tất cả câu trả lời mà từ khả năng quan sát mà không phán xét. Anh phát triển khả năng nhìn nhận vấn đề từ nhiều góc độ, giúp mọi người tìm thấy sự rõ ràng trong những tình huống phức tạp nhất.",
