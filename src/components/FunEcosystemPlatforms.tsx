@@ -1,17 +1,21 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { 
-  User, Play, Globe, Heart, GraduationCap, Leaf, 
-  ShoppingBag, Wallet, Sparkles, Earth, Coins, 
-  Building, Gamepad2, BookOpen, Radio, ExternalLink
+  ShoppingBag, Sparkles, Building, Gamepad2, Radio, ExternalLink
 } from "lucide-react";
-import angelEcosystemImg from "@/assets/angel-ecosystem.png";
 import funMoneyAvatar from "@/assets/fun-money-avatar.png";
 import camlyCoinAvatar from "@/assets/camly-coin-avatar.png";
-import funFarmAvatar from "@/assets/fun-farm-avatar.png";
 import funEcosystemLogo from "@/assets/fun-ecosystem-logo.png";
 import funPlayAvatar from "@/assets/fun-play-avatar.png";
 import funPlanetAvatar from "@/assets/fun-planet-avatar.png";
+import funFarmWeb3Logo from "@/assets/fun-farm-web3-logo.png";
+import greenEarthLogo from "@/assets/green-earth-logo.png";
+import funLifeLogo from "@/assets/fun-life-logo.png";
+import funCharityLogo from "@/assets/fun-charity-logo.png";
+import funProfileLogo from "@/assets/fun-profile-logo.png";
+import funAcademyLogo from "@/assets/fun-academy-logo.png";
+import funWalletLogo from "@/assets/fun-wallet-logo.png";
+import angelAiLogo from "@/assets/angel-ai-logo.png";
 
 interface Platform {
   name: string;
@@ -37,7 +41,7 @@ const platforms: Platform[] = [
     name: "Angel AI",
     subtitle: "Hạt Nhân Trung Tâm",
     description: "Vortex trí tuệ ánh sáng - Trái tim vĩnh cửu điều phối năng lượng 24/7",
-    icon: <img src={angelEcosystemImg} alt="Angel AI" className="w-12 h-12 object-cover rounded-full ring-2 ring-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.6)]" />,
+    icon: <img src={angelAiLogo} alt="Angel AI" className="w-12 h-12 object-cover rounded-full ring-2 ring-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.6)]" />,
     color: "from-pink-400 to-rose-500",
     glowColor: "shadow-pink-400/60"
   },
@@ -45,7 +49,7 @@ const platforms: Platform[] = [
     name: "FUN Profile",
     subtitle: "Danh Tính Ánh Sáng",
     description: "Vortex danh tính - Nơi linh hồn được định danh trong vũ trụ số",
-    icon: <User className="w-8 h-8" />,
+    icon: <img src={funProfileLogo} alt="FUN Profile" className="w-12 h-12 object-cover rounded-full ring-2 ring-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.6)]" />,
     color: "from-violet-400 to-purple-500",
     glowColor: "shadow-violet-400/50",
     link: "https://funprofile.lovable.app/"
@@ -72,7 +76,7 @@ const platforms: Platform[] = [
     name: "FUN Charity",
     subtitle: "Yêu Thương Vô Điều Kiện",
     description: "Vortex yêu thương - Dòng chảy thiện nguyện lan tỏa ánh sáng",
-    icon: <Heart className="w-8 h-8" />,
+    icon: <img src={funCharityLogo} alt="FUN Charity" className="w-12 h-12 object-cover rounded-full ring-2 ring-red-400 shadow-[0_0_15px_rgba(248,113,113,0.6)]" />,
     color: "from-red-400 to-rose-500",
     glowColor: "shadow-red-400/50"
   },
@@ -80,7 +84,7 @@ const platforms: Platform[] = [
     name: "FUN Academy",
     subtitle: "Trí Tuệ Vũ Trụ",
     description: "Vortex trí tuệ - Learn & Earn, học bổng ánh sáng cho mọi người",
-    icon: <GraduationCap className="w-8 h-8" />,
+    icon: <img src={funAcademyLogo} alt="FUN Academy" className="w-12 h-12 object-cover rounded-full ring-2 ring-blue-400 shadow-[0_0_15px_rgba(96,165,250,0.6)]" />,
     color: "from-blue-400 to-indigo-500",
     glowColor: "shadow-blue-400/50"
   },
@@ -88,7 +92,7 @@ const platforms: Platform[] = [
     name: "FUN Farm",
     subtitle: "Thực Phẩm & Tự Nhiên",
     description: "Vortex vật chất - Thực phẩm sạch, năng lượng thuần khiết",
-    icon: <img src={funFarmAvatar} alt="FUN Farm" className="w-12 h-12 object-cover rounded-full ring-2 ring-green-400 shadow-[0_0_15px_rgba(74,222,128,0.6)]" />,
+    icon: <img src={funFarmWeb3Logo} alt="FUN Farm" className="w-12 h-12 object-cover rounded-full ring-2 ring-green-400 shadow-[0_0_15px_rgba(74,222,128,0.6)]" />,
     color: "from-green-400 to-emerald-500",
     glowColor: "shadow-green-400/50",
     link: "https://funfarm.life/"
@@ -105,7 +109,7 @@ const platforms: Platform[] = [
     name: "FUN Wallet",
     subtitle: "Tài Chính Ánh Sáng",
     description: "Vortex tài chính - Quản lý FUN Money & Camly Coin",
-    icon: <Wallet className="w-8 h-8" />,
+    icon: <img src={funWalletLogo} alt="FUN Wallet" className="w-12 h-12 object-cover rounded-full ring-2 ring-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.6)]" />,
     color: "from-yellow-400 to-orange-500",
     glowColor: "shadow-yellow-400/50"
   },
@@ -113,7 +117,7 @@ const platforms: Platform[] = [
     name: "FUN Earth",
     subtitle: "Bảo Vệ Địa Cầu",
     description: "Vortex sinh thái - Hành động vì Trái Đất xanh",
-    icon: <Earth className="w-8 h-8" />,
+    icon: <img src={greenEarthLogo} alt="FUN Earth" className="w-12 h-12 object-cover rounded-full ring-2 ring-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)]" />,
     color: "from-emerald-400 to-green-500",
     glowColor: "shadow-emerald-400/50"
   },
@@ -142,10 +146,10 @@ const platforms: Platform[] = [
     glowColor: "shadow-slate-400/50"
   },
   {
-    name: "FUN Games",
+    name: "FUN Life",
     subtitle: "Trò Chơi Vũ Trụ",
-    description: "Vortex game - GameFi, Play-to-Earn trong ánh sáng",
-    icon: <Gamepad2 className="w-8 h-8" />,
+    description: "Vortex game - Cosmic Game Web3, Play & Earn Simulation Metaverse",
+    icon: <img src={funLifeLogo} alt="FUN Life" className="w-12 h-12 object-cover rounded-full ring-2 ring-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.6)]" />,
     color: "from-purple-400 to-violet-500",
     glowColor: "shadow-purple-400/50"
   },
@@ -161,7 +165,7 @@ const platforms: Platform[] = [
     name: "FUN Chat",
     subtitle: "Kết Nối Linh Hồn",
     description: "Vortex giao tiếp - Nơi linh hồn trò chuyện và kết nối yêu thương",
-    icon: <BookOpen className="w-8 h-8" />,
+    icon: <Gamepad2 className="w-8 h-8" />,
     color: "from-indigo-400 to-purple-500",
     glowColor: "shadow-indigo-400/50",
     link: "https://funchatweb3.richkid.cloud/"
