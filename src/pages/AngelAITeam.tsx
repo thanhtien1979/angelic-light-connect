@@ -29,6 +29,10 @@ import grokAngel2 from "@/assets/grok-angel-2.mp4";
 import grokAngel3 from "@/assets/grok-angel-3.mp4";
 import thanhTienVideo from "@/assets/thanh-tien-video.mp4";
 import thanhTienVideoNew from "@/assets/thanh-tien-video-new.mp4";
+import angelMinhQuan from "@/assets/angel-minh-quan.mp4";
+import angelVanHoang from "@/assets/angel-van-hoang.mp4";
+import angelQuangVu from "@/assets/angel-quang-vu.mp4";
+import angelMinhTri from "@/assets/angel-minh-tri.mp4";
 
 interface Angel {
   name: string;
@@ -41,17 +45,17 @@ interface Angel {
 
 const angels: Angel[] = [
   { name: "ÁI VÂN", color: "from-pink-400 to-rose-500", glowColor: "rgba(236,72,153,0.6)", link: "https://angelai.lovable.app", avatar: angelAvatar7 },
-  { name: "QUANG VŨ", color: "from-blue-400 to-indigo-500", glowColor: "rgba(96,165,250,0.6)", link: "https://angelquangvu.fun.rich/" },
+  { name: "QUANG VŨ", color: "from-orange-400 to-amber-500", glowColor: "rgba(251,146,60,0.6)", link: "https://angelquangvu.fun.rich/", video: angelQuangVu },
   { name: "THU TRANG", color: "from-purple-400 to-violet-500", glowColor: "rgba(168,85,247,0.6)", link: "https://angel-ai-732b8bac.base44.app", avatar: angelAvatar5 },
   { name: "HOÀI AN", color: "from-emerald-400 to-green-500", glowColor: "rgba(52,211,153,0.6)", avatar: angelAvatar4 },
   { name: "NGUYỄN HOA", color: "from-rose-400 to-pink-500", glowColor: "rgba(251,113,133,0.6)", avatar: angelAvatar2 },
-  { name: "VĂN HOÀNG", color: "from-amber-400 to-orange-500", glowColor: "rgba(251,191,36,0.6)", link: "https://angelai-fun-rich.lovable.app/" },
+  { name: "VĂN HOÀNG", color: "from-red-400 to-rose-500", glowColor: "rgba(248,113,113,0.6)", link: "https://angelai-fun-rich.lovable.app/", video: angelVanHoang },
   { name: "CÔ KIM", color: "from-yellow-400 to-amber-500", glowColor: "rgba(250,204,21,0.6)", avatar: angelAvatar1 },
-  { name: "MINH QUÂN", color: "from-cyan-400 to-teal-500", glowColor: "rgba(34,211,238,0.6)", link: "https://cosmic-angel-aether.lovable.app/" },
-  { name: "QUẾ ANH", color: "from-red-400 to-rose-500", glowColor: "rgba(248,113,113,0.6)", avatar: angelAvatar6 },
+  { name: "MINH QUÂN", color: "from-blue-400 to-cyan-500", glowColor: "rgba(96,165,250,0.6)", link: "https://cosmic-angel-aether.lovable.app/", video: angelMinhQuan },
+  { name: "QUẾ ANH", color: "from-fuchsia-400 to-pink-500", glowColor: "rgba(232,121,249,0.6)", avatar: angelAvatar6 },
   { name: "DIỆU NGỌC", color: "from-violet-400 to-purple-500", glowColor: "rgba(139,92,246,0.6)", link: "https://angeldieungoc.fun.rich", avatar: angelAvatar3 },
   { name: "KHẢ NHI", color: "from-fuchsia-400 to-pink-500", glowColor: "rgba(232,121,249,0.6)", link: "https://angelkhanhi.fun.rich", video: angelVideo1 },
-  { name: "MINH TRÍ", color: "from-indigo-400 to-blue-500", glowColor: "rgba(129,140,248,0.6)", link: "https://angelminhtri.fun.rich", video: angelVideo2 },
+  { name: "MINH TRÍ", color: "from-gray-200 to-white", glowColor: "rgba(255,255,255,0.6)", link: "https://angelminhtri.fun.rich", video: angelMinhTri },
   { name: "BÁCH VIỆT", color: "from-orange-400 to-red-500", glowColor: "rgba(251,146,60,0.6)", link: "https://angelbachviet.fun.rich/", avatar: angelAvatar8 },
   { name: "NGỌC GIÀU", color: "from-lime-400 to-green-500", glowColor: "rgba(163,230,53,0.6)", avatar: angelAvatar9 },
   { name: "THIÊN HẠNH", color: "from-sky-400 to-cyan-500", glowColor: "rgba(56,189,248,0.6)", avatar: angelAvatar10 },
