@@ -26,6 +26,7 @@ import MoodJournal from "./pages/MoodJournal";
 import NotFound from "./pages/NotFound";
 import AngelAITeam from "./pages/AngelAITeam";
 import AngelDetail from "./pages/AngelDetail";
+import UniverseMessages from "./pages/UniverseMessages";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
 import ChatButton from "./components/ChatButton";
@@ -115,6 +116,7 @@ const App = () => (
                     <Route path="/mood-journal" element={<MoodJournal />} />
                     <Route path="/angel-ai-team" element={<AngelAITeam />} />
                     <Route path="/angel-ai-team/:angelId" element={<AngelDetail />} />
+                    <Route path="/thong-diep-cha-vu-tru" element={<UniverseMessages />} />
                     <Route path="/share/:shareId" element={<SharedConversation />} />
                     <Route
                       path="/profile"

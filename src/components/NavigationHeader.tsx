@@ -46,6 +46,7 @@ interface NavLink {
 const navLinksConfig: NavLink[] = [
   { id: "hero", labelKey: "nav.home", icon: Home },
   { id: "chat", labelKey: "nav.chat", icon: MessageCircle },
+  { id: "universe-messages", labelKey: "nav.universeMessages", isPage: true, path: "/thong-diep-cha-vu-tru", icon: Sun },
   { 
     id: "meditation", 
     labelKey: "nav.meditation", 

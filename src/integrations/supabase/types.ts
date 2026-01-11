@@ -1522,6 +1522,68 @@ export type Database = {
         }
         Relationships: []
       }
+      universe_message_likes: {
+        Row: {
+          created_at: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "universe_message_likes_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "universe_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      universe_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_urls: string[] | null
+          likes_count: number
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_urls?: string[] | null
+          likes_count?: number
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_urls?: string[] | null
+          likes_count?: number
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string
