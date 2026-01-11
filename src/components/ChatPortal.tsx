@@ -953,7 +953,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                               </>
                             )}
                           </div>
-                          <div className="relative z-10 font-chat text-sm sm:text-[15px] leading-relaxed text-[hsl(25,50%,15%)]" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                          <div className="relative z-10 font-chat text-sm sm:text-[15px] leading-relaxed text-[hsl(25,50%,15%)] text-justify" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
                             {message.role === "assistant" ? (
                               // Direct display for fast streaming - no typing effect
                               <FormattedChatText text={message.content} className="text-fuchsia-900" />
