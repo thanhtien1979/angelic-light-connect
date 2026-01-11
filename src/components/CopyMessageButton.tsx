@@ -39,6 +39,18 @@ const fallbackCopyToClipboard = (text: string): boolean => {
   return success;
 };
 
+// Clean markdown formatting from text for copying
+const cleanTextForCopy = (text: string): string => {
+  return text
+    .replace(/\*{2,}/g, '') // Remove multiple asterisks
+    .replace(/\*([^*]+)\*/g, '$1') // Remove single asterisks around text
+    .replace(/_{2,}/g, '') // Remove multiple underscores
+    .replace(/_([^_]+)_/g, '$1') // Remove single underscores around text
+    .replace(/^#+\s*/gm, '') // Remove markdown headers
+    .replace(/\s{2,}/g, ' ') // Clean up extra spaces
+    .trim();
+};
+
 export const CopyMessageButton: React.FC<CopyMessageButtonProps> = ({
   text,
   position = 'right',
@@ -50,20 +62,21 @@ export const CopyMessageButton: React.FC<CopyMessageButtonProps> = ({
     e.stopPropagation();
     e.preventDefault();
     
+    const cleanedText = cleanTextForCopy(text);
     let success = false;
     
     // Try modern Clipboard API first
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       try {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(cleanedText);
         success = true;
       } catch (err) {
         console.warn('Clipboard API failed, trying fallback:', err);
-        success = fallbackCopyToClipboard(text);
+        success = fallbackCopyToClipboard(cleanedText);
       }
     } else {
       // Use fallback for Safari/older browsers
-      success = fallbackCopyToClipboard(text);
+      success = fallbackCopyToClipboard(cleanedText);
     }
     
     if (success) {

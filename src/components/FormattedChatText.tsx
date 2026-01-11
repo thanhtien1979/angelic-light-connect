@@ -11,14 +11,18 @@ interface FormattedChatTextProps {
  * - *text* or _text_ for italic
  * - Line breaks preserved
  * - Removes markdown headers (#) and excess asterisks
+ * - Adds proper paragraph breaks for better readability
  */
 const FormattedChatText = ({ text, className = "" }: FormattedChatTextProps) => {
   // Clean up all markdown artifacts
   const cleanText = text
     .replace(/^#+\s*/gm, '') // Remove # headers
-    .replace(/\*+/g, '') // Remove all asterisks
-    .replace(/_+/g, ' ') // Remove underscores
-    .replace(/\s{2,}/g, ' ') // Clean up extra spaces
+    .replace(/\*{2,}/g, '') // Remove multiple asterisks (bold markers)
+    .replace(/\*([^*\n]+)\*/g, '$1') // Remove single asterisks around text
+    .replace(/_{2,}/g, '') // Remove multiple underscores
+    .replace(/_([^_\n]+)_/g, '$1') // Remove single underscores around text
+    .replace(/\s{3,}/g, '\n\n') // Convert 3+ spaces to paragraph break
+    .replace(/([.!?:])\s+(?=[A-ZÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬĐÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ])/g, '$1\n\n') // Add paragraph break after sentence endings before capital letters
     .trim();
 
   // Parse and render formatted text
