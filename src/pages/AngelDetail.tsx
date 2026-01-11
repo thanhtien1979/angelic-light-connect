@@ -83,7 +83,7 @@ const angels: Angel[] = [
     name: "THU TRANG", 
     color: "from-purple-400 to-violet-500", 
     glowColor: "rgba(167,139,250,0.6)", 
-    link: "https://thutrang.lovable.app", 
+    link: "https://angel-ai-732b8bac.base44.app", 
     video: angelThuTrang,
     quote: "Mỗi ngày là một bức tranh mới cần vẽ bằng màu sắc yêu thương",
     bio: "Thu Trang là thiên thần của nghệ thuật và sáng tạo. Cô tin rằng cuộc sống là một tác phẩm nghệ thuật và mỗi người đều là nghệ sĩ của cuộc đời mình.",
