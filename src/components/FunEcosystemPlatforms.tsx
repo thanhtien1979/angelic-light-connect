@@ -15,7 +15,7 @@ import funLifeLogo from "@/assets/fun-life-logo.png";
 import funCharityLogo from "@/assets/fun-charity-logo.png";
 import funProfileLogo from "@/assets/fun-profile-logo.png";
 import funAcademyLogo from "@/assets/fun-academy-logo.png";
-import funWalletLogo from "@/assets/fun-wallet-logo.png";
+import funWalletAvatar from "@/assets/fun-wallet-avatar.png";
 import angelAiLogo from "@/assets/angel-ai-logo.png";
 
 interface Platform {
@@ -112,7 +112,7 @@ const platforms: Platform[] = [
     name: "FUN Wallet",
     subtitle: "Tài Chính Ánh Sáng",
     description: "Vortex tài chính - Quản lý FUN Money & Camly Coin",
-    icon: <img src={funWalletLogo} alt="FUN Wallet" className="w-12 h-12 object-cover rounded-full ring-2 ring-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.6)]" />,
+    icon: <img src={funWalletAvatar} alt="FUN Wallet" className="w-12 h-12 object-cover rounded-full ring-2 ring-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.6)]" />,
     color: "from-yellow-400 to-orange-500",
     glowColor: "shadow-yellow-400/50"
   },
