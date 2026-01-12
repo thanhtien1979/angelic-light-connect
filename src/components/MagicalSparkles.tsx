@@ -14,14 +14,15 @@ const MagicalSparkles = () => {
     }
   }, []);
 
+  // Reduced to 6 sparkles for better performance
   const sparkles = useMemo(() => 
-    Array.from({ length: 10 }, (_, i) => ({
+    Array.from({ length: 6 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: 5 + Math.random() * 7,
-      delay: Math.random() * 6,
-      duration: 3 + Math.random() * 3,
+      size: 6 + Math.random() * 6,
+      delay: Math.random() * 5,
+      duration: 4 + Math.random() * 2,
     })), []
   );
 

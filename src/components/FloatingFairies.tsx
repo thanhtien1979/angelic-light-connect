@@ -1,21 +1,16 @@
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback, useRef, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Import fairy images
+// Import fairy images - reduced to 3
 import fairyGreen from "@/assets/floating-fairy-green.png";
 import fairyGold from "@/assets/floating-fairy-gold.png";
-import fairyBrown from "@/assets/floating-fairy-brown.png";
 import fairyPink from "@/assets/floating-fairy-pink.png";
-import fairyPurple from "@/assets/floating-fairy-purple.png";
-import fairyYellow from "@/assets/floating-fairy-yellow.png";
 
+// Reduced to 3 fairies for performance
 const fairyImages = [
   { image: fairyGreen, sparkleColor: "hsl(120, 70%, 70%)", note: 523.25 }, // C5
   { image: fairyGold, sparkleColor: "hsl(45, 90%, 70%)", note: 587.33 }, // D5
-  { image: fairyBrown, sparkleColor: "hsl(35, 80%, 65%)", note: 659.25 }, // E5
   { image: fairyPink, sparkleColor: "hsl(340, 80%, 75%)", note: 698.46 }, // F5
-  { image: fairyPurple, sparkleColor: "hsl(280, 70%, 75%)", note: 783.99 }, // G5
-  { image: fairyYellow, sparkleColor: "hsl(50, 90%, 75%)", note: 880 }, // A5
 ];
 
 interface Sparkle {
@@ -47,54 +42,52 @@ interface FloatingFairiesProps {
   isReducedMotion?: boolean;
 }
 
-// Create a gentle fairy chime sound
+// Cached AudioContext for performance
+let cachedAudioContext: AudioContext | null = null;
+
+const getAudioContext = () => {
+  if (!cachedAudioContext || cachedAudioContext.state === 'closed') {
+    cachedAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+  return cachedAudioContext;
+};
+
+// Create a gentle fairy chime sound - optimized with cached context
 const playFairySound = (frequency: number) => {
   try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = getAudioContext();
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
     
-    // Main tone
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
     
     oscillator.type = "sine";
     oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
     
-    // Gentle fade in and out
     gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.05);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
-    
-    // Add harmonics for a bell-like sound
-    const harmonic = audioContext.createOscillator();
-    const harmonicGain = audioContext.createGain();
-    harmonic.type = "sine";
-    harmonic.frequency.setValueAtTime(frequency * 2, audioContext.currentTime);
-    harmonicGain.gain.setValueAtTime(0, audioContext.currentTime);
-    harmonicGain.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 0.03);
-    harmonicGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+    gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
     
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    harmonic.connect(harmonicGain);
-    harmonicGain.connect(audioContext.destination);
     
     oscillator.start();
-    harmonic.start();
-    oscillator.stop(audioContext.currentTime + 0.6);
-    harmonic.stop(audioContext.currentTime + 0.4);
-    
-    setTimeout(() => audioContext.close(), 700);
+    oscillator.stop(audioContext.currentTime + 0.5);
   } catch (e) {
     // Audio not supported
   }
 };
 
-// Special arpeggio sound for click
+// Simplified arpeggio sound for click - uses cached context
 const playClickSound = (baseFrequency: number) => {
   try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = getAudioContext();
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
     
-    // Create an arpeggio with 3 ascending notes
     const notes = [baseFrequency, baseFrequency * 1.25, baseFrequency * 1.5];
     
     notes.forEach((freq, i) => {
@@ -105,45 +98,36 @@ const playClickSound = (baseFrequency: number) => {
       osc.frequency.setValueAtTime(freq, audioContext.currentTime + i * 0.1);
       
       gain.gain.setValueAtTime(0, audioContext.currentTime + i * 0.1);
-      gain.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + i * 0.1 + 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.5);
-      
-      // Add shimmer harmonic
-      const shimmer = audioContext.createOscillator();
-      const shimmerGain = audioContext.createGain();
-      shimmer.type = "sine";
-      shimmer.frequency.setValueAtTime(freq * 3, audioContext.currentTime + i * 0.1);
-      shimmerGain.gain.setValueAtTime(0, audioContext.currentTime + i * 0.1);
-      shimmerGain.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + i * 0.1 + 0.02);
-      shimmerGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.3);
+      gain.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + i * 0.1 + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.4);
       
       osc.connect(gain);
       gain.connect(audioContext.destination);
-      shimmer.connect(shimmerGain);
-      shimmerGain.connect(audioContext.destination);
       
       osc.start(audioContext.currentTime + i * 0.1);
-      shimmer.start(audioContext.currentTime + i * 0.1);
-      osc.stop(audioContext.currentTime + i * 0.1 + 0.5);
-      shimmer.stop(audioContext.currentTime + i * 0.1 + 0.3);
+      osc.stop(audioContext.currentTime + i * 0.1 + 0.4);
     });
-    
-    setTimeout(() => audioContext.close(), 1000);
   } catch (e) {
     // Audio not supported
   }
 };
 
-const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
+const FloatingFairies = memo(({ isReducedMotion = false }: FloatingFairiesProps) => {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [lastPlayedTime, setLastPlayedTime] = useState<Record<number, number>>({});
   const [clickedFairy, setClickedFairy] = useState<number | null>(null);
   const [burstSparkles, setBurstSparkles] = useState<BurstSparkle[]>([]);
   const [ringWaves, setRingWaves] = useState<RingWave[]>([]);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
 
-  // Optimized: Only 4 fairies instead of 6
+  // Check device size on mount
+  useEffect(() => {
+    setIsMobileOrTablet(window.innerWidth < 1024);
+  }, []);
+
+  // Optimized: Only 3 fairies
   const fairies = useMemo(() => 
-    fairyImages.slice(0, 4).map((fairy, i) => {
+    fairyImages.map((fairy, i) => {
       const baseAngle = (i * 90) + 20;
       const distance = 360 + (i % 2) * 40;
       
@@ -223,13 +207,12 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
     }, 1000);
   }, []);
 
-  // Generate sparkles periodically - optimized with longer interval
+  // Generate sparkles periodically - optimized with longer interval (600ms)
   useEffect(() => {
-    if (isReducedMotion) return;
+    if (isReducedMotion || isMobileOrTablet) return;
 
     const interval = setInterval(() => {
-      // Only generate sparkles for 2 fairies at a time (alternating)
-      const currentIdx = Math.floor(Date.now() / 400) % fairies.length;
+      const currentIdx = Math.floor(Date.now() / 600) % fairies.length;
       const fairy = fairies[currentIdx];
       
       const currentTime = Date.now() / 1000;
@@ -248,21 +231,22 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
         color: fairy.sparkleColor,
       };
 
-      setSparkles(prev => [...prev.slice(-16), newSparkle]);
-    }, 400); // Slower interval
+      setSparkles(prev => [...prev.slice(-10), newSparkle]);
+    }, 600); // Increased from 400ms to 600ms
 
     return () => clearInterval(interval);
-  }, [fairies, isReducedMotion]);
+  }, [fairies, isReducedMotion, isMobileOrTablet]);
 
   // Clean up old sparkles - less frequent
   useEffect(() => {
     const cleanup = setInterval(() => {
-      setSparkles(prev => prev.slice(-12));
-    }, 1500);
+      setSparkles(prev => prev.slice(-8));
+    }, 2000);
     return () => clearInterval(cleanup);
   }, []);
 
-  if (isReducedMotion) return null;
+  // Disable on mobile/tablet or reduced motion
+  if (isReducedMotion || isMobileOrTablet) return null;
 
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 5 }}>
@@ -452,7 +436,9 @@ const FloatingFairies = ({ isReducedMotion = false }: FloatingFairiesProps) => {
       ))}
     </div>
   );
-};
+});
+
+FloatingFairies.displayName = 'FloatingFairies';
 
 export default FloatingFairies;
 

@@ -5,23 +5,23 @@ const GlobalAngelicAura = memo(() => {
   const [isEnabled, setIsEnabled] = useState(true);
   
   useEffect(() => {
+    // Disable on mobile/tablet (< 1024px) and respect reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (window.innerWidth < 768 || prefersReducedMotion) {
+    if (window.innerWidth < 1024 || prefersReducedMotion) {
       setIsEnabled(false);
     }
   }, []);
-  // Reduced to 4 particles for performance
+  // Reduced to 3 particles for performance
   const particles = useMemo(() => 
-    Array.from({ length: 4 }, (_, i) => ({
-      x: 15 + i * 22,
-      y: 20 + (i % 2) * 55,
-      size: 20 + i * 8,
-      delay: i * 1.5,
+    Array.from({ length: 3 }, (_, i) => ({
+      x: 20 + i * 30,
+      y: 25 + (i % 2) * 50,
+      size: 24 + i * 10,
+      delay: i * 2,
       color: [
-        "hsla(348, 80%, 75%, 0.2)",
-        "hsla(350, 85%, 82%, 0.15)",
-        "hsla(340, 70%, 88%, 0.25)",
-        "hsla(345, 75%, 80%, 0.18)",
+        "hsla(348, 80%, 75%, 0.18)",
+        "hsla(350, 85%, 82%, 0.12)",
+        "hsla(340, 70%, 88%, 0.2)",
       ][i],
     })), []
   );
