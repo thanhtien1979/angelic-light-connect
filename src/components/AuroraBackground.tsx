@@ -3,7 +3,7 @@
 // Includes subtle flowing aurora waves per theme
 
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 
 // Theme-specific aurora wave configurations
 const auroraConfigs = {
@@ -44,23 +44,34 @@ const auroraConfigs = {
   },
 };
 
-const AuroraBackground = () => {
+// Optimized: Reduced layers on mobile/tablet, CSS containment, memoized
+const AuroraBackground = memo(() => {
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Check for reduced motion preference
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(mediaQuery.matches);
+    // Check for reduced motion preference and device size
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(motionQuery.matches);
+    setIsMobileOrTablet(window.innerWidth < 1024);
     
-    const handleChange = (e: MediaQueryListEvent) => {
+    const handleMotionChange = (e: MediaQueryListEvent) => {
       setPrefersReducedMotion(e.matches);
     };
     
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    const handleResize = () => {
+      setIsMobileOrTablet(window.innerWidth < 1024);
+    };
+    
+    motionQuery.addEventListener("change", handleMotionChange);
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => {
+      motionQuery.removeEventListener("change", handleMotionChange);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   // Determine active theme
@@ -83,90 +94,87 @@ const AuroraBackground = () => {
   const isLight = themeKey === "light";
   const isMidnight = themeKey === "midnight";
 
+  // Disable animations on mobile/tablet or reduced motion
+  const shouldAnimate = !prefersReducedMotion && !isMobileOrTablet;
+
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div 
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+      style={{ contain: "paint layout" }}
+    >
       {/* Base gradient layer per theme */}
       <div
-        className="absolute inset-0 transition-opacity duration-700"
+        className="absolute inset-0"
         style={{
           background: getBaseGradient(themeKey),
         }}
       />
 
-      {/* Aurora Wave Layer 1 - Slowest, largest */}
-      <div
-        className="absolute inset-0 transition-all duration-700"
-        style={{
-          background: `
-            radial-gradient(ellipse 120% 80% at 15% 20%, ${config.wave1.split(", ")[0]} 0%, transparent 50%),
-            radial-gradient(ellipse 100% 70% at 85% 75%, ${config.wave1.split(", ")[1]} 0%, transparent 45%),
-            radial-gradient(ellipse 90% 60% at 50% 50%, ${config.wave1.split(", ")[2]} 0%, transparent 55%)
-          `,
-          backgroundSize: "200% 200%",
-          animation: waveAnimation1,
-          willChange: prefersReducedMotion ? "auto" : "background-position, opacity",
-        }}
-      />
+      {/* Aurora Wave Layer 1 - Only on desktop */}
+      {shouldAnimate && (
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse 120% 80% at 15% 20%, ${config.wave1.split(", ")[0]} 0%, transparent 50%),
+              radial-gradient(ellipse 100% 70% at 85% 75%, ${config.wave1.split(", ")[1]} 0%, transparent 45%)
+            `,
+            backgroundSize: "200% 200%",
+            animation: waveAnimation1,
+            willChange: "background-position",
+          }}
+        />
+      )}
 
-      {/* Aurora Wave Layer 2 - Medium speed */}
-      <div
-        className="absolute inset-0 transition-all duration-700"
-        style={{
-          background: `
-            radial-gradient(ellipse 80% 90% at 75% 25%, ${config.wave2.split(", ")[0]} 0%, transparent 50%),
-            radial-gradient(ellipse 110% 65% at 25% 70%, ${config.wave2.split(", ")[1]} 0%, transparent 45%),
-            radial-gradient(ellipse 70% 80% at 60% 40%, ${config.wave2.split(", ")[2]} 0%, transparent 50%)
-          `,
-          backgroundSize: "180% 180%",
-          animation: waveAnimation2,
-          willChange: prefersReducedMotion ? "auto" : "background-position, transform",
-        }}
-      />
+      {/* Aurora Wave Layer 2 - Only on desktop */}
+      {shouldAnimate && (
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse 80% 90% at 75% 25%, ${config.wave2.split(", ")[0]} 0%, transparent 50%),
+              radial-gradient(ellipse 110% 65% at 25% 70%, ${config.wave2.split(", ")[1]} 0%, transparent 45%)
+            `,
+            backgroundSize: "180% 180%",
+            animation: waveAnimation2,
+            willChange: "background-position",
+          }}
+        />
+      )}
 
-      {/* Aurora Wave Layer 3 - Fastest, subtlest */}
+      {/* Floating orbs - reduced blur on mobile, fewer orbs */}
       <div
-        className="absolute inset-0 transition-all duration-700"
+        className="absolute inset-0"
         style={{
-          background: `
-            radial-gradient(ellipse 100% 50% at 40% 30%, ${config.wave3.split(", ")[0]} 0%, transparent 45%),
-            radial-gradient(ellipse 60% 100% at 70% 60%, ${config.wave3.split(", ")[1]} 0%, transparent 50%),
-            radial-gradient(ellipse 85% 75% at 30% 80%, ${config.wave3.split(", ")[2]} 0%, transparent 45%)
-          `,
-          backgroundSize: "220% 220%",
-          animation: waveAnimation3,
-          willChange: prefersReducedMotion ? "auto" : "background-position, opacity",
-        }}
-      />
-
-      {/* Floating orbs with drift animation */}
-      <div
-        className="absolute inset-0 transition-all duration-700"
-        style={{
-          animation: driftAnimation,
-          willChange: prefersReducedMotion ? "auto" : "transform",
+          animation: shouldAnimate ? driftAnimation : "none",
+          willChange: shouldAnimate ? "transform" : "auto",
         }}
       >
         <div
-          className="absolute top-1/4 left-1/5 w-72 h-72 rounded-full transition-all duration-700"
+          className="absolute top-1/4 left-1/5 w-72 h-72 rounded-full"
           style={{
             background: getOrbGradient(themeKey, 1),
-            filter: "blur(35px)",
+            filter: isMobileOrTablet ? "blur(20px)" : "blur(35px)",
           }}
         />
-        <div
-          className="absolute bottom-1/4 right-1/5 w-80 h-80 rounded-full transition-all duration-700"
-          style={{
-            background: getOrbGradient(themeKey, 2),
-            filter: "blur(40px)",
-          }}
-        />
-        <div
-          className="absolute top-2/3 left-1/3 w-60 h-60 rounded-full transition-all duration-700"
-          style={{
-            background: getOrbGradient(themeKey, 3),
-            filter: "blur(32px)",
-          }}
-        />
+        {!isMobileOrTablet && (
+          <>
+            <div
+              className="absolute bottom-1/4 right-1/5 w-80 h-80 rounded-full"
+              style={{
+                background: getOrbGradient(themeKey, 2),
+                filter: "blur(40px)",
+              }}
+            />
+            <div
+              className="absolute top-2/3 left-1/3 w-60 h-60 rounded-full"
+              style={{
+                background: getOrbGradient(themeKey, 3),
+                filter: "blur(32px)",
+              }}
+            />
+          </>
+        )}
       </div>
 
       {/* Starfield overlay - only for Midnight theme */}
@@ -220,7 +228,7 @@ const AuroraBackground = () => {
       />
     </div>
   );
-};
+});
 
 // Helper function for base gradient per theme
 function getBaseGradient(theme: string): string {
@@ -314,5 +322,7 @@ function getOrbGradient(theme: string, orbIndex: number): string {
   const themeOrbs = orbConfigs[theme] || orbConfigs.light;
   return themeOrbs[orbIndex - 1] || themeOrbs[0];
 }
+
+AuroraBackground.displayName = 'AuroraBackground';
 
 export default AuroraBackground;

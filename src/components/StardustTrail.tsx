@@ -24,12 +24,12 @@ const StardustTrail = memo(() => {
 
     const handleMouseMove = (e: MouseEvent) => {
       const now = Date.now();
-      // Heavy throttle: 150ms between particles
-      if (now - lastTimeRef.current < 150) return;
+      // Heavier throttle: 250ms between particles (was 150ms)
+      if (now - lastTimeRef.current < 250) return;
       lastTimeRef.current = now;
 
-      // 60% chance to skip
-      if (Math.random() > 0.4) return;
+      // 70% chance to skip (was 60%)
+      if (Math.random() > 0.3) return;
 
       const newParticle: StardustParticle = {
         id: particleIdRef.current++,
@@ -38,8 +38,8 @@ const StardustTrail = memo(() => {
         size: 4 + Math.random() * 3,
       };
 
-      // Max 5 particles
-      setParticles(prev => [...prev.slice(-4), newParticle]);
+      // Max 3 particles (was 5)
+      setParticles(prev => [...prev.slice(-2), newParticle]);
     };
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
