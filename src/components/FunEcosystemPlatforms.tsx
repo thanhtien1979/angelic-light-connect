@@ -114,7 +114,8 @@ const platforms: Platform[] = [
     description: "Vortex tài chính - Quản lý FUN Money & Camly Coin",
     icon: <img src={funWalletAvatar} alt="FUN Wallet" className="w-12 h-12 object-cover rounded-full ring-2 ring-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.6)]" />,
     color: "from-yellow-400 to-orange-500",
-    glowColor: "shadow-yellow-400/50"
+    glowColor: "shadow-yellow-400/50",
+    link: "https://wallet-fun-rich.lovable.app"
   },
   {
     name: "FUN Earth",
