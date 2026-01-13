@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink, Calendar, Sparkles, BookOpen, Heart, Star } from "lucide-react";
+import { ArrowLeft, ExternalLink, Calendar, Sparkles, BookOpen, Heart, Star, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useAngelBio } from "@/hooks/useAngelBio";
+import { EditAngelBioDialog } from "@/components/EditAngelBioDialog";
 
 // Import all assets
 import angelAILogo from "@/assets/angel-ai-logo.png";
@@ -357,7 +361,10 @@ const angels: Angel[] = [
 
 const AngelDetail = () => {
   const { angelId } = useParams();
+  const { user } = useAuth();
   const angel = angels.find(a => a.id === angelId);
+  const { customBio, updateBio } = useAngelBio(angelId || "");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   if (!angel) {
     return (
@@ -374,6 +381,16 @@ const AngelDetail = () => {
       </div>
     );
   }
+
+  // Use custom bio from database if available, otherwise use default
+  const displayBio = customBio?.bio || angel.bio;
+  const displayQuote = customBio?.quote || angel.quote;
+  const displayStory = customBio?.mission || angel.story;
+  const displaySpecialties = customBio?.specialties || angel.specialties;
+
+  const handleSaveBio = (data: { bio?: string; quote?: string; specialties?: string[]; mission?: string }) => {
+    updateBio(data);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -401,11 +418,11 @@ const AngelDetail = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Back Button */}
+        {/* Back Button & Edit Button */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="mb-8"
+          className="mb-8 flex items-center justify-between"
         >
           <Link to="/angel-ai-team">
             <Button variant="ghost" className="gap-2 text-white/80 hover:text-white hover:bg-white/10">
@@ -413,6 +430,17 @@ const AngelDetail = () => {
               Quay lại đội ngũ Angel AI
             </Button>
           </Link>
+          
+          {user && (
+            <Button
+              variant="ghost"
+              onClick={() => setIsEditDialogOpen(true)}
+              className="gap-2 text-white/80 hover:text-white hover:bg-white/10"
+            >
+              <Pencil className="w-4 h-4" />
+              Chỉnh sửa tiểu sử
+            </Button>
+          )}
         </motion.div>
 
         {/* Hero Section */}
@@ -471,7 +499,7 @@ const AngelDetail = () => {
             transition={{ delay: 0.3 }}
             className="text-xl md:text-2xl text-white/90 italic max-w-2xl mx-auto"
           >
-            "{angel.quote}"
+            "{displayQuote}"
           </motion.p>
         </motion.div>
 
@@ -491,7 +519,7 @@ const AngelDetail = () => {
               <h2 className="text-xl font-semibold text-white">Tiểu sử</h2>
             </div>
             <p className="text-white/80 leading-relaxed">
-              {angel.bio}
+              {displayBio}
             </p>
           </motion.div>
 
@@ -509,7 +537,7 @@ const AngelDetail = () => {
               <h2 className="text-xl font-semibold text-white">Lĩnh vực đặc biệt</h2>
             </div>
             <div className="flex flex-wrap gap-2">
-              {angel.specialties.map((specialty, index) => (
+              {displaySpecialties.map((specialty, index) => (
                 <span
                   key={index}
                   className={`px-4 py-2 rounded-full bg-gradient-to-r ${angel.color} text-white text-sm font-medium`}
@@ -534,7 +562,7 @@ const AngelDetail = () => {
               <h2 className="text-xl font-semibold text-white">Câu chuyện</h2>
             </div>
             <p className="text-white/80 leading-relaxed text-lg">
-              {angel.story}
+              {displayStory}
             </p>
           </motion.div>
         </div>
@@ -561,6 +589,19 @@ const AngelDetail = () => {
           )}
         </motion.div>
       </div>
+
+      {/* Edit Dialog */}
+      <EditAngelBioDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        angelId={angel.id}
+        angelName={angel.name}
+        defaultBio={angel.bio}
+        defaultQuote={angel.quote}
+        defaultSpecialties={angel.specialties}
+        defaultMission={angel.story}
+        onSave={handleSaveBio}
+      />
     </div>
   );
 };

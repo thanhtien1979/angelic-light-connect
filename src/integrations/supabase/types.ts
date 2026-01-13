@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      angel_bios: {
+        Row: {
+          angel_id: string
+          bio: string | null
+          created_at: string
+          id: string
+          mission: string | null
+          quote: string | null
+          specialties: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          angel_id: string
+          bio?: string | null
+          created_at?: string
+          id?: string
+          mission?: string | null
+          quote?: string | null
+          specialties?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          angel_id?: string
+          bio?: string | null
+          created_at?: string
+          id?: string
+          mission?: string | null
+          quote?: string | null
+          specialties?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       banned_users: {
         Row: {
           banned_at: string
