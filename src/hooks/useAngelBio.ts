@@ -6,6 +6,8 @@ interface AngelBio {
   quote?: string;
   mission?: string;
   specialties?: string[];
+  avatar_url?: string;
+  video_url?: string;
 }
 
 export const useAngelBio = (angelId: string) => {
@@ -30,6 +32,8 @@ export const useAngelBio = (angelId: string) => {
             quote: data.quote || undefined,
             mission: data.mission || undefined,
             specialties: data.specialties || undefined,
+            avatar_url: data.avatar_url || undefined,
+            video_url: data.video_url || undefined,
           });
         } else {
           setCustomBio(null);
@@ -48,5 +52,27 @@ export const useAngelBio = (angelId: string) => {
     setCustomBio(newBio);
   };
 
-  return { customBio, isLoading, updateBio };
+  const uploadMedia = async (file: File, type: 'avatar' | 'video'): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${angelId}/${type}-${Date.now()}.${fileExt}`;
+
+      const { data, error } = await supabase.storage
+        .from('angel-media')
+        .upload(fileName, file, { upsert: true });
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from('angel-media')
+        .getPublicUrl(fileName);
+
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      return null;
+    }
+  };
+
+  return { customBio, isLoading, updateBio, uploadMedia };
 };
