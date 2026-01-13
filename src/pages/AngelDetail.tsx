@@ -387,8 +387,10 @@ const AngelDetail = () => {
   const displayQuote = customBio?.quote || angel.quote;
   const displayStory = customBio?.mission || angel.story;
   const displaySpecialties = customBio?.specialties || angel.specialties;
+  const displayAvatar = customBio?.avatar_url || angel.avatar;
+  const displayVideo = customBio?.video_url || angel.video;
 
-  const handleSaveBio = (data: { bio?: string; quote?: string; specialties?: string[]; mission?: string }) => {
+  const handleSaveBio = (data: { bio?: string; quote?: string; specialties?: string[]; mission?: string; avatar_url?: string; video_url?: string }) => {
     updateBio(data);
   };
 
@@ -456,18 +458,18 @@ const AngelDetail = () => {
               boxShadow: `0 0 60px ${angel.glowColor}, 0 0 100px ${angel.glowColor}`,
             }}
           >
-            {angel.video ? (
+            {displayVideo ? (
               <video
-                src={angel.video}
+                src={displayVideo}
                 autoPlay
                 loop
                 muted
                 playsInline
                 className="w-full h-full object-cover"
               />
-            ) : angel.avatar ? (
+            ) : displayAvatar ? (
               <img
-                src={angel.avatar}
+                src={displayAvatar}
                 alt={angel.name}
                 className="w-full h-full object-cover"
               />

@@ -17,6 +17,7 @@ export type Database = {
       angel_bios: {
         Row: {
           angel_id: string
+          avatar_url: string | null
           bio: string | null
           created_at: string
           id: string
@@ -24,9 +25,11 @@ export type Database = {
           quote: string | null
           specialties: string[] | null
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           angel_id: string
+          avatar_url?: string | null
           bio?: string | null
           created_at?: string
           id?: string
@@ -34,9 +37,11 @@ export type Database = {
           quote?: string | null
           specialties?: string[] | null
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           angel_id?: string
+          avatar_url?: string | null
           bio?: string | null
           created_at?: string
           id?: string
@@ -44,6 +49,7 @@ export type Database = {
           quote?: string | null
           specialties?: string[] | null
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
