@@ -475,21 +475,16 @@ const UniverseMessages = () => {
                     {/* Header */}
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <Link to={`/user/${msg.user_id}`}>
-                          <Avatar className="w-10 h-10 border-2 border-gold/30">
-                            <AvatarImage src={profile?.avatar_url || ""} />
-                            <AvatarFallback className="bg-gold/20 text-gold">
-                              {getInitials(profile?.display_name)}
-                            </AvatarFallback>
-                          </Avatar>
-                        </Link>
+                        <Avatar className="w-10 h-10 border-2 border-gold/30">
+                          <AvatarImage src={profile?.avatar_url || ""} />
+                          <AvatarFallback className="bg-gold/20 text-gold">
+                            {getInitials(profile?.display_name)}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
-                          <Link 
-                            to={`/user/${msg.user_id}`}
-                            className="font-medium hover:text-gold transition-colors"
-                          >
+                          <span className="font-medium text-foreground">
                             {profile?.display_name || "Người dùng"}
-                          </Link>
+                          </span>
                           <p className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(msg.created_at), {
                               addSuffix: true,
