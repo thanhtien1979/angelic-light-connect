@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Play, Pause, Volume2, VolumeX, Maximize2, AlertCircle, Loader2 } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Maximize2, AlertCircle, Loader2, PictureInPicture2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 interface VideoPlayerWithControlsProps {
   src: string;
@@ -24,7 +25,55 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
   const [bufferedProgress, setBufferedProgress] = useState(0);
   const [hasError, setHasError] = useState(false);
   const [useNativeControls, setUseNativeControls] = useState(false);
+  const [isPiPActive, setIsPiPActive] = useState(false);
+  const [isPiPSupported, setIsPiPSupported] = useState(false);
   const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Check PiP support
+  useEffect(() => {
+    setIsPiPSupported(
+      'pictureInPictureEnabled' in document && 
+      (document as any).pictureInPictureEnabled
+    );
+  }, []);
+
+  // PiP event listeners
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleEnterPiP = () => {
+      setIsPiPActive(true);
+      toast.success("Đã bật Picture-in-Picture");
+    };
+
+    const handleLeavePiP = () => {
+      setIsPiPActive(false);
+    };
+
+    video.addEventListener('enterpictureinpicture', handleEnterPiP);
+    video.addEventListener('leavepictureinpicture', handleLeavePiP);
+
+    return () => {
+      video.removeEventListener('enterpictureinpicture', handleEnterPiP);
+      video.removeEventListener('leavepictureinpicture', handleLeavePiP);
+    };
+  }, []);
+
+  const togglePiP = async () => {
+    if (!videoRef.current) return;
+
+    try {
+      if (isPiPActive) {
+        await document.exitPictureInPicture();
+      } else {
+        await (videoRef.current as any).requestPictureInPicture();
+      }
+    } catch (error) {
+      console.error("PiP error:", error);
+      toast.error("Không thể bật Picture-in-Picture");
+    }
+  };
 
   const togglePlay = useCallback(async () => {
     if (!videoRef.current) return;
@@ -386,6 +435,19 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
               >
                 Trình phát mặc định
               </Button>
+              
+              {/* Picture-in-Picture */}
+              {isPiPSupported && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={togglePiP}
+                  className={`h-8 w-8 text-white hover:bg-white/20 ${isPiPActive ? 'bg-white/30' : ''}`}
+                  title="Picture-in-Picture"
+                >
+                  <PictureInPicture2 className="w-5 h-5" />
+                </Button>
+              )}
               
               {/* Fullscreen */}
               <Button
