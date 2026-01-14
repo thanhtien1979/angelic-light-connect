@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Play, Pause, Volume2, VolumeX, Maximize2, AlertCircle, Loader2, PictureInPicture2 } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Maximize2, AlertCircle, Loader2, PictureInPicture2, Gauge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
@@ -27,7 +27,12 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
   const [useNativeControls, setUseNativeControls] = useState(false);
   const [isPiPActive, setIsPiPActive] = useState(false);
   const [isPiPSupported, setIsPiPSupported] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
+  const speedMenuRef = useRef<HTMLDivElement>(null);
+
+  const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
   // Check PiP support
   useEffect(() => {
@@ -74,6 +79,31 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
       toast.error("Không thể bật Picture-in-Picture");
     }
   };
+
+  const changePlaybackSpeed = (speed: number) => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = speed;
+      setPlaybackSpeed(speed);
+      setShowSpeedMenu(false);
+      toast.success(`Tốc độ phát: ${speed}x`);
+    }
+  };
+
+  // Close speed menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (speedMenuRef.current && !speedMenuRef.current.contains(event.target as Node)) {
+        setShowSpeedMenu(false);
+      }
+    };
+
+    if (showSpeedMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSpeedMenu]);
 
   const togglePlay = useCallback(async () => {
     if (!videoRef.current) return;
@@ -436,6 +466,35 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
                 Trình phát mặc định
               </Button>
               
+              {/* Playback Speed */}
+              <div className="relative" ref={speedMenuRef}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                  className={`h-8 w-8 text-white hover:bg-white/20 ${showSpeedMenu ? 'bg-white/30' : ''}`}
+                  title="Tốc độ phát"
+                >
+                  <Gauge className="w-5 h-5" />
+                </Button>
+                
+                {showSpeedMenu && (
+                  <div className="absolute bottom-full mb-2 right-0 bg-black/90 rounded-lg py-2 min-w-[80px] shadow-lg border border-white/20">
+                    {speedOptions.map((speed) => (
+                      <button
+                        key={speed}
+                        onClick={() => changePlaybackSpeed(speed)}
+                        className={`w-full px-4 py-1.5 text-sm text-left hover:bg-white/20 transition-colors ${
+                          playbackSpeed === speed ? 'text-primary bg-white/10' : 'text-white'
+                        }`}
+                      >
+                        {speed}x
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Picture-in-Picture */}
               {isPiPSupported && (
                 <Button
