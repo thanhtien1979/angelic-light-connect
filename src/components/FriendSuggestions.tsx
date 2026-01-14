@@ -17,8 +17,17 @@ const FriendSuggestions = () => {
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
+  // Get real display name - fallback if name is default "Thiên Thần" or empty
+  const getDisplayName = (suggestion: SuggestedFriend) => {
+    const name = suggestion.display_name?.trim();
+    if (!name || name === "Thiên Thần") {
+      return "Người dùng";
+    }
+    return name;
+  };
+
   const getInitials = (name: string | null) => {
-    if (!name) return '?';
+    if (!name || name === "Thiên Thần" || name === "Người dùng") return "?";
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
@@ -135,7 +144,7 @@ const FriendSuggestions = () => {
                       <Avatar className="w-12 h-12 ring-2 ring-border">
                         <AvatarImage src={suggestion.avatar_url || ''} />
                         <AvatarFallback className="bg-gradient-to-br from-primary/30 to-gold/30 text-foreground font-medium">
-                          {getInitials(suggestion.display_name)}
+                          {getInitials(getDisplayName(suggestion))}
                         </AvatarFallback>
                       </Avatar>
                       {suggestion.is_online && (
@@ -145,7 +154,7 @@ const FriendSuggestions = () => {
                     
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-foreground truncate">
-                        {suggestion.display_name || 'Người dùng'}
+                        {getDisplayName(suggestion)}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge 
