@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, Sparkles, LogIn, UserPlus, Phone, ArrowLeft, User } from "lucide-react";
+import { X, Mail, Lock, Sparkles, LogIn, UserPlus, Phone, ArrowLeft, User, Smartphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,8 +11,8 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
-const GoogleIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
+const GoogleIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
     <path
       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
       fill="#4285F4"
@@ -33,9 +33,11 @@ const GoogleIcon = () => (
 );
 
 type AuthMode = "signin" | "signup" | "phone" | "otp" | "light-law";
+type AuthMethod = "google" | "email" | "phone";
 
 const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [mode, setMode] = useState<AuthMode>("signin");
+  const [authMethod, setAuthMethod] = useState<AuthMethod>("google");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -47,6 +49,36 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [agreedToLightLaw, setAgreedToLightLaw] = useState(false);
   
   const { signIn, signUp, signInWithGoogle, signInWithPhone, verifyPhoneOtp } = useAuth();
+
+  const authMethods = [
+    { 
+      id: "google" as AuthMethod, 
+      label: "Google", 
+      icon: <GoogleIcon className="w-5 h-5" />,
+      color: "from-white to-gray-50",
+      borderColor: "border-gray-200",
+      textColor: "text-gray-700",
+      description: "Nhanh và an toàn"
+    },
+    { 
+      id: "email" as AuthMethod, 
+      label: "Email", 
+      icon: <Mail className="w-5 h-5 text-blue-500" />,
+      color: "from-blue-50 to-blue-100",
+      borderColor: "border-blue-200",
+      textColor: "text-blue-700",
+      description: "Email & mật khẩu"
+    },
+    { 
+      id: "phone" as AuthMethod, 
+      label: "Điện thoại", 
+      icon: <Smartphone className="w-5 h-5 text-green-500" />,
+      color: "from-green-50 to-green-100",
+      borderColor: "border-green-200",
+      textColor: "text-green-700",
+      description: "Xác thực OTP"
+    },
+  ];
 
   const validate = () => {
     const newErrors: { email?: string; password?: string; phone?: string; displayName?: string } = {};
@@ -361,137 +393,230 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
               {/* Email/Password Sign In/Up Form */}
               {(mode === "signin" || mode === "signup") && (
                 <>
-                  {/* Google Sign In Button */}
-                  <motion.button
-                    type="button"
-                    onClick={handleGoogleSignIn}
-                    disabled={isGoogleLoading || isSubmitting}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full py-3 mb-3 rounded-xl bg-white border border-border/50 hover:bg-gray-50 text-foreground font-medium flex items-center justify-center gap-3 disabled:opacity-60 transition-colors shadow-sm"
-                  >
-                    {isGoogleLoading ? (
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full"
-                      />
-                    ) : (
-                      <>
-                        <GoogleIcon />
-                        Tiếp tục với Google
-                      </>
-                    )}
-                  </motion.button>
-
-                  {/* Phone Sign In Button */}
-                  <motion.button
-                    type="button"
-                    onClick={() => setMode("phone")}
-                    disabled={isGoogleLoading || isSubmitting}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full py-3 mb-4 rounded-xl bg-white border border-border/50 hover:bg-gray-50 text-foreground font-medium flex items-center justify-center gap-3 disabled:opacity-60 transition-colors shadow-sm"
-                  >
-                    <Phone className="w-5 h-5 text-green-600" />
-                    Tiếp tục với Số điện thoại
-                  </motion.button>
-
-                  {/* Divider */}
-                  <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gold-light/30" />
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-white/90 text-muted-foreground">hoặc với email</span>
-                    </div>
+                  {/* Auth Method Tabs */}
+                  <div className="grid grid-cols-3 gap-2 mb-6">
+                    {authMethods.map((method) => (
+                      <motion.button
+                        key={method.id}
+                        type="button"
+                        onClick={() => setAuthMethod(method.id)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`relative p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 ${
+                          authMethod === method.id
+                            ? `bg-gradient-to-br ${method.color} ${method.borderColor} shadow-md`
+                            : "bg-white/50 border-gray-200/50 hover:border-gray-300"
+                        }`}
+                      >
+                        <div className={`p-2 rounded-lg ${authMethod === method.id ? "bg-white/80" : "bg-gray-100/50"}`}>
+                          {method.icon}
+                        </div>
+                        <span className={`text-xs font-medium ${authMethod === method.id ? method.textColor : "text-gray-500"}`}>
+                          {method.label}
+                        </span>
+                        {authMethod === method.id && (
+                          <motion.div
+                            layoutId="activeTab"
+                            className="absolute inset-0 rounded-xl border-2 border-gold/50"
+                            style={{ boxShadow: "0 0 15px hsla(45, 100%, 70%, 0.3)" }}
+                          />
+                        )}
+                      </motion.button>
+                    ))}
                   </div>
 
-                  {/* Form */}
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Display Name - Only for signup */}
-                    {mode === "signup" && (
-                      <div>
-                        <div className="relative">
-                          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                          <input
-                            type="text"
-                            value={displayName}
-                            onChange={(e) => setDisplayName(e.target.value)}
-                            placeholder="Tên hiển thị của bạn"
-                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/60 border border-gold-light/30 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20 transition-all"
-                            maxLength={50}
-                          />
-                        </div>
-                        {errors.displayName && (
-                          <p className="mt-1 text-sm text-red-500">{errors.displayName}</p>
-                        )}
-                      </div>
-                    )}
+                  {/* Selected method description */}
+                  <motion.p
+                    key={authMethod}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center text-sm text-muted-foreground mb-4"
+                  >
+                    {authMethods.find(m => m.id === authMethod)?.description}
+                  </motion.p>
 
-                    <div>
-                      <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="Email của bạn"
-                          className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/60 border border-gold-light/30 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20 transition-all"
-                        />
-                      </div>
-                      {errors.email && (
-                        <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <input
-                          type="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Mật khẩu"
-                          className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/60 border border-gold-light/30 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20 transition-all"
-                        />
-                      </div>
-                      {errors.password && (
-                        <p className="mt-1 text-sm text-red-500">{errors.password}</p>
-                      )}
-                    </div>
-
-                    <motion.button
-                      type="submit"
-                      disabled={isSubmitting || isGoogleLoading}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-gold to-gold-light text-white font-medium flex items-center justify-center gap-2 disabled:opacity-60"
-                      style={{
-                        boxShadow: "0 0 20px hsla(45, 100%, 70%, 0.4)",
-                      }}
+                  {/* Google Sign In */}
+                  {authMethod === "google" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-4"
                     >
-                      {isSubmitting ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                      <motion.button
+                        type="button"
+                        onClick={handleGoogleSignIn}
+                        disabled={isGoogleLoading || isSubmitting}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-4 rounded-xl bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-foreground font-medium flex items-center justify-center gap-3 disabled:opacity-60 transition-all shadow-sm"
+                      >
+                        {isGoogleLoading ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full"
+                          />
+                        ) : (
+                          <>
+                            <GoogleIcon className="w-6 h-6" />
+                            <span className="text-base">
+                              {mode === "signin" ? "Đăng nhập với Google" : "Đăng ký với Google"}
+                            </span>
+                          </>
+                        )}
+                      </motion.button>
+                      <p className="text-center text-xs text-muted-foreground">
+                        ✨ Đăng nhập nhanh chóng và bảo mật với tài khoản Google của bạn
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {/* Phone Sign In */}
+                  {authMethod === "phone" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-4"
+                    >
+                      <div className="relative">
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="+84 912 345 678"
+                          className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/60 border-2 border-green-200 focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
                         />
-                      ) : (
-                        <>
-                          {mode === "signin" ? (
-                            <LogIn className="w-5 h-5" />
-                          ) : (
-                            <UserPlus className="w-5 h-5" />
-                          )}
-                          {mode === "signin" ? "Đăng Nhập" : "Đăng Ký"}
-                        </>
+                      </div>
+                      {errors.phone && (
+                        <p className="text-sm text-red-500">{errors.phone}</p>
                       )}
-                    </motion.button>
-                  </form>
+                      <motion.button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (!validate()) return;
+                          setIsSubmitting(true);
+                          signInWithPhone(phone).then(({ error }) => {
+                            setIsSubmitting(false);
+                            if (!error) setMode("otp");
+                          });
+                        }}
+                        disabled={isSubmitting}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium flex items-center justify-center gap-2 disabled:opacity-60 shadow-lg"
+                        style={{ boxShadow: "0 0 20px hsla(145, 80%, 50%, 0.4)" }}
+                      >
+                        {isSubmitting ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                          />
+                        ) : (
+                          <>
+                            <Smartphone className="w-5 h-5" />
+                            Gửi Mã OTP
+                          </>
+                        )}
+                      </motion.button>
+                      <p className="text-center text-xs text-muted-foreground">
+                        📱 Mã xác thực sẽ được gửi đến số điện thoại của bạn
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {/* Email Sign In */}
+                  {authMethod === "email" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Display Name - Only for signup */}
+                        {mode === "signup" && (
+                          <div>
+                            <div className="relative">
+                              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
+                              <input
+                                type="text"
+                                value={displayName}
+                                onChange={(e) => setDisplayName(e.target.value)}
+                                placeholder="Tên hiển thị của bạn"
+                                className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/60 border-2 border-blue-200 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                                maxLength={50}
+                              />
+                            </div>
+                            {errors.displayName && (
+                              <p className="mt-1 text-sm text-red-500">{errors.displayName}</p>
+                            )}
+                          </div>
+                        )}
+
+                        <div>
+                          <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
+                            <input
+                              type="email"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              placeholder="Email của bạn"
+                              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/60 border-2 border-blue-200 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                            />
+                          </div>
+                          {errors.email && (
+                            <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
+                            <input
+                              type="password"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              placeholder="Mật khẩu"
+                              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/60 border-2 border-blue-200 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                            />
+                          </div>
+                          {errors.password && (
+                            <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                          )}
+                        </div>
+
+                        <motion.button
+                          type="submit"
+                          disabled={isSubmitting || isGoogleLoading}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium flex items-center justify-center gap-2 disabled:opacity-60 shadow-lg"
+                          style={{ boxShadow: "0 0 20px hsla(220, 80%, 60%, 0.4)" }}
+                        >
+                          {isSubmitting ? (
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                            />
+                          ) : (
+                            <>
+                              {mode === "signin" ? (
+                                <LogIn className="w-5 h-5" />
+                              ) : (
+                                <UserPlus className="w-5 h-5" />
+                              )}
+                              {mode === "signin" ? "Đăng Nhập" : "Đăng Ký"}
+                            </>
+                          )}
+                        </motion.button>
+                      </form>
+                    </motion.div>
+                  )}
 
                   {/* Toggle mode */}
-                  <div className="mt-6 text-center">
+                  <div className="mt-6 pt-4 border-t border-gold-light/20 text-center">
                     <p className="text-muted-foreground text-sm">
                       {mode === "signin" ? "Chưa có tài khoản?" : "Đã có tài khoản?"}
                       <button
