@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil, User, Camera, Share2 } from "lucide-react";
+import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Loader2, Heart, Volume2, VolumeX, Paperclip, Image as ImageIcon, Link as LinkIcon, X, Coins, Mic, MicOff, Pencil, User, Camera, Share2, ChevronUp, ChevronDown } from "lucide-react";
 import CopyMessageButton from "@/components/CopyMessageButton";
 import ShareMessageButton from "@/components/ShareMessageButton";
 import SpeakMessageButton from "@/components/SpeakMessageButton";
@@ -157,7 +157,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showScrollButtons, setShowScrollButtons] = useState(false);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const chatRewardTriedRef = useRef(false);
@@ -274,6 +278,28 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const scrollToTop = () => {
+    messagesContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Handle scroll to update button visibility
+  const handleMessagesScroll = useCallback(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const hasScroll = scrollHeight > clientHeight + 50; // Need at least 50px of scrollable content
+    
+    setShowScrollButtons(hasScroll);
+    setCanScrollUp(scrollTop > 50);
+    setCanScrollDown(scrollTop < scrollHeight - clientHeight - 50);
+  }, []);
+
+  // Initial check for scroll buttons when messages change
+  useEffect(() => {
+    handleMessagesScroll();
+  }, [messages, handleMessagesScroll]);
 
   useEffect(() => {
     scrollToBottom();
@@ -732,8 +758,51 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               onSkip={() => setShowBreathingExercise(false)}
             />
 
-            {/* Messages */}
-            <div className="px-4 sm:px-6 py-4 space-y-4 min-h-[300px] max-h-[50vh] sm:max-h-[400px] overflow-y-auto pb-20 sm:pb-6 scroll-smooth" style={{ willChange: "scroll-position", contain: "layout style" }}>
+            {/* Messages Container with Scroll Buttons */}
+            <div className="relative">
+              {/* Scroll to Top Button */}
+              <AnimatePresence>
+                {showScrollButtons && canScrollUp && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    onClick={scrollToTop}
+                    className="absolute top-2 left-1/2 -translate-x-1/2 z-20 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-rose-soft/40 shadow-lg flex items-center justify-center hover:bg-rose-light/50 transition-colors group"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="Lên đầu trang"
+                  >
+                    <ChevronUp className="w-5 h-5 text-primary group-hover:text-primary/80 transition-colors" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              {/* Scroll to Bottom Button */}
+              <AnimatePresence>
+                {showScrollButtons && canScrollDown && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    onClick={scrollToBottom}
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-rose-soft/40 shadow-lg flex items-center justify-center hover:bg-rose-light/50 transition-colors group"
+                    whileHover={{ y: 2 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="Xuống cuối trang"
+                  >
+                    <ChevronDown className="w-5 h-5 text-primary group-hover:text-primary/80 transition-colors" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              {/* Messages */}
+              <div 
+                ref={messagesContainerRef}
+                onScroll={handleMessagesScroll}
+                className="px-4 sm:px-6 py-4 space-y-4 min-h-[300px] max-h-[50vh] sm:max-h-[400px] overflow-y-auto pb-20 sm:pb-6 scroll-smooth" 
+                style={{ willChange: "scroll-position", contain: "layout style" }}
+              >
               {isRestoring ? (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -1040,6 +1109,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
               </AnimatePresence>
 
               <div ref={messagesEndRef} />
+              </div>
             </div>
 
             {/* Attachment Preview */}
