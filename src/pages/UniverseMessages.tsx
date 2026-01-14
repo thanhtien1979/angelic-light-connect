@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Heart, Sparkles, MessageCircle, Sun, Users, Send,
   Search, RefreshCw, Share2, Image, Video, X, Loader2, Play,
-  MoreHorizontal, Trash2, Edit2, BookOpen, Star
+  MoreHorizontal, Trash2, Edit2, BookOpen, Star, Check
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +18,8 @@ import { Progress } from "@/components/ui/progress";
 import NavigationHeader from "@/components/NavigationHeader";
 import { compressImage } from "@/lib/imageCompression";
 import MomentImageGallery from "@/components/MomentImageGallery";
+import UniverseMessageReactions from "@/components/UniverseMessageReactions";
+import UniverseMessageShareDialog from "@/components/UniverseMessageShareDialog";
 import {
   Dialog,
   DialogContent,
@@ -68,6 +70,14 @@ const UniverseMessages = () => {
   const [postVideo, setPostVideo] = useState<{ file: File; preview: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  
+  // Edit state
+  const [editingMessage, setEditingMessage] = useState<UniverseMessage | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Share state
+  const [shareMessage, setShareMessage] = useState<UniverseMessage | null>(null);
   
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -367,6 +377,48 @@ const UniverseMessages = () => {
     }
   };
 
+  // Edit message
+  const handleStartEdit = (message: UniverseMessage) => {
+    setEditingMessage(message);
+    setEditContent(message.content);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!user || !editingMessage) return;
+    if (!editContent.trim()) {
+      toast.error("Nội dung không được để trống");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("universe_messages" as any)
+        .update({ content: editContent.trim(), updated_at: new Date().toISOString() })
+        .eq("id", editingMessage.id)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      toast.success("Đã cập nhật thông điệp! ✨");
+      setIsEditing(false);
+      setEditingMessage(null);
+      setEditContent("");
+      fetchMessages();
+    } catch (error) {
+      console.error("Edit error:", error);
+      toast.error("Không thể cập nhật thông điệp");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditingMessage(null);
+    setEditContent("");
+  };
+
   const getInitials = (name: string | null) => {
     if (!name) return "?";
     return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
@@ -503,6 +555,12 @@ const UniverseMessages = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
+                              onClick={() => handleStartEdit(msg)}
+                            >
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              Chỉnh sửa
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               onClick={() => handleDelete(msg.id)}
                               className="text-destructive"
                             >
@@ -541,20 +599,17 @@ const UniverseMessages = () => {
                     )}
 
                     {/* Actions */}
-                    <div className="flex items-center gap-4 pt-3 border-t border-border/50">
+                    <div className="flex items-center gap-2 pt-3 border-t border-border/50">
+                      <UniverseMessageReactions
+                        messageId={msg.id}
+                        likesCount={msg.likes_count}
+                        onReactionChange={fetchMessages}
+                      />
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleLike(msg.id)}
-                        className="text-muted-foreground hover:text-rose-500"
-                      >
-                        <Heart className="w-4 h-4 mr-1" />
-                        {msg.likes_count}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground"
+                        onClick={() => setShareMessage(msg)}
+                        className="text-muted-foreground hover:text-blue-500"
                       >
                         <Share2 className="w-4 h-4 mr-1" />
                         Chia sẻ
@@ -699,6 +754,68 @@ const UniverseMessages = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Message Dialog */}
+      <Dialog open={isEditing} onOpenChange={(open) => !open && handleCancelEdit()}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit2 className="w-5 h-5 text-gold" />
+              Chỉnh sửa Thông Điệp
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <Textarea
+              placeholder="Chỉnh sửa thông điệp của bạn..."
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="min-h-[150px] resize-none"
+              maxLength={2000}
+            />
+            <div className="flex justify-end text-xs text-muted-foreground">
+              {editContent.length}/2000
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={handleCancelEdit}
+                disabled={isSubmitting}
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={handleSaveEdit}
+                disabled={isSubmitting || !editContent.trim()}
+                className="bg-gradient-to-r from-gold to-amber-500 text-white hover:from-gold/90 hover:to-amber-500/90"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Đang lưu...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Lưu thay đổi
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      {shareMessage && (
+        <UniverseMessageShareDialog
+          isOpen={!!shareMessage}
+          onClose={() => setShareMessage(null)}
+          message={shareMessage}
+          profile={profiles[shareMessage.user_id] || null}
+        />
+      )}
     </div>
   );
 };
