@@ -349,60 +349,60 @@ const Friends = () => {
                             </p>
                           </div>
                         </button>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-wrap justify-end">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => initiateCall(profile?.id || "", profile?.display_name || "Người dùng", 'video')}
-                            className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                            title="Gọi video"
+                            className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
                           >
                             <Video className="w-4 h-4" />
+                            <span className="text-[10px] font-medium">Video</span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => initiateCall(profile?.id || "", profile?.display_name || "Người dùng", 'audio')}
-                            className="text-green-500 hover:text-green-600 hover:bg-green-50"
-                            title="Gọi thoại"
+                            className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 text-green-500 hover:text-green-600 hover:bg-green-50"
                           >
                             <Phone className="w-4 h-4" />
+                            <span className="text-[10px] font-medium">Gọi</span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleOpenChat()}
-                            className="text-primary hover:text-primary hover:bg-primary/10"
-                            title="Nhắn tin"
+                            className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 text-primary hover:text-primary hover:bg-primary/10"
                           >
                             <MessageCircle className="w-4 h-4" />
+                            <span className="text-[10px] font-medium">Chat</span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => unfriend(friendship.id)}
-                            className="text-muted-foreground hover:text-amber-600 hover:bg-amber-50"
-                            title="Hủy kết bạn"
+                            className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 text-muted-foreground hover:text-amber-600 hover:bg-amber-50"
                           >
                             <Users className="w-4 h-4" />
+                            <span className="text-[10px] font-medium">Hủy</span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleReportUser(profile?.id || "", profile?.display_name || "Người dùng")}
-                            className="text-muted-foreground hover:text-amber-600 hover:bg-amber-50"
-                            title="Báo cáo"
+                            className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 text-muted-foreground hover:text-amber-600 hover:bg-amber-50"
                           >
                             <Flag className="w-4 h-4" />
+                            <span className="text-[10px] font-medium">Báo cáo</span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleBlockUser(profile?.id || "", profile?.display_name || "Người dùng")}
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            title="Chặn"
+                            className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           >
                             <ShieldOff className="w-4 h-4" />
+                            <span className="text-[10px] font-medium">Chặn</span>
                           </Button>
                         </div>
                       </motion.div>
