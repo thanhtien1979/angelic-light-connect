@@ -21,6 +21,7 @@ import { compressImage } from "@/lib/imageCompression";
 import MomentImageGallery from "@/components/MomentImageGallery";
 import UniverseMessageReactions from "@/components/UniverseMessageReactions";
 import UniverseMessageShareDialog from "@/components/UniverseMessageShareDialog";
+import UniverseMessageComments from "@/components/UniverseMessageComments";
 import VideoPlayerWithControls from "@/components/VideoPlayerWithControls";
 import {
   Dialog,
@@ -44,6 +45,7 @@ interface UniverseMessage {
   video_url: string | null;
   user_id: string;
   likes_count: number;
+  comments_count: number;
   created_at: string;
 }
 
@@ -601,6 +603,11 @@ const UniverseMessages = () => {
                         messageId={msg.id}
                         likesCount={msg.likes_count}
                         onReactionChange={fetchMessages}
+                      />
+                      <UniverseMessageComments
+                        messageId={msg.id}
+                        commentsCount={msg.comments_count || 0}
+                        onCommentsCountChange={() => fetchMessages()}
                       />
                       <Button
                         variant="ghost"
