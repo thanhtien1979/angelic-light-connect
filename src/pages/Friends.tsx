@@ -87,8 +87,20 @@ const Friends = () => {
     setSearchResults(prev => prev.filter(p => p.id !== userId));
   };
 
+  // Get real display name - fallback to email username if name is default "Thiên Thần" or empty
+  const getDisplayName = (profile: Profile | null | undefined) => {
+    if (!profile) return "Người dùng";
+    const name = profile.display_name?.trim();
+    // If name is empty, null, or is the default "Thiên Thần", try to use email
+    if (!name || name === "Thiên Thần") {
+      // We don't have email in profile, so return a generic name
+      return "Người dùng";
+    }
+    return name;
+  };
+
   const getInitials = (name: string | null) => {
-    if (!name) return "?";
+    if (!name || name === "Thiên Thần" || name === "Người dùng") return "?";
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
@@ -321,7 +333,7 @@ const Friends = () => {
                             <Avatar className="w-12 h-12 ring-2 ring-rose-200">
                               <AvatarImage src={profile?.avatar_url || ""} />
                               <AvatarFallback className="bg-gradient-to-br from-rose-400 to-pink-500 text-white font-medium">
-                                {getInitials(profile?.display_name)}
+                                {getInitials(getDisplayName(profile))}
                               </AvatarFallback>
                             </Avatar>
                             {profile?.is_online && (
@@ -330,7 +342,7 @@ const Friends = () => {
                           </div>
                           <div>
                             <p className="font-semibold text-foreground">
-                              {profile?.display_name || "Người dùng"}
+                              {getDisplayName(profile)}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {profile?.is_online ? "🟢 Đang online" : "Bạn bè ánh sáng ✨"}
@@ -427,12 +439,12 @@ const Friends = () => {
                           <Avatar className="w-12 h-12 ring-2 ring-amber-200">
                             <AvatarImage src={profile?.avatar_url || ""} />
                             <AvatarFallback className="bg-gradient-to-br from-amber-400 to-yellow-500 text-white font-medium">
-                              {getInitials(profile?.display_name)}
+                              {getInitials(getDisplayName(profile))}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <p className="font-semibold text-foreground">
-                              {profile?.display_name || "Người dùng"}
+                              {getDisplayName(profile)}
                             </p>
                             <p className="text-xs text-amber-600 dark:text-amber-400">Muốn kết bạn với bạn 💫</p>
                           </div>
@@ -488,12 +500,12 @@ const Friends = () => {
                           <Avatar className="w-12 h-12 ring-2 ring-blue-200">
                             <AvatarImage src={profile?.avatar_url || ""} />
                             <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white font-medium">
-                              {getInitials(profile?.display_name)}
+                              {getInitials(getDisplayName(profile))}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <p className="font-semibold text-foreground">
-                              {profile?.display_name || "Người dùng"}
+                              {getDisplayName(profile)}
                             </p>
                             <p className="text-xs text-blue-600 dark:text-blue-400">Đang chờ phản hồi...</p>
                           </div>
@@ -566,11 +578,11 @@ const Friends = () => {
                         <Avatar className="w-12 h-12 ring-2 ring-violet-200">
                           <AvatarImage src={profile.avatar_url || ""} />
                           <AvatarFallback className="bg-gradient-to-br from-violet-400 to-purple-500 text-white font-medium">
-                            {getInitials(profile.display_name)}
+                            {getInitials(getDisplayName(profile))}
                           </AvatarFallback>
                         </Avatar>
                         <p className="font-semibold text-foreground">
-                          {profile.display_name || "Người dùng"}
+                          {getDisplayName(profile)}
                         </p>
                       </button>
                       <Button

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, Sparkles, LogIn, UserPlus, Phone, ArrowLeft } from "lucide-react";
+import { X, Mail, Lock, Sparkles, LogIn, UserPlus, Phone, ArrowLeft, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,17 +38,18 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; phone?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; phone?: string; displayName?: string }>({});
   const [agreedToLightLaw, setAgreedToLightLaw] = useState(false);
   
   const { signIn, signUp, signInWithGoogle, signInWithPhone, verifyPhoneOtp } = useAuth();
 
   const validate = () => {
-    const newErrors: { email?: string; password?: string; phone?: string } = {};
+    const newErrors: { email?: string; password?: string; phone?: string; displayName?: string } = {};
     
     if (mode === "signin" || mode === "signup") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -58,6 +59,18 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
       
       if (password.length < 6) {
         newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+      }
+
+      // Validate display name for signup
+      if (mode === "signup") {
+        const trimmedName = displayName.trim();
+        if (!trimmedName) {
+          newErrors.displayName = "Vui lòng nhập tên hiển thị";
+        } else if (trimmedName.length < 2) {
+          newErrors.displayName = "Tên phải có ít nhất 2 ký tự";
+        } else if (trimmedName.length > 50) {
+          newErrors.displayName = "Tên không được quá 50 ký tự";
+        }
       }
     }
     
@@ -88,8 +101,8 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
         onClose();
       }
     } else if (mode === "signup") {
-      // Đăng ký với Light Law agreement
-      const { error, data } = await signUp(email, password);
+      // Đăng ký với Light Law agreement và display name
+      const { error, data } = await signUp(email, password, displayName.trim());
       setIsSubmitting(false);
       
       if (!error && data?.user) {
@@ -136,6 +149,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const resetForm = () => {
     setEmail("");
     setPassword("");
+    setDisplayName("");
     setPhone("");
     setOtp("");
     setErrors({});
@@ -395,6 +409,26 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
                   {/* Form */}
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Display Name - Only for signup */}
+                    {mode === "signup" && (
+                      <div>
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                          <input
+                            type="text"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            placeholder="Tên hiển thị của bạn"
+                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/60 border border-gold-light/30 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20 transition-all"
+                            maxLength={50}
+                          />
+                        </div>
+                        {errors.displayName && (
+                          <p className="mt-1 text-sm text-red-500">{errors.displayName}</p>
+                        )}
+                      </div>
+                    )}
+
                     <div>
                       <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
