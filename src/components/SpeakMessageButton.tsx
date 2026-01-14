@@ -1,12 +1,11 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Loader2, Settings, Check, User, Users } from 'lucide-react';
+import React, { useState, useCallback, useRef } from 'react';
+import { Volume2, VolumeX, Loader2, Settings, Check, User, Users, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -24,13 +23,16 @@ interface VoiceOption {
   region: 'north' | 'central' | 'south' | 'neutral';
   icon: string;
   description: string;
+  isAngel?: boolean;
 }
 
 interface VoiceSettings {
   voiceId: string;
   speed: number;
-  pitch: number;
 }
+
+// TTS API URL
+const TTS_API_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
 
 // Predefined Vietnamese voice options with different characteristics
 const VOICE_OPTIONS: VoiceOption[] = [
@@ -42,7 +44,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'young',
     region: 'north',
     icon: '👩',
-    description: 'Giọng nữ trẻ miền Bắc'
+    description: 'Giọng nữ trẻ miền Bắc - Trong trẻo, tươi vui'
   },
   {
     id: 'female-north-middle',
@@ -51,7 +53,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'middle',
     region: 'north',
     icon: '👩‍💼',
-    description: 'Giọng nữ trung niên miền Bắc'
+    description: 'Giọng nữ trung niên miền Bắc - Điềm đạm'
   },
   {
     id: 'female-south-young',
@@ -60,7 +62,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'young',
     region: 'south',
     icon: '👧',
-    description: 'Giọng nữ trẻ miền Nam'
+    description: 'Giọng nữ trẻ miền Nam - Sôi nổi, ngọt ngào'
   },
   {
     id: 'female-south-middle',
@@ -69,7 +71,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'middle',
     region: 'south',
     icon: '👩‍🦰',
-    description: 'Giọng nữ trung niên miền Nam'
+    description: 'Giọng nữ trung niên miền Nam - Ấm áp'
   },
   {
     id: 'female-central-young',
@@ -78,7 +80,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'young',
     region: 'central',
     icon: '👩‍🎤',
-    description: 'Giọng nữ trẻ miền Trung'
+    description: 'Giọng nữ trẻ miền Trung - Duyên dáng'
   },
   {
     id: 'female-neutral-old',
@@ -87,7 +89,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'old',
     region: 'neutral',
     icon: '👵',
-    description: 'Giọng bà hiền từ, ấm áp'
+    description: 'Giọng bà hiền từ, ấm áp, trìu mến'
   },
   // Male voices
   {
@@ -97,7 +99,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'young',
     region: 'north',
     icon: '👨',
-    description: 'Giọng nam trẻ miền Bắc'
+    description: 'Giọng nam trẻ miền Bắc - Năng động'
   },
   {
     id: 'male-north-middle',
@@ -106,7 +108,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'middle',
     region: 'north',
     icon: '👨‍💼',
-    description: 'Giọng nam trung niên miền Bắc'
+    description: 'Giọng nam trung niên miền Bắc - Trầm ổn'
   },
   {
     id: 'male-south-young',
@@ -115,7 +117,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'young',
     region: 'south',
     icon: '🧑',
-    description: 'Giọng nam trẻ miền Nam'
+    description: 'Giọng nam trẻ miền Nam - Vui vẻ'
   },
   {
     id: 'male-south-middle',
@@ -124,7 +126,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'middle',
     region: 'south',
     icon: '👨‍🦱',
-    description: 'Giọng nam trung niên miền Nam'
+    description: 'Giọng nam trung niên miền Nam - Thân thiện'
   },
   {
     id: 'male-central-young',
@@ -133,7 +135,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'young',
     region: 'central',
     icon: '👦',
-    description: 'Giọng nam trẻ miền Trung'
+    description: 'Giọng nam trẻ miền Trung - Mộc mạc'
   },
   {
     id: 'male-neutral-old',
@@ -142,7 +144,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'old',
     region: 'neutral',
     icon: '👴',
-    description: 'Giọng ông hiền từ, trầm ấm'
+    description: 'Giọng ông hiền từ, trầm ấm, sâu lắng'
   },
   // Special Angel voices
   {
@@ -152,7 +154,8 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'young',
     region: 'neutral',
     icon: '👼',
-    description: 'Giọng thiên thần dịu dàng'
+    description: 'Giọng thiên thần nữ dịu dàng, thanh thoát',
+    isAngel: true
   },
   {
     id: 'angel-male',
@@ -161,64 +164,31 @@ const VOICE_OPTIONS: VoiceOption[] = [
     age: 'young',
     region: 'neutral',
     icon: '😇',
-    description: 'Giọng thiên thần thanh thoát'
+    description: 'Giọng thiên thần nam thanh tao, bình an',
+    isAngel: true
   },
 ];
 
 const SPEED_OPTIONS = [
-  { value: 0.6, label: 'Rất chậm' },
-  { value: 0.8, label: 'Chậm' },
+  { value: 0.7, label: 'Rất chậm' },
+  { value: 0.85, label: 'Chậm' },
   { value: 1.0, label: 'Bình thường' },
-  { value: 1.2, label: 'Nhanh' },
-  { value: 1.4, label: 'Rất nhanh' },
+  { value: 1.1, label: 'Nhanh' },
+  { value: 1.2, label: 'Rất nhanh' },
 ];
-
-const PITCH_OPTIONS = [
-  { value: 0.8, label: 'Trầm' },
-  { value: 1.0, label: 'Bình thường' },
-  { value: 1.2, label: 'Cao' },
-];
-
-// Voice characteristics mapping for Web Speech API simulation
-const getVoiceCharacteristics = (voiceOption: VoiceOption) => {
-  let pitch = 1.0;
-  let rate = 1.0;
-  
-  // Adjust pitch based on gender and age
-  if (voiceOption.gender === 'female') {
-    pitch = voiceOption.age === 'old' ? 1.1 : voiceOption.age === 'young' ? 1.3 : 1.2;
-  } else {
-    pitch = voiceOption.age === 'old' ? 0.8 : voiceOption.age === 'young' ? 1.0 : 0.9;
-  }
-  
-  // Adjust rate based on age
-  if (voiceOption.age === 'old') {
-    rate = 0.85;
-  } else if (voiceOption.age === 'young') {
-    rate = 1.05;
-  }
-  
-  // Special adjustments for angel voices
-  if (voiceOption.id.startsWith('angel')) {
-    pitch = voiceOption.gender === 'female' ? 1.25 : 1.1;
-    rate = 0.95;
-  }
-  
-  return { pitch, rate };
-};
 
 // Get saved settings from localStorage
 const getSavedSettings = (): VoiceSettings => {
   try {
-    const saved = localStorage.getItem('tts_voice_settings');
+    const saved = localStorage.getItem('tts_voice_settings_v2');
     if (saved) return JSON.parse(saved);
   } catch {}
-  return { voiceId: 'angel-female', speed: 1.0, pitch: 1.0 };
+  return { voiceId: 'angel-female', speed: 1.0 };
 };
 
 // Save settings to localStorage
 const saveSettings = (settings: VoiceSettings) => {
-  localStorage.setItem('tts_voice_settings', JSON.stringify(settings));
+  localStorage.setItem('tts_voice_settings_v2', JSON.stringify(settings));
 };
 
 export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
@@ -228,42 +198,10 @@ export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [systemVoices, setSystemVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [settings, setSettings] = useState<VoiceSettings>(getSavedSettings);
   const [activeTab, setActiveTab] = useState<'female' | 'male'>('female');
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
-
-  // Load available system voices
-  useEffect(() => {
-    const loadVoices = () => {
-      const availableVoices = window.speechSynthesis.getVoices();
-      setSystemVoices(availableVoices);
-    };
-
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-
-    return () => {
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
-
-  // Close settings when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
-        setShowSettings(false);
-      }
-    };
-
-    if (showSettings) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showSettings]);
 
   const updateSettings = useCallback((newSettings: Partial<VoiceSettings>) => {
     const updated = { ...settings, ...newSettings };
@@ -275,104 +213,147 @@ export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
     return VOICE_OPTIONS.find(v => v.id === settings.voiceId) || VOICE_OPTIONS[0];
   }, [settings.voiceId]);
 
-  const getBestSystemVoice = useCallback(() => {
-    // Try to find Vietnamese voice
-    const viVoice = systemVoices.find(v => v.lang.startsWith('vi'));
-    if (viVoice) return viVoice;
-    
-    // Fallback to any available voice
-    return systemVoices[0] || null;
-  }, [systemVoices]);
-
-  const handleSpeak = useCallback(() => {
-    if (!window.speechSynthesis) {
-      console.warn('Speech synthesis not supported');
-      return;
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
     }
+    setIsSpeaking(false);
+  }, []);
 
+  const handleSpeak = useCallback(async () => {
     // If already speaking, stop
     if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
+      stopAudio();
       return;
     }
 
     setIsLoading(true);
 
-    // Clean text for speech
-    const cleanText = text
-      .replace(/[✨🌸💫🤍❤️💕🙏🌟⭐️🌈🦋🌺🌷💐🌹🌻😊😇🥰💖🕊️👼💝🌙✿❀🍀🌼🪷]/g, '')
-      .replace(/\*\*/g, '')
-      .replace(/\n+/g, '. ')
-      .replace(/\.+/g, '.')
-      .trim();
+    try {
+      // Clean text for speech
+      const cleanText = text
+        .replace(/[✨🌸💫🤍❤️💕🙏🌟⭐️🌈🦋🌺🌷💐🌹🌻😊😇🥰💖🕊️👼💝🌙✿❀🍀🌼🪷🌞🍃💛🧡💜💙💚🖤🤎💗💓💞💘💟❣️♥️🔥⚡️🎶🎵🎤🎧📿📖🕯️🌅🌄🌇🌆🏞️🏵️🌾🍂🍁🌿☘️🌱🌲🌳🌴🌵🌷🌸🌹🌺🌻🌼💮🪻🪸🪴🪺🐚🦢🦩🕊️🐝🦋🐞🌕🌖🌗🌘🌑🌒🌓🌔🌙⭐️🌟💫✨☀️🌤️⛅️🌥️🌦️🌧️⛈️🌩️🌪️🌫️🌬️💨🌀🌊💧💦☔️⚡️❄️🌨️☃️⛄️🔥💥✳️✴️☸️♻️🔯☯️☮️🕉️☪️✝️☦️✡️🔯🕎☸️⚛️🕉️🆔⚜️🔱❇️✳️✴️❌⭕️🛑⛔️📛🚫💯💢♨️🚷🚯🚳🚱🔞📵🚭❗️❓❕❔‼️⁉️🔅🔆〽️⚠️🚸🔱⚜️🔰♻️✅❎✔️☑️🔘🔴🟠🟡🟢🔵🟣⚫️⚪️🟤🔺🔻🔸🔹🔶🔷🔳🔲▪️▫️◾️◽️◼️◻️🟥🟧🟨🟩🟦🟪⬛️⬜️🟫🔈🔇🔉🔊🔔🔕📣📢💬💭🗯️♠️♣️♥️♦️🃏🎴🀄️🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛🕜🕝🕞🕟🕠🕡🕢🕣🕤🕥🕦🕧]/g, '')
+        .replace(/\*\*/g, '')
+        .replace(/\n+/g, '. ')
+        .replace(/\.+/g, '.')
+        .trim();
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utteranceRef.current = utterance;
+      if (!cleanText) {
+        toast.error('Không có nội dung để đọc');
+        setIsLoading(false);
+        return;
+      }
 
-    // Get selected voice option and its characteristics
-    const selectedVoice = getSelectedVoice();
-    const characteristics = getVoiceCharacteristics(selectedVoice);
-    
-    // Use system voice
-    const systemVoice = getBestSystemVoice();
-    if (systemVoice) {
-      utterance.voice = systemVoice;
-    }
-    
-    utterance.lang = 'vi-VN';
-    
-    // Apply voice characteristics with user speed/pitch adjustments
-    utterance.rate = characteristics.rate * settings.speed;
-    utterance.pitch = characteristics.pitch * settings.pitch;
-    utterance.volume = 1;
+      const response = await fetch(TTS_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          text: cleanText,
+          voiceId: settings.voiceId,
+          userSpeed: settings.speed,
+        }),
+      });
 
-    utterance.onstart = () => {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Lỗi ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onplay = () => {
+        setIsLoading(false);
+        setIsSpeaking(true);
+      };
+
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
+      };
+
+      audio.onerror = () => {
+        setIsLoading(false);
+        setIsSpeaking(false);
+        toast.error('Không thể phát âm thanh');
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error('TTS Error:', error);
       setIsLoading(false);
-      setIsSpeaking(true);
-    };
-
-    utterance.onend = () => {
       setIsSpeaking(false);
-    };
-
-    utterance.onerror = (e) => {
-      console.error('Speech error:', e);
-      setIsLoading(false);
-      setIsSpeaking(false);
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }, [text, isSpeaking, settings, getSelectedVoice, getBestSystemVoice]);
-
-  const handlePreview = useCallback(() => {
-    if (!window.speechSynthesis) return;
-    
-    window.speechSynthesis.cancel();
-    
-    const selectedVoice = getSelectedVoice();
-    const previewText = `Xin chào, tôi là ${selectedVoice.name}. Rất vui được đồng hành cùng bạn.`;
-    
-    const utterance = new SpeechSynthesisUtterance(previewText);
-    const characteristics = getVoiceCharacteristics(selectedVoice);
-    
-    const systemVoice = getBestSystemVoice();
-    if (systemVoice) {
-      utterance.voice = systemVoice;
+      toast.error(error instanceof Error ? error.message : 'Không thể tạo giọng nói');
     }
-    
-    utterance.lang = 'vi-VN';
-    utterance.rate = characteristics.rate * settings.speed;
-    utterance.pitch = characteristics.pitch * settings.pitch;
-    utterance.volume = 1;
-    
-    window.speechSynthesis.speak(utterance);
-  }, [getSelectedVoice, getBestSystemVoice, settings]);
+  }, [text, isSpeaking, settings, stopAudio]);
 
-  // Check if speech synthesis is supported
-  if (typeof window === 'undefined' || !window.speechSynthesis) {
-    return null;
-  }
+  const handlePreview = useCallback(async () => {
+    stopAudio();
+    setIsLoading(true);
+
+    try {
+      const selectedVoice = getSelectedVoice();
+      const previewText = `Xin chào, tôi là ${selectedVoice.name}. Rất vui được đồng hành cùng bạn trên hành trình tâm linh.`;
+
+      const response = await fetch(TTS_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          text: previewText,
+          voiceId: settings.voiceId,
+          userSpeed: settings.speed,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Không thể tạo giọng nói');
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onplay = () => {
+        setIsLoading(false);
+        setIsSpeaking(true);
+      };
+
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
+      };
+
+      audio.onerror = () => {
+        setIsLoading(false);
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error('Preview Error:', error);
+      setIsLoading(false);
+      toast.error('Không thể xem trước giọng nói');
+    }
+  }, [getSelectedVoice, settings, stopAudio]);
 
   const femaleVoices = VOICE_OPTIONS.filter(v => v.gender === 'female');
   const maleVoices = VOICE_OPTIONS.filter(v => v.gender === 'male');
@@ -430,18 +411,29 @@ export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
 
       {/* Settings dropdown */}
       {showSettings && (
-        <div className={cn(
-          'absolute z-50 top-full mt-1 right-0',
-          'w-[280px] sm:w-[320px] p-3 rounded-xl',
-          'bg-background/95 backdrop-blur-md border border-border shadow-xl',
-          'animate-fade-in'
-        )}>
-          {/* Header */}
+        <div 
+          className={cn(
+            'absolute z-50 top-full mt-1 right-0',
+            'w-[300px] sm:w-[340px] p-3 rounded-xl',
+            'bg-background/95 backdrop-blur-md border border-border shadow-xl',
+            'animate-fade-in'
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header with ElevenLabs badge */}
           <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/50">
             <span className="text-lg">{selectedVoice.icon}</span>
             <div className="flex-1">
-              <p className="text-sm font-medium">{selectedVoice.name}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-medium">{selectedVoice.name}</p>
+                {selectedVoice.isAngel && (
+                  <Sparkles className="w-3 h-3 text-amber-500" />
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">{selectedVoice.description}</p>
+            </div>
+            <div className="px-1.5 py-0.5 rounded bg-gradient-to-r from-violet-500/20 to-indigo-500/20 border border-violet-500/30">
+              <span className="text-[10px] font-medium text-violet-600 dark:text-violet-400">AI Voice</span>
             </div>
           </div>
 
@@ -457,7 +449,7 @@ export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
               )}
             >
               <Users className="w-3.5 h-3.5" />
-              Giọng nữ
+              Giọng nữ ({femaleVoices.length})
             </button>
             <button
               onClick={() => setActiveTab('male')}
@@ -469,12 +461,12 @@ export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
               )}
             >
               <User className="w-3.5 h-3.5" />
-              Giọng nam
+              Giọng nam ({maleVoices.length})
             </button>
           </div>
 
           {/* Voice list */}
-          <div className="max-h-[180px] overflow-y-auto space-y-1 mb-3 pr-1">
+          <div className="max-h-[200px] overflow-y-auto space-y-1 mb-3 pr-1">
             {(activeTab === 'female' ? femaleVoices : maleVoices).map((voice) => (
               <button
                 key={voice.id}
@@ -487,7 +479,12 @@ export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
               >
                 <span className="text-base">{voice.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{voice.name}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm font-medium truncate">{voice.name}</p>
+                    {voice.isAngel && (
+                      <Sparkles className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground truncate">{voice.description}</p>
                 </div>
                 {settings.voiceId === voice.id && (
@@ -497,57 +494,47 @@ export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
             ))}
           </div>
 
-          {/* Speed and Pitch controls */}
-          <div className="grid grid-cols-2 gap-2 mb-3 pt-2 border-t border-border/50">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                Tốc độ
-              </label>
-              <Select 
-                value={settings.speed.toString()} 
-                onValueChange={(v) => updateSettings({ speed: parseFloat(v) })}
-              >
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SPEED_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value.toString()} className="text-xs">
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                Cao độ
-              </label>
-              <Select 
-                value={settings.pitch.toString()} 
-                onValueChange={(v) => updateSettings({ pitch: parseFloat(v) })}
-              >
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PITCH_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value.toString()} className="text-xs">
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Speed control */}
+          <div className="mb-3 pt-2 border-t border-border/50">
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+              Tốc độ đọc
+            </label>
+            <Select 
+              value={settings.speed.toString()} 
+              onValueChange={(v) => updateSettings({ speed: parseFloat(v) })}
+            >
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SPEED_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value.toString()} className="text-xs">
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Preview button */}
           <button
             onClick={handlePreview}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+            disabled={isLoading || isSpeaking}
+            className={cn(
+              'w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              'bg-gradient-to-r from-violet-500/20 to-indigo-500/20 hover:from-violet-500/30 hover:to-indigo-500/30',
+              'text-violet-700 dark:text-violet-300 border border-violet-500/30',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
+            )}
           >
-            <Volume2 className="w-4 h-4" />
-            Thử nghe giọng {selectedVoice.name}
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isSpeaking ? (
+              <VolumeX className="w-4 h-4" />
+            ) : (
+              <Volume2 className="w-4 h-4" />
+            )}
+            {isSpeaking ? 'Đang phát...' : `Thử nghe giọng ${selectedVoice.name}`}
           </button>
         </div>
       )}
