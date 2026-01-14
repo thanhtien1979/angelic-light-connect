@@ -34,6 +34,7 @@ const Friends = () => {
   const [searching, setSearching] = useState(false);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatFriendId, setChatFriendId] = useState<string | undefined>(undefined);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [userToBlock, setUserToBlock] = useState<{ id: string; name: string } | null>(null);
@@ -108,7 +109,8 @@ const Friends = () => {
     return friendship.requester || friendship.addressee;
   };
 
-  const handleOpenChat = () => {
+  const handleOpenChat = (friendId?: string) => {
+    setChatFriendId(friendId);
     setIsChatOpen(true);
   };
 
@@ -371,7 +373,7 @@ const Friends = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleOpenChat()}
+                            onClick={() => handleOpenChat(profile?.id)}
                             className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 text-primary hover:text-primary hover:bg-primary/10"
                           >
                             <MessageCircle className="w-4 h-4" />
@@ -622,7 +624,11 @@ const Friends = () => {
       {/* Private Chat */}
       <PrivateChat 
         isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)}
+        onClose={() => {
+          setIsChatOpen(false);
+          setChatFriendId(undefined);
+        }}
+        initialFriendId={chatFriendId}
       />
 
       {/* Block User Dialog */}
@@ -669,7 +675,7 @@ const Friends = () => {
         isFriend={selectedProfileIsFriend}
         onChat={() => {
           handleCloseProfileModal();
-          handleOpenChat();
+          handleOpenChat(selectedProfile?.id);
         }}
         onVideoCall={() => {
           handleCloseProfileModal();
