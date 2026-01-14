@@ -24,9 +24,10 @@ interface PrivateChatProps {
   isOpen: boolean;
   onClose: () => void;
   onStartCall?: (friendId: string, friendName: string, callType: 'video' | 'audio') => void;
+  initialFriendId?: string;
 }
 
-const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
+const PrivateChat = ({ isOpen, onClose, onStartCall, initialFriendId }: PrivateChatProps) => {
   const { user } = useAuth();
   const [selectedFriend, setSelectedFriend] = useState<Conversation | null>(null);
   const [messageInput, setMessageInput] = useState('');
@@ -65,6 +66,16 @@ const PrivateChat = ({ isOpen, onClose, onStartCall }: PrivateChatProps) => {
     folder: 'documents',
     compress: false 
   });
+
+  // Auto-select friend when initialFriendId is provided
+  useEffect(() => {
+    if (initialFriendId && conversations.length > 0) {
+      const friend = conversations.find(c => c.friendId === initialFriendId);
+      if (friend) {
+        setSelectedFriend(friend);
+      }
+    }
+  }, [initialFriendId, conversations]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
