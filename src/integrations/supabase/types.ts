@@ -1561,6 +1561,83 @@ export type Database = {
         }
         Relationships: []
       }
+      universe_message_comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "universe_message_comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "universe_message_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      universe_message_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          message_id: string
+          parent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          message_id: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          message_id?: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "universe_message_comments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "universe_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "universe_message_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "universe_message_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       universe_message_likes: {
         Row: {
           created_at: string
@@ -1592,6 +1669,7 @@ export type Database = {
       }
       universe_messages: {
         Row: {
+          comments_count: number
           content: string
           created_at: string
           id: string
@@ -1602,6 +1680,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          comments_count?: number
           content?: string
           created_at?: string
           id?: string
@@ -1612,6 +1691,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          comments_count?: number
           content?: string
           created_at?: string
           id?: string
