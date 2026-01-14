@@ -104,20 +104,45 @@ export const useVideoCall = () => {
   }, [user]);
 
   const sendSignalingMessage = async (message: Omit<SignalingMessage, 'from'>) => {
-    if (!user || !channelRef.current) return;
+    if (!user) return;
 
     const fullMessage: SignalingMessage = {
       ...message,
       from: user.id,
     };
 
-    // Send to the remote user's channel
-    const remoteChannel = supabase.channel(`calls:${message.to}`);
+    // Create a temporary channel to send the message
+    const remoteChannelName = `calls:${message.to}`;
+    const remoteChannel = supabase.channel(remoteChannelName, {
+      config: { broadcast: { self: false } }
+    });
+    
+    // Subscribe first, then send - this ensures the message goes through WebSocket
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Channel subscription timeout'));
+      }, 5000);
+      
+      remoteChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          clearTimeout(timeout);
+          resolve();
+        }
+      });
+    });
+
     await remoteChannel.send({
       type: 'broadcast',
       event: 'signaling',
       payload: fullMessage,
     });
+
+    console.log('Sent signaling message:', message.type, 'to:', message.to);
+
+    // Clean up the channel after a short delay
+    setTimeout(() => {
+      supabase.removeChannel(remoteChannel);
+    }, 2000);
   };
 
   const createPeerConnection = useCallback(() => {
