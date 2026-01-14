@@ -85,18 +85,20 @@ export const useFriendSuggestions = () => {
         .from('profiles')
         .select('id, display_name, avatar_url, created_at')
         .not('id', 'eq', user.id)
-        .not('display_name', 'is', null)
         .order('updated_at', { ascending: false })
         .limit(100);
 
-      if (!activeProfiles) {
+      if (!activeProfiles || activeProfiles.length === 0) {
         setSuggestions([]);
         setLoading(false);
         return;
       }
+      
+      // Filter out profiles without display_name (skip them if empty)
+      const profilesWithNames = activeProfiles.filter(p => p.display_name && p.display_name.trim() !== '');
 
       // Filter out existing friends, pending, blocked, and private
-      const eligibleProfiles = activeProfiles.filter(p => 
+      const eligibleProfiles = profilesWithNames.filter(p => 
         !friendIds.has(p.id) && 
         !pendingIds.has(p.id) && 
         !blockedIds.has(p.id) &&
