@@ -40,44 +40,45 @@ const SharedConversation = () => {
       }
 
       try {
+        // Use secure RPC function with rate limiting instead of direct table access
+        // Using type assertion since this is a custom function
         const { data, error: fetchError } = await supabase
-          .from("shared_conversations")
-          .select("id, share_id, title, messages, visibility, created_at, expires_at, view_count")
-          .eq("share_id", shareId)
-          .eq("is_active", true)
-          .single();
+          .rpc("get_shared_conversation" as any, { p_share_id: shareId });
 
         if (fetchError) {
-          if (fetchError.code === "PGRST116") {
-            setError("Cuộc trò chuyện này không tồn tại hoặc đã bị thu hồi");
-          } else {
-            throw fetchError;
+          // Check for rate limit error
+          if (fetchError.message?.includes("Rate limit exceeded")) {
+            setError("Bạn đã xem quá nhiều lần. Vui lòng thử lại sau.");
+            return;
           }
+          console.error("RPC error:", fetchError);
+          setError("Cuộc trò chuyện này không tồn tại hoặc đã bị thu hồi");
           return;
         }
 
-        // Check if expired
-        if (data.expires_at && new Date(data.expires_at) < new Date()) {
-          setError("Liên kết này đã hết hạn");
-          setIsLoading(false);
+        // RPC returns an array, get the first result
+        const conversationData = Array.isArray(data) && data.length > 0 ? data[0] : null;
+
+        if (!conversationData) {
+          setError("Cuộc trò chuyện này không tồn tại hoặc đã bị thu hồi");
           return;
         }
 
-        if (data) {
-          // Parse messages from JSONB - safely cast through unknown
-          const parsedMessages = Array.isArray(data.messages) 
-            ? (data.messages as unknown as SharedMessage[])
-            : [];
-          
-          setConversation({
-            ...data,
-            messages: parsedMessages,
-            view_count: (data.view_count || 0) + 1, // Show incremented count
-          });
-
-          // Increment view count using RPC function
-          await supabase.rpc("increment_share_view", { p_share_id: shareId });
-        }
+        // Parse messages from JSONB - safely cast through unknown
+        const parsedMessages = Array.isArray(conversationData.messages) 
+          ? (conversationData.messages as unknown as SharedMessage[])
+          : [];
+        
+        setConversation({
+          id: conversationData.id,
+          share_id: conversationData.share_id,
+          title: conversationData.title,
+          messages: parsedMessages,
+          visibility: conversationData.visibility,
+          created_at: conversationData.created_at,
+          expires_at: null, // Not returned by RPC
+          view_count: (conversationData.view_count || 0) + 1, // Show incremented count
+        });
       } catch (err) {
         console.error("Error fetching shared conversation:", err);
         setError("Không thể tải cuộc trò chuyện. Vui lòng thử lại.");
