@@ -4,7 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Heart, Sparkles, MessageCircle, Sun, Users, Send,
   Search, RefreshCw, Share2, Image, Video, X, Loader2, Play,
-  MoreHorizontal, Trash2, Edit2, BookOpen, Star, Check
+  MoreHorizontal, Trash2, Edit2, BookOpen, Star, Check, Maximize2,
+  Volume2, VolumeX, Pause
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +21,7 @@ import { compressImage } from "@/lib/imageCompression";
 import MomentImageGallery from "@/components/MomentImageGallery";
 import UniverseMessageReactions from "@/components/UniverseMessageReactions";
 import UniverseMessageShareDialog from "@/components/UniverseMessageShareDialog";
+import VideoPlayerWithControls from "@/components/VideoPlayerWithControls";
 import {
   Dialog,
   DialogContent,
@@ -588,21 +590,8 @@ const UniverseMessages = () => {
 
                     {/* Video */}
                     {msg.video_url && (
-                      <div className="mb-4 rounded-xl overflow-hidden bg-black">
-                        <video
-                          src={msg.video_url}
-                          controls
-                          controlsList="nodownload"
-                          playsInline
-                          preload="auto"
-                          className="w-full max-h-[500px] object-contain"
-                          onError={(e) => {
-                            console.error("Video load error:", e);
-                          }}
-                        >
-                          <source src={msg.video_url} type="video/mp4" />
-                          Trình duyệt của bạn không hỗ trợ video.
-                        </video>
+                      <div className="mb-4">
+                        <VideoPlayerWithControls src={msg.video_url} />
                       </div>
                     )}
 
