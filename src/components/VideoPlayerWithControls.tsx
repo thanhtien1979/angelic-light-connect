@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Play, Pause, Volume2, VolumeX, Maximize2, AlertCircle } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Maximize2, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Progress } from "@/components/ui/progress";
 
 interface VideoPlayerWithControlsProps {
   src: string;
@@ -18,6 +19,9 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [bufferedProgress, setBufferedProgress] = useState(0);
   const [hasError, setHasError] = useState(false);
   const [useNativeControls, setUseNativeControls] = useState(false);
   const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -30,14 +34,17 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
         videoRef.current.pause();
         setIsPlaying(false);
       } else {
+        setIsBuffering(true);
         const playPromise = videoRef.current.play();
         if (playPromise !== undefined) {
           await playPromise;
           setIsPlaying(true);
         }
+        setIsBuffering(false);
       }
     } catch (error) {
       console.error("Play error:", error);
+      setIsBuffering(false);
       // Fallback to native controls if custom controls fail
       setUseNativeControls(true);
     }
@@ -73,7 +80,6 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       } else if (element) {
-        // Try different fullscreen methods for cross-browser compatibility
         if (element.requestFullscreen) {
           await element.requestFullscreen();
         } else if ((element as any).webkitRequestFullscreen) {
@@ -81,7 +87,6 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
         } else if ((element as any).msRequestFullscreen) {
           await (element as any).msRequestFullscreen();
         } else if (videoRef.current && (videoRef.current as any).webkitEnterFullscreen) {
-          // iOS Safari fallback
           await (videoRef.current as any).webkitEnterFullscreen();
         }
       }
@@ -93,6 +98,17 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
   const handleTimeUpdate = () => {
     if (videoRef.current) {
       setCurrentTime(videoRef.current.currentTime);
+      updateBufferProgress();
+    }
+  };
+
+  const updateBufferProgress = () => {
+    if (!videoRef.current || !duration) return;
+    const buffered = videoRef.current.buffered;
+    if (buffered.length > 0) {
+      const bufferedEnd = buffered.end(buffered.length - 1);
+      const progress = (bufferedEnd / duration) * 100;
+      setBufferedProgress(progress);
     }
   };
 
@@ -102,6 +118,7 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
       if (videoDuration && isFinite(videoDuration) && videoDuration > 0) {
         setDuration(videoDuration);
         setIsLoaded(true);
+        setIsLoading(false);
         setHasError(false);
       }
     }
@@ -113,9 +130,11 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
       if (videoDuration && isFinite(videoDuration) && videoDuration > 0) {
         setDuration(videoDuration);
         setIsLoaded(true);
+        setIsLoading(false);
         setHasError(false);
       }
     }
+    setIsBuffering(false);
   };
 
   const handleDurationChange = () => {
@@ -133,9 +152,23 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
     setCurrentTime(0);
   };
 
+  const handleWaiting = () => {
+    setIsBuffering(true);
+  };
+
+  const handlePlaying = () => {
+    setIsBuffering(false);
+    setIsLoading(false);
+  };
+
+  const handleProgress = () => {
+    updateBufferProgress();
+  };
+
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
     console.error("Video error:", e);
     setHasError(true);
+    setIsLoading(false);
     setUseNativeControls(true);
   };
 
@@ -164,7 +197,6 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
     }
   };
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (hideControlsTimeout.current) {
@@ -213,13 +245,30 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onError={handleError}
+        onWaiting={handleWaiting}
+        onPlaying={handlePlaying}
+        onProgress={handleProgress}
         playsInline
         preload="auto"
-        crossOrigin="anonymous"
       >
         <source src={src} type="video/mp4" />
         Trình duyệt của bạn không hỗ trợ video.
       </video>
+
+      {/* Loading spinner */}
+      {(isLoading || isBuffering) && !hasError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50">
+          <Loader2 className="w-12 h-12 text-white animate-spin mb-2" />
+          <p className="text-white text-sm">
+            {isLoading ? "Đang tải video..." : "Đang buffering..."}
+          </p>
+          {bufferedProgress > 0 && (
+            <div className="w-32 mt-2">
+              <Progress value={bufferedProgress} className="h-1" />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Error state */}
       {hasError && (
@@ -237,8 +286,8 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
         </div>
       )}
 
-      {/* Play button overlay when paused and no error */}
-      {!isPlaying && !hasError && (
+      {/* Play button overlay when paused and not loading/error */}
+      {!isPlaying && !hasError && !isLoading && !isBuffering && (
         <button
           onClick={togglePlay}
           className="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity"
@@ -256,14 +305,22 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
             showControls || !isPlaying ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
-          {/* Progress bar */}
-          <div className="mb-3">
+          {/* Progress bar with buffer indicator */}
+          <div className="mb-3 relative">
+            {/* Buffer progress (background) */}
+            <div className="absolute inset-0 h-2 bg-white/20 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-white/40 transition-all duration-300"
+                style={{ width: `${bufferedProgress}%` }}
+              />
+            </div>
+            {/* Playback progress */}
             <Slider
               value={[currentTime]}
               max={duration || 1}
               step={0.1}
               onValueChange={handleSeek}
-              className="cursor-pointer"
+              className="cursor-pointer relative z-10"
               disabled={!isLoaded}
             />
           </div>
@@ -277,8 +334,11 @@ const VideoPlayerWithControls = ({ src, className = "" }: VideoPlayerWithControl
                 size="icon"
                 onClick={togglePlay}
                 className="h-8 w-8 text-white hover:bg-white/20"
+                disabled={isBuffering}
               >
-                {isPlaying ? (
+                {isBuffering ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : isPlaying ? (
                   <Pause className="w-5 h-5" fill="currentColor" />
                 ) : (
                   <Play className="w-5 h-5" fill="currentColor" />
