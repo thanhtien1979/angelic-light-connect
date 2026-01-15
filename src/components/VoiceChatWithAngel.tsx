@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useConversation } from '@elevenlabs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, Phone, PhoneOff, Volume2, VolumeX, Sparkles, Heart, Gauge } from 'lucide-react';
+import { Mic, MicOff, Phone, PhoneOff, Volume2, VolumeX, Sparkles, Heart, Gauge, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +20,9 @@ const SPEED_OPTIONS = [
   { value: 1.3, label: '🚀 Nhanh', description: '130%' },
 ];
 
+// Keep-alive interval in milliseconds (30 seconds)
+const KEEP_ALIVE_INTERVAL = 30000;
+
 interface VoiceChatWithAngelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -32,13 +35,50 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
   const [currentMessage, setCurrentMessage] = useState('');
   const [speechSpeed, setSpeechSpeed] = useState(1.0);
   const [showSpeedPopover, setShowSpeedPopover] = useState(false);
+  const [callDuration, setCallDuration] = useState(0);
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const keepAliveRef = useRef<NodeJS.Timeout | null>(null);
+  const durationRef = useRef<NodeJS.Timeout | null>(null);
+  const callStartRef = useRef<number | null>(null);
   const { toast } = useToast();
   const { t } = useLanguage();
 
+  // Cleanup timers
+  const cleanupTimers = useCallback(() => {
+    if (keepAliveRef.current) {
+      clearInterval(keepAliveRef.current);
+      keepAliveRef.current = null;
+    }
+    if (durationRef.current) {
+      clearInterval(durationRef.current);
+      durationRef.current = null;
+    }
+    callStartRef.current = null;
+    setCallDuration(0);
+  }, []);
+
   const conversation = useConversation({
     onConnect: async () => {
-      console.log('Connected to Angel');
+      console.log('✨ Connected to Angel - Starting long-form conversation');
+      callStartRef.current = Date.now();
+      
+      // Start duration counter
+      durationRef.current = setInterval(() => {
+        if (callStartRef.current) {
+          setCallDuration(Math.floor((Date.now() - callStartRef.current) / 1000));
+        }
+      }, 1000);
+
+      // Start keep-alive to prevent timeout - send activity every 30 seconds
+      keepAliveRef.current = setInterval(() => {
+        try {
+          conversation.sendUserActivity();
+          console.log('📡 Keep-alive signal sent to prevent timeout');
+        } catch (e) {
+          console.log('Keep-alive failed, connection may have dropped:', e);
+        }
+      }, KEEP_ALIVE_INTERVAL);
+
       // Ensure audio volume is set to maximum
       try {
         await conversation.setVolume({ volume: 1.0 });
@@ -48,11 +88,12 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
       }
       toast({
         title: "✨ Kết nối thành công",
-        description: "Thiên Thần đang lắng nghe con...",
+        description: "Thiên Thần đang lắng nghe con... Cuộc gọi sẽ tiếp tục cho đến khi con kết thúc.",
       });
     },
     onDisconnect: () => {
-      console.log('Disconnected from Angel');
+      console.log('👋 Disconnected from Angel');
+      cleanupTimers();
       setTranscript([]);
       setCurrentMessage('');
     },
@@ -73,11 +114,31 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
         if (agentText) {
           setTranscript(prev => [...prev, `👼 Thiên Thần: ${agentText}`]);
         }
+      } else if (msg.type === 'agent_response_correction') {
+        // Handle interruption - use corrected response
+        const event = msg.agent_response_correction_event as Record<string, unknown> | undefined;
+        const correctedText = event?.corrected_agent_response as string | undefined;
+        if (correctedText) {
+          // Update the last agent message with corrected version
+          setTranscript(prev => {
+            const newTranscript = [...prev];
+            // Find last agent message index (compatible with older ES versions)
+            let lastAgentIdx = -1;
+            for (let i = newTranscript.length - 1; i >= 0; i--) {
+              if (newTranscript[i].startsWith('👼')) {
+                lastAgentIdx = i;
+                break;
+              }
+            }
+            if (lastAgentIdx !== -1) {
+              newTranscript[lastAgentIdx] = `👼 Thiên Thần: ${correctedText}`;
+            }
+            return newTranscript;
+          });
+        }
       } else if (msg.source === 'user' && msg.message) {
-        // Alternative format: { source: 'user', role: 'user', message: '...' }
         setTranscript(prev => [...prev, `🙏 Con: ${msg.message}`]);
       } else if (msg.source === 'ai' && msg.message) {
-        // Alternative format: { source: 'ai', role: 'agent', message: '...' }
         const agentMsg = msg.message as string;
         if (agentMsg && agentMsg !== '...') {
           setTranscript(prev => [...prev, `👼 Thiên Thần: ${agentMsg}`]);
@@ -86,6 +147,7 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
     },
     onError: (error) => {
       console.error('Voice chat error:', error);
+      cleanupTimers();
       toast({
         variant: "destructive",
         title: "Lỗi kết nối",
@@ -95,12 +157,26 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
     },
   });
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cleanupTimers();
+    };
+  }, [cleanupTimers]);
+
   // Auto-scroll transcript
   useEffect(() => {
     if (transcriptRef.current) {
       transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
     }
   }, [transcript]);
+
+  // Format duration as MM:SS
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const startConversation = useCallback(async () => {
     setIsConnecting(true);
@@ -139,14 +215,22 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
   }, [conversation, toast]);
 
   const stopConversation = useCallback(async () => {
+    cleanupTimers();
     await conversation.endSession();
     onClose();
-  }, [conversation, onClose]);
+  }, [conversation, onClose, cleanupTimers]);
 
   const toggleMute = useCallback(() => {
     setIsMuted(prev => !prev);
     // Note: Actual mute functionality would need to be implemented based on the SDK's capabilities
   }, []);
+
+  // Handle backdrop click - only close if not connected
+  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === e.currentTarget && conversation.status !== 'connected') {
+      onClose();
+    }
+  }, [conversation.status, onClose]);
 
   if (!isOpen) return null;
 
@@ -157,7 +241,7 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-        onClick={(e) => e.target === e.currentTarget && stopConversation()}
+        onClick={handleBackdropClick}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -196,6 +280,13 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
                   ? (conversation.isSpeaking ? '👼 Thiên Thần đang nói...' : '🎙️ Đang lắng nghe con...')
                   : '✨ Nhấn để bắt đầu cuộc trò chuyện'}
               </p>
+              {/* Call duration display */}
+              {conversation.status === 'connected' && (
+                <div className="mt-2 flex items-center justify-center gap-2 text-violet-300">
+                  <Clock className="w-4 h-4" />
+                  <span className="font-mono text-lg">{formatDuration(callDuration)}</span>
+                </div>
+              )}
             </div>
 
             {/* Transcript area */}
