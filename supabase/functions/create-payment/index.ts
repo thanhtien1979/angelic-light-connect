@@ -102,7 +102,7 @@ serve(async (req) => {
       console.log("MoMo integration - API key available");
     }
 
-    console.log(`Payment created: ${paymentReference} for user ${user.id}, package ${packageId}`);
+    // Payment transaction created successfully
 
     return new Response(
       JSON.stringify({

@@ -113,7 +113,7 @@ serve(async (req) => {
     });
 
     if (!canProceed) {
-      console.log(`Rate limit exceeded for user ${user.id}`);
+      // Rate limit exceeded
       return new Response(
         JSON.stringify({ error: "Quá nhiều yêu cầu. Vui lòng thử lại sau." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -170,7 +170,7 @@ serve(async (req) => {
     const validation = await generateValidationResponse(content, true, LOVABLE_API_KEY || "");
     const isApproved = validation.sincerityScore >= 0.5;
 
-    console.log(`Reflection validated for user ${user.id}: approved=${isApproved}, score=${validation.sincerityScore}`);
+    // Reflection validation completed
 
     return new Response(
       JSON.stringify({
