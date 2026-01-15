@@ -162,7 +162,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in generate-image function:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Lỗi không xác định" }),
+      JSON.stringify({ error: "Processing error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
