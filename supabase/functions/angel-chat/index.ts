@@ -84,7 +84,7 @@ function checkHourlyRateLimit(clientId: string): boolean {
   }
   
   if (entry.count >= MAX_REQUESTS_PER_HOUR) {
-    console.log(`Hourly rate limit exceeded for client: ${clientId}`);
+    // Hourly rate limit exceeded
     return false;
   }
   
@@ -218,7 +218,7 @@ async function prepareMessagesForAI(
     return { messages };
   }
 
-  console.log(`Summarizing conversation: ${messages.length} messages`);
+  // Summarizing long conversation
 
   // Split into older messages (to summarize) and recent messages (keep in full)
   const splitIndex = messages.length - KEEP_RECENT_MESSAGES;
@@ -229,7 +229,7 @@ async function prepareMessagesForAI(
   const summaryResult = await summarizeOlderMessages(olderMessages, apiKey);
 
   if (summaryResult.success && summaryResult.summary) {
-    console.log(`Successfully summarized ${olderMessages.length} older messages`);
+    // Summarization successful
     // Return summary as a system-level context + recent messages
     return {
       messages: [
@@ -328,7 +328,7 @@ function validateMessages(
     
     if (textContent.length > MAX_MESSAGE_LENGTH) {
       if (autoTruncate) {
-        console.log(`Truncating message at index ${i} from ${textContent.length} to ${MAX_MESSAGE_LENGTH} characters`);
+        // Truncating long message
         textContent = truncateMessage(textContent, MAX_MESSAGE_LENGTH);
       } else {
         return { valid: false, error: `Message at index ${i} exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` };
@@ -465,9 +465,7 @@ serve(async (req) => {
         ['image/jpeg', 'image/png', 'image/webp'].includes(img.mimeType)
       );
       
-      if (validatedImages.length > 0) {
-        console.log(`Processing ${validatedImages.length} image(s) for analysis`);
-      }
+      // Images validated for processing
     }
     
     // Validate messages with auto-truncation for long messages
