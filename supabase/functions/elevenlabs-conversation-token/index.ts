@@ -33,10 +33,10 @@ serve(async (req) => {
       return json({ error: "Server configuration error" }, 500);
     }
 
-    console.log("Fetching conversation token for agent:", ELEVENLABS_AGENT_ID);
+    console.log("Fetching signed URL for agent:", ELEVENLABS_AGENT_ID);
 
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/convai/conversation/token?agent_id=${ELEVENLABS_AGENT_ID}`,
+      `https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${ELEVENLABS_AGENT_ID}`,
       {
         headers: {
           "xi-api-key": ELEVENLABS_API_KEY,
@@ -48,13 +48,13 @@ serve(async (req) => {
       // SECURITY: Don't return upstream error details to the client.
       const errorText = await response.text();
       console.error("ElevenLabs API error:", response.status, errorText);
-      return json({ error: "Failed to get conversation token" }, 502);
+      return json({ error: "Failed to get signed URL" }, 502);
     }
 
     const data = await response.json();
-    console.log("Successfully obtained conversation token");
+    console.log("Successfully obtained signed URL");
 
-    return json({ token: data.token });
+    return json({ signed_url: data.signed_url });
   } catch (error) {
     console.error("Conversation token error:", error);
     return new Response(JSON.stringify({ error: "Processing error" }), {
