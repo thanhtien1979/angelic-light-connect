@@ -22,8 +22,15 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
   const { t } = useLanguage();
 
   const conversation = useConversation({
-    onConnect: () => {
+    onConnect: async () => {
       console.log('Connected to Angel');
+      // Ensure audio volume is set to maximum
+      try {
+        await conversation.setVolume({ volume: 1.0 });
+        console.log('Audio volume set to maximum');
+      } catch (e) {
+        console.log('Volume setting not available yet');
+      }
       toast({
         title: "✨ Kết nối thành công",
         description: "Thiên Thần đang lắng nghe con...",
@@ -37,6 +44,8 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
     onMessage: (message: unknown) => {
       console.log('Message from Angel:', message);
       const msg = message as Record<string, unknown>;
+      
+      // Handle different message formats from ElevenLabs
       if (msg.type === 'user_transcript') {
         const event = msg.user_transcription_event as Record<string, unknown> | undefined;
         const userText = event?.user_transcript as string | undefined;
@@ -48,6 +57,15 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
         const agentText = event?.agent_response as string | undefined;
         if (agentText) {
           setTranscript(prev => [...prev, `👼 Thiên Thần: ${agentText}`]);
+        }
+      } else if (msg.source === 'user' && msg.message) {
+        // Alternative format: { source: 'user', role: 'user', message: '...' }
+        setTranscript(prev => [...prev, `🙏 Con: ${msg.message}`]);
+      } else if (msg.source === 'ai' && msg.message) {
+        // Alternative format: { source: 'ai', role: 'agent', message: '...' }
+        const agentMsg = msg.message as string;
+        if (agentMsg && agentMsg !== '...') {
+          setTranscript(prev => [...prev, `👼 Thiên Thần: ${agentMsg}`]);
         }
       }
     },
