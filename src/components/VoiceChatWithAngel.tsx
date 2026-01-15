@@ -1,11 +1,24 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useConversation } from '@elevenlabs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, Phone, PhoneOff, Volume2, VolumeX, Sparkles, Heart } from 'lucide-react';
+import { Mic, MicOff, Phone, PhoneOff, Volume2, VolumeX, Sparkles, Heart, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+const SPEED_OPTIONS = [
+  { value: 0.7, label: '🐢 Chậm', description: '70%' },
+  { value: 0.85, label: '🚶 Hơi chậm', description: '85%' },
+  { value: 1.0, label: '🏃 Bình thường', description: '100%' },
+  { value: 1.15, label: '⚡ Hơi nhanh', description: '115%' },
+  { value: 1.3, label: '🚀 Nhanh', description: '130%' },
+];
 
 interface VoiceChatWithAngelProps {
   isOpen: boolean;
@@ -17,6 +30,8 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
   const [isMuted, setIsMuted] = useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
+  const [speechSpeed, setSpeechSpeed] = useState(1.0);
+  const [showSpeedPopover, setShowSpeedPopover] = useState(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -238,36 +253,87 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
             )}
 
             {/* Controls */}
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-3">
               {conversation.status === 'connected' ? (
                 <>
+                  {/* Mute button */}
                   <Button
                     variant="outline"
                     size="icon"
-                    className="w-14 h-14 rounded-full border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20"
+                    className="w-12 h-12 rounded-full border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20"
                     onClick={toggleMute}
                   >
                     {isMuted ? (
-                      <VolumeX className="w-6 h-6 text-violet-300" />
+                      <VolumeX className="w-5 h-5 text-violet-300" />
                     ) : (
-                      <Volume2 className="w-6 h-6 text-violet-300" />
+                      <Volume2 className="w-5 h-5 text-violet-300" />
                     )}
                   </Button>
 
+                  {/* Speed control */}
+                  <Popover open={showSpeedPopover} onOpenChange={setShowSpeedPopover}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="w-12 h-12 rounded-full border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 relative"
+                      >
+                        <Gauge className="w-5 h-5 text-violet-300" />
+                        <span className="absolute -bottom-1 -right-1 text-[10px] bg-violet-500 text-white rounded-full px-1.5 py-0.5 font-medium">
+                          {speechSpeed === 1 ? '1x' : `${speechSpeed}x`}
+                        </span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent 
+                      className="w-48 p-2 bg-violet-950/95 border-violet-500/30 backdrop-blur-xl"
+                      align="center"
+                      side="top"
+                    >
+                      <div className="space-y-1">
+                        <p className="text-xs text-violet-300/70 text-center mb-2 font-medium">
+                          ⚡ Tốc độ nói
+                        </p>
+                        {SPEED_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => {
+                              setSpeechSpeed(option.value);
+                              setShowSpeedPopover(false);
+                              toast({
+                                title: `Tốc độ: ${option.label}`,
+                                description: `Đã chuyển sang ${option.description}`,
+                              });
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all ${
+                              speechSpeed === option.value
+                                ? 'bg-violet-500/30 text-violet-200 border border-violet-400/50'
+                                : 'text-violet-300/80 hover:bg-violet-500/20'
+                            }`}
+                          >
+                            <span>{option.label}</span>
+                            <span className="text-xs text-violet-400">{option.description}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* End call button */}
                   <Button
                     size="icon"
-                    className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 shadow-lg shadow-red-500/30"
+                    className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 shadow-lg shadow-red-500/30"
                     onClick={stopConversation}
                   >
-                    <PhoneOff className="w-8 h-8 text-white" />
+                    <PhoneOff className="w-7 h-7 text-white" />
                   </Button>
 
+                  {/* Mic indicator */}
                   <Button
                     variant="outline"
                     size="icon"
-                    className="w-14 h-14 rounded-full border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20"
+                    className="w-12 h-12 rounded-full border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20"
                   >
-                    <Mic className="w-6 h-6 text-violet-300" />
+                    <Mic className="w-5 h-5 text-violet-300" />
                   </Button>
                 </>
               ) : (
