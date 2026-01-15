@@ -796,8 +796,11 @@ export type Database = {
           ai_insight: string | null
           created_at: string
           emotions: string[] | null
+          encrypted_data: string | null
+          encryption_iv: string | null
           entry_date: string
           id: string
+          is_encrypted: boolean | null
           mood_label: string
           mood_score: number
           note: string | null
@@ -808,8 +811,11 @@ export type Database = {
           ai_insight?: string | null
           created_at?: string
           emotions?: string[] | null
+          encrypted_data?: string | null
+          encryption_iv?: string | null
           entry_date?: string
           id?: string
+          is_encrypted?: boolean | null
           mood_label: string
           mood_score: number
           note?: string | null
@@ -820,8 +826,11 @@ export type Database = {
           ai_insight?: string | null
           created_at?: string
           emotions?: string[] | null
+          encrypted_data?: string | null
+          encryption_iv?: string | null
           entry_date?: string
           id?: string
+          is_encrypted?: boolean | null
           mood_label?: string
           mood_score?: number
           note?: string | null
@@ -1231,6 +1240,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      security_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          endpoint: string | null
+          event_severity: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          endpoint?: string | null
+          event_severity?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          endpoint?: string | null
+          event_severity?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       shared_conversations: {
         Row: {
@@ -2222,6 +2267,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_security_stats: {
+        Args: { p_hours?: number }
+        Returns: {
+          critical_count: number
+          failed_auth_count: number
+          rate_limit_count: number
+          suspicious_count: number
+          total_events: number
+          unique_ips: number
+        }[]
+      }
       get_shared_conversation: {
         Args: { p_share_id: string }
         Returns: {
@@ -2274,6 +2330,18 @@ export type Database = {
         Returns: boolean
       }
       is_service_role: { Args: never; Returns: boolean }
+      log_security_event: {
+        Args: {
+          p_details?: Json
+          p_endpoint?: string
+          p_event_severity?: string
+          p_event_type: string
+          p_ip_address?: string
+          p_user_agent?: string
+          p_user_id?: string
+        }
+        Returns: string
+      }
       record_credit_usage: {
         Args: { p_amount: number; p_description?: string; p_user_id: string }
         Returns: string

@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { 
+  encryptSensitiveData, 
+  decryptSensitiveData, 
+  isEncryptionSupported,
+  type EncryptedMoodData 
+} from '@/lib/encryption';
 
 export interface MoodEntry {
   id: string;
@@ -14,6 +20,10 @@ export interface MoodEntry {
   ai_insight?: string;
   entry_date: string;
   created_at: string;
+  // Encryption fields
+  encrypted_data?: string | null;
+  encryption_iv?: string | null;
+  is_encrypted?: boolean;
 }
 
 export type InsightType = 'daily' | 'weekly' | 'monthly';
@@ -76,6 +86,40 @@ export const useMoodTracker = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Giải mã entries đã được mã hóa
+  const decryptEntries = useCallback(async (rawEntries: MoodEntry[]): Promise<MoodEntry[]> => {
+    if (!user || !isEncryptionSupported()) return rawEntries;
+
+    const decrypted = await Promise.all(
+      rawEntries.map(async (entry) => {
+        // Nếu entry đã được mã hóa, giải mã
+        if (entry.is_encrypted && entry.encrypted_data && entry.encryption_iv) {
+          try {
+            const sensitiveData = await decryptSensitiveData<EncryptedMoodData>(
+              entry.encrypted_data,
+              entry.encryption_iv,
+              user.id
+            );
+            return {
+              ...entry,
+              emotions: sensitiveData.emotions || [],
+              note: sensitiveData.note,
+              activities: sensitiveData.activities || [],
+              ai_insight: sensitiveData.ai_insight,
+            };
+          } catch (error) {
+            console.error('Failed to decrypt entry:', entry.id, error);
+            // Trả về entry gốc nếu giải mã thất bại
+            return entry;
+          }
+        }
+        return entry;
+      })
+    );
+
+    return decrypted;
+  }, [user]);
+
   const fetchEntries = useCallback(async (days = 30) => {
     if (!user) return;
     
@@ -92,18 +136,20 @@ export const useMoodTracker = () => {
 
       if (error) throw error;
       
-      setEntries(data || []);
+      // Giải mã các entries đã mã hóa
+      const decryptedEntries = await decryptEntries(data || []);
+      setEntries(decryptedEntries);
       
       // Check for today's entry
       const today = format(new Date(), 'yyyy-MM-dd');
-      const todayData = data?.find(e => e.entry_date === today);
+      const todayData = decryptedEntries.find(e => e.entry_date === today);
       setTodayEntry(todayData || null);
     } catch (error) {
       console.error('Error fetching mood entries:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, decryptEntries]);
 
   const fetchInsights = useCallback(async () => {
     if (!user) return;
@@ -141,6 +187,29 @@ export const useMoodTracker = () => {
       const today = format(new Date(), 'yyyy-MM-dd');
       const moodLabel = MOOD_LABELS[moodScore as keyof typeof MOOD_LABELS].label;
 
+      // Dữ liệu nhạy cảm cần mã hóa
+      const sensitiveData: EncryptedMoodData = {
+        emotions,
+        activities,
+        note,
+      };
+
+      let encryptedData: string | null = null;
+      let encryptionIv: string | null = null;
+      let isEncrypted = false;
+
+      // Mã hóa nếu browser hỗ trợ
+      if (isEncryptionSupported()) {
+        try {
+          const encrypted = await encryptSensitiveData(sensitiveData, user.id);
+          encryptedData = encrypted.encryptedData;
+          encryptionIv = encrypted.iv;
+          isEncrypted = true;
+        } catch (error) {
+          console.error('Encryption failed, saving unencrypted:', error);
+        }
+      }
+
       // Use upsert to handle both create and update
       const { data, error } = await supabase
         .from('mood_entries')
@@ -148,10 +217,15 @@ export const useMoodTracker = () => {
           user_id: user.id,
           mood_score: moodScore,
           mood_label: moodLabel,
-          emotions,
-          activities,
-          note,
-          entry_date: today
+          // Lưu cả dạng gốc (cho backward compatibility) và dạng mã hóa
+          emotions: isEncrypted ? [] : emotions,
+          activities: isEncrypted ? [] : activities,
+          note: isEncrypted ? null : note,
+          entry_date: today,
+          // Dữ liệu mã hóa
+          encrypted_data: encryptedData,
+          encryption_iv: encryptionIv,
+          is_encrypted: isEncrypted,
         }, {
           onConflict: 'user_id,entry_date'
         })
@@ -160,9 +234,17 @@ export const useMoodTracker = () => {
 
       if (error) throw error;
       
-      setTodayEntry(data);
+      // Trả về entry với dữ liệu đã giải mã cho UI
+      const decryptedEntry = {
+        ...data,
+        emotions,
+        activities,
+        note,
+      };
+      
+      setTodayEntry(decryptedEntry);
       await fetchEntries();
-      return data;
+      return decryptedEntry;
     } catch (error) {
       console.error('Error saving mood entry:', error);
       return null;

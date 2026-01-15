@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.get-wallet-transactions]
 verify_jwt = false
+
+[functions.log-security-event]
+verify_jwt = false
