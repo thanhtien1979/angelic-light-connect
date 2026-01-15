@@ -248,33 +248,24 @@ serve(async (req) => {
         );
       }
 
-      // Add credits to user balance
+      // Add credits to user balance using RPC to properly increment (not overwrite)
       const { error: creditError } = await supabase
-        .from("user_camly_coins")
-        .upsert({
-          user_id: transaction.user_id,
-          total_coins: transaction.amount,
-          lifetime_coins: transaction.amount,
-        }, {
-          onConflict: "user_id",
+        .rpc("add_credits", {
+          p_user_id: transaction.user_id,
+          p_amount: transaction.amount,
+          p_transaction_type: "purchase",
+          p_description: transaction.description,
+          p_payment_method: transaction.payment_method,
+          p_payment_reference: transaction.payment_reference,
+          p_package_id: transaction.package_id,
         });
 
-      // If upsert doesn't work properly, update manually
       if (creditError) {
-        const { error: updateCreditError } = await supabase
-          .rpc("add_credits", {
-            p_user_id: transaction.user_id,
-            p_amount: transaction.amount,
-            p_transaction_type: "purchase",
-            p_description: transaction.description,
-            p_payment_method: transaction.payment_method,
-            p_payment_reference: transaction.payment_reference,
-            p_package_id: transaction.package_id,
-          });
-
-        if (updateCreditError) {
-          console.error("Error adding credits:", updateCreditError);
-        }
+        console.error("Error adding credits:", creditError);
+        return new Response(
+          JSON.stringify({ error: "Failed to add credits" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
       console.log(`Credits added: ${transaction.amount} for user ${transaction.user_id}`);
