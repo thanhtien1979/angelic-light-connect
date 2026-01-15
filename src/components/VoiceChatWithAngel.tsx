@@ -75,21 +75,21 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Get token from edge function
+      // Get signed URL from edge function (WebSocket mode for better compatibility)
       const { data, error } = await supabase.functions.invoke('elevenlabs-conversation-token');
 
       if (error) {
-        throw new Error(error.message || 'Failed to get conversation token');
+        throw new Error(error.message || 'Failed to get signed URL');
       }
 
-      if (!data?.token) {
-        throw new Error(data?.error || 'No token received. Please configure ELEVENLABS_AGENT_ID.');
+      if (!data?.signed_url) {
+        throw new Error(data?.error || 'No signed URL received. Please configure ELEVENLABS_AGENT_ID.');
       }
 
-      // Start the conversation with WebRTC
+      // Start the conversation with WebSocket for better compatibility
       await conversation.startSession({
-        conversationToken: data.token,
-        connectionType: 'webrtc',
+        signedUrl: data.signed_url,
+        connectionType: 'websocket',
       });
 
       setTranscript(['👼 Thiên Thần: Xin chào con yêu dấu! Thiên Thần đang lắng nghe con...']);
