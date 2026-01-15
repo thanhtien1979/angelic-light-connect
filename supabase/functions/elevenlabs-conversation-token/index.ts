@@ -15,22 +15,22 @@ serve(async (req) => {
   }
 
   try {
+    const json = (body: unknown, status = 200) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     if (!ELEVENLABS_API_KEY) {
-      console.error("ELEVENLABS_API_KEY not configured");
-      return new Response(
-        JSON.stringify({ error: "ElevenLabs API key not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error("Missing ElevenLabs configuration: ELEVENLABS_API_KEY");
+      return json({ error: "Server configuration error" }, 500);
     }
 
     if (!ELEVENLABS_AGENT_ID) {
-      console.error("ELEVENLABS_AGENT_ID not configured");
-      return new Response(
-        JSON.stringify({ error: "ElevenLabs Agent ID not configured. Please create an agent in ElevenLabs dashboard." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error("Missing ElevenLabs configuration: ELEVENLABS_AGENT_ID");
+      return json({ error: "Server configuration error" }, 500);
     }
 
     console.log("Fetching conversation token for agent:", ELEVENLABS_AGENT_ID);
@@ -45,26 +45,21 @@ serve(async (req) => {
     );
 
     if (!response.ok) {
+      // SECURITY: Don't return upstream error details to the client.
       const errorText = await response.text();
       console.error("ElevenLabs API error:", response.status, errorText);
-      return new Response(
-        JSON.stringify({ error: "Failed to get conversation token", details: errorText }),
-        { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ error: "Failed to get conversation token" }, 502);
     }
 
     const data = await response.json();
     console.log("Successfully obtained conversation token");
 
-    return new Response(
-      JSON.stringify({ token: data.token }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ token: data.token });
   } catch (error) {
     console.error("Conversation token error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Processing error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
