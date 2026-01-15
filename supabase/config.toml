@@ -26,4 +26,12 @@ verify_jwt = false
 
 [functions.get-shared-conversation]
 verify_jwt = false
-const AGENT_ID = "agent_1101kezn6bg8e82ajcwn8adjtn9p";
+
+[functions.log-profile-view]
+verify_jwt = false
+
+[functions.update-presence]
+verify_jwt = false
+
+[functions.get-wallet-transactions]
+verify_jwt = false

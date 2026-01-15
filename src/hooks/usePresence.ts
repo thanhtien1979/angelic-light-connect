@@ -9,17 +9,24 @@ export const usePresence = () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('user_presence')
-        .upsert({
-          user_id: user.id,
-          is_online: isOnline,
-          last_seen: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id'
-        });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
 
-      if (error) throw error;
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-presence`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ is_online: isOnline }),
+        }
+      );
+
+      if (!response.ok && response.status !== 429) {
+        console.error('Error updating presence:', await response.text());
+      }
     } catch (error) {
       console.error('Error updating presence:', error);
     }
@@ -41,13 +48,31 @@ export const usePresence = () => {
       updatePresence(!document.hidden);
     };
 
-    // Handle before unload
-    const handleBeforeUnload = () => {
-      // Use sendBeacon for reliable offline status
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_presence?user_id=eq.${user.id}`;
-      const data = JSON.stringify({ is_online: false, last_seen: new Date().toISOString() });
-      
-      navigator.sendBeacon(url, new Blob([data], { type: 'application/json' }));
+    // Handle before unload - keep sendBeacon for reliability
+    const handleBeforeUnload = async () => {
+      // Try edge function first
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-presence`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({ is_online: false }),
+              keepalive: true,
+            }
+          );
+        }
+      } catch {
+        // Fallback to sendBeacon if fetch fails
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_presence?user_id=eq.${user.id}`;
+        const data = JSON.stringify({ is_online: false, last_seen: new Date().toISOString() });
+        navigator.sendBeacon(url, new Blob([data], { type: 'application/json' }));
+      }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);

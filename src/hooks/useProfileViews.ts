@@ -83,34 +83,29 @@ export const useProfileViews = () => {
     }
   }, [user?.id]);
 
-  // Log a profile view
+  // Log a profile view via Edge Function (rate limited)
   const logProfileView = async (profileId: string) => {
     if (!user?.id || user.id === profileId) return;
 
     try {
-      // Check if already viewed today
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
 
-      const { data: existing } = await supabase
-        .from("profile_views")
-        .select("id")
-        .eq("profile_id", profileId)
-        .eq("viewer_id", user.id)
-        .gte("viewed_at", today.toISOString())
-        .maybeSingle();
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-profile-view`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ profile_id: profileId }),
+        }
+      );
 
-      if (existing) {
-        // Already viewed today, skip
-        return;
+      if (!response.ok && response.status !== 429) {
+        console.error("Error logging profile view:", await response.text());
       }
-
-      await supabase
-        .from("profile_views")
-        .insert({
-          profile_id: profileId,
-          viewer_id: user.id,
-        });
     } catch (error) {
       // Silently fail - this is not critical
       console.error("Error logging profile view:", error);
