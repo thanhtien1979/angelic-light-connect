@@ -181,11 +181,21 @@ export function VoiceChatWithAngel({ isOpen, onClose }: VoiceChatWithAngelProps)
   const startConversation = useCallback(async () => {
     setIsConnecting(true);
     try {
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Vui lòng đăng nhập để sử dụng tính năng này');
+      }
+
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Get signed URL from edge function (WebSocket mode for better compatibility)
-      const { data, error } = await supabase.functions.invoke('elevenlabs-conversation-token');
+      // Get signed URL from edge function with auth token
+      const { data, error } = await supabase.functions.invoke('elevenlabs-conversation-token', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
       if (error) {
         throw new Error(error.message || 'Failed to get signed URL');
