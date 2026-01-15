@@ -17,6 +17,7 @@ import AdminTestimonials from "./pages/AdminTestimonials";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCommentReports from "./pages/AdminCommentReports";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminSecurityDashboard from "./pages/AdminSecurityDashboard";
 import LightLaw from "./pages/LightLaw";
 import LightScore from "./pages/LightScore";
 import Settings from "./pages/Settings";
@@ -112,6 +113,7 @@ const App = () => (
                     <Route path="/admin/users" element={<AdminUsers />} />
                     <Route path="/admin/comment-reports" element={<AdminCommentReports />} />
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin/security" element={<AdminSecurityDashboard />} />
                     <Route path="/luat-anh-sang" element={<LightLaw />} />
                     <Route path="/diem-anh-sang" element={<LightScore />} />
                     <Route path="/mood-journal" element={<MoodJournal />} />
