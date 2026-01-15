@@ -2234,6 +2234,21 @@ export type Database = {
           visibility: string
         }[]
       }
+      get_shared_conversation_by_share_id: {
+        Args: { p_share_id: string }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          messages: Json
+          share_id: string
+          title: string
+          user_id: string
+          view_count: number
+          visibility: string
+        }[]
+      }
       get_testimonial_reaction_counts: {
         Args: { p_testimonial_id: string }
         Returns: {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowLeft, Calendar, MessageCircle, AlertTriangle, Eye } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+
 import { Button } from "@/components/ui/button";
 import angelAvatar from "@/assets/angel-avatar.jpg";
 import FormattedChatText from "@/components/FormattedChatText";
@@ -40,24 +40,26 @@ const SharedConversation = () => {
       }
 
       try {
-        // Use secure RPC function with rate limiting instead of direct table access
-        // Using type assertion since this is a custom function
-        const { data, error: fetchError } = await supabase
-          .rpc("get_shared_conversation" as any, { p_share_id: shareId });
+        // Use secure Edge Function with rate limiting instead of direct table access
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const response = await fetch(
+          `${supabaseUrl}/functions/v1/get-shared-conversation?share_id=${encodeURIComponent(shareId)}`
+        );
 
-        if (fetchError) {
+        const result = await response.json();
+
+        if (!response.ok) {
           // Check for rate limit error
-          if (fetchError.message?.includes("Rate limit exceeded")) {
+          if (response.status === 429) {
             setError("Bạn đã xem quá nhiều lần. Vui lòng thử lại sau.");
             return;
           }
-          console.error("RPC error:", fetchError);
-          setError("Cuộc trò chuyện này không tồn tại hoặc đã bị thu hồi");
+          console.error("Edge function error:", result.error);
+          setError(result.error || "Cuộc trò chuyện này không tồn tại hoặc đã bị thu hồi");
           return;
         }
 
-        // RPC returns an array, get the first result
-        const conversationData = Array.isArray(data) && data.length > 0 ? data[0] : null;
+        const conversationData = result.data;
 
         if (!conversationData) {
           setError("Cuộc trò chuyện này không tồn tại hoặc đã bị thu hồi");
