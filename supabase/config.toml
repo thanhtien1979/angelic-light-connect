@@ -23,3 +23,4 @@ verify_jwt = false
 
 [functions.analyze-light-behavior]
 verify_jwt = false
+const AGENT_ID = "agent_1101kezn6bg8e82ajcwn8adjtn9p";
