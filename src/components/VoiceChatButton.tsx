@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,28 @@ import {
 
 export function VoiceChatButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const openTimerRef = useRef<number | null>(null);
+
+  const open = useCallback(() => {
+    // Mobile fix: defer opening to the next tick so the same tap doesn't
+    // immediately land on the backdrop and close the modal.
+    if (openTimerRef.current) {
+      window.clearTimeout(openTimerRef.current);
+    }
+    openTimerRef.current = window.setTimeout(() => {
+      setIsOpen(true);
+      openTimerRef.current = null;
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (openTimerRef.current) {
+        window.clearTimeout(openTimerRef.current);
+        openTimerRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -22,15 +44,15 @@ export function VoiceChatButton() {
             className="fixed bottom-24 right-6 z-50"
           >
             <Button
-              onClick={() => setIsOpen(true)}
+              onClick={open}
               size="icon"
               className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 shadow-lg shadow-violet-500/40 border-2 border-white/20"
             >
               <motion.div
-                animate={{ 
+                animate={{
                   rotate: [0, 10, -10, 0],
                 }}
-                transition={{ 
+                transition={{
                   duration: 2,
                   repeat: Infinity,
                   repeatDelay: 3
@@ -38,15 +60,15 @@ export function VoiceChatButton() {
               >
                 <Phone className="w-6 h-6 text-white" />
               </motion.div>
-              
+
               {/* Sparkle effect */}
               <motion.div
                 className="absolute -top-1 -right-1"
-                animate={{ 
+                animate={{
                   scale: [1, 1.2, 1],
                   opacity: [1, 0.8, 1]
                 }}
-                transition={{ 
+                transition={{
                   duration: 1.5,
                   repeat: Infinity,
                 }}
