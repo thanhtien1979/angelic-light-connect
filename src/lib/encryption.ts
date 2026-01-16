@@ -3,13 +3,29 @@
  * Sử dụng AES-256-GCM - thuật toán mã hóa mạnh nhất hiện có
  * 
  * Cách hoạt động:
- * 1. Tạo khóa từ password của user (PBKDF2)
+ * 1. Tạo khóa từ userId + per-user salt (PBKDF2)
  * 2. Tạo IV (Initialization Vector) ngẫu nhiên cho mỗi lần mã hóa
  * 3. Mã hóa dữ liệu bằng AES-GCM
  * 4. Lưu cả encrypted data và IV vào database
+ * 
+ * Bảo mật: Mỗi user có salt riêng được lưu trong database,
+ * ngăn chặn việc suy đoán key từ user ID
  */
 
-// Derive encryption key from user's unique identifier
+// Fallback salt cho trường hợp chưa có per-user salt
+// Chỉ dùng cho backward compatibility với data cũ
+const FALLBACK_SALT = new Uint8Array([
+  0x4c, 0x69, 0x67, 0x68, 0x74, 0x43, 0x6f, 0x6e,
+  0x6e, 0x65, 0x63, 0x74, 0x32, 0x30, 0x32, 0x36
+]).buffer as ArrayBuffer;
+
+// Convert string salt to ArrayBuffer
+function saltStringToArrayBuffer(saltString: string): ArrayBuffer {
+  const encoder = new TextEncoder();
+  return encoder.encode(saltString).buffer;
+}
+
+// Derive encryption key from user's unique identifier and salt
 async function deriveKey(userId: string, salt: ArrayBuffer): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
@@ -54,21 +70,17 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
-// Static salt derived from app secret (consistent across sessions)
-const APP_SALT = new Uint8Array([
-  0x4c, 0x69, 0x67, 0x68, 0x74, 0x43, 0x6f, 0x6e,
-  0x6e, 0x65, 0x63, 0x74, 0x32, 0x30, 0x32, 0x36
-]).buffer as ArrayBuffer; // "LightConnect2026" in hex
-
 /**
- * Mã hóa dữ liệu nhạy cảm
+ * Mã hóa dữ liệu nhạy cảm với per-user salt
  * @param data - Object chứa dữ liệu cần mã hóa
- * @param userId - ID người dùng (dùng làm key)
+ * @param userId - ID người dùng (dùng làm key material)
+ * @param userSalt - Salt riêng của user (từ profiles.encryption_salt)
  * @returns Object chứa encrypted data và IV (đã encode Base64)
  */
 export async function encryptSensitiveData(
   data: unknown,
-  userId: string
+  userId: string,
+  userSalt?: string | null
 ): Promise<{ encryptedData: string; iv: string }> {
   try {
     const encoder = new TextEncoder();
@@ -78,8 +90,11 @@ export async function encryptSensitiveData(
     // Tạo IV ngẫu nhiên (12 bytes cho AES-GCM)
     const iv = crypto.getRandomValues(new Uint8Array(12));
 
-    // Derive key từ userId
-    const key = await deriveKey(userId, APP_SALT);
+    // Sử dụng per-user salt nếu có, fallback nếu chưa có
+    const salt = userSalt ? saltStringToArrayBuffer(userSalt) : FALLBACK_SALT;
+
+    // Derive key từ userId và salt
+    const key = await deriveKey(userId, salt);
 
     // Mã hóa
     const encryptedBuffer = await crypto.subtle.encrypt(
@@ -103,12 +118,14 @@ export async function encryptSensitiveData(
  * @param encryptedData - Dữ liệu đã mã hóa (Base64)
  * @param iv - Initialization Vector (Base64)
  * @param userId - ID người dùng
+ * @param userSalt - Salt riêng của user (từ profiles.encryption_salt)
  * @returns Object gốc đã giải mã
  */
 export async function decryptSensitiveData<T = Record<string, unknown>>(
   encryptedData: string,
   iv: string,
-  userId: string
+  userId: string,
+  userSalt?: string | null
 ): Promise<T> {
   try {
     const decoder = new TextDecoder();
@@ -117,8 +134,11 @@ export async function decryptSensitiveData<T = Record<string, unknown>>(
     const encryptedBuffer = base64ToArrayBuffer(encryptedData);
     const ivBuffer = new Uint8Array(base64ToArrayBuffer(iv));
 
+    // Sử dụng per-user salt nếu có, fallback nếu chưa có
+    const salt = userSalt ? saltStringToArrayBuffer(userSalt) : FALLBACK_SALT;
+
     // Derive key
-    const key = await deriveKey(userId, APP_SALT);
+    const key = await deriveKey(userId, salt);
 
     // Giải mã
     const decryptedBuffer = await crypto.subtle.decrypt(
@@ -130,6 +150,15 @@ export async function decryptSensitiveData<T = Record<string, unknown>>(
     const dataString = decoder.decode(decryptedBuffer);
     return JSON.parse(dataString) as T;
   } catch (error) {
+    // Nếu giải mã với user salt thất bại, thử lại với fallback salt
+    // Điều này hỗ trợ backward compatibility với data mã hóa trước khi có per-user salt
+    if (userSalt) {
+      try {
+        return await decryptSensitiveData<T>(encryptedData, iv, userId, null);
+      } catch {
+        // Cả hai đều thất bại
+      }
+    }
     console.error("Decryption error:", error);
     throw new Error("Failed to decrypt data");
   }
