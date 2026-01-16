@@ -548,55 +548,57 @@ const PrivateChat = ({ isOpen, onClose, onStartCall, initialFriendId }: PrivateC
                   className="hidden"
                 />
                 
-                <div className="flex items-center gap-1">
-                  <EmojiPicker onSelect={handleEmojiSelect} />
-                  <StickerPicker onSelect={async (stickerId, emoji) => {
-                    await sendMessage(emoji);
-                  }} />
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-100"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingImage || uploadingFile}
-                    title="Gửi hình ảnh"
-                  >
-                    {uploadingImage ? (
-                      <Sparkles className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <ImageIcon className="w-5 h-5" />
-                    )}
-                  </Button>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 shrink-0">
+                    <EmojiPicker onSelect={handleEmojiSelect} />
+                    <StickerPicker onSelect={async (stickerId, emoji) => {
+                      await sendMessage(emoji);
+                    }} />
+                    
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-100"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage || uploadingFile}
+                      title="Gửi hình ảnh"
+                    >
+                      {uploadingImage ? (
+                        <Sparkles className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <ImageIcon className="w-5 h-5" />
+                      )}
+                    </Button>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-100"
-                    onClick={() => docInputRef.current?.click()}
-                    disabled={uploadingImage || uploadingFile}
-                    title="Gửi tài liệu"
-                  >
-                    {uploadingFile ? (
-                      <Sparkles className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Paperclip className="w-5 h-5" />
-                    )}
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-100"
+                      onClick={() => docInputRef.current?.click()}
+                      disabled={uploadingImage || uploadingFile}
+                      title="Gửi tài liệu"
+                    >
+                      {uploadingFile ? (
+                        <Sparkles className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Paperclip className="w-5 h-5" />
+                      )}
+                    </Button>
+                  </div>
                   
                   <Input
                     value={messageInput}
                     onChange={handleInputChange}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Nhập tin nhắn..."
-                    className="flex-1 border-rose-200 focus:border-pink-400"
+                    className="flex-1 min-w-0 border-rose-200 focus:border-pink-400"
                     disabled={sending || uploadingImage || uploadingFile}
                   />
                   
                   <Button
                     onClick={handleSend}
                     disabled={!messageInput.trim() || sending || uploadingImage || uploadingFile}
-                    className="bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600"
+                    className="shrink-0 bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600"
                   >
                     {sending ? (
                       <Sparkles className="w-4 h-4 animate-spin" />
