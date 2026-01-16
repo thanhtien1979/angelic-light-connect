@@ -548,8 +548,33 @@ const PrivateChat = ({ isOpen, onClose, onStartCall, initialFriendId }: PrivateC
                   className="hidden"
                 />
                 
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 shrink-0">
+                <div className="space-y-2">
+                  {/* Input row - chính */}
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={messageInput}
+                      onChange={handleInputChange}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                      placeholder="Nhập tin nhắn..."
+                      className="flex-1 min-w-0 h-10 border-rose-200 focus:border-pink-400"
+                      disabled={sending || uploadingImage || uploadingFile}
+                    />
+                    
+                    <Button
+                      onClick={handleSend}
+                      disabled={!messageInput.trim() || sending || uploadingImage || uploadingFile}
+                      className="shrink-0 h-10 px-4 bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600"
+                    >
+                      {sending ? (
+                        <Sparkles className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {/* Action buttons row - phụ */}
+                  <div className="flex items-center gap-1">
                     <EmojiPicker onSelect={handleEmojiSelect} />
                     <StickerPicker onSelect={async (stickerId, emoji) => {
                       await sendMessage(emoji);
@@ -585,27 +610,6 @@ const PrivateChat = ({ isOpen, onClose, onStartCall, initialFriendId }: PrivateC
                       )}
                     </Button>
                   </div>
-                  
-                  <Input
-                    value={messageInput}
-                    onChange={handleInputChange}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder="Nhập tin nhắn..."
-                    className="flex-1 min-w-0 border-rose-200 focus:border-pink-400"
-                    disabled={sending || uploadingImage || uploadingFile}
-                  />
-                  
-                  <Button
-                    onClick={handleSend}
-                    disabled={!messageInput.trim() || sending || uploadingImage || uploadingFile}
-                    className="shrink-0 bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600"
-                  >
-                    {sending ? (
-                      <Sparkles className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                  </Button>
                 </div>
               </div>
             </>
