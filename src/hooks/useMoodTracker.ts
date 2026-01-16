@@ -8,6 +8,7 @@ import {
   isEncryptionSupported,
   type EncryptedMoodData 
 } from '@/lib/encryption';
+import { useEncryptionSalt } from './useEncryptionSalt';
 
 export interface MoodEntry {
   id: string;
@@ -80,6 +81,7 @@ export const ACTIVITY_OPTIONS = [
 
 export const useMoodTracker = () => {
   const { user } = useAuth();
+  const { salt: encryptionSalt } = useEncryptionSalt();
   const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [todayEntry, setTodayEntry] = useState<MoodEntry | null>(null);
   const [insights, setInsights] = useState<MoodInsight[]>([]);
@@ -98,7 +100,8 @@ export const useMoodTracker = () => {
             const sensitiveData = await decryptSensitiveData<EncryptedMoodData>(
               entry.encrypted_data,
               entry.encryption_iv,
-              user.id
+              user.id,
+              encryptionSalt
             );
             return {
               ...entry,
@@ -118,7 +121,7 @@ export const useMoodTracker = () => {
     );
 
     return decrypted;
-  }, [user]);
+  }, [user, encryptionSalt]);
 
   const fetchEntries = useCallback(async (days = 30) => {
     if (!user) return;
@@ -201,7 +204,7 @@ export const useMoodTracker = () => {
       // Mã hóa nếu browser hỗ trợ
       if (isEncryptionSupported()) {
         try {
-          const encrypted = await encryptSensitiveData(sensitiveData, user.id);
+          const encrypted = await encryptSensitiveData(sensitiveData, user.id, encryptionSalt);
           encryptedData = encrypted.encryptedData;
           encryptionIv = encrypted.iv;
           isEncrypted = true;

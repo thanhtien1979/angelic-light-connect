@@ -1084,6 +1084,7 @@ export type Database = {
           bio: string | null
           created_at: string
           display_name: string | null
+          encryption_salt: string | null
           id: string
           light_law_agreed_at: string | null
           updated_at: string
@@ -1094,6 +1095,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          encryption_salt?: string | null
           id: string
           light_law_agreed_at?: string | null
           updated_at?: string
@@ -1104,6 +1106,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          encryption_salt?: string | null
           id?: string
           light_law_agreed_at?: string | null
           updated_at?: string
@@ -2267,6 +2270,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      generate_encryption_salt: { Args: never; Returns: string }
       get_security_stats: {
         Args: { p_hours?: number }
         Returns: {
