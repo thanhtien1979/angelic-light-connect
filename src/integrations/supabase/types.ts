@@ -2157,6 +2157,39 @@ export type Database = {
       }
     }
     Views: {
+      profiles_public: {
+        Row: {
+          agreed_to_light_law: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          light_law_agreed_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agreed_to_light_law?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          light_law_agreed_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agreed_to_light_law?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          light_law_agreed_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       public_generated_images: {
         Row: {
           created_at: string | null
@@ -2271,6 +2304,20 @@ export type Database = {
         Returns: boolean
       }
       generate_encryption_salt: { Args: never; Returns: string }
+      get_profile_safe: {
+        Args: { target_user_id: string }
+        Returns: {
+          agreed_to_light_law: boolean
+          avatar_url: string
+          bio: string
+          created_at: string
+          display_name: string
+          encryption_salt: string
+          id: string
+          light_law_agreed_at: string
+          updated_at: string
+        }[]
+      }
       get_security_stats: {
         Args: { p_hours?: number }
         Returns: {
