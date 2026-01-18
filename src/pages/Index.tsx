@@ -3,6 +3,7 @@ import NavigationHeader from "@/components/NavigationHeader";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
+import { BackgroundEffects } from "@/components/BackgroundEffects";
 
 // Lazy load heavy components for better initial load
 const SacredPillars = lazy(() => import("@/components/SacredPillars"));
@@ -19,12 +20,6 @@ const WeeklyReflectionPrompt = lazy(() => import("@/components/WeeklyReflectionP
 const WalletLinkBanner = lazy(() => import("@/components/WalletLinkBanner"));
 const GentleMeditationReminder = lazy(() => import("@/components/GentleMeditationReminder").then(m => ({ default: m.GentleMeditationReminder })));
 
-// Lazy load background effects (non-critical)
-const GlobalAngelicAura = lazy(() => import("@/components/GlobalAngelicAura"));
-const MagicalSparkles = lazy(() => import("@/components/MagicalSparkles"));
-const AuroraBackground = lazy(() => import("@/components/AuroraBackground"));
-const StardustTrail = lazy(() => import("@/components/StardustTrail"));
-
 const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isAppReady, setIsAppReady] = useState(false);
@@ -39,13 +34,8 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      {/* Background effects - lazy loaded, non-blocking */}
-      <Suspense fallback={null}>
-        <AuroraBackground />
-        <GlobalAngelicAura />
-        <MagicalSparkles />
-        <StardustTrail />
-      </Suspense>
+      {/* Background effects - lazy loaded via wrapper */}
+      <BackgroundEffects showAurora showAura showSparkles showStardust />
       
       {/* Gentle Meditation Reminder */}
       <Suspense fallback={null}>

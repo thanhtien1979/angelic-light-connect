@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AuroraBackground from "@/components/AuroraBackground";
+import { BackgroundEffects } from "@/components/BackgroundEffects";
 import TestimonialComments from "@/components/TestimonialComments";
 import TestimonialReactions from "@/components/TestimonialReactions";
 import TestimonialVideoPlayer from "@/components/TestimonialVideoPlayer";
@@ -101,7 +101,7 @@ const TestimonialCategory = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <AuroraBackground />
+      <BackgroundEffects showAurora />
 
       {/* Header */}
       <header className="relative z-10 border-b border-border/30 bg-background/80 backdrop-blur-xl sticky top-0">
