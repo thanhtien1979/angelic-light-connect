@@ -2157,39 +2157,6 @@ export type Database = {
       }
     }
     Views: {
-      profiles_public: {
-        Row: {
-          agreed_to_light_law: boolean | null
-          avatar_url: string | null
-          bio: string | null
-          created_at: string | null
-          display_name: string | null
-          id: string | null
-          light_law_agreed_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          agreed_to_light_law?: boolean | null
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          light_law_agreed_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          agreed_to_light_law?: boolean | null
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          light_law_agreed_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       public_generated_images: {
         Row: {
           created_at: string | null
