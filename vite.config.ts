@@ -31,26 +31,40 @@ export default defineConfig(({ mode }) => ({
             src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any",
           },
           {
             src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
+            purpose: "any",
           },
           {
             src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable",
+            purpose: "maskable",
           },
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
-        // Exclude large files from precaching
-        globIgnores: ["**/*.{mp4,webm,wasm,png}"],
+        globPatterns: ["**/*.{js,css,html,ico,svg,woff2,png}"],
+        // Exclude large files from precaching (but keep PWA icons)
+        globIgnores: ["**/*.{mp4,webm,wasm}", "assets/**/*.png"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MiB
         runtimeCaching: [
+          {
+            // PWA icons - use StaleWhileRevalidate for faster updates
+            urlPattern: /\/(pwa-|apple-touch-icon|favicon).*\.png$/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "pwa-icons-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24, // 1 day
+              },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
