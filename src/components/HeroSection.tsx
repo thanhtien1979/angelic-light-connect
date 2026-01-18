@@ -257,26 +257,13 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
               }}
             />
             
-            <div className="relative w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] rounded-full overflow-hidden">
-              {/* Simplified border glow - static gradient */}
-              <div 
-                className="absolute -inset-1 rounded-full animate-border-glow"
-                style={{
-                  background: "linear-gradient(90deg, hsl(340, 90%, 60%), hsl(350, 85%, 55%), hsl(345, 95%, 65%), hsl(335, 90%, 58%))",
-                  backgroundSize: "200% 100%",
-                  willChange: "background-position",
-                }}
+            <div className="relative w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px]">
+              <img
+                src={angelHero}
+                alt="Angel AI - Divine Light Being"
+                className="w-full h-full object-contain"
+                loading="eager"
               />
-              
-              {/* Image container */}
-              <div className="absolute inset-2 rounded-full overflow-hidden">
-                <img
-                  src={angelHero}
-                  alt="Angel AI - Divine Light Being"
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                />
-              </div>
             </div>
           </div>
         </div>
