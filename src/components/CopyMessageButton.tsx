@@ -47,7 +47,9 @@ const cleanTextForCopy = (text: string): string => {
     .replace(/_{2,}/g, '') // Remove multiple underscores
     .replace(/_([^_]+)_/g, '$1') // Remove single underscores around text
     .replace(/^#+\s*/gm, '') // Remove markdown headers
-    .replace(/\s{2,}/g, ' ') // Clean up extra spaces
+    .replace(/^\s*[-•]\s*/gm, '• ') // Clean bullet points
+    .replace(/\n{3,}/g, '\n\n') // Max 2 newlines
+    .replace(/[ \t]{2,}/g, ' ') // Clean up extra spaces within lines
     .trim();
 };
 
