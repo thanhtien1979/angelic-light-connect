@@ -1,16 +1,12 @@
 import NavigationHeader from "@/components/NavigationHeader";
 import CamlyWhitepaperSection from "@/components/CamlyWhitepaper";
 import Footer from "@/components/Footer";
-import AuroraBackground from "@/components/AuroraBackground";
-import GlobalAngelicAura from "@/components/GlobalAngelicAura";
-import MagicalSparkles from "@/components/MagicalSparkles";
+import { BackgroundEffects } from "@/components/BackgroundEffects";
 
 const CamlyWhitepaper = () => {
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      <AuroraBackground />
-      <GlobalAngelicAura />
-      <MagicalSparkles />
+      <BackgroundEffects showAurora showAura showSparkles />
       
       <NavigationHeader />
       
