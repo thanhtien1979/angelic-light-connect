@@ -25,70 +25,26 @@ const FormattedChatText = ({ text, className = "" }: FormattedChatTextProps) => 
     .replace(/([.!?:])\s+(?=[A-ZÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬĐÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ])/g, '$1\n\n') // Add paragraph break after sentence endings before capital letters
     .trim();
 
-  // Parse and render formatted text
-  const renderFormattedText = (content: string): React.ReactNode[] => {
-    const parts: React.ReactNode[] = [];
-    let remaining = content;
-    let keyIndex = 0;
-
-    while (remaining.length > 0) {
-      // Match bold (**text** or __text__)
-      const boldMatch = remaining.match(/^(\*\*|__)(.+?)\1/);
-      if (boldMatch) {
-        parts.push(
-          <strong key={keyIndex++} className="font-semibold">
-            {boldMatch[2]}
-          </strong>
-        );
-        remaining = remaining.slice(boldMatch[0].length);
-        continue;
-      }
-
-      // Match italic (*text* or _text_) - but not inside words
-      const italicMatch = remaining.match(/^(\*|_)([^*_]+?)\1(?![a-zA-Z0-9])/);
-      if (italicMatch) {
-        parts.push(
-          <em key={keyIndex++} className="italic">
-            {italicMatch[2]}
-          </em>
-        );
-        remaining = remaining.slice(italicMatch[0].length);
-        continue;
-      }
-
-      // Find next potential format marker
-      const nextMarker = remaining.search(/(\*\*|__|\*|_)/);
-      
-      if (nextMarker === -1) {
-        // No more markers, add rest as plain text
-        parts.push(<span key={keyIndex++}>{remaining}</span>);
-        break;
-      } else if (nextMarker === 0) {
-        // Marker at start but didn't match pattern, treat as plain text
-        parts.push(<span key={keyIndex++}>{remaining[0]}</span>);
-        remaining = remaining.slice(1);
-      } else {
-        // Add text before next marker
-        parts.push(<span key={keyIndex++}>{remaining.slice(0, nextMarker)}</span>);
-        remaining = remaining.slice(nextMarker);
-      }
-    }
-
-    return parts;
-  };
-
-  // Split by line breaks and render each line
-  const lines = cleanText.split('\n');
+  // Split by double newlines for paragraphs, single newlines for line breaks
+  const paragraphs = cleanText.split(/\n\n+/);
 
   return (
-    <span className={className}>
-      {lines.map((line, lineIndex) => (
-        <React.Fragment key={lineIndex}>
-          {renderFormattedText(line)}
-          {lineIndex < lines.length - 1 && <br />}
-        </React.Fragment>
-      ))}
-    </span>
+    <div className={`space-y-3 ${className}`}>
+      {paragraphs.map((paragraph, pIndex) => {
+        const lines = paragraph.split('\n');
+        
+        return (
+          <p key={pIndex} className="first-letter:ml-4 leading-relaxed">
+            {lines.map((line, lineIndex) => (
+              <React.Fragment key={lineIndex}>
+                <span>{line}</span>
+                {lineIndex < lines.length - 1 && <br />}
+              </React.Fragment>
+            ))}
+          </p>
+        );
+      })}
+    </div>
   );
 };
 
