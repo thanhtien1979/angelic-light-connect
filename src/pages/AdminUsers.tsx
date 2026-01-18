@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { BackgroundEffects } from "@/components/BackgroundEffects";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import AuroraBackground from "@/components/AuroraBackground";
+
 import { toast } from "sonner";
 import { formatDistanceToNow, format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -335,7 +336,7 @@ const AdminUsers = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <AuroraBackground />
+      <BackgroundEffects showAurora />
       
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}

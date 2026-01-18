@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { BackgroundEffects } from "@/components/BackgroundEffects";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import AuroraBackground from "@/components/AuroraBackground";
+
 import TestimonialFilters from "@/components/TestimonialFilters";
 import TestimonialComments from "@/components/TestimonialComments";
 import TestimonialShareDialog from "@/components/TestimonialShareDialog";
@@ -331,7 +332,7 @@ const Testimonials = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <AuroraBackground />
+      <BackgroundEffects showAurora />
       
       <div className="relative z-10">
         {/* Header */}

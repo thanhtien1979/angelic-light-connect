@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BackgroundEffects } from "@/components/BackgroundEffects";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import AuroraBackground from "@/components/AuroraBackground";
+
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -226,7 +227,7 @@ const AdminTestimonials = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <AuroraBackground />
+      <BackgroundEffects showAurora />
 
       <div className="relative z-10">
         {/* Header */}
