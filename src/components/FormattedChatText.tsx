@@ -29,12 +29,12 @@ const FormattedChatText = ({ text, className = "" }: FormattedChatTextProps) => 
   const paragraphs = cleanText.split(/\n\n+/);
 
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div className={`space-y-1 ${className}`}>
       {paragraphs.map((paragraph, pIndex) => {
         const lines = paragraph.split('\n');
         
         return (
-          <p key={pIndex} className="first-letter:ml-4 leading-relaxed">
+          <p key={pIndex} className="first-letter:ml-4 leading-snug">
             {lines.map((line, lineIndex) => (
               <React.Fragment key={lineIndex}>
                 <span>{line}</span>
