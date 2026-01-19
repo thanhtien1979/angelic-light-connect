@@ -257,7 +257,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
               }}
             />
             
-            <div className="relative w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px]">
+            <div className="relative w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] md:w-[900px] md:h-[900px]">
               <img
                 src={angelHero}
                 alt="Angel AI - Divine Light Being"
