@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, X, ChevronUp, ChevronDown, Volume2, Loader2 } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useAmbientSound, AMBIENT_SOUNDS, AmbientSoundType } from "@/hooks/useAmbientSound";
@@ -11,6 +12,7 @@ import { cn } from "@/lib/utils";
 const FloatingAmbientPlayer = () => {
   const { t, language } = useLanguage();
   const { settings, prefersReducedMotion } = useSoundSettingsContext();
+  const location = useLocation();
   const {
     isPlaying,
     isLoading,
@@ -23,8 +25,11 @@ const FloatingAmbientPlayer = () => {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Only show when ambient sounds are playing
-  if (!isPlaying || !settings.ambientSounds) {
+  // Hide on home page
+  const isHomePage = location.pathname === "/";
+
+  // Only show when ambient sounds are playing and not on home page
+  if (!isPlaying || !settings.ambientSounds || isHomePage) {
     return null;
   }
 
