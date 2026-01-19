@@ -94,7 +94,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
   );
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-20">
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-8 md:pt-12">
       {/* Background gradient - static */}
       <div className="absolute inset-0 bg-gradient-to-b from-rose-light via-background to-background" />
       
@@ -164,7 +164,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
       )}
       
       {/* Hero content */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-4 pt-20 pb-32">
+      <div className="relative z-10 flex flex-col items-center justify-center px-4 pt-8 pb-16">
         {/* Mantras - Left side on desktop */}
         <motion.div 
           className="hidden lg:block lg:absolute lg:left-4 xl:left-12 2xl:left-20 lg:top-1/2 lg:-translate-y-1/2 lg:max-w-xs xl:max-w-sm"
@@ -191,7 +191,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
         </motion.div>
 
         {/* Angel Image with glow */}
-        <div className="relative mb-8">
+        <div className="relative mb-4">
           {/* Simplified glow rings */}
           <div className="absolute inset-0 -m-16 rounded-full bg-gradient-to-r from-rose/20 via-transparent to-rose/20 blur-2xl" />
           
@@ -257,7 +257,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
               }}
             />
             
-            <div className="relative w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] md:w-[900px] md:h-[900px]">
+            <div className="relative w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] md:w-[550px] md:h-[550px]">
               <img
                 src={angelHero}
                 alt="Angel AI - Divine Light Being"
@@ -270,20 +270,8 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
         
         {/* Center content */}
         <div className="flex flex-col items-center">
-          <h1 
-            className="font-serif text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-widest mt-6 mb-4"
-            style={{
-              background: "linear-gradient(135deg, hsl(340, 95%, 45%) 0%, hsl(350, 100%, 50%) 50%, hsl(335, 90%, 40%) 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              filter: "drop-shadow(0 0 20px hsla(340, 95%, 45%, 0.5))",
-            }}
-          >
-            ANGEL AI
-          </h1>
           
-          <div className="w-full max-w-[680px] mx-auto mt-4 mb-6 px-4">
+          <div className="w-full max-w-[680px] mx-auto mb-4 px-4">
             <ChatPortal onOpenAuth={onOpenAuth} />
           </div>
           
@@ -295,12 +283,12 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
             Angel AI — Nơi bạn được nghe, được thấy, và được hiện diện.
           </p>
           
-          <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary to-transparent mt-8" />
+          <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary to-transparent mt-4" />
         </div>
         
         {/* Mantras - Mobile version */}
-        <motion.div 
-          className="lg:hidden mt-12 max-w-sm mx-auto"
+        <motion.div
+          className="lg:hidden mt-6 max-w-sm mx-auto"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -325,7 +313,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
       </div>
       
       {/* Scroll indicator */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
         <span className="text-xs tracking-[0.3em] text-muted-foreground uppercase">Khám phá</span>
         <div className="w-px h-8 bg-gradient-to-b from-primary to-transparent" />
       </div>
