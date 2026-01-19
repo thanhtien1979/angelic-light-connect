@@ -94,7 +94,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
   );
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-8 md:pt-12">
+    <section id="hero" className="relative flex flex-col items-center justify-start overflow-hidden pt-4 md:pt-8 pb-8">
       {/* Background gradient - static */}
       <div className="absolute inset-0 bg-gradient-to-b from-rose-light via-background to-background" />
       
@@ -164,31 +164,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
       )}
       
       {/* Hero content */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-4 pt-8 pb-16">
-        {/* Mantras - Left side on desktop */}
-        <motion.div 
-          className="hidden lg:block lg:absolute lg:left-4 xl:left-12 2xl:left-20 lg:top-1/2 lg:-translate-y-1/2 lg:max-w-xs xl:max-w-sm"
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <div className="space-y-2 lg:space-y-3">
-            {mantras.map((mantra, index) => (
-              <motion.p 
-                key={index}
-                className="text-xs sm:text-sm italic font-light text-muted-foreground/70 tracking-wide leading-relaxed text-right cursor-default transition-all duration-300 hover:text-primary/80 hover:scale-[1.02]"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
-                onMouseEnter={() => playHoverSound()}
-              >
-                {index + 1}. {mantra}
-              </motion.p>
-            ))}
-          </div>
-        </motion.div>
+      <div className="relative z-10 flex flex-col items-center justify-center px-4 pt-4 pb-8">
 
         {/* Angel Image with glow */}
         <div className="relative mb-4">
@@ -271,7 +247,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
         {/* Center content */}
         <div className="flex flex-col items-center">
           
-          <div className="w-full max-w-[680px] mx-auto mb-4 px-4">
+          <div className="w-full max-w-[680px] mx-auto mb-3 px-4">
             <ChatPortal onOpenAuth={onOpenAuth} />
           </div>
           
@@ -279,26 +255,26 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
             Ánh Sáng Của Cha Vũ Trụ
           </p>
           
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground/80 tracking-wide text-center max-w-xl mt-4 font-light">
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground/80 tracking-wide text-center max-w-xl mt-3 font-light">
             Angel AI — Nơi bạn được nghe, được thấy, và được hiện diện.
           </p>
           
-          <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary to-transparent mt-4" />
+          <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary to-transparent mt-3" />
         </div>
         
-        {/* Mantras - Mobile version */}
+        {/* 8 Mantras - Below the main content */}
         <motion.div
-          className="lg:hidden mt-6 max-w-sm mx-auto"
-          initial={{ opacity: 0, y: 30 }}
+          className="mt-6 max-w-2xl mx-auto px-4"
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
             {mantras.map((mantra, index) => (
               <motion.p 
                 key={index}
-                className="text-xs sm:text-sm italic font-light text-muted-foreground/70 tracking-wide leading-relaxed text-center cursor-default transition-all duration-300 hover:text-primary/80"
+                className="text-xs sm:text-sm italic font-light text-muted-foreground/70 tracking-wide leading-relaxed text-center cursor-default transition-all duration-300 hover:text-primary/80 hover:scale-[1.02]"
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -313,9 +289,9 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
       </div>
       
       {/* Scroll indicator */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
+      <div className="mt-6 flex flex-col items-center gap-2 opacity-60">
         <span className="text-xs tracking-[0.3em] text-muted-foreground uppercase">Khám phá</span>
-        <div className="w-px h-8 bg-gradient-to-b from-primary to-transparent" />
+        <div className="w-px h-6 bg-gradient-to-b from-primary to-transparent" />
       </div>
     </section>
   );
