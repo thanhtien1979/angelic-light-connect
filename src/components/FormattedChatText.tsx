@@ -19,17 +19,19 @@ const FormattedChatText = ({ text, className = "" }: FormattedChatTextProps) => 
     .replace(/^#+\s*/gm, '') // Remove # headers
     .replace(/\*{2,}/g, '') // Remove multiple asterisks (bold markers)
     .replace(/\*([^*\n]+)\*/g, '$1') // Remove single asterisks around text
+    .replace(/^\s*\*\s*/gm, '') // Remove bullet point asterisks at start of lines
+    .replace(/\*/g, '') // Remove any remaining standalone asterisks
     .replace(/_{2,}/g, '') // Remove multiple underscores
     .replace(/_([^_\n]+)_/g, '$1') // Remove single underscores around text
-    .replace(/\s{3,}/g, '\n\n') // Convert 3+ spaces to paragraph break
-    .replace(/([.!?:])\s+(?=[A-ZÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬĐÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ])/g, '$1\n\n') // Add paragraph break after sentence endings before capital letters
+    .replace(/\s{3,}/g, '\n') // Convert 3+ spaces to single line break
+    .replace(/\n{3,}/g, '\n\n') // Limit consecutive newlines to max 2
     .trim();
 
   // Split by double newlines for paragraphs, single newlines for line breaks
   const paragraphs = cleanText.split(/\n\n+/);
 
   return (
-    <div className={`space-y-1 ${className}`}>
+    <div className={`space-y-0.5 ${className}`}>
       {paragraphs.map((paragraph, pIndex) => {
         const lines = paragraph.split('\n');
         
