@@ -2217,28 +2217,34 @@ export type Database = {
           created_at: string | null
           display_name: string | null
           id: string | null
+          image_url: string | null
           light_acknowledgement_id: string | null
           likes_count: number | null
           moment_type: string | null
           spiritual_message: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
           display_name?: string | null
           id?: string | null
+          image_url?: string | null
           light_acknowledgement_id?: string | null
           likes_count?: number | null
           moment_type?: string | null
           spiritual_message?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
           display_name?: string | null
           id?: string | null
+          image_url?: string | null
           light_acknowledgement_id?: string | null
           likes_count?: number | null
           moment_type?: string | null
           spiritual_message?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
