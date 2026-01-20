@@ -225,7 +225,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
           )}
           
           {/* Angel image */}
-          <div className="relative">
+          <div className="relative py-12">
             <div 
               className="absolute -inset-4 rounded-full"
               style={{
@@ -233,7 +233,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
               }}
             />
             
-            <div className="relative w-[300px] h-[300px]">
+            <div className="relative w-[300px] h-[300px] rounded-full overflow-hidden" style={{ backgroundColor: 'hsl(var(--background))' }}>
               <img
                 src={angelHero}
                 alt="Angel AI - Divine Light Being"
