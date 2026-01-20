@@ -48,8 +48,27 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
-    if (authError || !user) {
+    // Retry auth with exponential backoff for transient network errors
+    let user = null;
+    let lastError = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const { data, error: authError } = await supabaseUser.auth.getUser();
+        if (!authError && data?.user) {
+          user = data.user;
+          break;
+        }
+        lastError = authError;
+      } catch (e) {
+        lastError = e;
+        console.error(`Auth attempt ${attempt + 1} failed:`, e);
+      }
+      // Wait before retry (100ms, 200ms)
+      if (attempt < 2) await new Promise(r => setTimeout(r, 100 * (attempt + 1)));
+    }
+
+    if (!user) {
+      console.error("Auth failed after retries:", lastError);
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
