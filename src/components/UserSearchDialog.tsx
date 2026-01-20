@@ -141,13 +141,20 @@ const UserSearchDialog = ({ isOpen, onClose, onStartChat }: UserSearchDialogProp
     setHasSearched(true);
 
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, display_name, avatar_url")
-        .ilike("display_name", `%${query.trim()}%`)
-        .limit(20);
+      // Use secure RPC function with rate limiting and privacy checks
+      const { data, error } = await supabase.rpc("search_users_safe", {
+        p_search_term: query.trim(),
+        p_limit: 20,
+        p_offset: 0,
+      });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes("Rate limit")) {
+          toast.error("Quá nhiều yêu cầu. Vui lòng thử lại sau.");
+          return;
+        }
+        throw error;
+      }
 
       setResults(data || []);
     } catch (error) {

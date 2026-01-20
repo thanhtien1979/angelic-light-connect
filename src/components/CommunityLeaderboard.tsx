@@ -43,134 +43,26 @@ export const CommunityLeaderboard = () => {
   const fetchLeaderboard = async () => {
     setIsLoading(true);
     try {
-      let leaderboardData: LeaderboardUser[] = [];
+      // Use secure RPC function with rate limiting and privacy checks
+      const { data, error } = await supabase.rpc("get_leaderboard_safe", {
+        p_category: category,
+        p_limit: 20,
+      });
 
-      switch (category) {
-        case 'coins':
-          const { data: coinsData } = await supabase
-            .from('user_camly_coins')
-            .select('user_id, lifetime_coins')
-            .order('lifetime_coins', { ascending: false })
-            .limit(20);
-
-          if (coinsData) {
-            const userIds = coinsData.map(c => c.user_id);
-            const { data: profiles } = await supabase
-              .from('profiles')
-              .select('id, display_name, avatar_url')
-              .in('id', userIds);
-
-            leaderboardData = coinsData.map(c => {
-              const profile = profiles?.find(p => p.id === c.user_id);
-              return {
-                id: c.user_id,
-                display_name: profile?.display_name,
-                avatar_url: profile?.avatar_url,
-                score: c.lifetime_coins
-              };
-            });
-          }
-          break;
-
-        case 'meditation':
-          const { data: meditationData } = await supabase
-            .from('meditation_history')
-            .select('user_id, duration_seconds');
-
-          if (meditationData) {
-            const grouped: Record<string, number> = {};
-            meditationData.forEach(m => {
-              grouped[m.user_id] = (grouped[m.user_id] || 0) + m.duration_seconds;
-            });
-
-            const sorted = Object.entries(grouped)
-              .sort((a, b) => b[1] - a[1])
-              .slice(0, 20);
-
-            const userIds = sorted.map(([id]) => id);
-            const { data: profiles } = await supabase
-              .from('profiles')
-              .select('id, display_name, avatar_url')
-              .in('id', userIds);
-
-            leaderboardData = sorted.map(([userId, score]) => {
-              const profile = profiles?.find(p => p.id === userId);
-              return {
-                id: userId,
-                display_name: profile?.display_name,
-                avatar_url: profile?.avatar_url,
-                score: Math.round(score / 60) // Convert to minutes
-              };
-            });
-          }
-          break;
-
-        case 'moments':
-          const { data: momentsData } = await supabase
-            .from('shared_light_moments')
-            .select('user_id');
-
-          if (momentsData) {
-            const grouped: Record<string, number> = {};
-            momentsData.forEach(m => {
-              grouped[m.user_id] = (grouped[m.user_id] || 0) + 1;
-            });
-
-            const sorted = Object.entries(grouped)
-              .sort((a, b) => b[1] - a[1])
-              .slice(0, 20);
-
-            const userIds = sorted.map(([id]) => id);
-            const { data: profiles } = await supabase
-              .from('profiles')
-              .select('id, display_name, avatar_url')
-              .in('id', userIds);
-
-            leaderboardData = sorted.map(([userId, score]) => {
-              const profile = profiles?.find(p => p.id === userId);
-              return {
-                id: userId,
-                display_name: profile?.display_name,
-                avatar_url: profile?.avatar_url,
-                score
-              };
-            });
-          }
-          break;
-
-        case 'likes':
-          const { data: likesData } = await supabase
-            .from('shared_light_moments')
-            .select('user_id, likes_count');
-
-          if (likesData) {
-            const grouped: Record<string, number> = {};
-            likesData.forEach(m => {
-              grouped[m.user_id] = (grouped[m.user_id] || 0) + m.likes_count;
-            });
-
-            const sorted = Object.entries(grouped)
-              .sort((a, b) => b[1] - a[1])
-              .slice(0, 20);
-
-            const userIds = sorted.map(([id]) => id);
-            const { data: profiles } = await supabase
-              .from('profiles')
-              .select('id, display_name, avatar_url')
-              .in('id', userIds);
-
-            leaderboardData = sorted.map(([userId, score]) => {
-              const profile = profiles?.find(p => p.id === userId);
-              return {
-                id: userId,
-                display_name: profile?.display_name,
-                avatar_url: profile?.avatar_url,
-                score
-              };
-            });
-          }
-          break;
+      if (error) {
+        if (error.message?.includes("Rate limit")) {
+          console.warn("Rate limited on leaderboard fetch");
+        } else {
+          throw error;
+        }
       }
+
+      const leaderboardData: LeaderboardUser[] = (data || []).map((item: { id: string; display_name: string | null; avatar_url: string | null; score: number }) => ({
+        id: item.id,
+        display_name: item.display_name,
+        avatar_url: item.avatar_url,
+        score: Number(item.score) || 0,
+      }));
 
       setUsers(leaderboardData);
     } catch (error) {

@@ -80,12 +80,12 @@ export const useFriendSuggestions = () => {
 
       const userTags = new Set(userTestimonial?.tags || []);
 
-      // Get active users with profiles (ordered by recent activity)
+      // Get active users with profiles (using public_profiles view for security)
       const { data: activeProfiles } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('id, display_name, avatar_url, created_at')
         .not('id', 'eq', user.id)
-        .order('updated_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(100);
 
       if (!activeProfiles || activeProfiles.length === 0) {

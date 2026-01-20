@@ -976,6 +976,7 @@ export type Database = {
           id: string
           notify_profile_views: boolean
           online_status_visibility: string
+          online_visible: boolean | null
           profile_visibility: string
           show_last_seen: boolean
           updated_at: string
@@ -986,6 +987,7 @@ export type Database = {
           id?: string
           notify_profile_views?: boolean
           online_status_visibility?: string
+          online_visible?: boolean | null
           profile_visibility?: string
           show_last_seen?: boolean
           updated_at?: string
@@ -996,6 +998,7 @@ export type Database = {
           id?: string
           notify_profile_views?: boolean
           online_status_visibility?: string
+          online_visible?: boolean | null
           profile_visibility?: string
           show_last_seen?: boolean
           updated_at?: string
@@ -2157,6 +2160,15 @@ export type Database = {
       }
     }
     Views: {
+      admin_event_aggregates: {
+        Row: {
+          event_count: number | null
+          event_date: string | null
+          event_severity: string | null
+          event_type: string | null
+        }
+        Relationships: []
+      }
       public_generated_images: {
         Row: {
           created_at: string | null
@@ -2187,6 +2199,16 @@ export type Database = {
           likes_count?: number | null
           prompt?: string | null
           token_id?: string | null
+        }
+        Relationships: []
+      }
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          light_score: number | null
         }
         Relationships: []
       }
@@ -2271,6 +2293,34 @@ export type Database = {
         Returns: boolean
       }
       generate_encryption_salt: { Args: never; Returns: string }
+      get_admin_event_stats: {
+        Args: { p_days?: number }
+        Returns: {
+          event_count: number
+          event_date: string
+          event_severity: string
+          event_type: string
+        }[]
+      }
+      get_behavior_stats: {
+        Args: { p_days?: number }
+        Returns: {
+          avg_sentiment: number
+          behavior_count: number
+          behavior_date: string
+          behavior_type: string
+          energy_type: string
+        }[]
+      }
+      get_leaderboard_safe: {
+        Args: { p_category: string; p_limit?: number }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          score: number
+        }[]
+      }
       get_profile_safe: {
         Args: { target_user_id: string }
         Returns: {
@@ -2330,6 +2380,13 @@ export type Database = {
           reaction_type: string
         }[]
       }
+      get_user_presence_safe: {
+        Args: { p_target_user_id: string }
+        Returns: {
+          is_online: boolean
+          last_seen: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2363,6 +2420,15 @@ export type Database = {
       record_credit_usage: {
         Args: { p_amount: number; p_description?: string; p_user_id: string }
         Returns: string
+      }
+      search_users_safe: {
+        Args: { p_limit?: number; p_offset?: number; p_search_term: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          light_score: number
+        }[]
       }
     }
     Enums: {
