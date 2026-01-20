@@ -1,4 +1,4 @@
-import { lazy, Suspense, memo } from "react";
+import { lazy, Suspense, memo, useEffect, useState } from "react";
 
 // Lazy load all background effect components for proper code splitting
 const AuroraBackground = lazy(() => import("@/components/AuroraBackground"));
@@ -19,6 +19,34 @@ export const BackgroundEffects = memo(({
   showSparkles = false,
   showStardust = false 
 }: BackgroundEffectsProps) => {
+  const [shouldRender, setShouldRender] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Delay rendering of effects for better initial load
+    const timer = requestIdleCallback?.(() => setShouldRender(true)) 
+      ?? setTimeout(() => setShouldRender(true), 100);
+    
+    // Check device capability
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    
+    return () => {
+      if (typeof timer === 'number') {
+        clearTimeout(timer);
+      } else if (timer && 'cancel' in timer) {
+        cancelIdleCallback?.(timer as unknown as number);
+      }
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+
+  // Skip all effects on mobile for performance
+  if (!shouldRender || isMobile) return null;
+
   return (
     <Suspense fallback={null}>
       {showAurora && <AuroraBackground />}
