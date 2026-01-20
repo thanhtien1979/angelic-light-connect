@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Heart, Star, CheckCircle2, Lightbulb, Flower2, Sun, Moon, Zap, Shield, Gift, Music, Flame, Leaf, Bird, CloudSun } from "lucide-react";
+import { Sparkles, Heart, Star, CheckCircle2, Lightbulb, Flower2, Sun, Moon, Zap, Shield } from "lucide-react";
 
 interface FormattedChatTextProps {
   text: string;
@@ -7,7 +7,7 @@ interface FormattedChatTextProps {
 }
 
 // Icon mapping based on keywords in Vietnamese and English
-const getIconForContent = (content: string): React.ReactNode => {
+const getIconForContent = (content: string) => {
   const lowerContent = content.toLowerCase();
   
   // Love/Heart related
@@ -30,30 +30,6 @@ const getIconForContent = (content: string): React.ReactNode => {
   if (lowerContent.includes('bảo vệ') || lowerContent.includes('protect') || lowerContent.includes('an toàn') || lowerContent.includes('che chở')) {
     return <Shield className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />;
   }
-  // Gift/Blessing related
-  if (lowerContent.includes('ban phước') || lowerContent.includes('blessing') || lowerContent.includes('quà') || lowerContent.includes('gift') || lowerContent.includes('ân')) {
-    return <Gift className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />;
-  }
-  // Music/Harmony related
-  if (lowerContent.includes('hòa') || lowerContent.includes('harmony') || lowerContent.includes('nhạc') || lowerContent.includes('music')) {
-    return <Music className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />;
-  }
-  // Fire/Passion related
-  if (lowerContent.includes('đam mê') || lowerContent.includes('passion') || lowerContent.includes('lửa') || lowerContent.includes('fire') || lowerContent.includes('nhiệt')) {
-    return <Flame className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />;
-  }
-  // Nature/Growth related
-  if (lowerContent.includes('phát triển') || lowerContent.includes('growth') || lowerContent.includes('thiên nhiên') || lowerContent.includes('nature') || lowerContent.includes('xanh')) {
-    return <Leaf className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />;
-  }
-  // Freedom/Spirit related
-  if (lowerContent.includes('tự do') || lowerContent.includes('freedom') || lowerContent.includes('bay') || lowerContent.includes('fly') || lowerContent.includes('linh hồn')) {
-    return <Bird className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />;
-  }
-  // Hope/New beginning related
-  if (lowerContent.includes('hy vọng') || lowerContent.includes('hope') || lowerContent.includes('mới') || lowerContent.includes('new') || lowerContent.includes('bắt đầu')) {
-    return <CloudSun className="w-3.5 h-3.5 text-rose-300 flex-shrink-0" />;
-  }
   // Flower/Beauty related
   if (lowerContent.includes('hoa') || lowerContent.includes('flower') || lowerContent.includes('đẹp') || lowerContent.includes('beauty')) {
     return <Flower2 className="w-3.5 h-3.5 text-pink-300 flex-shrink-0" />;
@@ -71,98 +47,87 @@ const getIconForContent = (content: string): React.ReactNode => {
     return <Star className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />;
   }
   
-  // Default sparkle icon for spiritual content
+  // Default sparkle icon
   return <Sparkles className="w-3.5 h-3.5 text-amber-300/80 flex-shrink-0" />;
 };
 
 /**
- * Renders chat text with formatting and icons for list items:
- * - Detects bullet points and adds contextual icons
- * - Removes markdown artifacts
- * - Preserves line breaks
+ * Renders chat text with formatting and icons for list items
  */
 const FormattedChatText = ({ text, className = "" }: FormattedChatTextProps) => {
+  if (!text) {
+    return null;
+  }
+
   // Process text to identify bullet points and clean markdown
-  const processText = (rawText: string) => {
-    // First, identify lines that are bullet points (start with *, -, •, or numbered)
-    const lines = rawText.split('\n');
-    const processedLines: { text: string; isBullet: boolean }[] = [];
-    
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      // Check if line starts with bullet markers
-      const bulletMatch = trimmedLine.match(/^[\*\-•]\s*(.+)$/) || trimmedLine.match(/^\d+[\.\)]\s*(.+)$/);
-      
-      if (bulletMatch) {
-        // This is a bullet point - clean the content
-        let content = bulletMatch[1]
-          .replace(/\*{2,}/g, '')
-          .replace(/\*([^*\n]+)\*/g, '$1')
-          .replace(/\*/g, '')
-          .replace(/_{2,}/g, '')
-          .replace(/_([^_\n]+)_/g, '$1')
-          .trim();
-        
-        if (content) {
-          processedLines.push({ text: content, isBullet: true });
-        }
-      } else {
-        // Regular line - clean markdown
-        let content = trimmedLine
-          .replace(/^#+\s*/g, '')
-          .replace(/\*{2,}/g, '')
-          .replace(/\*([^*\n]+)\*/g, '$1')
-          .replace(/\*/g, '')
-          .replace(/_{2,}/g, '')
-          .replace(/_([^_\n]+)_/g, '$1')
-          .trim();
-        
-        if (content) {
-          processedLines.push({ text: content, isBullet: false });
-        }
-      }
-    }
-    
-    return processedLines;
-  };
-
-  const processedLines = processText(text);
-
-  // Group consecutive non-bullet lines into paragraphs
-  const elements: React.ReactNode[] = [];
+  const lines = text.split('\n');
+  const elements: React.ReactElement[] = [];
   let currentParagraph: string[] = [];
+  let elementIndex = 0;
   
-  processedLines.forEach((line, index) => {
-    if (line.isBullet) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmedLine = line.trim();
+    
+    // Check if line starts with bullet markers
+    const bulletMatch = trimmedLine.match(/^[\*\-•]\s*(.+)$/) || trimmedLine.match(/^\d+[\.\)]\s*(.+)$/);
+    
+    if (bulletMatch) {
       // Flush current paragraph if exists
       if (currentParagraph.length > 0) {
         elements.push(
-          <p key={`p-${index}`} className="leading-relaxed">
+          <p key={`p-${elementIndex++}`} className="leading-relaxed">
             {currentParagraph.join(' ')}
           </p>
         );
         currentParagraph = [];
       }
       
-      // Add bullet item with icon
-      elements.push(
-        <div key={`bullet-${index}`} className="flex items-start gap-2 py-0.5">
-          {getIconForContent(line.text)}
-          <span className="leading-relaxed">{line.text}</span>
-        </div>
-      );
-    } else {
-      currentParagraph.push(line.text);
+      // Clean the bullet content
+      const content = bulletMatch[1]
+        .replace(/\*{2,}/g, '')
+        .replace(/\*([^*\n]+)\*/g, '$1')
+        .replace(/\*/g, '')
+        .replace(/_{2,}/g, '')
+        .replace(/_([^_\n]+)_/g, '$1')
+        .trim();
+      
+      if (content) {
+        elements.push(
+          <div key={`bullet-${elementIndex++}`} className="flex items-start gap-2 py-0.5">
+            {getIconForContent(content)}
+            <span className="leading-relaxed">{content}</span>
+          </div>
+        );
+      }
+    } else if (trimmedLine) {
+      // Regular line - clean markdown and add to paragraph
+      const content = trimmedLine
+        .replace(/^#+\s*/g, '')
+        .replace(/\*{2,}/g, '')
+        .replace(/\*([^*\n]+)\*/g, '$1')
+        .replace(/\*/g, '')
+        .replace(/_{2,}/g, '')
+        .replace(/_([^_\n]+)_/g, '$1')
+        .trim();
+      
+      if (content) {
+        currentParagraph.push(content);
+      }
     }
-  });
+  }
   
   // Flush remaining paragraph
   if (currentParagraph.length > 0) {
     elements.push(
-      <p key="p-final" className="leading-relaxed">
+      <p key={`p-${elementIndex++}`} className="leading-relaxed">
         {currentParagraph.join(' ')}
       </p>
     );
+  }
+
+  if (elements.length === 0) {
+    return null;
   }
 
   return (
