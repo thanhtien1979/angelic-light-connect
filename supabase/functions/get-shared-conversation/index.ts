@@ -5,12 +5,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Simple in-memory rate limiting (resets on cold start)
+// In-memory rate limiting as first layer (resets on cold start)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 30; // requests per window
+const RATE_LIMIT = 15; // requests per window (reduced from 30)
 const RATE_WINDOW = 60 * 1000; // 1 minute
 
-function isRateLimited(ip: string): boolean {
+function isRateLimitedInMemory(ip: string): boolean {
   const now = Date.now();
   const record = rateLimitMap.get(ip);
   
@@ -39,8 +39,9 @@ Deno.serve(async (req) => {
                      req.headers.get("cf-connecting-ip") || 
                      "unknown";
 
-    // Check rate limit
-    if (isRateLimited(clientIP)) {
+    // First layer: in-memory rate limit check (fast, but resets on cold start)
+    if (isRateLimitedInMemory(clientIP)) {
+      console.log(`Rate limited (in-memory): ${clientIP}`);
       return new Response(
         JSON.stringify({ error: "Quá nhiều yêu cầu. Vui lòng thử lại sau." }),
         { 
@@ -80,6 +81,28 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Second layer: database-backed rate limiting (persistent across cold starts)
+    const { data: canProceed, error: rateLimitError } = await supabase.rpc('check_rate_limit', {
+      p_identifier: clientIP,
+      p_endpoint: 'get-shared-conversation',
+      p_max_requests: 20,
+      p_window_minutes: 5
+    });
+
+    if (rateLimitError) {
+      console.error("Rate limit check error:", rateLimitError);
+      // Continue even if rate limit check fails (don't block legitimate requests)
+    } else if (canProceed === false) {
+      console.log(`Rate limited (database): ${clientIP}`);
+      return new Response(
+        JSON.stringify({ error: "Quá nhiều yêu cầu. Vui lòng thử lại sau." }),
+        { 
+          status: 429, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
 
     // Use the secure function to get conversation
     const { data, error } = await supabase
