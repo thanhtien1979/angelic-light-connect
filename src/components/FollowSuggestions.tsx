@@ -79,9 +79,9 @@ export const FollowSuggestions = () => {
         }
       });
 
-      // Get profiles for potential users
+      // Get profiles using public_profiles view for security
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id, display_name, avatar_url")
         .in("id", potentialUserIds.slice(0, 10));
 

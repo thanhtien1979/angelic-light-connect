@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Globe, Users, Lock, Eye, EyeOff, Clock, Loader2, Check, Bell } from "lucide-react";
+import { Globe, Users, Lock, Eye, EyeOff, Clock, Loader2, Check, Bell, Wifi } from "lucide-react";
 import { usePrivacySettings, VisibilityOption } from "@/hooks/usePrivacySettings";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -66,6 +66,7 @@ export const PrivacySettings = () => {
     online_status_visibility?: VisibilityOption;
     show_last_seen?: boolean;
     notify_profile_views?: boolean;
+    online_visible?: boolean;
   }>({});
 
   const handleProfileVisibilityChange = async (value: VisibilityOption) => {
@@ -104,10 +105,20 @@ export const PrivacySettings = () => {
     });
   };
 
+  const handleOnlineVisibleChange = async (checked: boolean) => {
+    setPendingChanges((prev) => ({ ...prev, online_visible: checked }));
+    await updateSettings({ online_visible: checked });
+    setPendingChanges((prev) => {
+      const { online_visible, ...rest } = prev;
+      return rest;
+    });
+  };
+
   const currentProfileVisibility = pendingChanges.profile_visibility ?? settings.profile_visibility;
   const currentOnlineStatusVisibility = pendingChanges.online_status_visibility ?? settings.online_status_visibility;
   const currentShowLastSeen = pendingChanges.show_last_seen ?? settings.show_last_seen;
   const currentNotifyProfileViews = pendingChanges.notify_profile_views ?? settings.notify_profile_views;
+  const currentOnlineVisible = pendingChanges.online_visible ?? settings.online_visible;
 
   if (isLoading) {
     return (
@@ -180,7 +191,7 @@ export const PrivacySettings = () => {
             icon={<Globe className="w-4 h-4" />}
             label="Mọi người"
             description="Tất cả người dùng có thể thấy khi bạn đang online"
-            disabled={isSaving}
+            disabled={isSaving || !currentOnlineVisible}
           />
           <VisibilityOptionCard
             value="friends"
@@ -189,7 +200,7 @@ export const PrivacySettings = () => {
             icon={<Users className="w-4 h-4" />}
             label="Chỉ bạn bè"
             description="Chỉ bạn bè mới thấy trạng thái online của bạn"
-            disabled={isSaving}
+            disabled={isSaving || !currentOnlineVisible}
           />
           <VisibilityOptionCard
             value="nobody"
@@ -198,8 +209,33 @@ export const PrivacySettings = () => {
             icon={<Lock className="w-4 h-4" />}
             label="Không ai"
             description="Ẩn hoàn toàn trạng thái online của bạn"
-            disabled={isSaving}
+            disabled={isSaving || !currentOnlineVisible}
           />
+        </div>
+      </div>
+
+      {/* Show Online Status Toggle (Master Switch) */}
+      <div className="pt-4 border-t border-border/30">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-primary/20">
+              <Wifi className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-foreground">Cho phép hiển thị trạng thái online</Label>
+              <p className="text-xs text-muted-foreground">Bật để cho phép người khác thấy khi bạn online (tắt mặc định để bảo vệ quyền riêng tư)</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isSaving && pendingChanges.online_visible !== undefined && (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+            )}
+            <Switch
+              checked={currentOnlineVisible}
+              onCheckedChange={handleOnlineVisibleChange}
+              disabled={isSaving}
+            />
+          </div>
         </div>
       </div>
 
