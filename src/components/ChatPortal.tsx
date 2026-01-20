@@ -1008,26 +1008,26 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                         </div>
                       ) : (
                         <>
-                          {/* Action buttons */}
-                          <div className={`absolute z-20 top-2 flex items-center gap-1 ${message.role === "user" ? "left-2" : "right-2"}`}>
-                            <CopyMessageButton 
-                              text={message.content} 
-                              position={message.role === "user" ? "left" : "right"} 
-                              className="relative !static !opacity-0 group-hover:!opacity-100"
-                            />
-                            {message.role === "assistant" && (
-                              <>
-                                <ShareMessageButton text={message.content} />
-                                <SpeakMessageButton text={message.content} />
-                              </>
-                            )}
-                          </div>
                           <div className="relative z-10 font-chat text-sm sm:text-[15px] leading-relaxed text-[hsl(25,50%,15%)] text-justify" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
                             {message.role === "assistant" ? (
                               // Direct display for fast streaming - no typing effect
                               <FormattedChatText text={message.content} className="text-fuchsia-900" />
                             ) : (
                               <span className="text-amber-900">{message.content}</span>
+                            )}
+                          </div>
+                          {/* Action buttons - at bottom, side by side */}
+                          <div className={`flex items-center gap-1 mt-2 pt-2 border-t border-rose-soft/20 opacity-0 group-hover:opacity-100 transition-opacity ${message.role === "user" ? "justify-start" : "justify-end"}`}>
+                            <CopyMessageButton 
+                              text={message.content} 
+                              position={message.role === "user" ? "left" : "right"} 
+                              className="relative !static"
+                            />
+                            {message.role === "assistant" && (
+                              <>
+                                <SpeakMessageButton text={message.content} />
+                                <ShareMessageButton text={message.content} />
+                              </>
                             )}
                           </div>
                         </>
