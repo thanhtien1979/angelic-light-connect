@@ -642,12 +642,8 @@ const UniverseMessages = () => {
               placeholder="Chia sẻ thông điệp ánh sáng của bạn..."
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
-              className="min-h-[120px] resize-none"
-              maxLength={2000}
+              className="min-h-[150px] resize-y"
             />
-            <div className="flex justify-end text-xs text-muted-foreground">
-              {postContent.length}/2000
-            </div>
 
             {/* Image previews */}
             {postImages.length > 0 && (
