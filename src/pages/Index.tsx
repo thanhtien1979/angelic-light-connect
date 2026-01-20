@@ -34,8 +34,8 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      {/* Background effects - lazy loaded via wrapper */}
-      <BackgroundEffects showAurora showAura showSparkles showStardust />
+      {/* Background effects - optimized: only aurora on index for performance */}
+      <BackgroundEffects showAurora />
       
       {/* Gentle Meditation Reminder */}
       <Suspense fallback={null}>
