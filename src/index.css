@@ -349,15 +349,25 @@
     @apply border-border;
   }
   
-  /* Smooth theme transitions - respect reduced motion */
+  /* Smooth scrolling - enhanced for buttery smooth experience */
   html {
+    scroll-behavior: smooth;
     transition: background-color 400ms ease, color 400ms ease;
+    /* Enable hardware acceleration for scroll */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Optimize scroll performance */
+  html, body {
+    overscroll-behavior: none;
   }
   
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
     transition: background-color 400ms ease, color 400ms ease;
+    /* Prevent layout shifts during scroll */
+    overflow-x: hidden;
   }
 
   /* RTL language font support - Arabic */
@@ -371,21 +381,39 @@
     font-family: 'Noto Sans Arabic', 'Cormorant Garamond', serif;
   }
   
-  /* Theme transition for key elements */
+  /* GPU acceleration hints for smoother animations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  
+  /* Optimize fixed/sticky elements for scroll performance */
+  [class*="fixed"],
+  [class*="sticky"] {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* Theme transition for key elements - limit properties for performance */
   html:not(.reduce-motion) *,
   html:not(.reduce-motion) *::before,
   html:not(.reduce-motion) *::after {
-    transition-property: background-color, border-color, box-shadow;
-    transition-duration: 400ms;
-    transition-timing-function: ease;
+    transition-property: background-color, border-color, box-shadow, opacity;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   /* Disable transitions for reduced motion preference */
   @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
     html *,
     html *::before,
     html *::after {
       transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
     }
   }
   
