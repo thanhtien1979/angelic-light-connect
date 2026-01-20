@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import angelHero from "@/assets/angel-hero-new.png";
+import angelHero from "@/assets/angel-hero-transparent.png";
 import ChatPortal from "@/components/ChatPortal";
 import { useMantraSound } from "@/hooks/useMantraSound";
 
@@ -233,7 +233,7 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
               }}
             />
             
-            <div className="relative w-[900px] h-[900px]">
+            <div className="relative w-[300px] h-[300px]">
               <img
                 src={angelHero}
                 alt="Angel AI - Divine Light Being"
