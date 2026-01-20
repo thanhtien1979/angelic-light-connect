@@ -24,8 +24,7 @@ export const BackgroundEffects = memo(({
 
   useEffect(() => {
     // Delay rendering of effects for better initial load
-    const timer = requestIdleCallback?.(() => setShouldRender(true)) 
-      ?? setTimeout(() => setShouldRender(true), 100);
+    const timer = setTimeout(() => setShouldRender(true), 100);
     
     // Check device capability
     const checkMobile = () => {
@@ -35,11 +34,7 @@ export const BackgroundEffects = memo(({
     window.addEventListener('resize', checkMobile, { passive: true });
     
     return () => {
-      if (typeof timer === 'number') {
-        clearTimeout(timer);
-      } else if (timer && 'cancel' in timer) {
-        cancelIdleCallback?.(timer as unknown as number);
-      }
+      clearTimeout(timer);
       window.removeEventListener('resize', checkMobile);
     };
   }, []);
