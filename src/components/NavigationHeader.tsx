@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, X, Sun, Wallet, Loader2, Check, Unlink, ChevronDown, ChevronRight, Coins, Users, UserPlus,
   Home, MessageCircle, Sparkles, FileText, Heart, Palette, UsersRound, Star, LucideIcon,
-  Wind, Brain, Music, Images, Link2, TrendingUp
+  Wind, Brain, Music, Images, Link2, TrendingUp, ScrollText, Shield
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
@@ -56,6 +56,16 @@ const navLinksConfig: NavLink[] = [
       { labelKey: "Bài tập thở", path: "#breathing", icon: Wind },
       { labelKey: "Âm thanh thư giãn", path: "#ambient", icon: Music },
       { labelKey: "Nhật ký cảm xúc", path: "/mood-journal", icon: Heart },
+    ]
+  },
+  { 
+    id: "light-law", 
+    labelKey: "nav.lightLaw", 
+    icon: ScrollText,
+    subItems: [
+      { labelKey: "Hiến pháp Ánh Sáng", path: "/hien-phap-anh-sang", icon: Shield },
+      { labelKey: "Eternal Core Prompt", path: "/eternal-core-prompt", icon: Sparkles },
+      { labelKey: "Luật Ánh Sáng", path: "/luat-anh-sang", icon: ScrollText },
     ]
   },
   { id: "whitepaper", labelKey: "nav.whitepaper", isPage: true, path: "/camly-whitepaper", icon: FileText },
