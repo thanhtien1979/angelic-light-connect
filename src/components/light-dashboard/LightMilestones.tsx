@@ -10,14 +10,17 @@ import {
   Crown,
   Lock,
   Check,
+  Share2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LightMilestone } from "@/hooks/useLightProfile";
 
 interface LightMilestonesProps {
   milestones: LightMilestone[];
+  onShareMilestone?: (milestone: LightMilestone) => void;
 }
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -31,7 +34,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   crown: Crown,
 };
 
-const LightMilestones = ({ milestones }: LightMilestonesProps) => {
+const LightMilestones = ({ milestones, onShareMilestone }: LightMilestonesProps) => {
   const { t } = useLanguage();
 
   const getProgress = (milestone: LightMilestone) => {
@@ -69,9 +72,22 @@ const LightMilestones = ({ milestones }: LightMilestonesProps) => {
                       : "bg-muted/30 border-border/50"
                   }`}
                 >
-                  {/* Achievement badge */}
+                  {/* Achievement badge & share button */}
                   {milestone.achieved && (
-                    <div className="absolute top-2 right-2">
+                    <div className="absolute top-2 right-2 flex items-center gap-1">
+                      {onShareMilestone && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-6 h-6 rounded-full hover:bg-amber-500/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onShareMilestone(milestone);
+                          }}
+                        >
+                          <Share2 className="w-3 h-3 text-amber-600" />
+                        </Button>
+                      )}
                       <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
                         <Check className="w-3.5 h-3.5 text-white" />
                       </div>

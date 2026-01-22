@@ -543,6 +543,9 @@ const translations: Record<Language, Record<string, string>> = {
     "lightScore.showMore": "Xem thêm",
     "lightScore.lastWeek": "Tuần trước",
     "lightScore.thisWeek": "Tuần này",
+    "lightScore.share.title": "Chia sẻ Điểm Ánh Sáng",
+    "lightScore.share.milestone": "Chia sẻ Cột Mốc",
+    "lightScore.share.button": "Chia sẻ",
   },
   en: {
     // Navigation
@@ -1059,6 +1062,9 @@ const translations: Record<Language, Record<string, string>> = {
     "lightScore.showMore": "Show more",
     "lightScore.lastWeek": "Last Week",
     "lightScore.thisWeek": "This Week",
+    "lightScore.share.title": "Share Light Score",
+    "lightScore.share.milestone": "Share Milestone",
+    "lightScore.share.button": "Share",
   },
   zh: {
     // Navigation
