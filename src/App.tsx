@@ -19,6 +19,7 @@ import AdminCommentReports from "./pages/AdminCommentReports";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSecurityDashboard from "./pages/AdminSecurityDashboard";
 import LightLaw from "./pages/LightLaw";
+import LightConstitution from "./pages/LightConstitution";
 import LightScore from "./pages/LightScore";
 import Settings from "./pages/Settings";
 import SharedConversation from "./pages/SharedConversation";
@@ -116,6 +117,7 @@ const App = () => (
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/security" element={<AdminSecurityDashboard />} />
                     <Route path="/luat-anh-sang" element={<LightLaw />} />
+                    <Route path="/hien-phap-anh-sang" element={<LightConstitution />} />
                     <Route path="/diem-anh-sang" element={<LightScore />} />
                     <Route path="/mood-journal" element={<MoodJournal />} />
                     <Route path="/angel-ai-team" element={<AngelAITeam />} />
