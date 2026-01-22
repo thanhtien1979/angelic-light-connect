@@ -1,11 +1,12 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Sparkles, X } from "lucide-react";
+import { ArrowLeft, Sparkles, X, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLightProfile } from "@/hooks/useLightProfile";
+import { useLightProfile, LightMilestone } from "@/hooks/useLightProfile";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import NavigationHeader from "@/components/NavigationHeader";
@@ -15,12 +16,16 @@ import {
   LightEnergyCharts,
   LightMilestones,
   LightBehaviorTimeline,
+  LightScoreShareCard,
+  MilestoneShareCard,
 } from "@/components/light-dashboard";
 
 const LightScore = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
+  const [showScoreShare, setShowScoreShare] = useState(false);
+  const [selectedMilestone, setSelectedMilestone] = useState<LightMilestone | null>(null);
   const {
     profile,
     behaviors,
@@ -48,17 +53,28 @@ const LightScore = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-8"
+          className="flex items-center justify-between mb-8"
         >
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-              {t("lightScore.title")}
-            </h1>
-            <p className="text-muted-foreground text-sm">{t("lightScore.subtitle")}</p>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+                {t("lightScore.title")}
+              </h1>
+              <p className="text-muted-foreground text-sm">{t("lightScore.subtitle")}</p>
+            </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => setShowScoreShare(true)}
+          >
+            <Share2 className="w-4 h-4" />
+            <span className="hidden sm:inline">{t("lightScore.share.button")}</span>
+          </Button>
         </motion.div>
 
         {isLoading || authLoading ? (
@@ -134,12 +150,28 @@ const LightScore = () => {
             />
 
             {/* Milestones Grid */}
-            <LightMilestones milestones={milestones} />
+            <LightMilestones 
+              milestones={milestones} 
+              onShareMilestone={setSelectedMilestone}
+            />
 
             {/* Behavior Timeline with Filter */}
             <LightBehaviorTimeline behaviors={behaviors} />
           </div>
         )}
+
+        {/* Share Dialogs */}
+        <LightScoreShareCard
+          profile={profile}
+          stats={stats}
+          isOpen={showScoreShare}
+          onClose={() => setShowScoreShare(false)}
+        />
+        <MilestoneShareCard
+          milestone={selectedMilestone}
+          isOpen={!!selectedMilestone}
+          onClose={() => setSelectedMilestone(null)}
+        />
       </main>
     </div>
   );
