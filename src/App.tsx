@@ -38,6 +38,7 @@ import FloatingAmbientPlayer from "./components/FloatingAmbientPlayer";
 import AngelPresence from "./components/AngelPresence";
 import ClickLightBurst from "./components/ClickLightBurst";
 import { VoiceChatButton } from "./components/VoiceChatButton";
+import LightScoreOnboarding from "./components/LightScoreOnboarding";
 
 import LanguageSuggestionBanner from "./components/LanguageSuggestionBanner";
 import { usePresence } from "./hooks/usePresence";
@@ -83,6 +84,7 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
         trailEnabled={trailEnabled}
         imageUrl={customImageUrl}
       />
+      <LightScoreOnboarding />
       <SessionExpiredDialog isOpen={isSessionExpired} onClose={hideSessionExpired} />
     </>
   );
