@@ -25,7 +25,11 @@ serve(async (req) => {
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 
     if (!LOVABLE_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_ANON_KEY) {
-      throw new Error("Missing required environment variables");
+      console.error("Missing required environment variables");
+      return new Response(
+        JSON.stringify({ error: "Service unavailable" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // 1. Require authentication
@@ -259,7 +263,7 @@ Trả lời dưới dạng JSON với các trường trên. Chỉ trả về JSO
   } catch (error) {
     console.error("Error in analyze-light-behavior:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "Processing error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

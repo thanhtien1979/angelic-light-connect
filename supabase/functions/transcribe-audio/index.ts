@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,6 +44,60 @@ serve(async (req) => {
   }
 
   try {
+    // 1. Require authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.error("Missing or invalid Authorization header");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("Missing required environment variables");
+      return new Response(
+        JSON.stringify({ error: "Service unavailable" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // 2. Validate JWT token
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+
+    if (userError || !user) {
+      console.error("Invalid token:", userError?.message);
+      return new Response(
+        JSON.stringify({ error: "Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 3. Rate limiting - 20 requests per hour per user
+    const { data: rateLimitOk, error: rateLimitError } = await supabase.rpc("check_rate_limit", {
+      p_identifier: user.id,
+      p_endpoint: "transcribe-audio",
+      p_max_requests: 20,
+      p_window_minutes: 60,
+    });
+
+    if (rateLimitError) {
+      console.error("Rate limit check failed:", rateLimitError);
+      // Continue without rate limiting if check fails
+    } else if (!rateLimitOk) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 4. Parse and validate request body
     const { audio } = await req.json();
 
     if (!audio) {
@@ -52,11 +107,19 @@ serve(async (req) => {
       );
     }
 
+    // Validate audio size (max 25MB base64 ~ 18.75MB binary)
+    if (audio.length > 25 * 1024 * 1024) {
+      return new Response(
+        JSON.stringify({ error: "Audio file too large" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openAIApiKey) {
       console.error("OPENAI_API_KEY not configured");
       return new Response(
-        JSON.stringify({ error: "Service not configured" }),
+        JSON.stringify({ error: "Service unavailable" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -91,15 +154,16 @@ serve(async (req) => {
 
     const result = await response.json();
 
+    console.log(`Transcription completed for user ${user.id}`);
+
     return new Response(
       JSON.stringify({ text: result.text }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
     console.error("Transcription error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "Processing error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

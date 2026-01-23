@@ -2330,15 +2330,11 @@ export type Database = {
       get_profile_safe: {
         Args: { target_user_id: string }
         Returns: {
-          agreed_to_light_law: boolean
           avatar_url: string
           bio: string
           created_at: string
           display_name: string
-          encryption_salt: string
           id: string
-          light_law_agreed_at: string
-          updated_at: string
         }[]
       }
       get_security_stats: {
