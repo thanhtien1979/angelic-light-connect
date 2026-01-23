@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action_type: string
+          admin_id: string | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          query_details: Json | null
+          record_id: string | null
+          table_name: string
+          user_agent: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          query_details?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_agent?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          query_details?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       angel_bios: {
         Row: {
           angel_id: string
@@ -2256,6 +2292,36 @@ export type Database = {
           },
         ]
       }
+      safe_profiles: {
+        Row: {
+          agreed_to_light_law: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agreed_to_light_law?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agreed_to_light_law?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_credits: {
@@ -2269,6 +2335,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      are_users_blocked: {
+        Args: { user1: string; user2: string }
+        Returns: boolean
       }
       award_camly_coins: {
         Args: {

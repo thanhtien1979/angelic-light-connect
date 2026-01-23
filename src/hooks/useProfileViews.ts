@@ -47,8 +47,9 @@ export const useProfileViews = () => {
       const viewerIds = [...new Set((data || []).map(v => v.viewer_id))];
       
       if (viewerIds.length > 0) {
+        // Use safe_profiles view to avoid exposing encryption_salt
         const { data: profiles } = await supabase
-          .from("profiles")
+          .from("safe_profiles")
           .select("id, display_name, avatar_url")
           .in("id", viewerIds);
 

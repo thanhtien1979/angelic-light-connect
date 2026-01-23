@@ -135,10 +135,10 @@ export const useGroupChat = (selectedGroupId?: string) => {
 
       if (error) throw error;
 
-      // Get sender profiles
+      // Get sender profiles using safe_profiles view
       const senderIds = [...new Set((data || []).map(m => m.sender_id))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('safe_profiles')
         .select('id, display_name, avatar_url')
         .in('id', senderIds);
 
@@ -184,10 +184,10 @@ export const useGroupChat = (selectedGroupId?: string) => {
 
       if (error) throw error;
 
-      // Get member profiles
+      // Get member profiles using safe_profiles view
       const userIds = (data || []).map(m => m.user_id);
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('safe_profiles')
         .select('id, display_name, avatar_url')
         .in('id', userIds);
 
