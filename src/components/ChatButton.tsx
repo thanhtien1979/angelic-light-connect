@@ -54,6 +54,7 @@ const ChatButton = () => {
 
       {/* Private Chat Button */}
       <motion.button
+        data-chat-button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-4 right-4 w-14 h-14 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full shadow-lg flex items-center justify-center text-white z-40 hover:shadow-xl transition-shadow"
         whileHover={{ scale: 1.1 }}
