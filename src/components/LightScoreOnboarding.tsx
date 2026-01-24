@@ -27,63 +27,63 @@ const QuestionCard = ({ question, selectedAnswerId, onSelect, questionIndex }: Q
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-6"
+      transition={{ duration: 0.3 }}
+      className="space-y-3"
     >
       {/* Question */}
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-1">
         <motion.div 
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm"
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs"
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-3 h-3" />
           Câu hỏi {questionIndex + 1}
         </motion.div>
-        <h3 className="text-xl md:text-2xl font-semibold text-foreground">
+        <h3 className="text-lg font-semibold text-foreground leading-tight">
           {question.question}
         </h3>
         {question.description && (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-xs">
             {question.description}
           </p>
         )}
       </div>
 
-      {/* Answers */}
-      <div className="space-y-3">
+      {/* Answers - more compact */}
+      <div className="space-y-2">
         {question.answers.map((answer, index) => (
           <motion.button
             key={answer.id}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * 0.05 }}
             onClick={() => onSelect(answer.id, answer.score)}
             className={cn(
-              "w-full p-4 rounded-xl border-2 text-left transition-all duration-300",
-              "hover:scale-[1.02] hover:shadow-lg",
+              "w-full px-3 py-2.5 rounded-lg border text-left transition-all duration-200",
+              "hover:scale-[1.01]",
               selectedAnswerId === answer.id
-                ? "border-primary bg-primary/10 shadow-md shadow-primary/20"
+                ? "border-primary bg-primary/10 shadow-sm"
                 : "border-border bg-card/50 hover:border-primary/50"
             )}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <div className={cn(
-                "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
+                "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
                 selectedAnswerId === answer.id
                   ? "border-primary bg-primary"
-                  : "border-muted-foreground"
+                  : "border-muted-foreground/50"
               )}>
                 {selectedAnswerId === answer.id && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-3 h-3 rounded-full bg-primary-foreground"
+                    className="w-2 h-2 rounded-full bg-primary-foreground"
                   />
                 )}
               </div>
               <span className={cn(
-                "text-base",
+                "text-sm leading-tight",
                 selectedAnswerId === answer.id ? "text-foreground font-medium" : "text-muted-foreground"
               )}>
                 {answer.text}
@@ -260,30 +260,30 @@ export function LightScoreOnboarding() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md"
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/95 backdrop-blur-md p-4"
       >
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
         </div>
 
-        {/* Main Container */}
-        <div className="relative w-full max-w-lg mx-4">
-          {/* Header */}
+        {/* Main Container - constrained height */}
+        <div className="relative w-full max-w-md flex flex-col max-h-[85vh]">
+          {/* Header - compact */}
           <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-center mb-6"
+            className="text-center mb-3 flex-shrink-0"
           >
-            <div className="inline-flex items-center gap-2 mb-3">
-              <Sparkles className="w-6 h-6 text-primary" />
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                Khám Phá Năng Lượng Của Bạn
+            <div className="inline-flex items-center gap-1.5 mb-1">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                Khám Phá Năng Lượng
               </h2>
             </div>
             {!showResult && (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs">
                 Trả lời {questions.length} câu hỏi để xác định tần số năng lượng ban đầu
               </p>
             )}
@@ -292,27 +292,27 @@ export function LightScoreOnboarding() {
           {/* Skip Button */}
           <button
             onClick={skipOnboarding}
-            className="absolute top-0 right-0 p-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute top-0 right-0 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Bỏ qua"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
 
-          {/* Progress Bar */}
+          {/* Progress Bar - compact */}
           {!showResult && (
-            <div className="mb-6">
-              <Progress value={progress} className="h-2" />
-              <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+            <div className="mb-3 flex-shrink-0">
+              <Progress value={progress} className="h-1.5" />
+              <div className="flex justify-between mt-0.5 text-[10px] text-muted-foreground">
                 <span>Câu {currentStep + 1}/{questions.length}</span>
                 <span>{Math.round(progress)}%</span>
               </div>
             </div>
           )}
 
-          {/* Content Card */}
+          {/* Content Card - scrollable if needed */}
           <motion.div
             layout
-            className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border p-6 shadow-xl"
+            className="bg-card/80 backdrop-blur-sm rounded-xl border border-border p-4 shadow-xl flex-shrink-0 overflow-y-auto"
           >
             <AnimatePresence mode="wait">
               {showResult ? (
@@ -333,27 +333,29 @@ export function LightScoreOnboarding() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Navigation */}
+          {/* Navigation - always visible at bottom */}
           {!showResult && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex justify-between mt-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex justify-between items-center mt-4 pt-2 flex-shrink-0"
             >
               <Button
-                variant="ghost"
+                variant="outline"
+                size="sm"
                 onClick={handleBack}
                 disabled={currentStep === 0}
-                className="gap-2"
+                className="gap-1.5 px-4"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Quay lại
               </Button>
 
               <Button
+                size="sm"
                 onClick={handleNext}
                 disabled={!canProceed || isSubmitting}
-                className="gap-2"
+                className="gap-1.5 px-4 bg-primary hover:bg-primary/90"
               >
                 {isLastQuestion ? 'Xem kết quả' : 'Tiếp theo'}
                 <ChevronRight className="w-4 h-4" />
