@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useLightOnboarding, OnboardingQuestion } from '@/hooks/useLightOnboarding';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -96,7 +97,13 @@ const QuestionCard = ({ question, selectedAnswerId, onSelect, questionIndex }: Q
   );
 };
 
-const ResultCard = ({ score, onComplete }: { score: number; onComplete: () => void }) => {
+interface ResultCardProps {
+  score: number;
+  onComplete: () => void;
+  onFeatureClick: (feature: 'meditation' | 'chat' | 'track') => void;
+}
+
+const ResultCard = ({ score, onComplete, onFeatureClick }: ResultCardProps) => {
   const getScoreMessage = () => {
     if (score >= 70) return {
       title: '✨ Năng Lượng Ánh Sáng Mạnh Mẽ',
@@ -119,6 +126,12 @@ const ResultCard = ({ score, onComplete }: { score: number; onComplete: () => vo
   };
 
   const result = getScoreMessage();
+
+  const features = [
+    { icon: '🧘', label: 'Thiền định', action: 'meditation' as const },
+    { icon: '💬', label: 'Trò chuyện', action: 'chat' as const },
+    { icon: '📊', label: 'Theo dõi', action: 'track' as const },
+  ];
 
   return (
     <motion.div
@@ -154,23 +167,20 @@ const ResultCard = ({ score, onComplete }: { score: number; onComplete: () => vo
         </p>
       </div>
 
-      {/* Features Preview */}
+      {/* Features Preview - Now Clickable */}
       <div className="grid grid-cols-3 gap-3 pt-4">
-        {[
-          { icon: '🧘', label: 'Thiền định' },
-          { icon: '💬', label: 'Trò chuyện' },
-          { icon: '📊', label: 'Theo dõi' },
-        ].map((feature, i) => (
-          <motion.div
+        {features.map((feature, i) => (
+          <motion.button
             key={feature.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 + i * 0.1 }}
-            className="p-3 rounded-xl bg-card/50 border border-border"
+            onClick={() => onFeatureClick(feature.action)}
+            className="p-3 rounded-xl bg-card/50 border border-border hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 cursor-pointer group"
           >
-            <div className="text-2xl mb-1">{feature.icon}</div>
-            <div className="text-xs text-muted-foreground">{feature.label}</div>
-          </motion.div>
+            <div className="text-2xl mb-1 group-hover:scale-110 transition-transform">{feature.icon}</div>
+            <div className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{feature.label}</div>
+          </motion.button>
         ))}
       </div>
 
@@ -195,6 +205,7 @@ const ResultCard = ({ score, onComplete }: { score: number; onComplete: () => vo
 
 export function LightScoreOnboarding() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const {
     needsOnboarding,
     isLoading,
@@ -248,6 +259,39 @@ export function LightScoreOnboarding() {
       console.error('Failed to submit onboarding');
     }
   }, [submitOnboarding]);
+
+  const handleFeatureClick = useCallback(async (feature: 'meditation' | 'chat' | 'track') => {
+    // First complete the onboarding
+    const success = await submitOnboarding();
+    if (!success) {
+      console.error('Failed to submit onboarding');
+      return;
+    }
+    
+    // Then navigate based on feature
+    switch (feature) {
+      case 'meditation':
+        navigate('/');
+        // Scroll to meditation section after navigation
+        setTimeout(() => {
+          const meditationSection = document.getElementById('meditation');
+          if (meditationSection) {
+            meditationSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 300);
+        break;
+      case 'chat':
+        // Trigger the chat button click
+        const chatButton = document.querySelector('[data-chat-button]') as HTMLButtonElement;
+        if (chatButton) {
+          chatButton.click();
+        }
+        break;
+      case 'track':
+        navigate('/diem-anh-sang');
+        break;
+    }
+  }, [submitOnboarding, navigate]);
 
   // Don't render if not needed or still loading
   if (isLoading || !needsOnboarding) {
@@ -320,6 +364,7 @@ export function LightScoreOnboarding() {
                   key="result"
                   score={calculateInitialScore()}
                   onComplete={handleComplete}
+                  onFeatureClick={handleFeatureClick}
                 />
               ) : currentQuestion ? (
                 <QuestionCard
