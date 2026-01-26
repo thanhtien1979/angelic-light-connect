@@ -970,6 +970,281 @@ export type Database = {
           },
         ]
       }
+      nine_path_community_votes: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          proof_id: string
+          vote_type: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          proof_id: string
+          vote_type: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          proof_id?: string
+          vote_type?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nine_path_community_votes_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "nine_path_task_proofs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nine_path_daily_tasks: {
+        Row: {
+          category: Database["public"]["Enums"]["nine_path_task_category"]
+          completed_at: string | null
+          created_at: string
+          id: string
+          is_completed: boolean
+          points_earned: number | null
+          stage_id: number
+          task_date: string
+          task_description: string | null
+          task_title: string
+          updated_at: string
+          user_id: string
+          verification_level:
+            | Database["public"]["Enums"]["nine_path_verification_level"]
+            | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["nine_path_task_category"]
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          points_earned?: number | null
+          stage_id: number
+          task_date?: string
+          task_description?: string | null
+          task_title: string
+          updated_at?: string
+          user_id: string
+          verification_level?:
+            | Database["public"]["Enums"]["nine_path_verification_level"]
+            | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["nine_path_task_category"]
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          points_earned?: number | null
+          stage_id?: number
+          task_date?: string
+          task_description?: string | null
+          task_title?: string
+          updated_at?: string
+          user_id?: string
+          verification_level?:
+            | Database["public"]["Enums"]["nine_path_verification_level"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nine_path_daily_tasks_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "nine_path_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nine_path_profiles: {
+        Row: {
+          birth_date: string
+          created_at: string
+          current_stage: number
+          id: string
+          onboarding_answers: Json | null
+          onboarding_completed: boolean
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          birth_date: string
+          created_at?: string
+          current_stage?: number
+          id?: string
+          onboarding_answers?: Json | null
+          onboarding_completed?: boolean
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          birth_date?: string
+          created_at?: string
+          current_stage?: number
+          id?: string
+          onboarding_answers?: Json | null
+          onboarding_completed?: boolean
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      nine_path_stage_checklist: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          is_completed: boolean
+          item_description: string | null
+          item_title: string
+          sort_order: number | null
+          stage_id: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          item_description?: string | null
+          item_title: string
+          sort_order?: number | null
+          stage_id: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          item_description?: string | null
+          item_title?: string
+          sort_order?: number | null
+          stage_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nine_path_stage_checklist_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "nine_path_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nine_path_stages: {
+        Row: {
+          awakening_focus: string | null
+          created_at: string
+          description_en: string
+          description_vi: string
+          healing_focus: string | null
+          icon: string
+          id: number
+          name_en: string
+          name_vi: string
+          service_focus: string | null
+          theme_color: string
+        }
+        Insert: {
+          awakening_focus?: string | null
+          created_at?: string
+          description_en: string
+          description_vi: string
+          healing_focus?: string | null
+          icon?: string
+          id: number
+          name_en: string
+          name_vi: string
+          service_focus?: string | null
+          theme_color?: string
+        }
+        Update: {
+          awakening_focus?: string | null
+          created_at?: string
+          description_en?: string
+          description_vi?: string
+          healing_focus?: string | null
+          icon?: string
+          id?: number
+          name_en?: string
+          name_vi?: string
+          service_focus?: string | null
+          theme_color?: string
+        }
+        Relationships: []
+      }
+      nine_path_task_proofs: {
+        Row: {
+          community_votes: number | null
+          created_at: string
+          id: string
+          image_urls: string[] | null
+          is_verified: boolean | null
+          proof_text: string | null
+          required_votes: number | null
+          task_id: string
+          updated_at: string
+          user_id: string
+          verification_level: Database["public"]["Enums"]["nine_path_verification_level"]
+          verified_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          community_votes?: number | null
+          created_at?: string
+          id?: string
+          image_urls?: string[] | null
+          is_verified?: boolean | null
+          proof_text?: string | null
+          required_votes?: number | null
+          task_id: string
+          updated_at?: string
+          user_id: string
+          verification_level?: Database["public"]["Enums"]["nine_path_verification_level"]
+          verified_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          community_votes?: number | null
+          created_at?: string
+          id?: string
+          image_urls?: string[] | null
+          is_verified?: boolean | null
+          proof_text?: string | null
+          required_votes?: number | null
+          task_id?: string
+          updated_at?: string
+          user_id?: string
+          verification_level?: Database["public"]["Enums"]["nine_path_verification_level"]
+          verified_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nine_path_task_proofs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "nine_path_daily_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -2506,6 +2781,12 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user"
       chat_visibility: "private" | "public" | "unlisted"
+      nine_path_task_category: "healing" | "awakening" | "service"
+      nine_path_verification_level:
+        | "self_claim"
+        | "proof"
+        | "community_witness"
+        | "impact_verified"
       testimonial_badge_type:
         | "first_story"
         | "popular"
@@ -2641,6 +2922,13 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user"],
       chat_visibility: ["private", "public", "unlisted"],
+      nine_path_task_category: ["healing", "awakening", "service"],
+      nine_path_verification_level: [
+        "self_claim",
+        "proof",
+        "community_witness",
+        "impact_verified",
+      ],
       testimonial_badge_type: [
         "first_story",
         "popular",
