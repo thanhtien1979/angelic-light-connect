@@ -41,14 +41,56 @@ serve(async (req) => {
 
     // Authentication successful
 
-    const { prompt, editImage } = await req.json();
+    const body = await req.json();
+    const { prompt, editImage } = body;
     
-    if (!prompt) {
+    // Input validation
+    if (!prompt || typeof prompt !== "string") {
       return new Response(
-        JSON.stringify({ error: "Prompt is required" }),
+        JSON.stringify({ error: "Prompt is required and must be a string" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Validate prompt length (max 2000 characters to prevent resource exhaustion)
+    const MAX_PROMPT_LENGTH = 2000;
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Prompt quá dài. Tối đa ${MAX_PROMPT_LENGTH} ký tự.` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate editImage if provided (must be a valid data URL or https URL)
+    if (editImage !== undefined && editImage !== null) {
+      if (typeof editImage !== "string") {
+        return new Response(
+          JSON.stringify({ error: "editImage must be a string URL" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Only allow data URLs or https URLs for security
+      const isDataUrl = editImage.startsWith("data:image/");
+      const isHttpsUrl = editImage.startsWith("https://");
+      if (!isDataUrl && !isHttpsUrl) {
+        return new Response(
+          JSON.stringify({ error: "editImage must be a valid data URL or HTTPS URL" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Limit data URL size (max 10MB base64)
+      if (isDataUrl && editImage.length > 10 * 1024 * 1024 * 1.37) {
+        return new Response(
+          JSON.stringify({ error: "Image quá lớn. Tối đa 10MB." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Sanitize prompt - remove any potentially harmful control characters
+    const sanitizedPrompt = prompt.replace(/[\x00-\x1F\x7F]/g, "").trim();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -65,11 +107,11 @@ serve(async (req) => {
     const messages: any[] = [];
     
     if (editImage) {
-      // Edit existing image
+      // Edit existing image - use sanitized prompt
       messages.push({
         role: "user",
         content: [
-          { type: "text", text: prompt },
+          { type: "text", text: sanitizedPrompt },
           { type: "image_url", image_url: { url: editImage } }
         ]
       });
@@ -77,7 +119,7 @@ serve(async (req) => {
       // Generate new image from text
       messages.push({
         role: "user",
-        content: prompt
+        content: sanitizedPrompt
       });
     }
 

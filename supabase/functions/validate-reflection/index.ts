@@ -120,7 +120,8 @@ serve(async (req) => {
       );
     }
 
-    const { content } = await req.json();
+    const body = await req.json();
+    const { content } = body;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!content || typeof content !== "string") {
@@ -130,8 +131,20 @@ serve(async (req) => {
       );
     }
 
-    // Count words
-    const wordCount = content.trim().split(/\s+/).filter(w => w.length > 0).length;
+    // Validate content length (max 50000 characters to prevent resource exhaustion)
+    const MAX_CONTENT_LENGTH = 50000;
+    if (content.length > MAX_CONTENT_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Nội dung quá dài. Tối đa ${MAX_CONTENT_LENGTH} ký tự.` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Sanitize content - remove control characters but preserve normal text
+    const sanitizedContent = content.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim();
+
+    // Count words using sanitized content
+    const wordCount = sanitizedContent.split(/\s+/).filter(w => w.length > 0).length;
     
     if (wordCount < 200) {
       return new Response(
@@ -145,10 +158,10 @@ serve(async (req) => {
       );
     }
 
-    // Check for spam patterns
+    // Check for spam patterns using sanitized content
     let isSpam = false;
     for (const pattern of SPAM_PATTERNS) {
-      if (pattern.test(content)) {
+      if (pattern.test(sanitizedContent)) {
         isSpam = true;
         break;
       }
@@ -166,8 +179,8 @@ serve(async (req) => {
       );
     }
 
-    // Use AI to validate sincerity
-    const validation = await generateValidationResponse(content, true, LOVABLE_API_KEY || "");
+    // Use AI to validate sincerity with sanitized content
+    const validation = await generateValidationResponse(sanitizedContent, true, LOVABLE_API_KEY || "");
     const isApproved = validation.sincerityScore >= 0.5;
 
     // Reflection validation completed
