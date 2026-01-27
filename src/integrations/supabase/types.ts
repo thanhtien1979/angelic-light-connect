@@ -2490,6 +2490,7 @@ export type Database = {
           likes_count: number | null
           prompt: string | null
           token_id: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -2500,6 +2501,7 @@ export type Database = {
           likes_count?: number | null
           prompt?: string | null
           token_id?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -2510,6 +2512,7 @@ export type Database = {
           likes_count?: number | null
           prompt?: string | null
           token_id?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -2569,31 +2572,25 @@ export type Database = {
       }
       safe_profiles: {
         Row: {
-          agreed_to_light_law: boolean | null
           avatar_url: string | null
           bio: string | null
           created_at: string | null
           display_name: string | null
           id: string | null
-          updated_at: string | null
         }
         Insert: {
-          agreed_to_light_law?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
           id?: string | null
-          updated_at?: string | null
         }
         Update: {
-          agreed_to_light_law?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
           id?: string | null
-          updated_at?: string | null
         }
         Relationships: []
       }
