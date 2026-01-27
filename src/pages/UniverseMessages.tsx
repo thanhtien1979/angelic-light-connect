@@ -78,7 +78,12 @@ const UniverseMessages = () => {
   // Edit state
   const [editingMessage, setEditingMessage] = useState<UniverseMessage | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [editImages, setEditImages] = useState<{ file?: File; preview: string; isExisting?: boolean }[]>([]);
+  const [editVideo, setEditVideo] = useState<{ file?: File; preview: string; isExisting?: boolean } | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  
+  const editImageInputRef = useRef<HTMLInputElement>(null);
+  const editVideoInputRef = useRef<HTMLInputElement>(null);
   
   // Share state
   const [shareMessage, setShareMessage] = useState<UniverseMessage | null>(null);
@@ -385,42 +390,182 @@ const UniverseMessages = () => {
   const handleStartEdit = (message: UniverseMessage) => {
     setEditingMessage(message);
     setEditContent(message.content);
+    
+    // Load existing images
+    if (message.image_urls && message.image_urls.length > 0) {
+      setEditImages(message.image_urls.map(url => ({ preview: url, isExisting: true })));
+      setEditVideo(null);
+    } else if (message.video_url) {
+      setEditVideo({ preview: message.video_url, isExisting: true });
+      setEditImages([]);
+    } else {
+      setEditImages([]);
+      setEditVideo(null);
+    }
+    
     setIsEditing(true);
+  };
+
+  // Handle edit image selection
+  const handleEditImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newImages: { file: File; preview: string; isExisting?: boolean }[] = [];
+    for (let i = 0; i < files.length && editImages.length + newImages.length < MAX_IMAGES; i++) {
+      const file = files[i];
+      if (file.type.startsWith("image/")) {
+        try {
+          const compressed = await compressImage(file, {
+            maxWidth: 1920,
+            maxHeight: 1080,
+            quality: 0.85,
+          });
+          newImages.push({
+            file: compressed,
+            preview: URL.createObjectURL(compressed),
+            isExisting: false,
+          });
+        } catch {
+          newImages.push({
+            file,
+            preview: URL.createObjectURL(file),
+            isExisting: false,
+          });
+        }
+      }
+    }
+    
+    setEditImages(prev => [...prev, ...newImages]);
+    if (editImageInputRef.current) editImageInputRef.current.value = "";
+  };
+
+  // Handle edit video selection
+  const handleEditVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("video/")) {
+      toast.error("Vui lòng chọn file video");
+      return;
+    }
+
+    if (file.size > MAX_VIDEO_SIZE) {
+      toast.error("Video không được vượt quá 50MB");
+      return;
+    }
+
+    setEditVideo({
+      file,
+      preview: URL.createObjectURL(file),
+      isExisting: false,
+    });
+    // Clear images when video is selected
+    editImages.forEach(img => {
+      if (!img.isExisting) URL.revokeObjectURL(img.preview);
+    });
+    setEditImages([]);
+    if (editVideoInputRef.current) editVideoInputRef.current.value = "";
+  };
+
+  const removeEditImage = (index: number) => {
+    setEditImages(prev => {
+      const newImages = [...prev];
+      if (!newImages[index].isExisting) {
+        URL.revokeObjectURL(newImages[index].preview);
+      }
+      newImages.splice(index, 1);
+      return newImages;
+    });
+  };
+
+  const removeEditVideo = () => {
+    if (editVideo && !editVideo.isExisting) {
+      URL.revokeObjectURL(editVideo.preview);
+    }
+    setEditVideo(null);
   };
 
   const handleSaveEdit = async () => {
     if (!user || !editingMessage) return;
-    if (!editContent.trim()) {
+    if (!editContent.trim() && editImages.length === 0 && !editVideo) {
       toast.error("Nội dung không được để trống");
       return;
     }
 
     setIsSubmitting(true);
+    setUploadProgress(0);
+    
     try {
+      let imageUrls: string[] = [];
+      let videoUrl: string | null = null;
+
+      // Process images
+      if (editImages.length > 0) {
+        for (let i = 0; i < editImages.length; i++) {
+          const img = editImages[i];
+          if (img.isExisting) {
+            // Keep existing URL
+            imageUrls.push(img.preview);
+          } else if (img.file) {
+            // Upload new image
+            const url = await uploadFile(img.file, "images");
+            if (url) imageUrls.push(url);
+          }
+          setUploadProgress(((i + 1) / editImages.length) * 70);
+        }
+      }
+
+      // Process video
+      if (editVideo) {
+        if (editVideo.isExisting) {
+          videoUrl = editVideo.preview;
+        } else if (editVideo.file) {
+          videoUrl = await uploadFile(editVideo.file, "videos");
+        }
+        setUploadProgress(80);
+      }
+
       const { error } = await supabase
         .from("universe_messages" as any)
-        .update({ content: editContent.trim(), updated_at: new Date().toISOString() })
+        .update({ 
+          content: editContent.trim(), 
+          image_urls: imageUrls.length > 0 ? imageUrls : null,
+          video_url: videoUrl,
+          updated_at: new Date().toISOString() 
+        })
         .eq("id", editingMessage.id)
         .eq("user_id", user.id);
 
       if (error) throw error;
+      
+      setUploadProgress(100);
       toast.success("Đã cập nhật thông điệp! ✨");
-      setIsEditing(false);
-      setEditingMessage(null);
-      setEditContent("");
+      handleCancelEdit();
       fetchMessages();
     } catch (error) {
       console.error("Edit error:", error);
       toast.error("Không thể cập nhật thông điệp");
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
   const handleCancelEdit = () => {
+    // Clean up blob URLs
+    editImages.forEach(img => {
+      if (!img.isExisting) URL.revokeObjectURL(img.preview);
+    });
+    if (editVideo && !editVideo.isExisting) {
+      URL.revokeObjectURL(editVideo.preview);
+    }
+    
     setIsEditing(false);
     setEditingMessage(null);
     setEditContent("");
+    setEditImages([]);
+    setEditVideo(null);
   };
 
   const getInitials = (name: string | null) => {
@@ -757,7 +902,7 @@ const UniverseMessages = () => {
 
       {/* Edit Message Dialog */}
       <Dialog open={isEditing} onOpenChange={(open) => !open && handleCancelEdit()}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit2 className="w-5 h-5 text-gold" />
@@ -770,11 +915,108 @@ const UniverseMessages = () => {
               placeholder="Chỉnh sửa thông điệp của bạn..."
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="min-h-[150px] resize-none"
-              maxLength={2000}
+              className="min-h-[150px] resize-y"
             />
-            <div className="flex justify-end text-xs text-muted-foreground">
-              {editContent.length}/2000
+
+            {/* Image Preview */}
+            {editImages.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {editImages.map((img, index) => (
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
+                    <img
+                      src={img.preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeEditImage(index)}
+                      className="absolute top-1 right-1 w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-4 h-4 text-white" />
+                    </button>
+                    {img.isExisting && (
+                      <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 rounded text-[10px] text-white">
+                        Hiện tại
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Video Preview */}
+            {editVideo && (
+              <div className="relative rounded-lg overflow-hidden">
+                <video
+                  src={editVideo.preview}
+                  controls
+                  className="w-full max-h-[200px] object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={removeEditVideo}
+                  className="absolute top-2 right-2 w-8 h-8 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+                {editVideo.isExisting && (
+                  <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 rounded text-xs text-white">
+                    Video hiện tại
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Upload Progress */}
+            {isSubmitting && uploadProgress > 0 && (
+              <div className="space-y-1">
+                <Progress value={uploadProgress} className="h-2" />
+                <p className="text-xs text-muted-foreground text-center">
+                  Đang tải lên... {uploadProgress}%
+                </p>
+              </div>
+            )}
+
+            {/* Media Buttons */}
+            <div className="flex gap-2">
+              <input
+                ref={editImageInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleEditImageSelect}
+                className="hidden"
+              />
+              <input
+                ref={editVideoInputRef}
+                type="file"
+                accept="video/*"
+                onChange={handleEditVideoSelect}
+                className="hidden"
+              />
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => editImageInputRef.current?.click()}
+                disabled={editImages.length >= MAX_IMAGES || !!editVideo || isSubmitting}
+              >
+                <Image className="w-4 h-4 mr-2" />
+                Ảnh ({editImages.length}/{MAX_IMAGES})
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => editVideoInputRef.current?.click()}
+                disabled={!!editVideo || editImages.length > 0 || isSubmitting}
+              >
+                <Video className="w-4 h-4 mr-2" />
+                Video
+              </Button>
             </div>
 
             <div className="flex gap-3 justify-end">
@@ -787,7 +1029,7 @@ const UniverseMessages = () => {
               </Button>
               <Button
                 onClick={handleSaveEdit}
-                disabled={isSubmitting || !editContent.trim()}
+                disabled={isSubmitting || (!editContent.trim() && editImages.length === 0 && !editVideo)}
                 className="bg-gradient-to-r from-gold to-amber-500 text-white hover:from-gold/90 hover:to-amber-500/90"
               >
                 {isSubmitting ? (
