@@ -52,8 +52,8 @@ serve(async (req) => {
       );
     }
 
-    // Validate prompt length (max 2000 characters to prevent resource exhaustion)
-    const MAX_PROMPT_LENGTH = 2000;
+    // Validate prompt length (max 5000 characters to prevent resource exhaustion)
+    const MAX_PROMPT_LENGTH = 5000;
     if (prompt.length > MAX_PROMPT_LENGTH) {
       return new Response(
         JSON.stringify({ error: `Prompt quá dài. Tối đa ${MAX_PROMPT_LENGTH} ký tự.` }),
