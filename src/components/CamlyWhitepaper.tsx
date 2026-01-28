@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { 
   Sparkles, 
   Heart, 
@@ -11,12 +12,16 @@ import {
   Users,
   TrendingUp,
   AlertTriangle,
-  Gift
+  Gift,
+  ArrowLeft
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const CamlyWhitepaper = () => {
+  const navigate = useNavigate();
+
   const tiers = [
     {
       level: 1,
@@ -123,6 +128,24 @@ const CamlyWhitepaper = () => {
 
   return (
     <section className="relative py-24 px-4 overflow-hidden">
+      {/* Exit Button */}
+      <motion.div
+        className="fixed top-24 left-4 z-50"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/")}
+          className="bg-background/80 backdrop-blur-sm border-gold/30 hover:border-gold/50 hover:bg-gold/10 gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Trang chủ
+        </Button>
+      </motion.div>
+
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
       <div className="absolute inset-0 opacity-30">
