@@ -103,17 +103,17 @@ const UniverseMessages = () => {
       if (error) throw error;
       setMessages((data as unknown as UniverseMessage[]) || []);
       
-      // Fetch profiles
+      // Fetch profiles using safe_profiles view (bypasses owner-only RLS)
       if (data && data.length > 0) {
         const userIds = [...new Set((data as any[]).map(m => m.user_id))];
         const { data: profilesData } = await supabase
-          .from("profiles")
+          .from("safe_profiles")
           .select("id, display_name, avatar_url")
           .in("id", userIds);
         
         if (profilesData) {
           const profileMap: Record<string, Profile> = {};
-          profilesData.forEach(p => {
+          (profilesData as Profile[]).forEach(p => {
             profileMap[p.id] = p;
           });
           setProfiles(profileMap);
