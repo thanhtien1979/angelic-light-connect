@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { triggerSessionExpired } from "@/hooks/useSessionExpired";
 
 type Message = {
   id: string;
@@ -269,7 +268,7 @@ export const useAngelChat = () => {
       const accessToken = sessionData?.session?.access_token;
 
       if (!accessToken) {
-        triggerSessionExpired();
+        toast.error("Vui lòng đăng nhập lại");
         setMessages((prev) => prev.filter((m) => m.id !== tempUserMessageId));
         setIsLoading(false);
         return;

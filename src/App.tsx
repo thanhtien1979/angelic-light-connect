@@ -45,10 +45,8 @@ import LanguageSuggestionBanner from "./components/LanguageSuggestionBanner";
 import { usePresence } from "./hooks/usePresence";
 import { useFriendRequestSound } from "./hooks/useFriendRequestSound";
 import { useTokenRefresh } from "./hooks/useTokenRefresh";
-import { useSessionExpired } from "./hooks/useSessionExpired";
 import { useAngelPresence } from "./hooks/useAngelPresence";
 import { useAdminReportNotifications } from "./hooks/useAdminReportNotifications";
-import { SessionExpiredDialog } from "./components/SessionExpiredDialog";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { SoundSettingsProvider } from "./contexts/SoundSettingsContext";
 import { AngelPresenceProvider } from "./contexts/AngelPresenceContext";
@@ -62,7 +60,6 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   useFriendRequestSound();
   useTokenRefresh();
   useAdminReportNotifications();
-  const { isSessionExpired, hideSessionExpired } = useSessionExpired();
   const { 
     isEnabled: angelEnabled, 
     style: angelStyle,
@@ -86,7 +83,6 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
         imageUrl={customImageUrl}
       />
       <LightScoreOnboarding />
-      <SessionExpiredDialog isOpen={isSessionExpired} onClose={hideSessionExpired} />
     </>
   );
 };
