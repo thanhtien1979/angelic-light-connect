@@ -62,26 +62,23 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
     })), []
   );
 
-  // Optimized: Reduced stars from 42 to 16 total
-  const allStars = useMemo(() => {
-    const inner = Array.from({ length: 6 }, (_, i) => ({
-      angle: (i * 60) + 15,
-      distance: 170,
-      color: starColors[i % starColors.length],
-      size: 14 + (i % 2) * 4,
-      ring: 'inner' as const,
-    }));
-
-    const outer = Array.from({ length: 10 }, (_, i) => ({
-      angle: (i * 36),
-      distance: 230,
-      color: starColors[(i + 2) % starColors.length],
-      size: 12 + (i % 3) * 5,
-      ring: 'outer' as const,
-    }));
-
-    return [...inner, ...outer];
-  }, []);
+  // Galaxy particles - bright and colorful
+  const galaxyParticles = useMemo(() => 
+    Array.from({ length: 60 }, (_, i) => ({
+      angle: Math.random() * 360,
+      distance: 140 + Math.random() * 120,
+      size: 2 + Math.random() * 3,
+      opacity: 0.5 + Math.random() * 0.5,
+      color: [
+        "hsla(348, 80%, 85%, 0.9)",
+        "hsla(280, 70%, 80%, 0.8)",
+        "hsla(200, 80%, 85%, 0.8)",
+        "hsla(45, 90%, 85%, 0.9)",
+        "hsla(320, 75%, 85%, 0.85)",
+      ][i % 5],
+      delay: Math.random() * 5,
+    })), []
+  );
 
   // Optimized: Reduced shooting stars from 8 to 3
   const shootingStars = useMemo(() =>
@@ -166,62 +163,63 @@ const HeroSection = ({ onOpenAuth }: HeroSectionProps) => {
       {/* Hero content */}
       <div className="relative z-10 flex flex-col items-center justify-center px-4 pt-4 pb-8">
 
-        {/* Angel Image with glow */}
+        {/* Angel Image with galaxy */}
         <div className="relative mb-4">
-          {/* Simplified glow rings */}
-          <div className="absolute inset-0 -m-16 rounded-full bg-gradient-to-r from-rose/20 via-transparent to-rose/20 blur-2xl" />
+          {/* Galaxy glow background */}
+          <div 
+            className="absolute inset-0 -m-20 rounded-full blur-3xl"
+            style={{
+              background: "radial-gradient(ellipse at center, hsla(280, 60%, 70%, 0.25) 0%, hsla(348, 70%, 75%, 0.15) 30%, hsla(200, 60%, 80%, 0.1) 50%, transparent 70%)",
+            }}
+          />
           
-          {/* Optimized star rings - CSS animation, fewer stars */}
+          {/* Galaxy spiral effect */}
           {!isReducedMotion && (
-            <>
-              <div 
-                className="absolute inset-0 flex items-center justify-center"
-                style={{ animation: 'rotate-slow 150s linear infinite' }}
-              >
-                {allStars.filter(s => s.ring === 'inner').map((star, i) => {
-                  const x = Math.cos((star.angle * Math.PI) / 180) * star.distance;
-                  const y = Math.sin((star.angle * Math.PI) / 180) * star.distance;
-                  return (
-                    <div
-                      key={`inner-${i}`}
-                      className="absolute left-1/2 top-1/2 animate-twinkle"
-                      style={{ 
-                        transform: `translate(${x - star.size / 2}px, ${y - star.size / 2}px)`,
-                        animationDelay: `${i * 0.3}s`,
-                      }}
-                    >
-                      <svg width={star.size} height={star.size} viewBox="0 0 24 24" fill={star.color}>
-                        <path d="M12 0L14.59 8.41L23 12L14.59 15.59L12 24L9.41 15.59L1 12L9.41 8.41L12 0Z" />
-                      </svg>
-                    </div>
-                  );
-                })}
-              </div>
+            <div 
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ animation: 'rotate-slow 120s linear infinite' }}
+            >
+              {/* Galaxy particles */}
+              {galaxyParticles.map((particle, i) => {
+                const x = Math.cos((particle.angle * Math.PI) / 180) * particle.distance;
+                const y = Math.sin((particle.angle * Math.PI) / 180) * particle.distance;
+                return (
+                  <div
+                    key={`galaxy-${i}`}
+                    className="absolute left-1/2 top-1/2 rounded-full animate-galaxy-twinkle"
+                    style={{ 
+                      transform: `translate(${x - particle.size / 2}px, ${y - particle.size / 2}px)`,
+                      width: particle.size,
+                      height: particle.size,
+                      background: particle.color,
+                      boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
+                      animationDelay: `${particle.delay}s`,
+                    }}
+                  />
+                );
+              })}
               
+              {/* Galaxy spiral arms */}
               <div 
-                className="absolute inset-0 flex items-center justify-center"
-                style={{ animation: 'rotate-slow 180s linear infinite reverse' }}
-              >
-                {allStars.filter(s => s.ring === 'outer').map((star, i) => {
-                  const x = Math.cos((star.angle * Math.PI) / 180) * star.distance;
-                  const y = Math.sin((star.angle * Math.PI) / 180) * star.distance;
-                  return (
-                    <div
-                      key={`outer-${i}`}
-                      className="absolute left-1/2 top-1/2 animate-twinkle"
-                      style={{ 
-                        transform: `translate(${x - star.size / 2}px, ${y - star.size / 2}px)`,
-                        animationDelay: `${i * 0.4}s`,
-                      }}
-                    >
-                      <svg width={star.size} height={star.size} viewBox="0 0 24 24" fill={star.color}>
-                        <path d="M12 0L14.59 8.41L23 12L14.59 15.59L12 24L9.41 15.59L1 12L9.41 8.41L12 0Z" />
-                      </svg>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
+                className="absolute w-[500px] h-[500px] opacity-30"
+                style={{
+                  background: `
+                    conic-gradient(from 0deg at 50% 50%, 
+                      transparent 0deg, 
+                      hsla(348, 70%, 80%, 0.4) 30deg, 
+                      transparent 60deg,
+                      hsla(280, 60%, 80%, 0.3) 120deg,
+                      transparent 150deg,
+                      hsla(200, 70%, 85%, 0.35) 210deg,
+                      transparent 240deg,
+                      hsla(45, 80%, 80%, 0.3) 300deg,
+                      transparent 330deg
+                    )
+                  `,
+                  filter: "blur(20px)",
+                }}
+              />
+            </div>
           )}
           
           {/* Angel image */}
