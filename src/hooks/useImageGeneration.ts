@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { triggerSessionExpired } from "@/hooks/useSessionExpired";
 
 interface GenerationResult {
   imageUrl: string;
@@ -110,7 +109,7 @@ export function useImageGeneration() {
     // Check for valid user session before calling edge function
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
-      triggerSessionExpired();
+      toast.error("Vui lòng đăng nhập lại");
       setError("Chưa đăng nhập");
       return null;
     }
@@ -171,7 +170,7 @@ export function useImageGeneration() {
     // Check for valid user session before calling edge function
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
-      triggerSessionExpired();
+      toast.error("Vui lòng đăng nhập lại");
       setError("Chưa đăng nhập");
       return null;
     }

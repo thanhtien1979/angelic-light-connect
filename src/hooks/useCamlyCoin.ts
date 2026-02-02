@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { triggerSessionExpired } from "@/hooks/useSessionExpired";
 
 // Helper to get fresh access token
 const getFreshAccessToken = async (): Promise<string | null> => {
@@ -158,7 +157,7 @@ export const useCamlyCoin = () => {
       const accessToken = await getFreshAccessToken();
       
       if (!accessToken) {
-        triggerSessionExpired();
+        toast.error("Vui lòng đăng nhập lại");
         return null;
       }
       
@@ -183,7 +182,7 @@ export const useCamlyCoin = () => {
 
       if (!response.ok) {
         if (response.status === 401) {
-          triggerSessionExpired();
+          toast.error("Vui lòng đăng nhập lại");
           return null;
         }
         throw new Error(result.error || "Unknown error");
@@ -224,7 +223,7 @@ export const useCamlyCoin = () => {
       const accessToken = await getFreshAccessToken();
       
       if (!accessToken) {
-        triggerSessionExpired();
+        toast.error("Vui lòng đăng nhập lại");
         return null;
       }
       
@@ -250,7 +249,7 @@ export const useCamlyCoin = () => {
 
       if (!response.ok) {
         if (response.status === 401) {
-          triggerSessionExpired();
+          toast.error("Vui lòng đăng nhập lại");
           return null;
         }
         throw new Error(result.error || "Unknown error");

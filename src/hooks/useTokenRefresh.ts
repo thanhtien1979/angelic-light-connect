@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { triggerSessionExpired } from "./useSessionExpired";
 import { toast } from "sonner";
 
 const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes before expiry
@@ -105,12 +104,7 @@ export const useTokenRefresh = () => {
       } else if (timeUntilExpiry <= 0) {
         // Token already expired - try to refresh silently
         console.log("Token expired, attempting silent refresh...");
-        const success = await attemptSilentRefresh(true);
-        
-        if (!success && !hasTriggeredExpiry.current) {
-          hasTriggeredExpiry.current = true;
-          triggerSessionExpired();
-        }
+        await attemptSilentRefresh(true);
       }
     } catch (error) {
       console.error("Error checking token:", error);
