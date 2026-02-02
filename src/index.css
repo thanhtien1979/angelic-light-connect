@@ -1292,6 +1292,22 @@ body.dark::before {
   .animate-rotate-slow {
     animation: rotateSlow 120s linear infinite;
   }
+  
+  /* Galaxy twinkle - bright particles */
+  @keyframes galaxy-twinkle {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(0.8);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+  
+  .animate-galaxy-twinkle {
+    animation: galaxy-twinkle 3s ease-in-out infinite;
+  }
 
   /* Prefers reduced motion - disable all animations */
   @media (prefers-reduced-motion: reduce) {
