@@ -1321,6 +1321,8 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           file_name: string | null
           file_type: string | null
           file_url: string | null
@@ -1335,6 +1337,8 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           file_name?: string | null
           file_type?: string | null
           file_url?: string | null
@@ -1349,6 +1353,8 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           file_name?: string | null
           file_type?: string | null
           file_url?: string | null
@@ -1490,6 +1496,51 @@ export type Database = {
           sincerity_score?: number | null
           user_id?: string
           word_count?: number
+        }
+        Relationships: []
+      }
+      reward_ledger: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          ip_address: string | null
+          is_admin_action: boolean
+          reference_id: string | null
+          reward_type: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          ip_address?: string | null
+          is_admin_action?: boolean
+          reference_id?: string | null
+          reward_type: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          ip_address?: string | null
+          is_admin_action?: boolean
+          reference_id?: string | null
+          reward_type?: string
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2608,6 +2659,19 @@ export type Database = {
         }
         Returns: string
       }
+      add_reward_ledger_entry: {
+        Args: {
+          p_amount: number
+          p_description: string
+          p_ip_address?: string
+          p_is_admin_action?: boolean
+          p_reference_id?: string
+          p_reward_type: string
+          p_user_agent?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       are_users_blocked: {
         Args: { user1: string; user2: string }
         Returns: boolean
@@ -2739,6 +2803,7 @@ export type Database = {
         Returns: boolean
       }
       increment_share_view: { Args: { p_share_id: string }; Returns: undefined }
+      is_admin: { Args: never; Returns: boolean }
       is_group_admin: { Args: { p_group_id: string }; Returns: boolean }
       is_group_creator: {
         Args: { _group_id: string; _user_id: string }
@@ -2774,6 +2839,7 @@ export type Database = {
           light_score: number
         }[]
       }
+      soft_delete_message: { Args: { p_message_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

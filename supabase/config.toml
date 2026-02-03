@@ -38,3 +38,9 @@ verify_jwt = false
 
 [functions.log-security-event]
 verify_jwt = false
+
+[functions.admin-adjust-reward]
+verify_jwt = false
+
+[functions.secure-award-reward]
+verify_jwt = false
