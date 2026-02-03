@@ -85,6 +85,8 @@ const extractUserMemory = async (
   }
 };
 
+const MESSAGES_PER_PAGE = 50;
+
 export const useAngelChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,6 +94,9 @@ export const useAngelChat = () => {
   const [isInitializing, setIsInitializing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [oldestMessageDate, setOldestMessageDate] = useState<string | null>(null);
   const { user, isAuthenticated } = useAuth();
 
   // Track online/offline status
@@ -115,6 +120,7 @@ export const useAngelChat = () => {
 
   // SECURITY: Restore messages ONLY for authenticated users
   // Anonymous users cannot access chat history (privacy-first architecture)
+  // Uses cursor-based pagination to load latest 50 messages first
   useEffect(() => {
     const restoreMessages = async () => {
       try {
@@ -122,20 +128,29 @@ export const useAngelChat = () => {
         if (isAuthenticated && user) {
           const { data, error } = await supabase
             .from("chat_messages")
-            .select("id, role, content")
+            .select("id, role, content, created_at")
             .eq("user_id", user.id)
-            .order("created_at", { ascending: true });
+            .order("created_at", { ascending: false })
+            .limit(MESSAGES_PER_PAGE);
 
           if (error) throw error;
 
           if (data && data.length > 0) {
+            // Reverse to show oldest first in UI
+            const reversedData = [...data].reverse();
             setMessages(
-              data.map((m) => ({
+              reversedData.map((m) => ({
                 id: m.id,
                 role: m.role as "user" | "assistant",
                 content: m.content,
               }))
             );
+            // Track oldest message date for pagination
+            setOldestMessageDate(reversedData[0].created_at);
+            // If we got less than a full page, there are no more messages
+            setHasMoreMessages(data.length === MESSAGES_PER_PAGE);
+          } else {
+            setHasMoreMessages(false);
           }
         }
         // Anonymous users start with empty chat (no persistence)
@@ -148,6 +163,47 @@ export const useAngelChat = () => {
 
     restoreMessages();
   }, [isAuthenticated, user]);
+
+  // Load more messages (older ones) for infinite scroll
+  const loadMoreMessages = useCallback(async () => {
+    if (!isAuthenticated || !user || !hasMoreMessages || isLoadingMore || !oldestMessageDate) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+    try {
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .select("id, role, content, created_at")
+        .eq("user_id", user.id)
+        .lt("created_at", oldestMessageDate)
+        .order("created_at", { ascending: false })
+        .limit(MESSAGES_PER_PAGE);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Reverse to show oldest first
+        const reversedData = [...data].reverse();
+        const olderMessages = reversedData.map((m) => ({
+          id: m.id,
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        }));
+        
+        // Prepend older messages to the beginning
+        setMessages((prev) => [...olderMessages, ...prev]);
+        setOldestMessageDate(reversedData[0].created_at);
+        setHasMoreMessages(data.length === MESSAGES_PER_PAGE);
+      } else {
+        setHasMoreMessages(false);
+      }
+    } catch {
+      // SECURITY: Don't log error details
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isAuthenticated, user, hasMoreMessages, isLoadingMore, oldestMessageDate]);
 
   // SECURITY: Save messages ONLY for authenticated users
   // Messages are private by default (visibility = 'private')
@@ -461,6 +517,10 @@ export const useAngelChat = () => {
     editMessage,
     clearMessages, 
     startNewConversation, 
-    isAuthenticated 
+    isAuthenticated,
+    // Pagination
+    hasMoreMessages,
+    isLoadingMore,
+    loadMoreMessages,
   };
 };
