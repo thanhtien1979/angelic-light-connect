@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
+const ONBOARDING_COMPLETED_KEY = 'camly_light_onboarding_completed';
+const ONBOARDING_SESSION_KEY = 'camly_light_onboarding_session';
+
 export interface OnboardingAnswer {
   questionId: string;
   answerId: string;
@@ -107,10 +110,27 @@ export function useLightOnboarding() {
   const [answers, setAnswers] = useState<OnboardingAnswer[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Check if user needs onboarding
+  // Check if user needs onboarding - only once per session for new users
   useEffect(() => {
     const checkOnboarding = async () => {
       if (!user) {
+        setIsLoading(false);
+        setNeedsOnboarding(false);
+        return;
+      }
+
+      // First check localStorage - if completed, never show again
+      const completedKey = `${ONBOARDING_COMPLETED_KEY}_${user.id}`;
+      const sessionKey = `${ONBOARDING_SESSION_KEY}_${user.id}`;
+      
+      if (localStorage.getItem(completedKey) === 'true') {
+        setIsLoading(false);
+        setNeedsOnboarding(false);
+        return;
+      }
+
+      // Check if already shown in this browser session
+      if (sessionStorage.getItem(sessionKey) === 'shown') {
         setIsLoading(false);
         setNeedsOnboarding(false);
         return;
@@ -125,15 +145,25 @@ export function useLightOnboarding() {
 
         if (error) {
           console.error('Error checking onboarding status:', error);
+          // On error, mark as shown for this session to prevent repeated attempts
+          sessionStorage.setItem(sessionKey, 'shown');
           setNeedsOnboarding(false);
         } else if (!data) {
-          // No profile yet, needs onboarding
+          // No profile yet, needs onboarding - but only show once per session
+          sessionStorage.setItem(sessionKey, 'shown');
           setNeedsOnboarding(true);
+        } else if (data.onboarding_completed) {
+          // Already completed in DB, save to localStorage for future
+          localStorage.setItem(completedKey, 'true');
+          setNeedsOnboarding(false);
         } else {
-          setNeedsOnboarding(!data.onboarding_completed);
+          // Profile exists but not completed - show onboarding once per session
+          sessionStorage.setItem(sessionKey, 'shown');
+          setNeedsOnboarding(true);
         }
       } catch (err) {
         console.error('Error in checkOnboarding:', err);
+        sessionStorage.setItem(sessionKey, 'shown');
         setNeedsOnboarding(false);
       } finally {
         setIsLoading(false);
@@ -229,10 +259,18 @@ export function useLightOnboarding() {
         if (error) throw error;
       }
 
+      // Mark as completed in localStorage
+      const completedKey = `${ONBOARDING_COMPLETED_KEY}_${user.id}`;
+      localStorage.setItem(completedKey, 'true');
+      
       setNeedsOnboarding(false);
       return true;
     } catch (err) {
       console.error('Error submitting onboarding:', err);
+      // Even on error, mark as completed locally to prevent repeated popups
+      const completedKey = `${ONBOARDING_COMPLETED_KEY}_${user.id}`;
+      localStorage.setItem(completedKey, 'true');
+      setNeedsOnboarding(false);
       return false;
     } finally {
       setIsSubmitting(false);
@@ -241,6 +279,11 @@ export function useLightOnboarding() {
 
   const skipOnboarding = useCallback(async () => {
     if (!user) return;
+
+    // Mark as completed in localStorage immediately
+    const completedKey = `${ONBOARDING_COMPLETED_KEY}_${user.id}`;
+    localStorage.setItem(completedKey, 'true');
+    setNeedsOnboarding(false);
 
     try {
       const { data: existingProfile } = await supabase
@@ -263,10 +306,9 @@ export function useLightOnboarding() {
             onboarding_completed: true,
           });
       }
-
-      setNeedsOnboarding(false);
     } catch (err) {
       console.error('Error skipping onboarding:', err);
+      // Already marked as completed locally, so user won't see it again
     }
   }, [user]);
 
