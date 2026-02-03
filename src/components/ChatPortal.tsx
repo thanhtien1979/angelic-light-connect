@@ -4,6 +4,8 @@ import { Send, Sparkles, Trash2, MessageSquarePlus, Cloud, CloudOff, Check, Load
 import CopyMessageButton from "@/components/CopyMessageButton";
 import ShareMessageButton from "@/components/ShareMessageButton";
 import SpeakMessageButton from "@/components/SpeakMessageButton";
+import ChatLoadMoreIndicator from "@/components/ChatLoadMoreIndicator";
+import ChatExportMenu from "@/components/ChatExportMenu";
 import { useAngelChat, SyncStatus } from "@/hooks/useAngelChat";
 import { useConversationSummary } from "@/hooks/useConversationSummary";
 import { useFeedback } from "@/hooks/useFeedback";
@@ -118,7 +120,7 @@ const shouldShowDailyBlessing = (): boolean => {
 
 const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const { user } = useAuth();
-  const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, editMessage, clearMessages, startNewConversation, isAuthenticated } = useAngelChat();
+  const { messages, isLoading, isRestoring, isInitializing, isReady, syncStatus, sendMessage, editMessage, clearMessages, startNewConversation, isAuthenticated, hasMoreMessages, isLoadingMore, loadMoreMessages } = useAngelChat();
   const { summary, clearSummary } = useConversationSummary();
   const { isEnabled: isFeedbackEnabled, toggleFeedback, playSendFeedback, playNewConversationFeedback, enableAudioContext } = useFeedback();
   const { needsVerification, incrementCount, setVerified, resetForNewConversation, remainingFreeMessages } = useAnonymousRateLimit();
@@ -162,9 +164,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   const [canScrollDown, setCanScrollDown] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const chatRewardTriedRef = useRef(false);
+  const previousScrollHeightRef = useRef<number>(0);
 
   // Attachment hook
   const attachmentsHook = useChatAttachments();
@@ -283,7 +287,7 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
     messagesContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Handle scroll to update button visibility
+  // Handle scroll to update button visibility and trigger infinite scroll
   const handleMessagesScroll = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
@@ -294,7 +298,26 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
     setShowScrollButtons(hasScroll);
     setCanScrollUp(scrollTop > 50);
     setCanScrollDown(scrollTop < scrollHeight - clientHeight - 50);
-  }, []);
+    
+    // Trigger load more when scrolled near top (within 100px)
+    if (scrollTop < 100 && hasMoreMessages && !isLoadingMore && isAuthenticated) {
+      previousScrollHeightRef.current = scrollHeight;
+      loadMoreMessages();
+    }
+  }, [hasMoreMessages, isLoadingMore, isAuthenticated, loadMoreMessages]);
+
+  // Maintain scroll position when loading older messages
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (container && previousScrollHeightRef.current > 0 && !isLoadingMore) {
+      const newScrollHeight = container.scrollHeight;
+      const scrollDiff = newScrollHeight - previousScrollHeightRef.current;
+      if (scrollDiff > 0) {
+        container.scrollTop = scrollDiff;
+      }
+      previousScrollHeightRef.current = 0;
+    }
+  }, [messages, isLoadingMore]);
 
   // Initial check for scroll buttons when messages change
   useEffect(() => {
@@ -302,8 +325,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
   }, [messages, handleMessagesScroll]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only auto-scroll to bottom for new messages, not when loading older ones
+    if (!isLoadingMore) {
+      scrollToBottom();
+    }
+  }, [messages, isLoadingMore]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -580,6 +606,10 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+                {/* Export chat history button */}
+                {messages.length > 0 && (
+                  <ChatExportMenu disabled={isLoading} />
+                )}
                 {/* Share conversation button */}
                 {messages.length > 0 && (
                   <motion.button
@@ -803,6 +833,14 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                 className="px-4 sm:px-6 py-4 space-y-4 min-h-[300px] max-h-[50vh] sm:max-h-[400px] overflow-y-auto pb-20 sm:pb-6 scroll-smooth" 
                 style={{ willChange: "scroll-position", contain: "layout style" }}
               >
+              {/* Load More Indicator at top */}
+              {isAuthenticated && messages.length > 0 && (
+                <ChatLoadMoreIndicator 
+                  isLoading={isLoadingMore} 
+                  hasMore={hasMoreMessages} 
+                />
+              )}
+              
               {isRestoring ? (
                 <motion.div
                   initial={{ opacity: 0 }}
