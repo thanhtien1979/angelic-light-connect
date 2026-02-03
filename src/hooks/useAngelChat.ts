@@ -274,8 +274,12 @@ export const useAngelChat = () => {
         return;
       }
 
+      // Only send the last 100 messages to the AI for context (to avoid exceeding limits)
+      const allMessages = [...messages, userMessage];
+      const recentMessages = allMessages.slice(-100);
+      
       const requestBody: { messages: Array<{ role: string; content: string }>; images?: Array<{ type: "image"; base64: string; mimeType: string }> } = {
-        messages: [...messages, userMessage].map((m) => ({
+        messages: recentMessages.map((m) => ({
           role: m.role,
           content: m.content,
         })),
