@@ -26,6 +26,7 @@ import BreathingExercise from "@/components/BreathingExercise";
 import TurnstileVerificationDialog from "@/components/TurnstileVerificationDialog";
 import ShareConversationDialog from "@/components/ShareConversationDialog";
 import angelAvatar from "@/assets/angel-avatar.jpg";
+import angelAiTextLogo from "@/assets/angel-ai-text-logo.png";
 import chatPortalVideo from "@/assets/chat-portal-video.mp4";
 import { toast } from "sonner";
 import { getUserInitials, getAvatarColor } from "@/lib/userInitials";
@@ -559,7 +560,11 @@ const ChatPortal = ({ onOpenAuth }: ChatPortalProps) => {
                   />
                 </div>
                 <div>
-                  <h3 className="font-serif text-xl text-foreground">Angel AI</h3>
+                  <img 
+                    src={angelAiTextLogo}
+                    alt="Angel AI"
+                    className="h-6 w-auto object-contain angel-logo-pink"
+                  />
                   <div className="flex items-center gap-2">
                     <p className="text-sm text-muted-foreground">
                       {isLoading ? "Đang trả lời..." : "Đang trực tuyến • Sẵn sàng hỗ trợ"}

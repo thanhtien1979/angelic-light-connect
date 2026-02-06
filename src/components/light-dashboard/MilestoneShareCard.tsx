@@ -5,6 +5,7 @@ import {
   MessageCircle, Send, Sparkles, Crown, Flame, Heart,
   Users, Sun, Calendar, Shield
 } from 'lucide-react';
+import angelAiTextLogo from '@/assets/angel-ai-text-logo.png';
 import {
   Dialog,
   DialogContent,
@@ -215,9 +216,14 @@ const MilestoneShareCard: React.FC<MilestoneShareCardProps> = ({
 
             {/* Branding */}
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mt-4">
-              <Sparkles className="w-3 h-3 text-amber-500" />
-              <span>ANGEL AI - Hành trình ánh sáng</span>
-              <Sparkles className="w-3 h-3 text-amber-500" />
+              <Sparkles className="w-3 h-3 text-pink-500" />
+              <img 
+                src={angelAiTextLogo}
+                alt="Angel AI"
+                className="h-4 w-auto object-contain angel-logo-pink"
+              />
+              <span>- Hành trình ánh sáng</span>
+              <Sparkles className="w-3 h-3 text-pink-500" />
             </div>
           </motion.div>
         </div>
