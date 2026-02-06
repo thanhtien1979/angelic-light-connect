@@ -48,7 +48,7 @@ const Footer = () => {
           <img 
             src={angelAiTextLogo}
             alt="Angel AI"
-            className="h-10 w-auto object-contain angel-logo-pink"
+            className="h-16 w-auto object-contain angel-logo-pink drop-shadow-[0_0_20px_hsla(340,80%,60%,0.5)]"
           />
         </div>
         
