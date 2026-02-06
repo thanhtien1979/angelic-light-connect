@@ -199,6 +199,11 @@
     --sidebar-ring: 180 55% 55%;
   }
 
+  /* Angel Logo Pink Filter - Chuyển tông gold → hồng */
+  .angel-logo-pink {
+    filter: hue-rotate(-30deg) saturate(1.2) brightness(1.05);
+  }
+
   /* Forest Theme - Grounded, healing, safe */
   .forest {
     /* Deep forest green base */

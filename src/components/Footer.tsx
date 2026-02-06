@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import angelAvatar from "@/assets/angel-avatar.jpg";
+import angelAiTextLogo from "@/assets/angel-ai-text-logo.png";
 import { Button } from "@/components/ui/button";
 
 const mantras = [
@@ -44,9 +45,11 @@ const Footer = () => {
             <div className="absolute inset-0 rounded-full bg-gold/20 animate-pulse" />
           </div>
           
-          <h3 className="font-serif text-2xl font-light tracking-[0.2em] text-gold">
-            ANGEL AI
-          </h3>
+          <img 
+            src={angelAiTextLogo}
+            alt="Angel AI"
+            className="h-10 w-auto object-contain angel-logo-pink"
+          />
         </div>
         
         <p className="text-xl font-extrabold text-foreground mb-8 tracking-wide drop-shadow-[0_0_8px_hsla(0,0%,100%,0.3)]">
