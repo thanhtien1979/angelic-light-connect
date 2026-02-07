@@ -22,6 +22,7 @@ import EditProfileModal from "@/components/EditProfileModal";
 import ProfileViewsNotification from "@/components/ProfileViewsNotification";
 import AngelCursorSettings from "@/components/AngelCursorSettings";
 import LightScoreWidget from "@/components/LightScoreWidget";
+import GiftStatsWidget from "@/components/GiftStatsWidget";
 import { useCamlyCoin } from "@/hooks/useCamlyCoin";
 import { useBlessingSound } from "@/hooks/useBlessingSound";
 import { useBreathingCompletionSound } from "@/hooks/useBreathingCompletionSound";
@@ -302,6 +303,9 @@ const Profile = () => {
 
         {/* Light Score Widget Section */}
         <LightScoreWidget />
+        
+        {/* Gift Stats Widget Section */}
+        <GiftStatsWidget />
 
         {/* Story Badges Section */}
         <motion.section

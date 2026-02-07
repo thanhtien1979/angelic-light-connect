@@ -12,6 +12,7 @@ const FunEcosystemPlatforms = lazy(() => import("@/components/FunEcosystemPlatfo
 const MeditationPortal = lazy(() => import("@/components/MeditationPortal"));
 const Testimonials = lazy(() => import("@/components/Testimonials"));
 const CallToAction = lazy(() => import("@/components/CallToAction"));
+const TopSponsorsLeaderboard = lazy(() => import("@/components/TopSponsorsLeaderboard"));
 
 // Lazy load floating widgets
 const MiniMeditationPlayer = lazy(() => import("@/components/MiniMeditationPlayer"));
@@ -59,6 +60,14 @@ const Index = () => {
         {/* Below-fold content - lazy loaded */}
         <Suspense fallback={<div className="min-h-[50vh]" />}>
           <SacredPillars />
+          
+          {/* Top Sponsors Section - Floating sidebar on desktop, inline on mobile */}
+          <div className="container mx-auto px-4 py-8">
+            <div className="max-w-md mx-auto lg:hidden">
+              <TopSponsorsLeaderboard compact />
+            </div>
+          </div>
+          
           <VisionMission />
           <FunEcosystemPlatforms />
           <MeditationPortal />
@@ -78,6 +87,13 @@ const Index = () => {
         <QuickBreathingWidget />
         <WeeklyReflectionPrompt />
         <WalletLinkBanner />
+      </Suspense>
+      
+      {/* Desktop: Floating Top Sponsors sidebar */}
+      <Suspense fallback={null}>
+        <div className="hidden lg:block fixed right-4 top-24 w-72 z-40">
+          <TopSponsorsLeaderboard compact />
+        </div>
       </Suspense>
     </div>
   );
