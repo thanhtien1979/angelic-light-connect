@@ -377,6 +377,48 @@ export type Database = {
         }
         Relationships: []
       }
+      gift_transactions: {
+        Row: {
+          amount: number
+          bsc_tx_hash: string | null
+          coin_type: Database["public"]["Enums"]["coin_type"]
+          created_at: string
+          id: string
+          light_score_points: number | null
+          message: string | null
+          post_id: string | null
+          receiver_id: string
+          sender_id: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          bsc_tx_hash?: string | null
+          coin_type?: Database["public"]["Enums"]["coin_type"]
+          created_at?: string
+          id?: string
+          light_score_points?: number | null
+          message?: string | null
+          post_id?: string | null
+          receiver_id: string
+          sender_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          bsc_tx_hash?: string | null
+          coin_type?: Database["public"]["Enums"]["coin_type"]
+          created_at?: string
+          id?: string
+          light_score_points?: number | null
+          message?: string | null
+          post_id?: string | null
+          receiver_id?: string
+          sender_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       greeting_history: {
         Row: {
           created_at: string
@@ -2645,6 +2687,17 @@ export type Database = {
         }
         Relationships: []
       }
+      top_sponsors: {
+        Row: {
+          avatar_url: string | null
+          coin_type: Database["public"]["Enums"]["coin_type"] | null
+          display_name: string | null
+          sender_id: string | null
+          total_amount: number | null
+          total_gifts: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_credits: {
@@ -2844,6 +2897,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user"
       chat_visibility: "private" | "public" | "unlisted"
+      coin_type: "camly_coin" | "fun_money" | "bnb" | "usdt"
       nine_path_task_category: "healing" | "awakening" | "service"
       nine_path_verification_level:
         | "self_claim"
@@ -2985,6 +3039,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user"],
       chat_visibility: ["private", "public", "unlisted"],
+      coin_type: ["camly_coin", "fun_money", "bnb", "usdt"],
       nine_path_task_category: ["healing", "awakening", "service"],
       nine_path_verification_level: [
         "self_claim",
