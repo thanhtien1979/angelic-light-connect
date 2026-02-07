@@ -36,6 +36,8 @@ const getNotificationIcon = (type: string) => {
       return MessageCircle;
     case "save":
       return Bookmark;
+    case "gift_received":
+      return Sparkles; // Will use 🎁 emoji in display
     default:
       return Sparkles;
   }
@@ -53,6 +55,8 @@ const getNotificationColor = (type: string) => {
       return "text-emerald-500 bg-emerald-500/20";
     case "save":
       return "text-amber-500 bg-amber-500/20";
+    case "gift_received":
+      return "text-pink-500 bg-gradient-to-r from-pink-500/20 to-gold/20";
     default:
       return "text-violet-500 bg-violet-500/20";
   }
@@ -193,6 +197,8 @@ export const NotificationsDropdown = () => {
       navigate(`/friends`);
     } else if ((notification.type === "like" || notification.type === "comment" || notification.type === "save") && notification.reference_id) {
       navigate(`/community`);
+    } else if (notification.type === "gift_received" && notification.actor_id) {
+      navigate(`/user/${notification.actor_id}`);
     }
 
     setIsOpen(false);
