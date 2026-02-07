@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { 
   ArrowLeft, Sparkles, Heart, BookOpen, Leaf, 
   Calendar, Award, Coins, MessageCircle, TrendingUp,
-  Clock, Star, Sun, UserPlus, UserMinus, Users, Loader2, Trophy, Share2
+  Clock, Star, Sun, UserPlus, UserMinus, Users, Loader2, Trophy, Share2, Gift
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,6 +21,7 @@ import { FollowListModal } from "@/components/FollowListModal";
 import AchievementBadges from "@/components/AchievementBadges";
 import ProfileShareDialog from "@/components/ProfileShareDialog";
 import PrivateChat from "@/components/PrivateChat";
+import GiftButton from "@/components/GiftButton";
 import { toast } from "sonner";
 
 interface UserProfileData {
@@ -416,6 +417,16 @@ const UserProfile = () => {
               </>
             ) : (
               <>
+                {/* Gift Button - Primary action */}
+                <GiftButton
+                  receiverId={targetUserId || ""}
+                  receiverProfile={profile ? {
+                    id: profile.id,
+                    display_name: profile.display_name,
+                    avatar_url: profile.avatar_url,
+                  } : null}
+                />
+                
                 {isFriendWithUser ? (
                   <Button
                     onClick={handleStartChat}

@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Heart, Sparkles, BookOpen, MessageCircle, Leaf, Sun, Users,
-  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw, MessageSquare, Share2, PenLine, Bookmark
+  Search, Filter, TrendingUp, Eye, ChevronDown, RefreshCw, MessageSquare, Share2, PenLine, Bookmark, Gift
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +22,8 @@ import { useSavedMoments } from "@/hooks/useSavedMoments";
 import UserSearchDialog from "@/components/UserSearchDialog";
 import MomentLikersDialog from "@/components/MomentLikersDialog";
 import MomentSaversDialog from "@/components/MomentSaversDialog";
+import TopSponsorsLeaderboard from "@/components/TopSponsorsLeaderboard";
+import GiftButton from "@/components/GiftButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -241,6 +243,18 @@ const MomentCard = ({
       {/* Footer */}
       <div className="flex items-center justify-between pt-3 border-t border-border/30">
         <div className="flex items-center gap-2">
+          {/* Gift Button */}
+          <GiftButton
+            receiverId={moment.user_id}
+            receiverProfile={profile ? {
+              id: profile.id,
+              display_name: profile.display_name,
+              avatar_url: profile.avatar_url,
+            } : null}
+            postId={moment.id}
+            variant="icon"
+          />
+          
           <motion.button
             onClick={() => onOpenComments(moment.id)}
             whileHover={{ scale: 1.05 }}
@@ -756,6 +770,15 @@ const Community = () => {
           className="mb-10"
         >
           <CommunityLeaderboard />
+        </motion.div>
+
+        {/* Top Sponsors Leaderboard */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10"
+        >
+          <TopSponsorsLeaderboard showExport={true} />
         </motion.div>
 
         {/* Follow Suggestions & Friendship Manager */}
