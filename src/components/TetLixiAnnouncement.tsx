@@ -205,15 +205,16 @@ const TetLixiAnnouncement = ({
                 <Button
                   onClick={handleClaim}
                   disabled={isClaiming || hasClaimed || !isPromotionActive}
-                  className="flex-1 h-12 text-lg font-bold relative overflow-hidden border-0"
+                  className="flex-1 h-12 text-lg font-bold relative overflow-hidden"
                   style={{
                     background: hasClaimed 
                       ? 'linear-gradient(135deg, #22c55e, #16a34a)'
-                      : 'linear-gradient(135deg, #E8A4B8 0%, #F5D0DC 25%, #FFFFFF 50%, #F5D0DC 75%, #E8A4B8 100%)',
+                      : 'linear-gradient(135deg, #D4708A 0%, #E8A4B8 20%, #F5D0DC 40%, #FFFFFF 50%, #F5D0DC 60%, #E8A4B8 80%, #D4708A 100%)',
                     backgroundSize: '200% 100%',
                     animation: !hasClaimed ? 'buttonShimmer 2s ease-in-out infinite' : 'none',
-                    boxShadow: '0 4px 15px rgba(232,164,184,0.5), inset 0 0 20px rgba(255,255,255,0.4)',
+                    boxShadow: '0 4px 15px rgba(212,112,138,0.5), inset 0 0 20px rgba(255,255,255,0.4)',
                     color: '#4A2F35',
+                    border: '3px solid #8B4557',
                   }}
                 >
                   {/* White sparkle overlay */}
@@ -245,13 +246,14 @@ const TetLixiAnnouncement = ({
 
                 <Button
                   asChild
-                  className="flex-1 h-12 font-semibold relative overflow-hidden border-0"
+                  className="flex-1 h-12 font-semibold relative overflow-hidden"
                   style={{
-                    background: 'linear-gradient(135deg, #F0B8C8 0%, #F8E0E8 25%, #FFFFFF 50%, #F8E0E8 75%, #F0B8C8 100%)',
+                    background: 'linear-gradient(135deg, #D4708A 0%, #E8A4B8 20%, #F5D0DC 40%, #FFFFFF 50%, #F5D0DC 60%, #E8A4B8 80%, #D4708A 100%)',
                     backgroundSize: '200% 100%',
                     animation: 'buttonShimmer 2.5s ease-in-out infinite',
-                    boxShadow: '0 4px 12px rgba(240,184,200,0.4), inset 0 0 15px rgba(255,255,255,0.3)',
+                    boxShadow: '0 4px 12px rgba(212,112,138,0.4), inset 0 0 15px rgba(255,255,255,0.3)',
                     color: '#4A2F35',
+                    border: '3px solid #8B4557',
                   }}
                 >
                   <Link to="/admin/mint-stats" className="flex items-center justify-center">
