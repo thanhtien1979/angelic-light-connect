@@ -205,45 +205,68 @@ const TetLixiAnnouncement = ({
                 <Button
                   onClick={handleClaim}
                   disabled={isClaiming || hasClaimed || !isPromotionActive}
-                  className="flex-1 h-12 text-lg font-bold relative overflow-hidden"
+                  className="flex-1 h-12 text-lg font-bold relative overflow-hidden border-0"
                   style={{
                     background: hasClaimed 
                       ? 'linear-gradient(135deg, #22c55e, #16a34a)'
-                      : 'linear-gradient(135deg, #DC143C 0%, #B22222 50%, #8B0000 100%)',
-                    boxShadow: '0 4px 15px rgba(220,20,60,0.4)',
-                    border: 'none',
+                      : 'linear-gradient(135deg, #E8A4B8 0%, #F5D0DC 25%, #FFFFFF 50%, #F5D0DC 75%, #E8A4B8 100%)',
+                    backgroundSize: '200% 100%',
+                    animation: !hasClaimed ? 'buttonShimmer 2s ease-in-out infinite' : 'none',
+                    boxShadow: '0 4px 15px rgba(232,164,184,0.5), inset 0 0 20px rgba(255,255,255,0.4)',
+                    color: '#4A2F35',
                   }}
                 >
-                  {isClaiming ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Sparkles className="w-5 h-5" />
-                    </motion.div>
-                  ) : hasClaimed ? (
-                    <>✓ Đã nhận</>
-                  ) : (
-                    <>
-                      <Gift className="w-5 h-5 mr-2" />
-                      Claim
-                    </>
-                  )}
+                  {/* White sparkle overlay */}
+                  <div 
+                    className="absolute inset-0 opacity-60"
+                    style={{
+                      background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.9) 50%, transparent 70%)',
+                      animation: 'shimmer 2s infinite',
+                    }}
+                  />
+                  <span className="relative z-10 flex items-center justify-center">
+                    {isClaiming ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Sparkles className="w-5 h-5" />
+                      </motion.div>
+                    ) : hasClaimed ? (
+                      <>✓ Đã nhận</>
+                    ) : (
+                      <>
+                        <Gift className="w-5 h-5 mr-2" />
+                        Claim
+                      </>
+                    )}
+                  </span>
                 </Button>
 
                 <Button
                   asChild
-                  variant="outline"
-                  className="flex-1 h-12 font-semibold"
+                  className="flex-1 h-12 font-semibold relative overflow-hidden border-0"
                   style={{
-                    background: 'rgba(255,255,255,0.9)',
-                    borderColor: '#DAA520',
-                    color: '#8B4513',
+                    background: 'linear-gradient(135deg, #F0B8C8 0%, #F8E0E8 25%, #FFFFFF 50%, #F8E0E8 75%, #F0B8C8 100%)',
+                    backgroundSize: '200% 100%',
+                    animation: 'buttonShimmer 2.5s ease-in-out infinite',
+                    boxShadow: '0 4px 12px rgba(240,184,200,0.4), inset 0 0 15px rgba(255,255,255,0.3)',
+                    color: '#4A2F35',
                   }}
                 >
-                  <Link to="/admin/mint-stats">
-                    <Info className="w-5 h-5 mr-2" />
-                    Thêm Thông Tin
+                  <Link to="/admin/mint-stats" className="flex items-center justify-center">
+                    {/* White sparkle overlay */}
+                    <div 
+                      className="absolute inset-0 opacity-50"
+                      style={{
+                        background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.8) 50%, transparent 70%)',
+                        animation: 'shimmer 2.5s infinite',
+                      }}
+                    />
+                    <span className="relative z-10 flex items-center">
+                      <Info className="w-5 h-5 mr-2" />
+                      Thêm Thông Tin
+                    </span>
                   </Link>
                 </Button>
               </div>
@@ -288,6 +311,10 @@ const TetLixiAnnouncement = ({
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
+        }
+        @keyframes buttonShimmer {
+          0% { background-position: 200% center; }
+          100% { background-position: -200% center; }
         }
       `}</style>
     </AnimatePresence>
