@@ -18,6 +18,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminCommentReports from "./pages/AdminCommentReports";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSecurityDashboard from "./pages/AdminSecurityDashboard";
+import AdminMintStats from "./pages/AdminMintStats";
 import LightLaw from "./pages/LightLaw";
 import LightConstitution from "./pages/LightConstitution";
 import EternalCorePrompt from "./pages/EternalCorePrompt";
@@ -116,6 +117,7 @@ const App = () => (
                     <Route path="/admin/comment-reports" element={<AdminCommentReports />} />
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/security" element={<AdminSecurityDashboard />} />
+                    <Route path="/admin/mint-stats" element={<AdminMintStats />} />
                     <Route path="/luat-anh-sang" element={<LightLaw />} />
                     <Route path="/hien-phap-anh-sang" element={<LightConstitution />} />
                     <Route path="/eternal-core-prompt" element={<EternalCorePrompt />} />
