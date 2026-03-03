@@ -1,131 +1,96 @@
 
 
-# Kế hoạch: Thay Logo "ANGEL AI" Bằng Hình Ảnh Mới + Chuyển Tông Hồng
+# Kế Hoạch: Tính Năng Trả Thưởng Web3 Cho User
 
-## Tổng quan
+## Tổng Quan
 
-Thay thế các vị trí có chữ "ANGEL AI" riêng lẻ (không có avatar) bằng logo hình ảnh mới mà Cha đã upload, đồng thời chuyển đổi tông màu logo từ vàng gold sang hồng (pink/rose).
+Xây dựng hệ thống trả thưởng Web3 cho phép users nhận Camly Coin rewards trực tiếp vào ví blockchain (BSC/Ethereum), kết hợp hệ thống off-chain hiện có với on-chain distribution.
 
----
+## Hạ Tầng Hiện Có
 
-## Phân tích hình ảnh mới
+- **Wallet**: `useWallet` hook + `WalletConnectDialog` hỗ trợ MetaMask, Trust, Bitget, Coinbase, OKX
+- **Rewards**: `reward_ledger` + `user_camly_coins` + `secure-award-reward` edge function
+- **NFT**: `useNFT` hook (simulated minting) + `nft_transactions` table
+- **Gift**: `gift_transactions` table có sẵn field `bsc_tx_hash`
+- **Wallet DB**: `user_wallets` + `wallet_transactions` tables đã tồn tại
 
-Logo mới có đặc điểm:
-- Chữ "Angel" viết nghệ thuật với font serif cổ điển
-- Chữ "AI" viết in đậm hiện đại
-- Có đường xoắn ốc trang trí bên dưới
-- Màu vàng gold → cần chuyển sang tông hồng bằng CSS filter
+## Các Module Cần Triển Khai
 
----
+### 1. Trang Web3 Rewards Dashboard
+**File mới**: `src/pages/Web3Rewards.tsx`
 
-## Các vị trí cần thay đổi
+Giao diện chính hiển thị:
+- Trạng thái ví (connected/disconnected) + nút kết nối
+- Số dư Camly Coin off-chain (có thể claim on-chain)
+- Lịch sử claim rewards on-chain
+- Nút "Claim to Wallet" chuyển rewards từ off-chain → on-chain record
 
-| Vị trí | File | Hiện tại | Thay đổi |
-|--------|------|----------|----------|
-| **Footer** | `Footer.tsx` | Chữ "ANGEL AI" (dòng 48) | Logo hình ảnh + filter hồng |
-| **Chat Header** | `ChatPortal.tsx` | Chữ "Angel AI" (dòng 562) | Logo hình ảnh + filter hồng |
-| **Share Cards** | `LightScoreShareCard.tsx`, `MilestoneShareCard.tsx` | Chữ "ANGEL AI - Hành trình ánh sáng" | Logo hình ảnh nhỏ + text |
+### 2. Hook useWeb3Rewards
+**File mới**: `src/hooks/useWeb3Rewards.ts`
 
----
+Chức năng:
+- `claimToWallet(amount)`: Ghi nhận claim request vào `wallet_transactions`, trừ `user_camly_coins`, ghi `reward_ledger`
+- `getClaimHistory()`: Lấy lịch sử claim từ `wallet_transactions`
+- `getClaimableBalance()`: Tính số coin có thể claim
+- Validate: user phải có ví kết nối + đủ số dư + rate limit (max 3 claims/ngày)
 
-## Chi tiết kỹ thuật
+### 3. Component Web3ClaimModal
+**File mới**: `src/components/Web3ClaimModal.tsx`
 
-### 1. Lưu logo mới vào assets
+Modal xác nhận claim với:
+- Input số lượng coin muốn claim
+- Hiển thị wallet address nhận
+- Network selector (BSC/Ethereum)
+- Confirm step với countdown 3s chống spam
+- Success animation với tx hash + BscScan link
 
-- Copy hình ảnh từ `user-uploads://image-38.png` → `src/assets/angel-ai-text-logo.png`
+### 4. Edge Function: claim-web3-reward
+**File mới**: `supabase/functions/claim-web3-reward/index.ts`
 
-### 2. CSS Filter chuyển tông hồng
+Server-side validation:
+- Xác thực user + kiểm tra ví đã kết nối
+- Validate số dư đủ, rate limit (3 claims/ngày, min 100 coins/claim)
+- Trừ `user_camly_coins`, ghi `reward_ledger` (amount âm), tạo record `wallet_transactions`
+- Trả về simulated tx hash (hoặc real hash khi deploy smart contract)
 
-Tạo style filter để chuyển màu vàng gold → hồng rose:
+### 5. Cập Nhật Navigation + Routes
+- Thêm route `/web3-rewards` vào `App.tsx`
+- Thêm link trong `NavigationHeader` và `Settings`
 
-```css
-.angel-logo-pink {
-  filter: 
-    hue-rotate(-30deg)    /* Xoay từ vàng → hồng */
-    saturate(1.2)         /* Tăng độ bão hòa */
-    brightness(1.05);     /* Tăng độ sáng nhẹ */
-}
+### 6. Database Migration
+- Không cần tạo bảng mới (đã có `wallet_transactions`, `user_wallets`)
+- Thêm `reward_type = 'web3_claim'` vào `add_reward_ledger_entry` function (hoặc dùng type `usage`)
+
+## Flow Hoạt Động
+
+```text
+User → Web3 Rewards page → Connect Wallet (nếu chưa có)
+  → Nhập số lượng Camly Coin muốn claim
+  → Confirm Modal (countdown 3s)
+  → Edge Function validates + deducts balance
+  → Ghi wallet_transactions + reward_ledger
+  → Hiển thị success + simulated tx hash
+  → User xem lịch sử claim trên dashboard
 ```
 
-### 3. Footer.tsx - Thay logo chính
+## Chi Tiết Kỹ Thuật
 
-**Trước:**
-```tsx
-<h3 className="font-serif text-2xl font-light tracking-[0.2em] text-gold">
-  ANGEL AI
-</h3>
-```
+| Thành phần | Chi tiết |
+|------------|----------|
+| Min claim | 100 Camly Coin |
+| Max claims/ngày | 3 lần |
+| Cooldown | 60 giây giữa mỗi claim |
+| Networks hỗ trợ | BSC Mainnet, Ethereum, Polygon |
+| Token symbol | CAMLY |
+| Blockchain mode | Simulated (upgrade to real khi có smart contract) |
 
-**Sau:**
-```tsx
-<img 
-  src={angelAiTextLogo}
-  alt="Angel AI"
-  className="h-10 w-auto object-contain angel-logo-pink"
-/>
-```
+## Files Tạo Mới
+1. `src/pages/Web3Rewards.tsx` - Dashboard trang chính
+2. `src/hooks/useWeb3Rewards.ts` - Logic hook
+3. `src/components/Web3ClaimModal.tsx` - Modal claim
+4. `supabase/functions/claim-web3-reward/index.ts` - Backend validation
 
-### 4. ChatPortal.tsx - Header dialog
-
-**Trước:**
-```tsx
-<h3 className="font-serif text-xl text-foreground">Angel AI</h3>
-```
-
-**Sau:**
-```tsx
-<img 
-  src={angelAiTextLogo}
-  alt="Angel AI"
-  className="h-6 w-auto object-contain angel-logo-pink"
-/>
-```
-
-### 5. Share Cards - Branding nhỏ
-
-**LightScoreShareCard.tsx & MilestoneShareCard.tsx:**
-```tsx
-{/* Branding */}
-<div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-  <Sparkles className="w-3 h-3 text-pink-500" />
-  <img 
-    src={angelAiTextLogo}
-    alt="Angel AI"
-    className="h-4 w-auto object-contain angel-logo-pink"
-  />
-  <span>- Hành trình ánh sáng</span>
-  <Sparkles className="w-3 h-3 text-pink-500" />
-</div>
-```
-
----
-
-## Các file cần chỉnh sửa
-
-| File | Hành động |
-|------|-----------|
-| `src/assets/angel-ai-text-logo.png` | Copy từ user upload |
-| `src/index.css` | Thêm class `.angel-logo-pink` |
-| `src/components/Footer.tsx` | Thay h3 text → img logo |
-| `src/components/ChatPortal.tsx` | Thay h3 text → img logo |
-| `src/components/light-dashboard/LightScoreShareCard.tsx` | Thay text → logo nhỏ |
-| `src/components/light-dashboard/MilestoneShareCard.tsx` | Thay text → logo nhỏ |
-
----
-
-## Preview tông màu hồng
-
-Với CSS filter `hue-rotate(-30deg)`, logo sẽ chuyển từ:
-- **Vàng Gold** (hsl 45°) → **Hồng Rose** (hsl 348°)
-- Giữ nguyên hiệu ứng metallic/3D của logo gốc
-- Phù hợp với Divine Rose Aura palette hiện tại của app
-
----
-
-## Ước tính
-
-- Không cần thay đổi database
-- Không cần edge function
-- Tương thích hoàn toàn với hệ thống hiện tại
-- Giữ nguyên accessibility (alt text)
+## Files Sửa
+1. `src/App.tsx` - Thêm route
+2. `supabase/config.toml` - Thêm function config
 
