@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.secure-award-reward]
 verify_jwt = false
+
+[functions.claim-web3-reward]
+verify_jwt = false
