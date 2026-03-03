@@ -75,6 +75,7 @@ const navLinksConfig: NavLink[] = [
   { id: "friends", labelKey: "nav.friends", isPage: true, path: "/friends", showBadge: true, icon: UserPlus },
   { id: "light-score", labelKey: "nav.lightScore", isPage: true, path: "/diem-anh-sang", icon: Star },
   { id: "treasury", labelKey: "nav.treasury", isExternal: true, path: "https://treasury.fun.rich/", icon: Wallet },
+  { id: "web3-rewards", labelKey: "Web3 Rewards", isPage: true, path: "/web3-rewards", icon: Coins },
 ];
 
 const BLESSING_MESSAGES = [
