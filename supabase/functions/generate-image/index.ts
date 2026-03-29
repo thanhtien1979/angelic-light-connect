@@ -103,23 +103,26 @@ serve(async (req) => {
 
     // Processing image generation request
 
-    // Build messages array
-    const messages: any[] = [];
+    // Build messages array with system prompt to ensure image generation
+    const messages: any[] = [
+      {
+        role: "system",
+        content: "You are an image generation AI. You MUST always generate an image in response to the user's request. Never respond with only text. Always produce a visual image output regardless of the prompt language or content. If the prompt is vague, use your creativity to generate a beautiful image."
+      }
+    ];
     
     if (editImage) {
-      // Edit existing image - use sanitized prompt
       messages.push({
         role: "user",
         content: [
-          { type: "text", text: sanitizedPrompt },
+          { type: "text", text: `Generate/edit this image: ${sanitizedPrompt}` },
           { type: "image_url", image_url: { url: editImage } }
         ]
       });
     } else {
-      // Generate new image from text
       messages.push({
         role: "user",
-        content: sanitizedPrompt
+        content: `Generate an image: ${sanitizedPrompt}`
       });
     }
 
