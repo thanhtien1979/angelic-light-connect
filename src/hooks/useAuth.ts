@@ -159,6 +159,41 @@ export const useAuth = () => {
     }
   }, []);
 
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      const redirectUrl = `${window.location.origin}/reset-password`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) {
+        toast.error("Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại.");
+        return { error };
+      }
+
+      toast.success("Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư.");
+      return { error: null };
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi. Vui lòng thử lại.");
+      return { error };
+    }
+  }, []);
+
+  const updatePassword = useCallback(async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast.error("Không thể cập nhật mật khẩu. Vui lòng thử lại.");
+        return { error };
+      }
+      toast.success("Mật khẩu đã được cập nhật thành công!");
+      return { error: null };
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi. Vui lòng thử lại.");
+      return { error };
+    }
+  }, []);
+
   return {
     user,
     session,
@@ -170,5 +205,7 @@ export const useAuth = () => {
     signInWithPhone,
     verifyPhoneOtp,
     signOut,
+    resetPassword,
+    updatePassword,
   };
 };
