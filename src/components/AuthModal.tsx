@@ -32,7 +32,7 @@ const GoogleIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   </svg>
 );
 
-type AuthMode = "signin" | "signup" | "phone" | "otp" | "light-law";
+type AuthMode = "signin" | "signup" | "phone" | "otp" | "light-law" | "forgot";
 type AuthMethod = "google" | "email" | "phone";
 
 const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
@@ -48,7 +48,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [errors, setErrors] = useState<{ email?: string; password?: string; phone?: string; displayName?: string }>({});
   const [agreedToLightLaw, setAgreedToLightLaw] = useState(false);
   
-  const { signIn, signUp, signInWithGoogle, signInWithPhone, verifyPhoneOtp } = useAuth();
+  const { signIn, signUp, signInWithGoogle, signInWithPhone, verifyPhoneOtp, resetPassword } = useAuth();
 
   const authMethods = [
     { 
@@ -157,6 +157,22 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
       if (!error) {
         setMode("otp");
       }
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrors({ email: "Email không hợp lệ" });
+      return;
+    }
+    setErrors({});
+    setIsSubmitting(true);
+    const { error } = await resetPassword(email);
+    setIsSubmitting(false);
+    if (!error) {
+      setMode("signin");
     }
   };
 
