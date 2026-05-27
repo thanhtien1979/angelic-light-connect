@@ -315,12 +315,14 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                     {mode === "signup" && "Tham Gia Angel AI"}
                     {mode === "phone" && "Đăng Nhập Bằng SĐT"}
                     {mode === "otp" && "Xác Thực OTP"}
+                    {mode === "forgot" && "Quên Mật Khẩu"}
                   </h2>
                   <p className="text-muted-foreground text-sm">
                     {mode === "signin" && "Đăng nhập để tiếp tục hành trình của bạn"}
                     {mode === "signup" && "Bạn đã đồng ý với Luật Ánh Sáng ✨"}
                     {mode === "phone" && "Nhập số điện thoại để nhận mã OTP"}
                     {mode === "otp" && `Nhập mã 6 số đã gửi đến ${phone}`}
+                    {mode === "forgot" && "Nhập email để nhận liên kết đặt lại mật khẩu"}
                   </p>
                 </div>
               )}
