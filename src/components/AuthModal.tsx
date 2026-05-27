@@ -228,6 +228,9 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
       setMode("light-law");
     } else if (mode === "light-law") {
       setMode("signin");
+    } else if (mode === "forgot") {
+      setMode("signin");
+      setErrors({});
     } else {
       setMode("signin");
     }
@@ -268,6 +271,14 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
             {/* Back button for phone/otp/signup/light-law modes */}
             {(mode === "phone" || mode === "otp" || mode === "signup" || mode === "light-law") && (
+              <button
+                onClick={goBack}
+                className="absolute top-4 left-4 p-2 rounded-full hover:bg-black/5 transition-colors z-10"
+              >
+                <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
+            {mode === "forgot" && (
               <button
                 onClick={goBack}
                 className="absolute top-4 left-4 p-2 rounded-full hover:bg-black/5 transition-colors z-10"
