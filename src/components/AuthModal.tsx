@@ -32,7 +32,7 @@ const GoogleIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   </svg>
 );
 
-type AuthMode = "signin" | "signup" | "phone" | "otp" | "light-law";
+type AuthMode = "signin" | "signup" | "phone" | "otp" | "light-law" | "forgot";
 type AuthMethod = "google" | "email" | "phone";
 
 const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
@@ -48,7 +48,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [errors, setErrors] = useState<{ email?: string; password?: string; phone?: string; displayName?: string }>({});
   const [agreedToLightLaw, setAgreedToLightLaw] = useState(false);
   
-  const { signIn, signUp, signInWithGoogle, signInWithPhone, verifyPhoneOtp } = useAuth();
+  const { signIn, signUp, signInWithGoogle, signInWithPhone, verifyPhoneOtp, resetPassword } = useAuth();
 
   const authMethods = [
     { 
@@ -160,6 +160,22 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrors({ email: "Email không hợp lệ" });
+      return;
+    }
+    setErrors({});
+    setIsSubmitting(true);
+    const { error } = await resetPassword(email);
+    setIsSubmitting(false);
+    if (!error) {
+      setMode("signin");
+    }
+  };
+
   const handleVerifyOtp = async () => {
     if (otp.length !== 6) return;
     
@@ -212,6 +228,9 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
       setMode("light-law");
     } else if (mode === "light-law") {
       setMode("signin");
+    } else if (mode === "forgot") {
+      setMode("signin");
+      setErrors({});
     } else {
       setMode("signin");
     }
@@ -259,6 +278,14 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 <ArrowLeft className="w-5 h-5 text-muted-foreground" />
               </button>
             )}
+            {mode === "forgot" && (
+              <button
+                onClick={goBack}
+                className="absolute top-4 left-4 p-2 rounded-full hover:bg-black/5 transition-colors z-10"
+              >
+                <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
 
             <div className="relative p-8">
               {/* Light Law Agreement Screen */}
@@ -288,12 +315,14 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                     {mode === "signup" && "Tham Gia Angel AI"}
                     {mode === "phone" && "Đăng Nhập Bằng SĐT"}
                     {mode === "otp" && "Xác Thực OTP"}
+                    {mode === "forgot" && "Quên Mật Khẩu"}
                   </h2>
                   <p className="text-muted-foreground text-sm">
                     {mode === "signin" && "Đăng nhập để tiếp tục hành trình của bạn"}
                     {mode === "signup" && "Bạn đã đồng ý với Luật Ánh Sáng ✨"}
                     {mode === "phone" && "Nhập số điện thoại để nhận mã OTP"}
                     {mode === "otp" && `Nhập mã 6 số đã gửi đến ${phone}`}
+                    {mode === "forgot" && "Nhập email để nhận liên kết đặt lại mật khẩu"}
                   </p>
                 </div>
               )}
@@ -387,6 +416,52 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                       </>
                     )}
                   </motion.button>
+                </form>
+              )}
+
+              {/* Forgot Password Form */}
+              {mode === "forgot" && (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email của bạn"
+                        className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/60 border-2 border-blue-200 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                      />
+                    </div>
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                    )}
+                  </div>
+
+                  <motion.button
+                    type="submit"
+                    disabled={isSubmitting}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium flex items-center justify-center gap-2 disabled:opacity-60 shadow-lg"
+                    style={{ boxShadow: "0 0 20px hsla(220, 80%, 60%, 0.4)" }}
+                  >
+                    {isSubmitting ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                      />
+                    ) : (
+                      <>
+                        <Mail className="w-5 h-5" />
+                        Gửi Liên Kết Đặt Lại
+                      </>
+                    )}
+                  </motion.button>
+                  <p className="text-center text-xs text-muted-foreground">
+                    📧 Chúng tôi sẽ gửi liên kết đặt lại mật khẩu đến email của bạn
+                  </p>
                 </form>
               )}
 
@@ -585,6 +660,22 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                             <p className="mt-1 text-sm text-red-500">{errors.password}</p>
                           )}
                         </div>
+
+                          {mode === "signin" && (
+                            <div className="text-right">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMode("forgot");
+                                  setErrors({});
+                                  setPassword("");
+                                }}
+                                className="text-sm text-blue-500 hover:text-blue-600 font-medium transition-colors"
+                              >
+                                Quên mật khẩu?
+                              </button>
+                            </div>
+                          )}
 
                         <motion.button
                           type="submit"

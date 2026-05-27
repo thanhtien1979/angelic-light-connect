@@ -34,6 +34,7 @@ import UniverseMessages from "./pages/UniverseMessages";
 import Install from "./pages/Install";
 import NinePath from "./pages/NinePath";
 import Web3Rewards from "./pages/Web3Rewards";
+import ResetPassword from "./pages/ResetPassword";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DailyLightGreeting from "./components/DailyLightGreeting";
 import ChatButton from "./components/ChatButton";
@@ -130,6 +131,7 @@ const App = () => (
                     <Route path="/install" element={<Install />} />
                     <Route path="/nine-path" element={<NinePath />} />
                     <Route path="/web3-rewards" element={<Web3Rewards />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/share/:shareId" element={<SharedConversation />} />
                     <Route
                       path="/profile"
