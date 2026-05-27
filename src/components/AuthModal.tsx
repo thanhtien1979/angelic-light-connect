@@ -661,6 +661,22 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                           )}
                         </div>
 
+                          {mode === "signin" && (
+                            <div className="text-right">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMode("forgot");
+                                  setErrors({});
+                                  setPassword("");
+                                }}
+                                className="text-sm text-blue-500 hover:text-blue-600 font-medium transition-colors"
+                              >
+                                Quên mật khẩu?
+                              </button>
+                            </div>
+                          )}
+
                         <motion.button
                           type="submit"
                           disabled={isSubmitting || isGoogleLoading}
