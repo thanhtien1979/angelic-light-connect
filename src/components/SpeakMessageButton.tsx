@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { Volume2, VolumeX, Loader2, Settings, Check, User, Users, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Select,
   SelectContent,
