@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { Volume2, VolumeX, Loader2, Settings, Check, User, Users, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Select,
   SelectContent,
@@ -246,12 +247,19 @@ export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
         return;
       }
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Vui lòng đăng nhập để sử dụng giọng nói');
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch(TTS_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           text: cleanText,
@@ -306,12 +314,19 @@ export const SpeakMessageButton: React.FC<SpeakMessageButtonProps> = ({
       const selectedVoice = getSelectedVoice();
       const previewText = `Xin chào, tôi là ${selectedVoice.name}. Rất vui được đồng hành cùng bạn trên hành trình tâm linh.`;
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Vui lòng đăng nhập để sử dụng giọng nói');
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch(TTS_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           text: previewText,
