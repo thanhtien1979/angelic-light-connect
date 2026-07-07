@@ -11,10 +11,31 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require authenticated caller; attribute event to that user only
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    );
+    const { data: userData, error: userErr } = await supabaseAuth.auth.getUser(token);
+    if (userErr || !userData?.user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const authedUserId = userData.user.id;
+
     const {
       event_type,
       event_severity = "info",
-      user_id = null,
       endpoint = null,
       details = {},
     } = await req.json();
@@ -52,7 +73,7 @@ Deno.serve(async (req) => {
     const { data, error } = await supabaseAdmin.rpc("log_security_event", {
       p_event_type: event_type,
       p_event_severity: event_severity,
-      p_user_id: user_id,
+      p_user_id: authedUserId,
       p_ip_address: ip_address,
       p_user_agent: user_agent,
       p_endpoint: endpoint,
