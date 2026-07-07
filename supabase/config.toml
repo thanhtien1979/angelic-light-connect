@@ -37,7 +37,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.log-security-event]
-verify_jwt = false
+verify_jwt = true
 
 [functions.admin-adjust-reward]
 verify_jwt = false
@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.claim-web3-reward]
 verify_jwt = false
+
+[functions.elevenlabs-tts]
+verify_jwt = true
