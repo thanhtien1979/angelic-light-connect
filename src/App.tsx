@@ -41,7 +41,6 @@ import ChatButton from "./components/ChatButton";
 import FloatingAmbientPlayer from "./components/FloatingAmbientPlayer";
 import AngelPresence from "./components/AngelPresence";
 import ClickLightBurst from "./components/ClickLightBurst";
-import { VoiceChatButton } from "./components/VoiceChatButton";
 import LightScoreOnboarding from "./components/LightScoreOnboarding";
 
 import LanguageSuggestionBanner from "./components/LanguageSuggestionBanner";
@@ -153,7 +152,6 @@ const App = () => (
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <ChatButton />
-                  <VoiceChatButton />
                   <FloatingAmbientPlayer />
                 </AppInitializer>
               </BrowserRouter>
