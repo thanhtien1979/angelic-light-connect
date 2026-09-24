@@ -3,16 +3,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export const useAdminRole = () => {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAdminRole = useCallback(async () => {
+    if (isAuthLoading) {
+      setIsLoading(true);
+      return;
+    }
     if (!user) {
       setIsAdmin(false);
       setIsLoading(false);
       return;
     }
+    setIsLoading(true);
+
 
     try {
       // Get the current session for auth header
@@ -43,7 +49,7 @@ export const useAdminRole = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, isAuthLoading]);
 
   useEffect(() => {
     checkAdminRole();
